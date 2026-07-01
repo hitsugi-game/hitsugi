@@ -1,0 +1,450 @@
+/* 『灯継ぎ』デザインシステム — 常夜の藍と灯の琥珀 */
+:root {
+  --night-deep: #0b0f1e;
+  --night: #101830;
+  --night-soft: #182242;
+  --panel: rgba(16, 23, 46, 0.88);
+  --panel-border: rgba(201, 168, 106, 0.32);
+  --gold: #c9a86a;
+  --amber: #e8a33d;
+  --flame: #ff9d45;
+  --ember: #c73e3a;
+  --text: #efe6d4;
+  --text-dim: #9a917f;
+  --hp: linear-gradient(90deg, #c73e3a, #e8724c);
+  --mp: linear-gradient(90deg, #3d5a99, #5b8bd0);
+  --light-bar: linear-gradient(90deg, #b97a1e, #ffcf70);
+  --el-fire: #d4593e;
+  --el-water: #4f86c6;
+  --el-wind: #6fae8f;
+  --el-earth: #b08d57;
+  --el-moon: #9b7fc2;
+  --el-star: #d9c26a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root { height: 100%; }
+
+body {
+  background:
+    radial-gradient(ellipse at 50% -10%, #1a2440 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 110%, #17102a 0%, transparent 50%),
+    var(--night-deep);
+  color: var(--text);
+  font-family: 'Shippori Mincho', 'Yu Mincho', serif;
+  font-weight: 500;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* ---- 画面共通 ---- */
+.screen {
+  min-height: 100vh;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+  animation: screenIn 0.5s ease both;
+  position: relative;
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+.panel-title {
+  font-size: 15px;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  background: rgba(201, 168, 106, 0.07);
+  color: var(--text);
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  transition: all 0.18s;
+  margin: 4px;
+}
+.btn:hover:not(:disabled) {
+  background: rgba(232, 163, 61, 0.18);
+  border-color: var(--amber);
+  box-shadow: 0 0 14px rgba(232, 163, 61, 0.25);
+  transform: translateY(-1px);
+}
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-main {
+  border-color: var(--amber);
+  background: rgba(232, 163, 61, 0.14);
+  font-weight: 700;
+}
+.btn-ghost { border-color: transparent; color: var(--text-dim); font-size: 13px; }
+.btn-danger { border-color: rgba(199, 62, 58, 0.6); background: rgba(199, 62, 58, 0.12); }
+
+/* ---- タイトル ---- */
+.title-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+.game-title {
+  font-size: clamp(64px, 16vw, 130px);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-shadow: 0 0 40px rgba(232, 163, 61, 0.45), 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+.title-hi { color: var(--flame); animation: flicker 3.2s infinite; display: inline-block; }
+.title-tsugi { color: var(--text); }
+@keyframes flicker {
+  0%, 100% { opacity: 1; text-shadow: 0 0 32px rgba(255, 157, 69, 0.8); }
+  46% { opacity: 0.92; }
+  48% { opacity: 0.72; text-shadow: 0 0 12px rgba(255, 157, 69, 0.4); }
+  50% { opacity: 0.96; }
+  74% { opacity: 0.85; }
+}
+.title-sub { letter-spacing: 0.7em; color: var(--gold); margin-top: 6px; font-size: 14px; }
+.title-copy { margin-top: 26px; font-size: 18px; letter-spacing: 0.25em; color: var(--text-dim); }
+.title-menu { margin-top: 44px; display: flex; flex-direction: column; gap: 6px; min-width: 300px; z-index: 2; }
+.mode-ask { color: var(--gold); letter-spacing: 0.2em; margin-bottom: 8px; }
+.title-ver { position: absolute; bottom: 14px; color: var(--text-dim); font-size: 12px; letter-spacing: 0.2em; }
+
+.embers { position: absolute; inset: 0; pointer-events: none; }
+.ember {
+  position: absolute;
+  bottom: -10px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--flame);
+  opacity: 0;
+  animation: rise 7s linear infinite;
+}
+@keyframes rise {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  8% { opacity: 0.9; }
+  60% { opacity: 0.5; }
+  100% { transform: translateY(-92vh) translateX(24px); opacity: 0; }
+}
+
+/* ---- 導入 ---- */
+.intro-screen { display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
+.intro-text { max-width: 640px; margin: 0 auto; min-height: 40vh; }
+.intro-text p { margin-bottom: 22px; font-size: 17px; letter-spacing: 0.1em; }
+.intro-past { color: var(--text-dim); opacity: 0.55; }
+.intro-current { animation: screenIn 0.7s ease both; }
+.intro-hint { text-align: center; color: var(--text-dim); font-size: 12px; letter-spacing: 0.3em; animation: flicker 2.5s infinite; }
+.intro-skip { position: absolute; top: 16px; right: 16px; }
+
+/* ---- 命の灯 ---- */
+.life-flames { display: inline-flex; gap: 2px; font-size: 12px; letter-spacing: 0; }
+.flame.out { color: #3a3f52; }
+.flame.lit { filter: drop-shadow(0 0 3px rgba(255, 157, 69, 0.7)); }
+.flame.last { animation: flicker 1.4s infinite; }
+
+/* ---- バー ---- */
+.bar {
+  position: relative;
+  height: 15px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 3px 0;
+}
+.bar-fill { height: 100%; transition: width 0.45s ease; }
+.bar-hp .bar-fill { background: var(--hp); }
+.bar-mp .bar-fill { background: var(--mp); }
+.bar-light .bar-fill { background: var(--light-bar); box-shadow: 0 0 10px rgba(255, 207, 112, 0.5); }
+.bar-text {
+  position: absolute; inset: 0;
+  font-size: 10px; text-align: center; line-height: 15px;
+  color: #fff; text-shadow: 0 1px 2px #000;
+  letter-spacing: 0.1em;
+}
+
+/* ---- キャラカード ---- */
+.char-card {
+  background: rgba(10, 14, 30, 0.75);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  transition: all 0.18s;
+}
+.char-card.clickable { cursor: pointer; }
+.char-card.clickable:hover { border-color: var(--amber); box-shadow: 0 0 12px rgba(232, 163, 61, 0.2); }
+.char-card.selected { border-color: var(--flame); background: rgba(232, 163, 61, 0.1); box-shadow: 0 0 16px rgba(232, 163, 61, 0.3); }
+.char-card.child { opacity: 0.8; }
+.char-head { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.char-name { font-size: 17px; font-weight: 700; letter-spacing: 0.1em; }
+.head-mark {
+  font-size: 10px; color: var(--night-deep); background: var(--gold);
+  border-radius: 3px; padding: 1px 5px; margin-right: 6px; vertical-align: 2px;
+  letter-spacing: 0.1em; font-weight: 700;
+}
+.char-gen { margin-left: auto; color: var(--text-dim); font-size: 12px; }
+.char-meta { font-size: 12px; color: var(--text-dim); margin: 2px 0 6px; }
+.child-note { font-size: 12px; color: var(--el-moon); margin-top: 4px; }
+
+.element-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 12px; font-weight: 700; color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+}
+.el-fire { background: var(--el-fire); }
+.el-water { background: var(--el-water); }
+.el-wind { background: var(--el-wind); }
+.el-earth { background: var(--el-earth); }
+.el-moon { background: var(--el-moon); }
+.el-star { background: var(--el-star); color: #221; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; margin-top: 6px; }
+.stat-cell {
+  font-size: 12px; text-align: center;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 3px; padding: 2px 0;
+}
+.stat-cell em { font-style: normal; color: var(--gold); display: block; font-size: 10px; }
+
+/* ---- 綴 ---- */
+.tsuzuri {
+  display: flex; gap: 10px; align-items: baseline;
+  background: rgba(201, 168, 106, 0.06);
+  border-left: 3px solid var(--gold);
+  padding: 8px 12px; margin-bottom: 14px;
+  font-size: 14px;
+}
+.tsuzuri-name {
+  color: var(--gold); font-weight: 700; flex-shrink: 0;
+  border: 1px solid var(--gold); border-radius: 50%;
+  width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.tsuzuri-text { color: var(--text); }
+
+/* ---- 郷 ---- */
+.home-header {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px;
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px double var(--panel-border);
+}
+.season-label { font-size: 22px; font-weight: 700; letter-spacing: 0.2em; color: var(--amber); }
+.resource { color: var(--text-dim); font-size: 14px; }
+.resource b { color: var(--text); font-size: 17px; margin-left: 4px; }
+.family-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.home-actions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.action-note { font-size: 12px; color: var(--text-dim); margin-top: 8px; }
+
+/* ---- モーダル ---- */
+.modal-back {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(5, 8, 18, 0.8);
+  display: flex; align-items: center; justify-content: center;
+  animation: screenIn 0.25s ease both;
+}
+.modal {
+  background: var(--night);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  max-width: 760px; width: 92%;
+  max-height: 84vh; overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.7);
+}
+
+/* ---- 星契り ---- */
+.god-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.god-card {
+  border: 1px solid var(--panel-border); border-radius: 6px;
+  padding: 12px; cursor: pointer; transition: all 0.18s;
+  background: rgba(10, 14, 30, 0.7);
+}
+.god-card:hover { border-color: var(--el-star); box-shadow: 0 0 14px rgba(217, 194, 106, 0.25); }
+.god-card.selected { border-color: var(--el-star); background: rgba(217, 194, 106, 0.08); }
+.god-card.locked { opacity: 0.45; cursor: not-allowed; }
+.god-name { font-size: 17px; font-weight: 700; }
+.god-kana { font-size: 11px; color: var(--text-dim); letter-spacing: 0.15em; }
+.god-rank { font-size: 11px; color: var(--el-star); }
+.god-cost { font-size: 13px; color: var(--amber); margin-top: 4px; }
+.god-person { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.god-desc { font-size: 12px; margin-top: 6px; color: var(--text); opacity: 0.85; }
+.predict-row { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 2px 0; }
+.predict-label { width: 20px; color: var(--gold); }
+.predict-track { flex: 1; height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; position: relative; }
+.predict-range { position: absolute; height: 100%; background: linear-gradient(90deg, rgba(232,163,61,0.5), var(--amber)); border-radius: 4px; }
+.predict-num { width: 70px; text-align: right; color: var(--text-dim); }
+.pact-quote {
+  font-size: 15px; color: var(--el-star); border-left: 3px solid var(--el-star);
+  padding: 6px 12px; margin: 12px 0; font-style: italic;
+}
+
+/* ---- 出立・探索 ---- */
+.region-card {
+  border: 1px solid var(--panel-border); border-radius: 6px; padding: 14px;
+  margin-bottom: 8px; cursor: pointer; transition: all 0.18s;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.region-card:hover:not(.locked) { border-color: var(--amber); }
+.region-card.selected { border-color: var(--flame); background: rgba(232, 163, 61, 0.08); }
+.region-card.locked { opacity: 0.4; cursor: not-allowed; }
+.region-name { font-size: 17px; font-weight: 700; letter-spacing: 0.15em; }
+.region-desc { font-size: 12px; color: var(--text-dim); }
+.region-tier { color: var(--ember); font-size: 13px; flex-shrink: 0; }
+
+.exp-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+.exp-region { font-size: 20px; font-weight: 700; letter-spacing: 0.2em; color: var(--amber); }
+.light-wrap { flex: 1; min-width: 200px; }
+.light-label { font-size: 12px; color: var(--gold); letter-spacing: 0.2em; }
+.node-choices { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 18px 0; }
+.node-btn {
+  border: 1px solid var(--panel-border); border-radius: 8px;
+  background: rgba(10, 14, 30, 0.8);
+  padding: 18px 26px; text-align: center; min-width: 130px;
+  transition: all 0.2s;
+}
+.node-btn:hover { border-color: var(--flame); box-shadow: 0 0 18px rgba(255, 157, 69, 0.3); transform: translateY(-3px); }
+.node-icon { font-size: 30px; display: block; margin-bottom: 6px; }
+.node-label { font-size: 14px; letter-spacing: 0.2em; }
+.node-depth { font-size: 11px; color: var(--text-dim); }
+.exp-log { font-size: 13px; color: var(--text-dim); max-height: 130px; overflow-y: auto; }
+.exp-log p { margin-bottom: 4px; }
+.exp-log p:last-child { color: var(--text); }
+.exp-party { display: flex; gap: 8px; flex-wrap: wrap; }
+.exp-party .char-card { flex: 1; min-width: 150px; }
+
+/* ---- 戦闘 ---- */
+.battle-screen { display: flex; flex-direction: column; min-height: 100vh; }
+.battle-field { flex: 1; }
+.enemy-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0 26px; }
+.enemy-card {
+  border: 1px solid rgba(199, 62, 58, 0.5); border-radius: 6px;
+  background: rgba(30, 10, 16, 0.75);
+  padding: 12px 16px; min-width: 150px; text-align: center;
+  transition: all 0.2s; cursor: pointer;
+}
+.enemy-card.targetable:hover { border-color: var(--ember); box-shadow: 0 0 16px rgba(199, 62, 58, 0.5); transform: scale(1.04); }
+.enemy-card.dead { opacity: 0.25; filter: grayscale(1); pointer-events: none; }
+.enemy-card.acting { border-color: #fff; }
+.enemy-name { font-size: 15px; font-weight: 700; margin: 4px 0; }
+.enemy-sprite { font-size: 38px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+.ally-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.ally-cell {
+  border: 1px solid var(--panel-border); border-radius: 6px;
+  padding: 8px 10px; background: rgba(10, 14, 30, 0.8);
+  transition: all 0.2s;
+}
+.ally-cell.acting { border-color: var(--flame); box-shadow: 0 0 14px rgba(255, 157, 69, 0.4); }
+.ally-cell.dead { opacity: 0.35; }
+.ally-cell.targetable { cursor: pointer; }
+.ally-cell.targetable:hover { border-color: #7fc79a; box-shadow: 0 0 12px rgba(111, 174, 143, 0.5); }
+.ally-name { font-size: 14px; font-weight: 700; }
+.row-tag { font-size: 10px; color: var(--text-dim); margin-left: 6px; }
+.battle-log {
+  min-height: 108px; max-height: 108px; overflow-y: auto;
+  font-size: 14px; padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--panel-border); border-radius: 4px;
+  margin: 12px 0;
+}
+.battle-log p { margin-bottom: 2px; animation: screenIn 0.3s ease both; }
+.log-dmg { color: #ffb9a3; }
+.log-heal { color: #9fd8b0; }
+.log-ko { color: var(--ember); font-weight: 700; }
+.log-chain { color: var(--amber); font-weight: 700; }
+.log-win { color: var(--el-star); font-weight: 700; }
+.log-lose { color: var(--ember); font-weight: 700; }
+.cmd-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cmd-hint { text-align: center; font-size: 13px; color: var(--gold); letter-spacing: 0.2em; min-height: 22px; }
+.chain-badge {
+  display: inline-block; background: var(--amber); color: var(--night-deep);
+  font-weight: 700; border-radius: 4px; padding: 0 8px; font-size: 12px;
+  animation: screenIn 0.3s ease both;
+}
+
+/* ---- 家譜 ---- */
+.chronicle-scroll {
+  background: linear-gradient(180deg, rgba(38, 30, 18, 0.5), rgba(24, 18, 10, 0.6));
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  padding: 20px 24px;
+  max-height: 60vh; overflow-y: auto;
+}
+.chron-entry { display: flex; gap: 14px; margin-bottom: 8px; font-size: 14px; }
+.chron-season { color: var(--gold); flex-shrink: 0; width: 110px; font-size: 12px; padding-top: 3px; }
+.chron-death { color: #d8a7a0; }
+.chron-birth { color: #a9c8e8; }
+.chron-triumph { color: var(--el-star); }
+.chron-era { color: var(--amber); font-weight: 700; }
+.fallen-card {
+  border-bottom: 1px dashed var(--panel-border);
+  padding: 10px 4px;
+}
+.fallen-name { font-weight: 700; font-size: 16px; }
+.fallen-cause { font-size: 12px; color: var(--text-dim); margin-left: 10px; }
+.fallen-epitaph { font-size: 14px; color: var(--gold); margin-top: 4px; font-style: italic; }
+
+/* ---- 誕生・看取り・エンディング ---- */
+.scene-screen {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; min-height: 100vh;
+}
+.scene-title { font-size: 30px; letter-spacing: 0.5em; color: var(--gold); margin-bottom: 26px; }
+.scene-body { max-width: 560px; font-size: 17px; }
+.scene-body p { margin-bottom: 14px; }
+.scene-epitaph {
+  font-size: 20px; color: var(--amber); margin: 26px 0;
+  border-top: 1px solid var(--panel-border); border-bottom: 1px solid var(--panel-border);
+  padding: 18px 10px; letter-spacing: 0.1em;
+}
+.death-flame {
+  font-size: 60px; margin-bottom: 20px;
+  animation: fadeout 4s ease forwards;
+}
+@keyframes fadeout {
+  0% { opacity: 1; filter: drop-shadow(0 0 30px rgba(255,157,69,0.9)); }
+  70% { opacity: 0.9; }
+  100% { opacity: 0.15; filter: none; }
+}
+.birth-flame { font-size: 60px; margin-bottom: 20px; animation: ignite 2.5s ease both; }
+@keyframes ignite {
+  0% { opacity: 0.1; transform: scale(0.6); filter: none; }
+  100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 30px rgba(255,157,69,0.9)); }
+}
+.ending-stats { margin: 20px 0; color: var(--text-dim); font-size: 14px; }
+.ending-stats b { color: var(--amber); font-size: 20px; margin: 0 4px; }
+
+/* ---- スマホ ---- */
+@media (max-width: 560px) {
+  .screen { padding: 12px 10px 40px; }
+  .stat-grid { grid-template-columns: repeat(3, 1fr); }
+  .chron-season { width: 84px; }
+  .node-btn { min-width: 104px; padding: 12px 14px; }
+}
