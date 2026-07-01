@@ -1,32 +1,38 @@
-# React + TypeScript + Vite
+# 灯継ぎ -HITSUGI-
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+**八季の命を、継いでゆけ。**
 
-Currently, two official plugins are available:
+二年(八季)で燃え尽きる呪われた血族を率い、星神と契って子を授かり、世代を重ねて常夜の山の頂を目指す — 世代交代ダークファンタジーRPG。ブラウザでそのまま遊べます。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+『俺の屍を越えてゆけ』が示した「短命・世代交代・血脈」というゲームデザインの遺伝子に敬意を捧げつつ、物語・キャラクター・システムはすべてオリジナル。現代的なUX(1セッション5〜15分、ノード式探索、透明な遺伝予測)で再設計しました。
 
-## React Compiler
+## 遊び方
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+ブラウザで http://localhost:5173 を開く。スマホ表示にも対応。
+
+## 特徴
+
+- **八季の命** — 仲間は必ず2年で死ぬ。残り寿命は「炎の点」でいつも見えている
+- **星契り** — 星神12柱と契って子を授かる。子の血潮は予測レンジ付きで透明
+- **灯システム** — 探索は「灯」が尽きる前に帰るか、深部の宝を狙うかの賭け
+- **継足** — 家族で同じ敵を連続で狙うと連携倍率が上がる、血の絆バトル
+- **家譜** — 全キャラの生涯・辞世が自動記録される、あなただけの千年紀
+- **辞世の句** — 性根と死に様から自動生成される、その人だけの最期の言葉
+- **和風プロシージャルBGM** — Web Audioによる箏・太鼓・鈴の生演奏。全曲の芯は家祖「汐里の子守唄」
+
+## 技術
+
+React 19 + TypeScript + Vite + Zustand。外部アセットなしでも動く軽量設計(音楽は全て実行時合成)。セーブはlocalStorage。
+
+## ドキュメント
+
+- [ゲームデザインドキュメント](docs/GDD.md)
+
+## License
+
+MIT (code). ゲームテキスト・世界観・キャラクター設定 © 2026 燈守家プロジェクト

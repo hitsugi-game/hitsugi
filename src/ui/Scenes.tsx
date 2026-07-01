@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useGame } from '../core/store'
+import { audio } from '../core/audio'
 import { STAT_LABELS } from '../core/types'
 import type { StatKey } from '../core/types'
 import { godById } from '../core/data/gods'
@@ -10,6 +11,9 @@ export function BirthScene({ charId }: { charId: string }) {
   const data = useGame((s) => s.data)!
   const processNextScene = useGame((s) => s.processNextScene)
   const char = data.family.find((c) => c.id === charId)
+  useEffect(() => {
+    audio.se('birth')
+  }, [])
   if (!char) return null
   const god = godById(char.godParentId)
   const parent = data.family.find((c) => c.id === char.humanParentId)
@@ -52,6 +56,9 @@ export function DeathScene({ charId }: { charId: string }) {
   const data = useGame((s) => s.data)!
   const processNextScene = useGame((s) => s.processNextScene)
   const char = data.family.find((c) => c.id === charId)
+  useEffect(() => {
+    audio.se('death')
+  }, [])
   if (!char) return null
 
   return (

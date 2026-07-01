@@ -3,6 +3,7 @@ import { useGame } from '../core/store'
 import type { BattleLogEntry, Combatant } from '../core/types'
 import { ELEMENT_LABELS } from '../core/types'
 import { currentActor } from '../core/battle'
+import { audio } from '../core/audio'
 import { skillById } from '../core/data/skills'
 import { enemyById } from '../core/data/enemies'
 import { Bar } from './components'
@@ -36,7 +37,13 @@ export function BattleScreen() {
   useEffect(() => {
     if (pending.length === 0) return
     const t = setTimeout(() => {
-      setDisplayed((d) => [...d, pending[0]])
+      const entry = pending[0]
+      const seMap: Partial<Record<BattleLogEntry['kind'], Parameters<typeof audio.se>[0]>> = {
+        dmg: 'hit', heal: 'heal', ko: 'ko', chain: 'chain', win: 'win', lose: 'death',
+      }
+      const se = seMap[entry.kind]
+      if (se) audio.se(se)
+      setDisplayed((d) => [...d, entry])
       setPending((p) => p.slice(1))
     }, REVEAL_MS)
     return () => clearTimeout(t)

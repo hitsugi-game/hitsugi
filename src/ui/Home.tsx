@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useGame } from '../core/store'
-import { seasonLabel } from '../core/types'
+import { seasonLabel, STAT_LABELS } from '../core/types'
+import type { StatKey } from '../core/types'
 import { isAdult, seasonsLeft } from '../core/inheritance'
 import { ITEM_BASES } from '../core/data/items'
 import { GODS } from '../core/data/gods'
@@ -97,6 +98,7 @@ function ForgeModal({ onClose }: { onClose: () => void }) {
   const data = useGame((s) => s.data)!
   const buyItem = useGame((s) => s.buyItem)
   const equipItem = useGame((s) => s.equipItem)
+  const trainStat = useGame((s) => s.trainStat)
   const [charId, setCharId] = useState<string | null>(null)
 
   const alive = data.family.filter((c) => c.alive)
@@ -160,6 +162,23 @@ function ForgeModal({ onClose }: { onClose: () => void }) {
           )}
         </Panel>
 
+        {selChar && (
+          <Panel title={`修練 — ${selChar.name}の血潮を磨く(血珠5で+3)`}>
+            <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 6 }}>
+              持てる血珠: {data.ketsu} — 磨いた血潮は子へも受け継がれる。
+            </p>
+            {(Object.keys(STAT_LABELS) as StatKey[]).map((k) => (
+              <button
+                key={k}
+                className="btn"
+                disabled={data.ketsu < 5 || selChar.potential[k] >= 120}
+                onClick={() => trainStat(selChar.id, k)}
+              >
+                {STAT_LABELS[k]} {selChar.potential[k]}→{Math.min(120, selChar.potential[k] + 3)}
+              </button>
+            ))}
+          </Panel>
+        )}
         <button className="btn btn-ghost" onClick={onClose}>
           閉じる
         </button>

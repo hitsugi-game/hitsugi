@@ -15,7 +15,11 @@ import {
 import {
   combatantFromChar, combatantFromEnemy, startBattle, performAction, enemyAction, currentActor,
 } from './battle'
-import { generateExpedition, rollTreasure, campHeal, LIGHT_COST } from './expedition'
+import {
+  generateExpedition, rollTreasure, campHeal, LIGHT_COST,
+  pickEvent, eventById, pickEnemies,
+} from './expedition'
+import { ITEM_BASES } from './data/items'
 import { generateEpitaph, deathCauseLabel, birthLine } from './epitaph'
 import { saveGame, loadGame } from './save'
 
@@ -29,6 +33,7 @@ interface GameStore {
   battleNodeId: string | null
   battleLogQueue: BattleLogEntry[]
   pendingScenes: PendingScene[]
+  pendingEvent: { eventId: string; nodeId: string } | null
   rng: Rng
 
   // メタ
@@ -42,9 +47,13 @@ interface GameStore {
   doFestival: () => void
   doRest: () => void
 
-  // 店・装備(季を消費しない)
+  // 店・装備・修練(季を消費しない)
   buyItem: (baseId: string) => void
   equipItem: (charId: string, itemId: string) => void
+  trainStat: (charId: string, key: keyof GameData['family'][number]['potential']) => void
+
+  // 事件
+  resolveEvent: (choiceIdx: number) => void
 
   // 出立〜探索
   depart: (regionId: string, partyIds: string[]) => void
@@ -162,6 +171,7 @@ export const useGame = create<GameStore>((set, get) => {
     battleNodeId: null,
     battleLogQueue: [],
     pendingScenes: [],
+    pendingEvent: null,
     rng: newRng(),
 
     newGame: (narrativeMode) => {
@@ -250,6 +260,82 @@ export const useGame = create<GameStore>((set, get) => {
       advanceSeason()
     },
 
+    resolveEvent: (choiceIdx) => {
+      const { rng, pendingEvent } = get()
+      const d = get().data!
+      const exp = d.expedition
+      if (!pendingEvent || !exp) return
+      const ev = eventById(pendingEvent.eventId)
+      const choice = ev.choices[choiceIdx]
+      if (!choice) return
+      const success = choice.successRate === undefined || rng.chance(choice.successRate)
+      const effect = success ? choice.outcomes[0] : (choice.outcomes[1] ?? choice.outcomes[0])
+      const region = regionById(exp.regionId)
+      const node = exp.nodes[pendingEvent.nodeId]
+
+      let nd: GameData = { ...d }
+      let light = exp.light
+      let log = [...exp.log, effect.log]
+      if (effect.hoto) nd = { ...nd, hoto: Math.max(0, nd.hoto + effect.hoto) }
+      if (effect.ketsu) nd = { ...nd, ketsu: nd.ketsu + effect.ketsu }
+      if (effect.fame) nd = { ...nd, fame: nd.fame + effect.fame }
+      if (effect.light) light = Math.max(0, Math.min(100, light + effect.light))
+      if (effect.hpRatio) {
+        nd = {
+          ...nd,
+          family: nd.family.map((c) =>
+            exp.partyIds.includes(c.id) && c.alive
+              ? { ...c, hp: Math.max(1, Math.min(c.maxHp, Math.round(c.hp + c.maxHp * effect.hpRatio!))) }
+              : c,
+          ),
+        }
+      }
+      if (effect.itemTier) {
+        const pool = ITEM_BASES.filter((b) => b.shopTier <= region.tier)
+        const item = makeItem(rng.pick(pool).baseId)
+        nd = { ...nd, inventory: [...nd.inventory, item] }
+        log = [...log, `「${item.name}」を手に入れた。`]
+      }
+
+      const nodes = { ...exp.nodes, [pendingEvent.nodeId]: { ...node, cleared: true } }
+      nd = { ...nd, expedition: { ...exp, light, log, nodes } }
+      set({ data: nd, pendingEvent: null })
+
+      if (effect.battle) {
+        const enemyIds = pickEnemies(region, 'battle', node.depth, rng)
+        const nodes2 = { ...nodes, [pendingEvent.nodeId]: { ...node, cleared: false, enemyIds } }
+        set({ data: { ...nd, expedition: { ...nd.expedition!, nodes: nodes2 } } })
+        const party = nd.family
+          .filter((c) => exp.partyIds.includes(c.id) && c.alive && c.hp > 0)
+          .map((c, i) => combatantFromChar(c, i < 2 ? 'front' : 'back'))
+        const enemies = enemyIds.map((id, i) => combatantFromEnemy(enemyById(id), i))
+        const battle = startBattle(party, enemies)
+        set({ battle, battleNodeId: pendingEvent.nodeId, screen: { id: 'battle' }, battleLogQueue: [...battle.log] })
+        return
+      }
+
+      // 最深部だった場合は自動帰還
+      if (node.choices.length === 0) get().useReturnFire()
+    },
+
+    trainStat: (charId, key) => {
+      mutate((d) => {
+        if (d.ketsu < 5) return d
+        const c = d.family.find((x) => x.id === charId)
+        if (!c || !c.alive || c.potential[key] >= 120) return d
+        const nd: GameData = {
+          ...d,
+          ketsu: d.ketsu - 5,
+          family: d.family.map((x) =>
+            x.id === charId
+              ? recalcStats({ ...x, potential: { ...x.potential, [key]: Math.min(120, x.potential[key] + 3) } }, d.seasonIndex)
+              : x,
+          ),
+        }
+        return nd
+      })
+    },
+
     buyItem: (baseId) => {
       mutate((d) => {
         const base = itemBaseById(baseId)
@@ -312,6 +398,9 @@ export const useGame = create<GameStore>((set, get) => {
           combatantFromEnemy(dark ? { ...e, atk: Math.round(e.atk * 1.4), hp: Math.round(e.hp * 1.2) } : e, i),
         )
         const battle = startBattle(party, enemies)
+        if (node.type === 'boss' || node.type === 'elite') {
+          battle.log.unshift({ text: defs[0].desc, kind: 'info' })
+        }
         if (dark) battle.log.push({ text: '灯は尽きた。常夜の重圧が魔性を狂わせている……!', kind: 'info' })
         mutate((dd) => ({
           ...dd,
@@ -343,15 +432,14 @@ export const useGame = create<GameStore>((set, get) => {
         }))
         log.push('焚火を囲んだ。誰かが故郷の唄を口ずさむ。傷が癒え、灯が少し戻った。')
       } else if (node.type === 'event') {
-        // M1では簡易イベント: 奉燈か灯のどちらか
-        if (rng.chance(0.5)) {
-          const gain = 10 + region.tier * 8
-          loot = { ...loot, hoto: loot.hoto + gain }
-          log.push(`道端の地蔵に誰かが供えた奉燈${gain}を見つけた。手を合わせて頂く。`)
-        } else {
-          light = Math.min(100, light + 12)
-          log.push('夜藪の切れ間から星明かりが差した。灯が少し回復した。')
-        }
+        // 選択式の事件 — 選択はUIから resolveEvent で戻る
+        const ev = pickEvent(rng)
+        mutate((dd) => ({
+          ...dd,
+          expedition: { ...exp, currentNodeId: nodeId, light, log },
+        }))
+        set({ pendingEvent: { eventId: ev.id, nodeId } })
+        return
       }
 
       const nodes = { ...exp.nodes, [nodeId]: { ...node, cleared: true } }
@@ -370,7 +458,7 @@ export const useGame = create<GameStore>((set, get) => {
       const d = get().data!
       const exp = d.expedition
       if (!exp) return
-      const gainedFame = Math.round(exp.loot.hoto / 8) + exp.loot.ketsu * 2
+      const gainedFame = Math.round(exp.loot.hoto / 4) + exp.loot.ketsu * 3
       let nd: GameData = {
         ...d,
         hoto: d.hoto + exp.loot.hoto,
@@ -440,6 +528,31 @@ export const useGame = create<GameStore>((set, get) => {
       })
 
       if (battle.phase === 'won') {
+        // 玄冬撃破 → 面が割れ、汐里との最終戦(二段目)へ
+        if (node.enemyIds?.includes('boss_gentou') && !d.flags.shioriPhase) {
+          const healed = battle.allies.map((a) => ({
+            ...a,
+            hp: Math.max(a.hp, Math.round(a.maxHp * 0.45)),
+            mp: Math.min(a.maxMp, a.mp + 25),
+            guard: false,
+            buffs: {},
+          }))
+          const shiori = [combatantFromEnemy(enemyById('boss_shiori'), 0)]
+          const battle2 = startBattle(healed, shiori)
+          battle2.log = [
+            { text: '玄冬の面が、割れて落ちる——', kind: 'info' },
+            { text: '現れたのは、楽士の面影。千年、独りで星喰いを封じ続けた家祖・汐里。', kind: 'info' },
+            { text: '「……ああ、来てくれたのね。私の、遠い遠い子どもたち」', kind: 'info' },
+            { text: '汐里は楽を構えた。千年の最後の演目——看取ってやれ!', kind: 'info' },
+          ]
+          const nodes = { ...exp.nodes, [battleNodeId]: { ...node, enemyIds: ['boss_shiori'] } }
+          set({
+            data: { ...d, family, flags: { ...d.flags, shioriPhase: true }, expedition: { ...exp, nodes } },
+            battle: battle2,
+            battleLogQueue: [...battle2.log],
+          })
+          return
+        }
         const defs = (node.enemyIds ?? []).map((id) => enemyById(id))
         const hoto = defs.reduce((s, e) => s + e.hoto, 0)
         const ketsu = defs.reduce((s, e) => s + e.ketsu, 0)

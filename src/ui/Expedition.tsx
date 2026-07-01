@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useGame } from '../core/store'
 import type { NodeType } from '../core/types'
 import { REGIONS, regionById } from '../core/data/regions'
+import { eventById } from '../core/expedition'
 import { isAdult } from '../core/inheritance'
 import { Bar, CharCard, Panel, TsuzuriLine } from './components'
 
@@ -81,6 +82,35 @@ const NODE_META: Record<NodeType, { icon: string; label: string }> = {
   start: { icon: '⛩️', label: '入口' },
 }
 
+function EventModal() {
+  const data = useGame((s) => s.data)!
+  const pendingEvent = useGame((s) => s.pendingEvent)
+  const resolveEvent = useGame((s) => s.resolveEvent)
+  if (!pendingEvent) return null
+  const ev = eventById(pendingEvent.eventId)
+  return (
+    <div className="modal-back">
+      <div className="modal">
+        <h2 className="panel-title">事件</h2>
+        <p style={{ marginBottom: 16, fontSize: 15 }}>{ev.text}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {ev.choices.map((c, i) => (
+            <button
+              key={i}
+              className="btn"
+              disabled={c.requireHoto !== undefined && data.hoto < c.requireHoto}
+              onClick={() => resolveEvent(i)}
+            >
+              {c.label}
+              {c.successRate !== undefined && ' (賭け)'}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function ExpeditionScreen() {
   const data = useGame((s) => s.data)!
   const chooseNode = useGame((s) => s.chooseNode)
@@ -156,6 +186,8 @@ export function ExpeditionScreen() {
           ))}
         </div>
       </Panel>
+
+      <EventModal />
     </div>
   )
 }
