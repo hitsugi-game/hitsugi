@@ -119,6 +119,21 @@ export const REGIONS: Region[] = [
     bg: 'bg_tani.png',
   },
   {
+    id: 'hoshikui_no', name: '星喰い野', tier: 4, depth: 12, unlockFame: 420, bossId: 'boss_hoshikuimushi',
+    desc: '墜ちた星の欠片ばかりが転がる野。踏み込むと、地面そのものが微かに瞬いて見える。',
+    bg: 'bg_miyama.png',
+  },
+  {
+    id: 'mouja_machi', name: '亡者町', tier: 4, depth: 12, unlockFame: 460, bossId: 'boss_chouchounomukuro',
+    desc: '千年前に滅んだはずの町の跡。夜ごと、誰もいない家々に灯りが点る。',
+    bg: 'bg_miyama.png',
+  },
+  {
+    id: 'gentou_zentei', name: '玄冬前庭', tier: 4, depth: 12, unlockFame: 490, bossId: 'boss_maeburenokage',
+    desc: '灯ノ御山の麓、頂への最後の庭。ここに立つと、常夜の重みがはっきりと肩にのしかかる。',
+    bg: 'bg_miyama.png',
+  },
+  {
     id: 'akashi_miyama', name: '灯ノ御山', tier: 4, depth: 12, unlockFame: FAME_SEAL_THRESHOLD, bossId: 'boss_gentou',
     desc: '常夜の中心。頂に玄冬が座す。千年、誰も頂に届いていない。',
     bg: 'bg_miyama.png',

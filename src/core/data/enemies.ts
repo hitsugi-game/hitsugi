@@ -184,6 +184,9 @@ const BOSSES: EnemyDef[] = [
   { id: 'boss_kottounonushi', name: '骨董の主', element: 'earth', tier: 5, hp: 830, atk: 45, def: 36, agi: 10, skillIds: ['e_hisui'], hoto: 245, ketsu: 12, sprite: 'boss_kottounonushi.png', desc: '骨董坂に積み上がった品々の付喪神が寄り合って生まれた主。値のつかない品ほど、その力は濃い。' },
   { id: 'boss_hyakkiyakousendatsu', name: '百鬼夜行の先達', element: 'wind', tier: 5, hp: 870, atk: 50, def: 32, agi: 24, skillIds: ['e_hoshikui', 'e_kurayami'], hoto: 260, ketsu: 13, sprite: 'boss_hyakkiyakousendatsu.png', desc: '百鬼夜行の辻で行列を先導する者。その後ろに続く鬼たちの数は、見る者の数だけ違うという。' },
   { id: 'boss_tokoyaminobannin', name: '常闇の番人', element: 'moon', tier: 5, hp: 910, atk: 52, def: 38, agi: 16, skillIds: ['e_kurayami', 'e_yamiuta'], hoto: 280, ketsu: 14, sprite: 'boss_tokoyaminobannin.png', desc: '常闇の回廊の最奥に立つ番人。灯ノ御山へ至る道が近いことを、その重い佇まいだけで知らせてくる。' },
+  { id: 'boss_hoshikuimushi', name: '星喰い蟲', element: 'star', tier: 5, hp: 950, atk: 56, def: 36, agi: 22, skillIds: ['e_hoshikui', 'e_kurayami'], hoto: 300, ketsu: 15, sprite: 'boss_hoshikuimushi.png', desc: '星喰い野を覆う蟲の大群が一体となった怪。玄冬の眷属と噂され、墜ちた星の欠片を求めて蠢き続ける。' },
+  { id: 'boss_chouchounomukuro', name: '町長の骸', element: 'moon', tier: 5, hp: 1020, atk: 58, def: 40, agi: 14, skillIds: ['e_kurayami', 'e_yamiuta'], hoto: 320, ketsu: 16, sprite: 'boss_chouchounomukuro.png', desc: '亡者町の中心に居座る、かつての長の骸。今も町の名を呼び続け、誰も答えぬ点呼を取っている。' },
+  { id: 'boss_maeburenokage', name: '前触れの影', element: 'moon', tier: 5, hp: 1100, atk: 62, def: 44, agi: 20, skillIds: ['e_kurayami', 'e_yamiuta', 'e_hoshikui'], hoto: 350, ketsu: 18, sprite: 'boss_maeburenokage.png', desc: '玄冬前庭に落ちる、誰のものでもない影。灯ノ御山の頂で待つ者の気配が、ここまで及んでいる証だという。' },
 ]
 
 // ---- 変異展開(GDD_v3) ----
