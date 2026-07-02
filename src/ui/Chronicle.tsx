@@ -4,11 +4,13 @@ import { seasonLabel } from '../core/types'
 import { godById } from '../core/data/gods'
 import { downloadChronicleCard, copyShareText } from './shareCard'
 import { Panel } from './components'
+import { FamilyTree } from './FamilyTree'
 
 export function ChronicleScreen() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
   const [copied, setCopied] = useState(false)
+  const [showTree, setShowTree] = useState(false)
   const fallen = data.family.filter((c) => !c.alive)
 
   return (
@@ -49,6 +51,9 @@ export function ChronicleScreen() {
       </Panel>
 
       <div className="home-actions">
+        <button className="btn btn-main" onClick={() => setShowTree(true)}>
+          🌳 家系図を見る
+        </button>
         <button className="btn" onClick={() => downloadChronicleCard(data)}>
           家譜を一枚絵に残す(画像保存)
         </button>
@@ -66,6 +71,8 @@ export function ChronicleScreen() {
           郷へ戻る
         </button>
       </div>
+
+      {showTree && <FamilyTree onClose={() => setShowTree(false)} />}
     </div>
   )
 }

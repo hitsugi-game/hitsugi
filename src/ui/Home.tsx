@@ -8,6 +8,7 @@ import { GODS } from '../core/data/gods'
 import { VILLAGERS, villagerLine } from '../core/data/villagers'
 import { CharCard, NightBackdrop, Panel, TsuzuriLine } from './components'
 import { gameImg, HOME_BG } from './img'
+import { FamilyTree } from './FamilyTree'
 
 export function HomeScreen() {
   const data = useGame((s) => s.data)!
@@ -17,6 +18,7 @@ export function HomeScreen() {
   const [showForge, setShowForge] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showVillage, setShowVillage] = useState(false)
+  const [showTree, setShowTree] = useState(false)
 
   const alive = data.family.filter((c) => c.alive)
   const adults = alive.filter((c) => isAdult(c, data.seasonIndex))
@@ -93,6 +95,7 @@ export function HomeScreen() {
       <div className="home-links">
         <button className="btn btn-ghost" onClick={() => setShowForge(true)}>🔨 鍛冶と蔵</button>
         <button className="btn btn-ghost" onClick={() => setScreen({ id: 'chronicle' })}>📜 家譜を繰る</button>
+        <button className="btn btn-ghost" onClick={() => setShowTree(true)}>🌳 家系図</button>
         <button className="btn btn-ghost" onClick={() => setShowVillage(true)}>🏘️ 郷を歩く</button>
         <button className="btn btn-ghost" onClick={() => setShowHelp(true)}>📖 手引き</button>
       </div>
@@ -100,6 +103,7 @@ export function HomeScreen() {
       {showForge && <ForgeModal onClose={() => setShowForge(false)} />}
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
       {showVillage && <VillageModal onClose={() => setShowVillage(false)} />}
+      {showTree && <FamilyTree onClose={() => setShowTree(false)} />}
     </div>
   )
 }

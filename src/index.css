@@ -641,6 +641,41 @@ button {
 .resource .res-label { font-size: 12px; color: var(--text-dim); }
 .resource b { color: var(--text); font-size: 16px; margin-left: 2px; }
 
+/* ---- 家系図(GDD_v3 M5) ---- */
+.familytree-modal { max-width: 96vw; width: 96vw; max-height: 90vh; }
+.familytree-scroll {
+  position: relative;
+  overflow: auto;
+  max-height: 62vh;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+}
+.familytree-svg { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.tree-line-human { stroke: var(--gold); stroke-width: 1.6; opacity: 0.6; }
+.tree-line-god { stroke: var(--el-moon); stroke-width: 1.2; stroke-dasharray: 3 3; opacity: 0.5; }
+.familytree-cols { position: relative; z-index: 2; display: flex; gap: 28px; padding: 20px; min-width: max-content; }
+.familytree-col { display: flex; flex-direction: column; align-items: center; gap: 26px; min-width: 120px; }
+.familytree-gen-label {
+  font-size: 11px; color: var(--gold); letter-spacing: 0.2em;
+  position: sticky; top: 0; background: var(--night); padding: 2px 8px; border-radius: 10px;
+  border: 1px solid var(--panel-border);
+}
+.familytree-node {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(16, 23, 46, 0.92); border: 1px solid var(--panel-border); border-radius: 20px;
+  padding: 5px 12px 5px 6px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.familytree-node:hover { border-color: var(--amber); box-shadow: 0 0 10px rgba(232, 163, 61, 0.25); }
+.familytree-node.selected { border-color: var(--flame); background: rgba(232, 163, 61, 0.12); }
+.familytree-node.dead { opacity: 0.5; filter: grayscale(0.6); }
+.familytree-badge { width: 20px; height: 20px; font-size: 10px; }
+.familytree-name { font-size: 13px; }
+.tree-legend { display: inline-flex; align-items: center; gap: 4px; margin-right: 14px; }
+.tree-legend-swatch { display: inline-block; width: 14px; height: 2px; }
+.tree-legend-swatch.human { background: var(--gold); }
+.tree-legend-swatch.god { background: var(--el-moon); border-top: 1px dashed var(--el-moon); height: 0; }
+
 /* ---- スマホ ---- */
 @media (max-width: 560px) {
   .screen { padding: 12px 10px 40px; }
