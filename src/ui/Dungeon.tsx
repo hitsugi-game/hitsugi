@@ -63,6 +63,13 @@ function DungeonFloor() {
       party[0]
         ? { gata: party[0].tomoshigata ?? 'homura', sex: party[0].sex }
         : undefined,
+      // v3.1: テーマ/照明/プロップ散布のためのフロア情報
+      {
+        bg: region.bg,
+        tier: region.tier as 1 | 2 | 3 | 4,
+        seed: floorDef.seed,
+        isBossFloor: run.floor === dungeon.floors.length - 1,
+      },
     )
     engineRef.current = engine
     if (import.meta.env.DEV) {
