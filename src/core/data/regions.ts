@@ -138,6 +138,12 @@ export const REGIONS: Region[] = [
     desc: '常夜の中心。頂に玄冬が座す。千年、誰も頂に届いていない。',
     bg: 'bg_miyama.png',
   },
+  {
+    // v3.1 M15-6: 腕試しの塔(クリア後解放 — fameでは開かない)
+    id: 'tokoyo_tou', name: '常夜百層', tier: 4, depth: 100, unlockFame: 999999,
+    desc: '千年紀を越えた一族だけが挑める、終わりなき試練の塔。降りた層の数だけ、武名が刻まれる。',
+    bg: 'bg_miyama.png',
+  },
 ]
 
 export function regionById(id: string): Region {

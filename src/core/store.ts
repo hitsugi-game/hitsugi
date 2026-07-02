@@ -1163,13 +1163,22 @@ export const useGame = create<GameStore>((set, get) => {
       const run = get().dungeonRun
       const d = get().data
       if (!run || !d) return
-      const gainedFame = Math.round(run.loot.hoto / 10) + run.loot.ketsu * 2 + (run.bossDown ? 40 : 0)
+      // 常夜百層(v3.1 M15-6): 降りた層の数だけ武名が刻まれる
+      const towerBonus = run.regionId === 'tokoyo_tou' ? (run.floor + 1) * 2 : 0
+      const gainedFame = Math.round(run.loot.hoto / 10) + run.loot.ketsu * 2 + (run.bossDown ? 40 : 0) + towerBonus
       let nd: GameData = {
         ...d,
         hoto: d.hoto + run.loot.hoto,
         ketsu: d.ketsu + run.loot.ketsu,
         inventory: [...d.inventory, ...run.loot.items],
         fame: d.fame + gainedFame,
+      }
+      if (run.regionId === 'tokoyo_tou') {
+        const best = typeof d.flags.towerBest === 'number' ? d.flags.towerBest : 0
+        if (run.floor + 1 > best) {
+          nd = { ...nd, flags: { ...nd.flags, towerBest: run.floor + 1 } }
+          nd = chronicle(nd, 'era', `常夜百層 — 第${run.floor + 1}層到達。一族の最深記録を更新した。`)
+        }
       }
       nd = chronicle(nd, 'triumph', `${regionById(run.regionId).name}より帰還。奉燈${run.loot.hoto}、血珠${run.loot.ketsu}、武功${gainedFame}を得た。`)
 

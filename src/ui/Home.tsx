@@ -13,6 +13,7 @@ import { FamilyTree } from './FamilyTree'
 export function HomeScreen() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
+  const departDungeon = useGame((s) => s.departDungeon)
   const doFestival = useGame((s) => s.doFestival)
   const doRest = useGame((s) => s.doRest)
   const [showForge, setShowForge] = useState(false)
@@ -102,6 +103,18 @@ export function HomeScreen() {
         <button className="btn btn-ghost" onClick={() => setShowMotto(true)}>
           🏮 家訓{data.motto ? `「${MOTTOS[data.motto].name}」` : 'を定める'}
         </button>
+        {!!data.flags.cleared && (
+          <button
+            className="btn btn-ghost"
+            title="千年紀を越えた一族の試練場 — 存命の大人(先頭4名)で挑む"
+            onClick={() => {
+              const party = data.family.filter((c) => c.alive && isAdult(c, data.seasonIndex)).slice(0, 4)
+              if (party.length > 0) departDungeon('tokoyo_tou', party.map((c) => c.id))
+            }}
+          >
+            🗼 常夜百層
+          </button>
+        )}
         <button className="btn btn-ghost" onClick={() => setShowHelp(true)}>📖 手引き</button>
       </div>
 
