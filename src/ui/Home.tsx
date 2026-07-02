@@ -13,6 +13,7 @@ export function HomeScreen() {
   const doFestival = useGame((s) => s.doFestival)
   const doRest = useGame((s) => s.doRest)
   const [showForge, setShowForge] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
 
   const alive = data.family.filter((c) => c.alive)
   const adults = alive.filter((c) => isAdult(c, data.seasonIndex))
@@ -65,9 +66,32 @@ export function HomeScreen() {
         <button className="btn btn-ghost" onClick={() => setScreen({ id: 'chronicle' })}>
           家譜を繰る
         </button>
+        <button className="btn btn-ghost" onClick={() => setShowHelp(true)}>
+          手引き
+        </button>
       </div>
 
       {showForge && <ForgeModal onClose={() => setShowForge(false)} />}
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+    </div>
+  )
+}
+
+function HelpModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h2 className="panel-title">綴の手引き — 千年ぶん、要点だけな</h2>
+        <div style={{ fontSize: 14, lineHeight: 1.9 }}>
+          <p><b style={{ color: 'var(--amber)' }}>命は八季。</b>生まれて八つの季節で、一族は必ず灯が尽きる。名前の下の炎が残り寿命だ。</p>
+          <p><b style={{ color: 'var(--amber)' }}>星契りを絶やすな。</b>子は翌季に生まれ、二季で成人する。親の血潮と星神の血潮を継ぐ — 高い位の星ほど濃い血をくれる。</p>
+          <p><b style={{ color: 'var(--amber)' }}>夜藪では灯が命綱。</b>灯が尽きると魔性が狂暴化する。「帰り火」はいつでも焚ける — 欲と命を天秤にかけろ。</p>
+          <p><b style={{ color: 'var(--amber)' }}>継足(つぎたし)。</b>戦いで家族が同じ敵を続けて狙うと、連撃の倍率が上がる。血の繋がりは技になる。</p>
+          <p><b style={{ color: 'var(--amber)' }}>形見は強くなる。</b>死者の装備は「形見」として蔵に還り、代を継ぐごとに強まる。祖母の簪は、孫の代で名刀に劣らん。</p>
+          <p><b style={{ color: 'var(--amber)' }}>敗北は終わりじゃない。</b>主に敗れても、次の世代がいる。血を濃くして、装備を継いで、雪辱しろ。それが灯継ぎだ。</p>
+        </div>
+        <button className="btn btn-ghost" onClick={onClose}>閉じる</button>
+      </div>
     </div>
   )
 }

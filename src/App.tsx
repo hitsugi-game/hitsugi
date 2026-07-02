@@ -28,6 +28,18 @@ function App() {
   const battleNodeId = useGame((s) => s.battleNodeId)
   const data = useGame((s) => s.data)
 
+  // ボタン操作音(委譲リスナー1本)
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const el = e.target as HTMLElement
+      if (el.closest('.btn, .node-btn, .god-card, .region-card, .char-card.clickable')) {
+        audio.se('click')
+      }
+    }
+    document.addEventListener('click', onClick)
+    return () => document.removeEventListener('click', onClick)
+  }, [])
+
   useEffect(() => {
     const track = ((): TrackName => {
       switch (screen.id) {
