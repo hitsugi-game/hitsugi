@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { useGame } from '../core/store'
 import type { Character } from '../core/types'
 import { STAT_LABELS, ELEMENT_LABELS, LIFESPAN_MONTHS } from '../core/types'
 import { ageOf } from '../core/inheritance'
@@ -148,10 +149,23 @@ export function SceneBg({ file }: { file: string }) {
   return <img className="scene-bg" src={gameImg(file)} alt="" aria-hidden onError={() => setOk(false)} />
 }
 
+// 季節の風物(v3.1 M15-8): 月に応じて雪・花びら・蛍・紅葉が郷に舞う
+function seasonKind(month: number): 'snow' | 'petal' | 'firefly' | 'momiji' {
+  const m = ((month % 12) + 12) % 12
+  if (m >= 11 || m <= 1) return 'snow' // 師走〜如月
+  if (m <= 4) return 'petal' // 弥生〜皐月
+  if (m <= 7) return 'firefly' // 水無月〜葉月
+  return 'momiji' // 長月〜霜月
+}
+
+const SEASON_GLYPH = { snow: '❄', petal: '❀', firefly: '●', momiji: '🍁' } as const
+
 // 常夜の郷 — 画面奥に敷く一枚絵(SVG)。生成画像が来るまでの土台であり、来た後も霞として残る。
 // bg を渡すと本画像を上に重ね、無ければ(未生成でも)このSVGだけで成立する。
 export function NightBackdrop({ bg }: { bg?: string }) {
   const [bgOk, setBgOk] = useState(true)
+  const seasonIndex = useGame((s) => s.data?.seasonIndex)
+  const season = seasonIndex !== undefined && seasonIndex !== null ? seasonKind(seasonIndex) : null
   const stars = Array.from({ length: 54 }, (_, i) => ({
     x: (i * 197.3) % 1200,
     y: (i * 61.7) % 380,
@@ -199,6 +213,24 @@ export function NightBackdrop({ bg }: { bg?: string }) {
           alt=""
           onError={() => setBgOk(false)}
         />
+      )}
+      {season && (
+        <div className={`season-fx season-${season}`} aria-hidden>
+          {Array.from({ length: 10 }, (_, i) => (
+            <span
+              key={i}
+              className="season-particle"
+              style={{
+                left: `${(i * 37 + 8) % 100}%`,
+                animationDelay: `${(i * 1.7) % 9}s`,
+                animationDuration: `${8 + (i % 4) * 2.4}s`,
+                fontSize: `${10 + (i % 3) * 4}px`,
+              }}
+            >
+              {SEASON_GLYPH[season]}
+            </span>
+          ))}
+        </div>
       )}
       <div className="backdrop-veil" />
     </div>
