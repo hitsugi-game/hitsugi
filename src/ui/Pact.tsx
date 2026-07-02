@@ -1,11 +1,22 @@
 import { useMemo, useState } from 'react'
 import { useGame } from '../core/store'
-import type { StatKey } from '../core/types'
+import type { StatKey, GodRank, Element } from '../core/types'
 import { GOD_RANK_LABELS, STAT_LABELS, ELEMENT_LABELS } from '../core/types'
-import { GODS } from '../core/data/gods'
+import { GODS, godUnlocked } from '../core/data/gods'
 import { isAdult, predictChild } from '../core/inheritance'
-import { CharCard, Panel, TsuzuriLine } from './components'
-import { gameImg } from './img'
+import { CharCard, NightBackdrop, Panel, TsuzuriLine } from './components'
+import { gameImg, HOME_BG } from './img'
+
+// 封印中の神の解放条件を一言で(unlock条件から自動生成)
+function sealHint(g: (typeof GODS)[number]): string {
+  const u = g.unlock
+  if (!u) return ''
+  const parts: string[] = []
+  if (u.fame !== undefined) parts.push(`武功${u.fame}`)
+  if (u.regionId !== undefined) parts.push('とある地の主の討伐')
+  if (u.gen !== undefined) parts.push(`第${u.gen}代の血`)
+  return `${parts.join('と')}で道が開く`
+}
 
 const GOD_EMOJI: Record<string, string> = {
   ishiusu: '🗿', tsubame: '🐦', shimihime: '📖', chidori: '🌊', kagaribi: '🔥',
@@ -19,10 +30,17 @@ export function PactScreen() {
   const doPact = useGame((s) => s.doPact)
   const [parentId, setParentId] = useState<string | null>(null)
   const [godId, setGodId] = useState<string | null>(null)
+  // 星の数が増えても迷わないための絞り込み(位階タブ×系統チップ) — GDD_v3 §1
+  const [rankTab, setRankTab] = useState<GodRank | 0>(0) // 0=全て
+  const [elemChip, setElemChip] = useState<Element | null>(null)
 
   const adults = data.family.filter((c) => c.alive && isAdult(c, data.seasonIndex))
   const parent = adults.find((c) => c.id === parentId) ?? null
   const god = GODS.find((g) => g.id === godId) ?? null
+
+  const shownGods = GODS.filter(
+    (g) => (rankTab === 0 || g.rank === rankTab) && (elemChip === null || g.element === elemChip),
+  )
 
   const prediction = useMemo(
     () => (parent && god ? predictChild(parent, god) : null),
@@ -31,6 +49,7 @@ export function PactScreen() {
 
   return (
     <div className="screen">
+      <NightBackdrop bg={gameImg(HOME_BG)} />
       <h1 className="season-label" style={{ marginBottom: 14 }}>星契りの儀</h1>
       <TsuzuriLine text="星神と契れば、翌季に子が生まれる。血潮は親と神から流れ込む — 誰の血を、どの星に継がせる?" />
 
@@ -50,10 +69,40 @@ export function PactScreen() {
       </Panel>
 
       <Panel title={`星神を選ぶ — 奉燈 ${data.hoto}`}>
+        <div className="god-filter">
+          <div className="god-filter-row">
+            {([0, 1, 2, 3, 4] as const).map((r) => (
+              <button
+                key={r}
+                className={`btn btn-ghost filter-tab ${rankTab === r ? 'active' : ''}`}
+                onClick={() => setRankTab(r)}
+              >
+                {r === 0 ? '全て' : GOD_RANK_LABELS[r]}
+              </button>
+            ))}
+          </div>
+          <div className="god-filter-row">
+            {(Object.keys(ELEMENT_LABELS) as Element[]).map((el) => (
+              <button
+                key={el}
+                className={`element-badge el-${el} elem-chip ${elemChip === el ? 'active' : ''}`}
+                title={`${ELEMENT_LABELS[el]}の星だけ見る`}
+                onClick={() => setElemChip(elemChip === el ? null : el)}
+              >
+                {ELEMENT_LABELS[el]}
+              </button>
+            ))}
+          </div>
+        </div>
+        {shownGods.length === 0 && (
+          <p style={{ fontSize: 13, color: 'var(--text-dim)', textAlign: 'center', padding: 12 }}>
+            その条件の星は、今夜は見えない。
+          </p>
+        )}
         <div className="god-grid">
-          {GODS.map((g) => {
-            // 北辰老は最奥への道(武功520)が開くまで姿を見せない
-            const sealed = g.rank === 4 && data.fame < 520
+          {shownGods.map((g) => {
+            // 封印された星は条件(unlock)を満たすまで姿を見せない
+            const sealed = !godUnlocked(g, data)
             const affordable = data.hoto >= g.cost && !sealed
             const affinity = Math.floor(data.godAffinity[g.id] ?? 0)
             return (
@@ -76,7 +125,7 @@ export function PactScreen() {
                   {sealed ? '???' : g.name}
                 </div>
                 <div className="god-kana">{sealed ? '北天に、まだ遠い星がある' : g.kana}</div>
-                <div className="god-cost">{sealed ? `武功520で道が開く` : `奉燈 ${g.cost}${affinity > 0 ? ` ・縁 ${affinity}` : ''}`}</div>
+                <div className="god-cost">{sealed ? sealHint(g) : `奉燈 ${g.cost}${affinity > 0 ? ` ・縁 ${affinity}` : ''}`}</div>
                 <div className="god-person">{sealed ? '' : g.personality}</div>
                 {godId === g.id && !sealed && <div className="god-desc">{g.desc}</div>}
               </div>

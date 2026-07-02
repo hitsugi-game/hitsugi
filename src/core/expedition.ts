@@ -139,7 +139,7 @@ export interface EventDef {
   choices: EventChoice[]
 }
 
-export const EVENTS: EventDef[] = [
+const CORE_EVENTS: EventDef[] = [
   {
     id: 'naki_ishi',
     text: '道端の石が、夜通し啜り泣いている。近づく者の悲しみを吸うとも、涙の底に珠を隠すとも言われる。',
@@ -235,6 +235,10 @@ export const EVENTS: EventDef[] = [
     ],
   },
 ]
+
+// 結合(初期8件+増員分 — GDD_v3 §1)。実行時循環なし(events.tsは型のみ本ファイルを参照)
+import { EXTRA_EVENTS } from './data/events'
+export const EVENTS: EventDef[] = [...CORE_EVENTS, ...EXTRA_EVENTS]
 
 export function eventById(id: string): EventDef {
   const e = EVENTS.find((x) => x.id === id)

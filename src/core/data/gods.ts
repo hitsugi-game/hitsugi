@@ -1,7 +1,14 @@
-import type { God } from '../types'
+import type { God, GameData } from '../types'
+import { FAME_SEAL_THRESHOLD } from '../constants'
+import { GODS_LOW, MOURNING_LOW } from './gods_low'
+import { GODS_MID, MOURNING_MID } from './gods_mid'
+import { GODS_HIGH, MOURNING_HIGH } from './gods_high'
+import { GODS_APEX, MOURNING_APEX } from './gods_apex'
 
-// 星神十二柱 — 星契りの相手。位が高いほど強い血潮を授ける。
-export const GODS: God[] = [
+// 星神 — 星契りの相手。位が高いほど強い血潮を授ける。
+// 初期24柱は本ファイル(FOUNDING_GODS)、増員分は位階別ファイル(gods_low/mid/high/apex)。
+// 結合エクスポートは末尾のGODS/MOURNING(GDD_v3 §5)。
+const FOUNDING_GODS: God[] = [
   {
     id: 'ishiusu', name: '石臼翁', kana: 'いしうすのおきな', rank: 1, element: 'earth',
     statBias: { vit: 22, str: 10 }, cost: 80, skillId: 'g_iwakura',
@@ -194,8 +201,12 @@ export const GODS: God[] = [
     desc: '千年動かず夜空の軸であり続けた最古の星。汐里の楽を千年聴き続けた唯一の証人。「あの娘の唄を、終わらせてやってくれ」',
     pactLines: ['……千年、待った。お前たちの誰かが、ここへ届くのを。', 'わしの血は重いぞ。それでも継ぐか。……良い目じゃ。'],
     portrait: 'god_hokushin.png',
+    unlock: { fame: FAME_SEAL_THRESHOLD },
   },
 ]
+
+// 結合(初期24柱+位階別増員分)
+export const GODS: God[] = [...FOUNDING_GODS, ...GODS_LOW, ...GODS_MID, ...GODS_HIGH, ...GODS_APEX]
 
 export function godById(id: string): God {
   const g = GODS.find((x) => x.id === id)
@@ -203,9 +214,22 @@ export function godById(id: string): God {
   return g
 }
 
+// 封印判定 — unlock条件(AND)を満たしているか。無指定の神は常に契れる。
+export function godUnlocked(
+  g: God,
+  data: Pick<GameData, 'fame' | 'regionsCleared' | 'family'>,
+): boolean {
+  const u = g.unlock
+  if (!u) return true
+  if (u.fame !== undefined && data.fame < u.fame) return false
+  if (u.regionId !== undefined && !data.regionsCleared.includes(u.regionId)) return false
+  if (u.gen !== undefined && !data.family.some((c) => c.gen >= u.gen!)) return false
+  return true
+}
+
 // 弔いの文 — 契った子が逝ったとき、星の親から届く手紙。
 // 神々は、子の行く末をずっと見ている。
-export const MOURNING: Record<string, string> = {
+const FOUNDING_MOURNING: Record<string, string> = {
   ishiusu: '「良い子じゃった。転んでも泣かん子じゃった。……今夜の団子は、供えの分だけ甘くしておく」',
   tsubame: '「借りがまた増えちまった。あの子の分の空は、俺が代わりに渡っておく。良い風だったぜ、あんたの子は」',
   shimihime: '「あの子の頁、何度も読み返しているの。良い一生だったわ。……インクが滲んだのは、内緒よ」',
@@ -230,4 +254,12 @@ export const MOURNING: Record<string, string> = {
   noroshi: '「訃報だけは、追い越せなかった。……すまない。せめてあの子の武勇伝は、俺が天界中に届ける」',
   hoshikaji: '「あの子は、儂が鍛えた中で一番の星だった。打ち直しはせん。あのままで、完成しとる」',
   byakuya: '「袖の中の朝を、少しだけあの子に持たせました。常夜の向こうで、道に迷わないように」',
+}
+
+export const MOURNING: Record<string, string> = {
+  ...FOUNDING_MOURNING,
+  ...MOURNING_LOW,
+  ...MOURNING_MID,
+  ...MOURNING_HIGH,
+  ...MOURNING_APEX,
 }
