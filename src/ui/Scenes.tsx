@@ -6,6 +6,7 @@ import type { StatKey } from '../core/types'
 import { godById } from '../core/data/gods'
 import { personalityById } from '../core/data/personalities'
 import { clearSave } from '../core/save'
+import { downloadChronicleCard } from './shareCard'
 
 export function BirthScene({ charId }: { charId: string }) {
   const data = useGame((s) => s.data)!
@@ -174,6 +175,9 @@ export function EndingScene() {
           <div className="ending-stats">
             紡がれた世代<b>{gens}</b>代 / 逝った者<b>{fallenCount}</b>人 / 費やした歳月<b>{years}</b>年
           </div>
+          <button className="btn" onClick={() => downloadChronicleCard(data)}>
+            この千年紀を一枚絵に残す(画像保存)
+          </button>
           {cleared && (
             <button className="btn btn-main" onClick={() => newLegacyGame()}>
               新たな千年紀へ — 継承新周回(形見と血の濃さを持ち越す)
