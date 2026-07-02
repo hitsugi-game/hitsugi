@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { Character } from '../core/types'
 import { godById } from '../core/data/gods'
 import { useGame } from '../core/store'
+import { downloadFamilyTreeCard } from './shareCard'
 
 // 家系図 — 世代交代の全体像を一望する(GDD_v3 M5)
 // 世代ごとに縦カラムを並べ、親子線はSVGオーバーレイで描く(人親=金、神親=薄紫の点線)。
@@ -61,7 +62,16 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
   return (
     <div className="modal-back" onClick={onClose}>
       <div className="modal familytree-modal" onClick={(e) => e.stopPropagation()}>
-        <h2 className="panel-title">家系図 — 燈守家の世代交代</h2>
+        <h2 className="panel-title">
+          家系図 — 燈守家の世代交代
+          <button
+            className="btn btn-ghost"
+            style={{ marginLeft: 12, fontSize: 12 }}
+            onClick={() => { const d = useGame.getState().data; if (d) void downloadFamilyTreeCard(d) }}
+          >
+            📷 一枚絵にして残す
+          </button>
+        </h2>
         <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 10 }}>
           <span className="tree-legend"><i className="tree-legend-swatch human" />人の親</span>
           <span className="tree-legend"><i className="tree-legend-swatch god" />星の親</span>
