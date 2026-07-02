@@ -278,6 +278,7 @@ export type Screen =
   | { id: 'battle' }
   | { id: 'chronicle' }
   | { id: 'codex' } // 図鑑(v3.1 M14: 魔性/星神/土地の記)
+  | { id: 'finale' } // 千年の岐路(v3.1 M15-4: 結末の選択)
   | { id: 'death'; charId: string }
   | { id: 'dream' } // 夢渡り — 汐里との邂逅
   | { id: 'ending' }

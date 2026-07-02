@@ -10,7 +10,7 @@ import { DungeonScreen } from './ui/Dungeon'
 import { BattleScreen } from './ui/Battle'
 import { ChronicleScreen } from './ui/Chronicle'
 import { CodexScreen } from './ui/Codex'
-import { BirthScene, CeremonyScene, DeathScene, DreamScene, EndingScene, JobRiteScene, LifeScene } from './ui/Scenes'
+import { BirthScene, CeremonyScene, DeathScene, DreamScene, EndingScene, FinaleScene, JobRiteScene, LifeScene } from './ui/Scenes'
 
 function MuteButton() {
   const [muted, setMuted] = useState(audio.muted)
@@ -97,6 +97,8 @@ function App() {
         return <ChronicleScreen />
       case 'codex':
         return <CodexScreen />
+      case 'finale':
+        return <FinaleScene />
       case 'birth':
         return <BirthScene charId={screen.charId} />
       case 'ceremony':

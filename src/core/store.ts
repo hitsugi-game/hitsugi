@@ -10,6 +10,8 @@ import { regionById } from './data/regions'
 import { enemyById } from './data/enemies'
 import { makeItem, inheritItem, itemBaseById, reforgeItem, reforgeCost, REFORGE_MAX } from './data/items'
 import { loreFor } from './data/lore'
+import { CHAPTERS, ENDINGS } from './data/story'
+import { FAME_SEAL_THRESHOLD } from './constants'
 import {
   conceiveChild, makeFounder, recalcStats, ageOf, pactCost,
 } from './inheritance'
@@ -72,6 +74,7 @@ interface GameStore {
   setMotto: (motto: MottoId) => void
   forgeUpgrade: (itemId: string) => void
   setLastWords: (charId: string, words: string) => void
+  resolveFinale: (choiceIndex: number) => void
 
   // 店・装備・修練(季を消費しない)
   buyItem: (baseId: string) => void
@@ -273,6 +276,26 @@ export const useGame = create<GameStore>((set, get) => {
           const pair = rng.shuffle(adults).slice(0, 2)
           scenes.push({ kind: 'life', ...kizunaScene(pair[0], pair[1], rng) })
         }
+      }
+    }
+
+    // 本編の章(v3.1 M15-4) — 条件を満たした月に一度だけ語られる
+    if (scenes.length === 0) {
+      const chapterDue = CHAPTERS.find((ch) => {
+        if (d.flags[ch.id]) return false
+        switch (ch.id) {
+          case 'ch1': return d.seasonIndex >= 2
+          case 'ch2': return d.regionsCleared.length >= 1
+          case 'ch3': return d.regionsCleared.length >= 5
+          case 'ch4': return (d.loreFrags?.['akashi_miyama'] ?? 0) >= 3 || d.regionsCleared.length >= 10
+          case 'ch5': return d.fame >= FAME_SEAL_THRESHOLD
+          default: return false
+        }
+      })
+      if (chapterDue) {
+        d = { ...d, flags: { ...d.flags, [chapterDue.id]: true } }
+        d = chronicle(d, 'era', `【${chapterDue.title}】語り継がれる千年の真実が、一つ明らかになった。`)
+        scenes.push({ kind: 'life', title: chapterDue.title, lines: chapterDue.lines })
       }
     }
 
@@ -595,6 +618,19 @@ export const useGame = create<GameStore>((set, get) => {
         nd = chronicle(nd, 'event', `鍛冶場に槌音が響く — 「${item.name}」を「${forged.name}」に打ち直した。`)
         return nd
       })
+    },
+
+    // v3.1 M15-4: 千年の岐路 — 最終決戦後の選択で結末が分岐する
+    resolveFinale: (choiceIndex) => {
+      const types = ['cut', 'save', 'inherit'] as const
+      const t = types[Math.max(0, Math.min(2, choiceIndex))]
+      mutate((d) => {
+        let nd: GameData = { ...d, flags: { ...d.flags, cleared: true, endingType: choiceIndex } }
+        nd = chronicle(nd, 'era', `一族の選択 —「${ENDINGS[t].title}」。千年の答えが、ここに定まる。`)
+        return nd
+      })
+      saveGame(get().data!)
+      set({ screen: { id: 'ending' } })
     },
 
     // v3.1 M15-2: 看取りの遺言 — 故人の言葉が家譜に残る
@@ -1237,15 +1273,15 @@ export const useGame = create<GameStore>((set, get) => {
               regionsCleared: [...new Set([...d.regionsCleared, run.regionId])],
               flags: { ...d.flags, cleared: true },
             }
-            nd = chronicle(nd, 'era', '灯ノ御山の頂にて、家祖・汐里を看取る。千年の常夜、ここに明ける。')
+            nd = chronicle(nd, 'era', '灯ノ御山の頂にて、家祖・汐里と相まみえる。千年の答えを、選ぶ時。')
             set({
               data: nd,
               battle: null,
               battleSource: 'node',
-            goldenBattle: false,
+              goldenBattle: false,
               dungeonRun: null,
               pendingScenes: [],
-              screen: { id: 'ending' },
+              screen: { id: 'finale' }, // v3.1 M15-4: 結末の選択へ
             })
             saveGame(get().data!)
             return
@@ -1430,11 +1466,11 @@ export const useGame = create<GameStore>((set, get) => {
                 : c,
             ),
           }
-          // 最終ボス撃破 → エンディング(探索状態は畳む)
+          // 最終ボス撃破 → 千年の岐路(探索状態は畳む) — v3.1 M15-4
           if (region.id === 'akashi_miyama') {
             set({
               data: { ...nd, expedition: undefined, flags: { ...nd.flags, cleared: true } },
-              battle: null, battleNodeId: null, pendingScenes: [], screen: { id: 'ending' },
+              battle: null, battleNodeId: null, pendingScenes: [], screen: { id: 'finale' },
             })
             saveGame(get().data!)
             return

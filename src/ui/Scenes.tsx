@@ -11,6 +11,7 @@ import { JOB_CLASSES, JOB_ROLE_LABELS, JOB_SCHOOL_LABELS, recommendJob, jobById 
 import type { JobRole } from '../core/data/jobs'
 import { skillById } from '../core/data/skills'
 import { MALE_NAMES, FEMALE_NAMES } from '../core/data/names'
+import { ENDINGS, FINALE_CHOICES } from '../core/data/story'
 import { clearSave } from '../core/save'
 import { downloadChronicleCard } from './shareCard'
 import { SceneBg } from './components'
@@ -421,13 +422,41 @@ const ENDING_EXTINCT = [
   '綴「いつか誰かが、この記を読む。ならばこれは敗北ではない。……中断だ」',
 ]
 
+// 最終決戦後の選択(v3.1 M15-4) — 千年の結末を、一族が選ぶ
+export function FinaleScene() {
+  const resolveFinale = useGame((s) => s.resolveFinale)
+  return (
+    <div className="scene-screen screen">
+      <div className="birth-flame">🔥</div>
+      <h1 className="scene-title">千年の岐路</h1>
+      <div className="scene-body">
+        <p>汐里は楽を置き、静かにこちらを見ている。</p>
+        <p>「……ここから先は、生きている者が決めることよ」</p>
+        <p style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 10 }}>この選択が、一族の千年の答えになる。</p>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 460, margin: '0 auto' }}>
+        {FINALE_CHOICES.map((c, i) => (
+          <button key={c.id} className="btn" style={{ textAlign: 'left' }} onClick={() => resolveFinale(i)}>
+            <b>{c.label}</b>
+            <span style={{ display: 'block', fontSize: 12, color: 'var(--text-dim)' }}>{c.desc}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function EndingScene() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
   const newLegacyGame = useGame((s) => s.newLegacyGame)
   const [beat, setBeat] = useState(0)
   const cleared = !!data.flags.cleared
-  const beats = cleared ? ENDING_CLEARED : ENDING_EXTINCT
+  // v3.1 M15-4: 最終選択に応じた結末分岐(選択がなければ従来の夜明け)
+  const endType = (typeof data.flags.endingType === 'number'
+    ? (['cut', 'save', 'inherit'] as const)[data.flags.endingType]
+    : 'cut')
+  const beats = cleared ? [...ENDINGS[endType].beats, ...ENDING_CLEARED] : ENDING_EXTINCT
   const done = beat >= beats.length - 1
 
   const gens = Math.max(...data.family.map((c) => c.gen))

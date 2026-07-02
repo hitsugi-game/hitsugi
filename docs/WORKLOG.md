@@ -492,3 +492,16 @@
 - **検証**: tsc 0エラー。抽選320回で19種が出現・プレースホルダ漏れ0・候補なし時のnull処理OK
 - **M15進捗**: 残り4(章立てED)/6(周回+塔)のみ
 - **commit**: (この直後)
+
+## 2026-07-03 (v3.1 M15-4 章立て+マルチエンディング)
+
+- **やったこと**:
+  - `data/story.ts`新設: **五章構成**(常夜/主たちの無念/星喰いの影/楽士の秘密/頂へ — 綴と夢の声で段階開示)+
+    **結末3種**(斬る=夜明け/救う=二人の錠前/継ぐ=灯継ぎ — 各4ビート)
+  - 章トリガー(advanceSeason): ch1=2月/ch2=主討伐1/ch3=討伐5/ch4=御山の欠片3or討伐10/ch5=武功520。
+    一度きり(flags)+家譜era記録+既存lifeシーンで表示(新規UI不要)
+  - **千年の岐路**(Screen'finale'+FinaleScene): 汐里戦勝利→(dungeon/expedition両経路)選択画面へ。
+    `resolveFinale(choice)`がendingType記録+家譜+ending遷移。EndingSceneは選択別ビート+既存締めを連結
+- **検証**: tsc 0エラー。実機: 月送りで「第一章 常夜」発火+flag、resolveFinale(2)→endingType=2でending遷移
+- **M15残り**: 6(周回+塔)のみ
+- **commit**: (この直後)
