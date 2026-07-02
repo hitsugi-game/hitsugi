@@ -1,9 +1,12 @@
 import type { Character } from './types'
 import { Rng } from './rng'
 import { personalityById } from './data/personalities'
+import { EPITAPHS_EXTRA } from './epitaph_extra'
+import { EPITAPHS_EXTRA_2 } from './epitaph_extra2'
+import { EPITAPHS_EXTRA_3 } from './epitaph_extra3'
 
 // 辞世 — 性根×死因から自動生成される、その人だけの最期の言葉
-type DeathCause = 'lifespan' | 'battle' | 'lost'
+export type DeathCause = 'lifespan' | 'battle' | 'lost'
 
 const EPITAPHS: Record<string, Record<DeathCause, string[]>> = {
   brave: {
@@ -372,9 +375,31 @@ const EPITAPHS: Record<string, Record<DeathCause, string[]>> = {
   },
 }
 
+function mergeEpitaphs(
+  base: Record<string, Record<DeathCause, string[]>>,
+  ...extras: Record<string, Record<DeathCause, string[]>>[]
+): Record<string, Record<DeathCause, string[]>> {
+  let out: Record<string, Record<DeathCause, string[]>> = { ...base }
+  for (const extra of extras) {
+    for (const voice of Object.keys(extra)) {
+      out = {
+        ...out,
+        [voice]: {
+          lifespan: [...(out[voice]?.lifespan ?? []), ...extra[voice].lifespan],
+          battle: [...(out[voice]?.battle ?? []), ...extra[voice].battle],
+          lost: [...(out[voice]?.lost ?? []), ...extra[voice].lost],
+        },
+      }
+    }
+  }
+  return out
+}
+
+const ALL_EPITAPHS = mergeEpitaphs(EPITAPHS, EPITAPHS_EXTRA, EPITAPHS_EXTRA_2, EPITAPHS_EXTRA_3)
+
 export function generateEpitaph(c: Character, cause: DeathCause, rng: Rng): string {
   const voice = personalityById(c.personalityId).voice
-  const pool = EPITAPHS[voice]?.[cause] ?? EPITAPHS.brave[cause]
+  const pool = ALL_EPITAPHS[voice]?.[cause] ?? ALL_EPITAPHS.brave[cause]
   return rng.pick(pool)
 }
 
