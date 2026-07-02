@@ -9,6 +9,7 @@ import { TOMOSHIGATA, tozaOf } from '../core/data/toza'
 import type { Tomoshigata } from '../core/types'
 import { clearSave } from '../core/save'
 import { downloadChronicleCard } from './shareCard'
+import { gameImg } from './img'
 
 export function BirthScene({ charId }: { charId: string }) {
   const data = useGame((s) => s.data)!
@@ -90,12 +91,13 @@ export function DeathScene({ charId }: { charId: string }) {
 }
 
 // ライフイベント — 家族の人生の一場面(初陣・絆・灯細りの夜)
-export function LifeScene({ title, lines }: { title: string; lines: { speaker: string; text: string }[] }) {
+export function LifeScene({ title, lines, bg }: { title: string; lines: { speaker: string; text: string }[]; bg?: string }) {
   const processNextScene = useGame((s) => s.processNextScene)
   const [beat, setBeat] = useState(0)
   const done = beat >= lines.length - 1
   return (
     <div className="scene-screen screen" onClick={() => !done && setBeat(beat + 1)}>
+      {bg && <img className="scene-bg" src={gameImg(bg)} alt="" aria-hidden />}
       <h1 className="scene-title">{title}</h1>
       <div className="scene-body" style={{ textAlign: 'left' }}>
         {lines.slice(0, beat + 1).map((l, i) => (
@@ -147,6 +149,7 @@ export function CeremonyScene({ charId }: { charId: string }) {
     const toza = tozaOf(chosen, char.element)
     return (
       <div className="scene-screen screen">
+        <img className="scene-bg" src={gameImg('cg_ceremony.png')} alt="" aria-hidden />
         <div className="birth-flame">🔥</div>
         <h1 className="scene-title">成人の儀</h1>
         <div className="scene-body">

@@ -243,7 +243,7 @@ export type Screen =
   | { id: 'pact' }
   | { id: 'birth'; charId: string }
   | { id: 'ceremony'; charId: string } // 成人の儀 — 灯型を授ける
-  | { id: 'life'; title: string; lines: { speaker: string; text: string }[] } // ライフイベント
+  | { id: 'life'; title: string; lines: { speaker: string; text: string }[]; bg?: string } // ライフイベント
   | { id: 'depart' } // 出立準備
   | { id: 'expedition' }
   | { id: 'dungeon' } // 歩行ダンジョン(v2)

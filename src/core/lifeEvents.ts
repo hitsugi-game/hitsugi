@@ -16,6 +16,7 @@ export interface LifeLine {
 export interface LifeScenePayload {
   title: string
   lines: LifeLine[]
+  bg?: string // 情景CG(public/img/)
 }
 
 const v = (c: Character) => personalityById(c.personalityId).voice
@@ -59,7 +60,7 @@ export function hatsujinScene(c: Character, head: Character | null, rng: Rng): L
   }
   const lines = byVoice[v(c)] ?? byVoice.brave
   void rng
-  return { title: '初陣の夜', lines: [opener, ...lines] }
+  return { title: '初陣の夜', lines: [opener, ...lines], bg: 'cg_hatsujin.png' }
 }
 
 // ---- 絆 — 月々の家族の掛け合い(組み合わせで変化) ----
@@ -165,5 +166,5 @@ export function hosoriScene(c: Character, witness: Character | null): LifeSceneP
       { speaker: c.name, text: 'なら、もう怖くない。……ねえ、私、この家に生まれてよかった。' },
     ],
   }
-  return { title: '灯細りの夜', lines: [opener, ...(byVoice[v(c)] ?? byVoice.brave)] }
+  return { title: '灯細りの夜', lines: [opener, ...(byVoice[v(c)] ?? byVoice.brave)], bg: 'cg_hosori.png' }
 }

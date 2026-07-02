@@ -459,6 +459,14 @@ button {
   text-align: center; min-height: 100vh;
 }
 .scene-title { font-size: 30px; letter-spacing: 0.5em; color: var(--gold); margin-bottom: 26px; }
+.scene-bg {
+  position: fixed; inset: 0; z-index: -1;
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0;
+  animation: sceneBgIn 1.4s ease 0.1s forwards;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.75));
+}
+@keyframes sceneBgIn { to { opacity: 0.5; } }
 .scene-body { max-width: 560px; font-size: 17px; }
 .scene-body p { margin-bottom: 14px; }
 .scene-epitaph {

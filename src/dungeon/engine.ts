@@ -42,6 +42,8 @@ export class DungeonEngine {
   private walkTex: Record<string, Texture[]> = {}
   private facing = 'down'
   private animT = 0
+  private leader: { gata: string; sex: string } = { gata: 'homura', sex: 'm' }
+  private baseScale = 1
   private shades: Shade[] = []
   private px = 1
   private py = 1
@@ -77,11 +79,13 @@ export class DungeonEngine {
     usedKeys: string[],
     floorIndex: number,
     events: EngineEvents,
+    leader?: { gata: string; sex: string },
   ) {
     this.host = host
     this.floor = floor
     this.floorIndex = floorIndex
     this.events = events
+    this.leader = leader ?? { gata: 'homura', sex: 'm' }
     this.used = new Set(usedKeys)
     this.parse()
     if (start) {
@@ -145,19 +149,21 @@ export class DungeonEngine {
       }
     }
 
-    // プレイヤー — 切り絵シルエット歩行スプライト(読めなければ灯印で代替)
+    // プレイヤー — 灯型×性別の切り絵シルエット歩行スプライト(読めなければ灯印で代替)
     this.player = new Container()
     try {
       const base = import.meta.env.BASE_URL
-      for (const dir of ['down', 'up', 'left', 'right']) {
+      const { gata, sex } = this.leader
+      for (const dir of ['down', 'up', 'left']) {
         this.walkTex[dir] = await Promise.all(
-          [0, 1, 2].map((i) => Assets.load<Texture>(`${base}img/sprites/walk_${dir}_${i}.png`)),
+          [0, 1, 2].map((i) => Assets.load<Texture>(`${base}img/sprites/walk_${gata}_${sex}_${dir}_${i}.png`)),
         )
       }
       const sp = new Sprite(this.walkTex.down[1])
       sp.anchor.set(0.5, 0.78)
       sp.height = TILE * 1.6
       sp.scale.x = sp.scale.y
+      this.baseScale = sp.scale.y
       sp.x = TILE / 2
       sp.y = TILE * 0.9
       this.playerSprite = sp
@@ -223,19 +229,19 @@ export class DungeonEngine {
       this.player.x = (this.moveFrom.x + (this.px - this.moveFrom.x) * t) * TILE
       this.player.y = (this.moveFrom.y + (this.py - this.moveFrom.y) * t) * TILE
       this.centerCamera()
-      // 歩行コマ送り(0-1-2-1のサイクル)
-      if (this.playerSprite && this.walkTex[this.facing]) {
+      // 歩行コマ送り(0-1-2-1のサイクル)。右向きは左向きの反転
+      if (this.playerSprite) {
         this.animT += dms
         const frame = [0, 1, 2, 1][Math.floor(this.animT / 130) % 4]
-        this.playerSprite.texture = this.walkTex[this.facing][frame]
+        this.applyFacing(frame)
       }
       if (t >= 1) {
         this.moving = false
         this.moveFrom = null
         this.arrive(this.px, this.py)
       }
-    } else if (this.playerSprite && this.walkTex[this.facing]) {
-      this.playerSprite.texture = this.walkTex[this.facing][1]
+    } else if (this.playerSprite) {
+      this.applyFacing(1)
     }
     // プレイヤー移動開始
     if (!this.moving && this.held.size > 0) {
@@ -275,6 +281,15 @@ export class DungeonEngine {
         return
       }
     }
+  }
+
+  private applyFacing(frame: number): void {
+    if (!this.playerSprite) return
+    const texDir = this.facing === 'right' ? 'left' : this.facing
+    const tex = this.walkTex[texDir]
+    if (!tex) return
+    this.playerSprite.texture = tex[frame]
+    this.playerSprite.scale.x = this.facing === 'right' ? -this.baseScale : this.baseScale
   }
 
   private removeShade(s: Shade): void {

@@ -34,7 +34,7 @@ type PendingScene =
   | { kind: 'death'; charId: string }
   | { kind: 'ceremony'; charId: string }
   | { kind: 'dream' }
-  | { kind: 'life'; title: string; lines: { speaker: string; text: string }[] }
+  | { kind: 'life'; title: string; lines: { speaker: string; text: string }[]; bg?: string }
 
 interface GameStore {
   screen: Screen
@@ -364,7 +364,7 @@ export const useGame = create<GameStore>((set, get) => {
               : next.kind === 'ceremony'
                 ? { id: 'ceremony', charId: next.charId }
                 : next.kind === 'life'
-                  ? { id: 'life', title: next.title, lines: next.lines }
+                  ? { id: 'life', title: next.title, lines: next.lines, bg: next.bg }
                   : { id: 'dream' },
       })
     },

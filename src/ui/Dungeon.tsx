@@ -59,6 +59,10 @@ function DungeonFloor() {
           }
         },
       },
+      // 隊列の先頭が歩く姿になる(灯型×性別のスプライト)
+      party[0]
+        ? { gata: party[0].tomoshigata ?? 'homura', sex: party[0].sex }
+        : undefined,
     )
     engineRef.current = engine
     if (import.meta.env.DEV) {

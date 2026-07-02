@@ -98,7 +98,7 @@ function App() {
       case 'ceremony':
         return <CeremonyScene charId={screen.charId} />
       case 'life':
-        return <LifeScene title={screen.title} lines={screen.lines} />
+        return <LifeScene title={screen.title} lines={screen.lines} bg={screen.bg} />
       case 'death':
         return <DeathScene charId={screen.charId} />
       case 'dream':

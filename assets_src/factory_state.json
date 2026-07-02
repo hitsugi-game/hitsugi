@@ -1,3 +1,15 @@
 {
-  "done": []
+  "done": [
+    "spr_homura_m",
+    "spr_homura_f",
+    "spr_iwao_m",
+    "spr_iwao_f",
+    "spr_nagi_m",
+    "spr_nagi_f",
+    "spr_sumi_m",
+    "spr_sumi_f",
+    "cg_ceremony",
+    "cg_hosori",
+    "cg_hatsujin"
+  ]
 }
