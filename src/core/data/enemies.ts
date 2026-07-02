@@ -176,6 +176,10 @@ const BOSSES: EnemyDef[] = [
   { id: 'boss_touroumori', name: '灯篭守', element: 'fire', tier: 5, hp: 450, atk: 29, def: 18, agi: 10, skillIds: ['e_hisui'], hoto: 105, ketsu: 5, sprite: 'boss_touroumori.png', desc: '崩れた灯篭の列を守る古い番人の霊。消えかけの火を抱え、道を塞ぐ者には容赦がない。' },
   { id: 'boss_kakashimusha', name: '案山子武者', element: 'earth', tier: 5, hp: 500, atk: 33, def: 20, agi: 8, skillIds: [], hoto: 120, ketsu: 6, sprite: 'boss_kakashimusha.png', desc: '苅田に立ち尽くす案山子が武者の姿を得た怪。動きは鈍重だが、藁の腕の一振りは重い。' },
   { id: 'boss_minomushinushi', name: '蓑虫嚢主', element: 'wind', tier: 5, hp: 540, atk: 30, def: 24, agi: 16, skillIds: ['e_kurayami'], hoto: 135, ketsu: 6, sprite: 'boss_minomushinushi.png', desc: '蓑虫の廻廊に巣くう巨大な嚢の主。無数の子蓑虫を纏い、揺れるたびに小さな棘が舞う。' },
+  { id: 'boss_oborofunayuurei', name: '朧舟幽鬼', element: 'water', tier: 5, hp: 580, atk: 35, def: 22, agi: 16, skillIds: ['e_kurayami'], hoto: 155, ketsu: 8, sprite: 'boss_oborofunayuurei.png', desc: '朧橋の下を漂う舟形の幽鬼。渡ろうとする者を舟に乗せ、対岸のない川を延々と漕ぎ続けさせる。' },
+  { id: 'boss_suzuridama', name: '硯魂', element: 'moon', tier: 5, hp: 650, atk: 39, def: 26, agi: 12, skillIds: ['e_hisui'], hoto: 175, ketsu: 9, sprite: 'boss_suzuridama.png', desc: '硯石の坂に棲みつく硯の付喪神。刷った墨は全て、届かなかった文の言葉だという。' },
+  { id: 'boss_rousokuoni', name: '蝋燭鬼', element: 'fire', tier: 5, hp: 700, atk: 44, def: 24, agi: 18, skillIds: ['e_hisui', 'e_kurayami'], hoto: 195, ketsu: 10, sprite: 'boss_rousokuoni.png', desc: '蝋燭河岸に居座る鬼。売れ残った蝋燭の魂が集まり、一つの意思を持つに至った。' },
+  { id: 'boss_kagamibuchinushi', name: '鏡淵の主', element: 'moon', tier: 5, hp: 760, atk: 42, def: 30, agi: 14, skillIds: ['e_kurayami', 'e_yamiuta'], hoto: 215, ketsu: 11, sprite: 'boss_kagamibuchinushi.png', desc: '鏡のように澄んだ淵の主。水面に映る者の姿を写し取り、いつまでも淵の底に留め置く。' },
 ]
 
 // ---- 変異展開(GDD_v3) ----

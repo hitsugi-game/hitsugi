@@ -64,6 +64,26 @@ export const REGIONS: Region[] = [
     bg: 'bg_zaka.png',
   },
   {
+    id: 'oboro_bashi', name: '朧橋', tier: 2, depth: 8, unlockFame: 75, bossId: 'boss_oborofunayuurei',
+    desc: '霧の向こうに霞んで見える橋。渡り切ったと思っても、いつも同じ岸に立っている。',
+    bg: 'bg_zaka.png',
+  },
+  {
+    id: 'suzuriishi_no_saka', name: '硯石の坂', tier: 2, depth: 8, unlockFame: 120, bossId: 'boss_suzuridama',
+    desc: '硯の形をした岩がいくつも転がる坂道。踏むたびに、微かに墨の匂いがする。',
+    bg: 'bg_zaka.png',
+  },
+  {
+    id: 'rousoku_kashi', name: '蝋燭河岸', tier: 2, depth: 8, unlockFame: 160, bossId: 'boss_rousokuoni',
+    desc: '涸れた河岸に蝋燭が延々と並ぶ。灯る火は誰も点けていないのに消えることがない。',
+    bg: 'bg_zaka.png',
+  },
+  {
+    id: 'kagami_ga_fuchi', name: '鏡ヶ淵', tier: 2, depth: 8, unlockFame: 200, bossId: 'boss_kagamibuchinushi',
+    desc: '澄みきった淵。覗き込むと、自分によく似た何かが一拍遅れてこちらを見返す。',
+    bg: 'bg_zaka.png',
+  },
+  {
     id: 'hoshimukuro_tani', name: '星骸の谷', tier: 3, depth: 10, unlockFame: 220, bossId: 'boss_hoshimukuro',
     desc: '玄冬に喰われた星々が墜ちて積もる谷。星の骸は今も微かに瞬く。',
     bg: 'bg_tani.png',
