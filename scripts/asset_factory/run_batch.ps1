@@ -102,14 +102,25 @@ for ($s = 0; $s -lt $MaxSessions; $s++) {
       Copy-Item $genFiles[$i].FullName $target
     }
     if (Test-Path $target) {
-      Compress-One $target $doneNames[$i]
-      $id = ($manifest | Where-Object { $_.file -eq $doneNames[$i] } | Select-Object -First 1).id
-      if ($id) { [void]$doneSet.Add($id) }
-      Write-Output "FACTORY: ok $($doneNames[$i])"
+      # 1枚の不良(切断時の破損png等)で工場全体を殺さない — 失敗はスキップして後のセッションで再試行
+      try {
+        Compress-One $target $doneNames[$i] -ErrorAction Stop
+        $id = ($manifest | Where-Object { $_.file -eq $doneNames[$i] } | Select-Object -First 1).id
+        if ($id) { [void]$doneSet.Add($id) }
+        Write-Output "FACTORY: ok $($doneNames[$i])"
+      } catch {
+        Write-Output "FACTORY: skip $($doneNames[$i]) (compress failed: $($_.Exception.Message))"
+        Remove-Item $target -Force -ErrorAction SilentlyContinue
+      }
     }
   }
   # 進捗保存
   [pscustomobject]@{ done = @($doneSet) } | ConvertTo-Json | Set-Content $statePath
+  # クォータ切れは粘っても無駄 — 早期終了して毎時スケジューラの再開に任せる
+  if (Select-String -Path $log, $errLog -Pattern 'usage limit' -Quiet -ErrorAction SilentlyContinue) {
+    Write-Output 'FACTORY: usage limit reached — stopping (hourly task will resume)'
+    break
+  }
 }
 Write-Output "FACTORY: state -> $statePath ($($doneSet.Count) done)"
 # 歩行シートが届いていればフレームへ自動分割(冪等)
