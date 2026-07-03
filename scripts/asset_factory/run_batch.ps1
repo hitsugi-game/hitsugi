@@ -157,6 +157,17 @@ for ($s = 0; $s -lt $MaxSessions; $s++) {
   }
   # 進捗保存
   [pscustomobject]@{ done = @($doneSet) } | ConvertTo-Json | Set-Content $statePath
+  # セッション毎に自動コミット&プッシュ — 毎時タスク単独で「生成→公開」まで自走させる(私のセッション非依存)
+  Push-Location $root
+  try {
+    git add public/img assets_src/factory_state.json 2>&1 | Out-Null
+    $staged = git diff --cached --name-only 2>&1
+    if ($staged) {
+      git commit -q -m "chore(assets): 画像バッチ自動追加 ($($doneSet.Count)/2096)" -m "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" 2>&1 | Out-Null
+      git push -q 2>&1 | Out-Null
+      Write-Output "FACTORY: committed & pushed ($($doneSet.Count)/2096)"
+    }
+  } catch { Write-Output "FACTORY: git skipped ($($_.Exception.Message))" } finally { Pop-Location }
   # クォータ切れは粘っても無駄 — 早期終了して毎時スケジューラの再開に任せる
   if (Select-String -Path $log, $errLog -Pattern 'usage limit' -Quiet -ErrorAction SilentlyContinue) {
     Write-Output 'FACTORY: usage limit reached — stopping (hourly task will resume)'
