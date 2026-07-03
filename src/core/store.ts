@@ -12,6 +12,10 @@ import { makeItem, inheritItem, itemBaseById, reforgeItem, reforgeCost, REFORGE_
 import { loreFor } from './data/lore'
 import { CHAPTERS, ENDINGS } from './data/story'
 import { boonById, draftBoons } from './data/boons'
+import {
+  facilityById, facilityCost, facilityLevel, yuyaRecoverBonus, shokoPotentialBonus, yashiroAffinityGain,
+  FACILITY_MAX_LV,
+} from './data/facilities'
 import { FAME_SEAL_THRESHOLD } from './constants'
 import {
   conceiveChild, makeFounder, recalcStats, ageOf, pactCost,
@@ -74,6 +78,7 @@ interface GameStore {
   renameCharacter: (charId: string, name: string) => void
   setMotto: (motto: MottoId) => void
   forgeUpgrade: (itemId: string) => void
+  buildFacility: (id: string) => void // v3.1 M16-6: 郷普請 — 施設を建てる/普請を進める
   setLastWords: (charId: string, words: string) => void
   resolveFinale: (choiceIndex: number) => void
 
@@ -193,11 +198,21 @@ export const useGame = create<GameStore>((set, get) => {
       const twins = rng.chance(0.06)
       const count = twins ? 2 : 1
       for (let i = 0; i < count; i++) {
-        const child = conceiveChild(
+        let child = conceiveChild(
           parent, god, gen, d.seasonIndex, rng,
           d.family.map((c) => c.name),
           affinity, d.family,
         )
+        // 書庫(M16-6): 先達の知恵が、子の血潮に僅かな伸びしろを残す(上限120は維持)
+        const shokoBonus = shokoPotentialBonus(facilityLevel(d.facilities, 'shoko'))
+        if (shokoBonus > 0) {
+          const boosted = { ...child.potential }
+          for (const k of Object.keys(boosted) as (keyof typeof boosted)[]) {
+            boosted[k] = Math.min(120, Math.round(boosted[k] * (1 + shokoBonus)))
+          }
+          const withStats = recalcStats({ ...child, potential: boosted }, d.seasonIndex)
+          child = { ...withStats, hp: withStats.maxHp, mp: withStats.maxMp }
+        }
         d = { ...d, family: [...d.family, child] }
         d = chronicle(d, 'birth', birthLine(child.name, god.name, rng), child.id)
         if (child.deeds.some((x) => x.includes('隔世遺伝'))) {
@@ -368,6 +383,17 @@ export const useGame = create<GameStore>((set, get) => {
 
     // 郷の営み — 郷人たちが大燈籠に捧げる奉燈(月次・討伐が進むほど郷が潤う)
     d = { ...d, hoto: d.hoto + 3 + d.regionsCleared.length * 2 }
+
+    // 社(M16-6): 月送りごと、既に契った星々(縁>0)への縁を篤くする
+    const yashiroGain = yashiroAffinityGain(facilityLevel(d.facilities, 'yashiro'))
+    if (yashiroGain > 0) {
+      d = {
+        ...d,
+        godAffinity: Object.fromEntries(
+          Object.entries(d.godAffinity).map(([gid, aff]) => [gid, aff > 0 ? aff + yashiroGain : aff]),
+        ),
+      }
+    }
 
     // 夢渡り — 星骸の谷を制した夜、当主の夢に家祖が現れる
     if (d.regionsCleared.includes('hoshimukuro_tani') && !d.flags.dreamSeen) {
@@ -682,6 +708,25 @@ export const useGame = create<GameStore>((set, get) => {
           }
         }
         nd = chronicle(nd, 'event', `鍛冶場に槌音が響く — 「${item.name}」を「${forged.name}」に打ち直した。`)
+        return nd
+      })
+    },
+
+    // v3.1 M16-6: 郷普請 — 施設を建てる/普請を進める(季を消費しない。代を跨いで効く恒常加護)
+    buildFacility: (id) => {
+      mutate((d) => {
+        const facility = facilityById(id) // 未知idなら例外(呼び出し元はFACILITIES由来のidのみ渡す)
+        const lv = facilityLevel(d.facilities, id)
+        if (lv >= FACILITY_MAX_LV) return d
+        const cost = facilityCost(id, lv)
+        if (d.hoto < cost) return d
+        const nextLv = lv + 1
+        let nd: GameData = {
+          ...d,
+          hoto: d.hoto - cost,
+          facilities: { ...(d.facilities ?? {}), [id]: nextLv },
+        }
+        nd = chronicle(nd, 'event', `郷普請 — 「${facility.name}」が${nextLv === 1 ? '建った' : `Lv${nextLv}に普請された`}。`)
         return nd
       })
     },
@@ -1003,6 +1048,8 @@ export const useGame = create<GameStore>((set, get) => {
       const exp = d.expedition
       if (!exp) return
       const gainedFame = Math.round(exp.loot.hoto / 10) + exp.loot.ketsu * 2
+      // 湯屋(M16-6): 帰還した隊のHP/MPを普請段階に応じて回復
+      const yuyaBonus = yuyaRecoverBonus(facilityLevel(d.facilities, 'yuya'))
       let nd: GameData = {
         ...d,
         hoto: d.hoto + exp.loot.hoto,
@@ -1010,6 +1057,17 @@ export const useGame = create<GameStore>((set, get) => {
         inventory: [...d.inventory, ...exp.loot.items],
         fame: d.fame + gainedFame,
         expedition: undefined,
+        family: yuyaBonus > 0
+          ? d.family.map((c) =>
+              exp.partyIds.includes(c.id) && c.alive
+                ? {
+                    ...c,
+                    hp: Math.min(c.maxHp, Math.round(c.hp + c.maxHp * yuyaBonus)),
+                    mp: Math.min(c.maxMp, Math.round(c.mp + c.maxMp * yuyaBonus)),
+                  }
+                : c,
+            )
+          : d.family,
       }
       nd = {
         ...nd,
@@ -1298,12 +1356,25 @@ export const useGame = create<GameStore>((set, get) => {
       const kaeribiBonus = (run.boons ?? []).includes('kaeribi') ? 15 : 0
       const gainedFame =
         Math.round(run.loot.hoto / 10) + run.loot.ketsu * 2 + (run.bossDown ? 40 : 0) + towerBonus + kaeribiBonus
+      // 湯屋(M16-6): 帰還した隊のHP/MPを普請段階に応じて回復
+      const yuyaBonus = yuyaRecoverBonus(facilityLevel(d.facilities, 'yuya'))
       let nd: GameData = {
         ...d,
         hoto: d.hoto + run.loot.hoto,
         ketsu: d.ketsu + run.loot.ketsu,
         inventory: [...d.inventory, ...run.loot.items],
         fame: d.fame + gainedFame,
+        family: yuyaBonus > 0
+          ? d.family.map((c) =>
+              run.partyIds.includes(c.id) && c.alive
+                ? {
+                    ...c,
+                    hp: Math.min(c.maxHp, Math.round(c.hp + c.maxHp * yuyaBonus)),
+                    mp: Math.min(c.maxMp, Math.round(c.mp + c.maxMp * yuyaBonus)),
+                  }
+                : c,
+            )
+          : d.family,
       }
       if (run.regionId === 'tokoyo_tou') {
         const best = typeof d.flags.towerBest === 'number' ? d.flags.towerBest : 0

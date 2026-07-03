@@ -3,6 +3,9 @@
 
 type TrackName = 'title' | 'home' | 'expedition' | 'battle' | 'boss' | 'scene' | 'none'
 
+// 地域アンビエンス種別 — BGMとは別レイヤーで鳴る環境音ループ
+type AmbienceKind = 'forest' | 'zaka' | 'tani' | 'miyama' | 'none'
+
 // A平調子: A3 を宮とする陰旋法
 const HIRAJOSHI = [220.0, 246.94, 261.63, 329.63, 349.23] // A3 B3 C4 E4 F4
 function deg(d: number): number {
@@ -83,6 +86,9 @@ class AudioEngine {
   private timer: number | null = null
   private nextLoopAt = 0
   private _muted: boolean
+  private _tension = 0 // 0..1 — BGMの緊張度(テンポ/低太鼓パルスに反映)
+  private ambience: AmbienceKind = 'none'
+  private ambienceTimers: number[] = []
 
   constructor() {
     this._muted = localStorage.getItem(STORAGE_KEY) === 'muted'
@@ -96,6 +102,7 @@ class AudioEngine {
     this._muted = !this._muted
     localStorage.setItem(STORAGE_KEY, this._muted ? 'muted' : 'on')
     if (this.master) this.master.gain.value = this._muted ? 0 : 0.5
+    if (this._muted) this.clearAmbienceTimers()
     return this._muted
   }
 
@@ -147,10 +154,11 @@ class AudioEngine {
     o.start(at); o.stop(at + dur + 0.2)
   }
 
-  private taikoHit(at: number, accent = false): void {
+  private taikoHit(at: number, accent = false, volOverride?: number): void {
     const ctx = this.ctx!
+    const vol = volOverride ?? (accent ? 0.7 : 0.45)
     const g = ctx.createGain()
-    g.gain.setValueAtTime(accent ? 0.7 : 0.45, at)
+    g.gain.setValueAtTime(vol, at)
     g.gain.exponentialRampToValueAtTime(0.001, at + 0.28)
     const o = ctx.createOscillator()
     o.type = 'sine'
@@ -166,9 +174,51 @@ class AudioEngine {
     const src = ctx.createBufferSource()
     src.buffer = buf
     const ng = ctx.createGain()
-    ng.gain.value = accent ? 0.24 : 0.14
+    ng.gain.value = (volOverride ?? (accent ? 0.24 : 0.14)) * 0.55
     src.connect(ng).connect(this.master!)
     src.start(at)
+  }
+
+  // 風/虫の音などに使うフィルタ済みノイズの短いスウェル
+  private noiseSwell(at: number, dur: number, vol: number, cutoff: number): void {
+    const ctx = this.ctx!
+    const len = Math.max(1, Math.floor(ctx.sampleRate * dur))
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate)
+    const data = buf.getChannelData(0)
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1
+    const src = ctx.createBufferSource()
+    src.buffer = buf
+    const bp = ctx.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.frequency.value = cutoff
+    bp.Q.value = 0.7
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0.0001, at)
+    g.gain.linearRampToValueAtTime(vol, at + dur * 0.4)
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur)
+    src.connect(bp).connect(g).connect(this.master!)
+    src.start(at)
+  }
+
+  // 地鳴り/重低音などの持続ドローン(LFOで揺らぐ)
+  private drone(freq: number, at: number, dur: number, vol: number): void {
+    const ctx = this.ctx!
+    const o = ctx.createOscillator()
+    o.type = 'sine'
+    o.frequency.value = freq
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0.0001, at)
+    g.gain.linearRampToValueAtTime(vol, at + dur * 0.3)
+    g.gain.linearRampToValueAtTime(vol * 0.6, at + dur * 0.7)
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur)
+    const lfo = ctx.createOscillator()
+    lfo.frequency.value = 0.08 + Math.random() * 0.06
+    const lfoGain = ctx.createGain()
+    lfoGain.gain.value = freq * 0.03
+    lfo.connect(lfoGain).connect(o.frequency)
+    o.connect(g).connect(this.master!)
+    o.start(at); lfo.start(at)
+    o.stop(at + dur + 0.5); lfo.stop(at + dur + 0.5)
   }
 
   private bellTone(freq: number, at: number, vol = 0.3): void {
@@ -190,7 +240,8 @@ class AudioEngine {
   }
 
   // ---- シーケンサ ----
-  play(track: TrackName): void {
+  play(track: TrackName, tension?: number): void {
+    if (tension !== undefined) this.setTension(tension)
     if (track === this.track) return
     this.track = track
     if (this.timer !== null) {
@@ -204,10 +255,68 @@ class AudioEngine {
     this.timer = window.setInterval(() => this.scheduleLoop(), 500)
   }
 
+  // 段階的緊張度(0..1)— テンポを僅かに上げ、高まると低太鼓の追加パルスを差し込む
+  setTension(t: number): void {
+    this._tension = Math.min(1, Math.max(0, t))
+  }
+
+  // ---- 地域アンビエンス ----
+  startAmbience(kind: AmbienceKind): void {
+    if (kind === this.ambience) return
+    this.clearAmbienceTimers()
+    this.ambience = kind
+    if (kind === 'none' || this._muted) return
+    this.ensure()
+    const intervalMs: Record<Exclude<AmbienceKind, 'none'>, number> = {
+      forest: 1400, zaka: 2200, tani: 3000, miyama: 4500,
+    }
+    const tick = (): void => this.ambienceTick(kind)
+    tick() // 即座に一度鳴らす
+    this.ambienceTimers.push(window.setInterval(tick, intervalMs[kind]))
+  }
+
+  stopAmbience(): void {
+    this.clearAmbienceTimers()
+    this.ambience = 'none'
+  }
+
+  private clearAmbienceTimers(): void {
+    for (const id of this.ambienceTimers) window.clearInterval(id)
+    this.ambienceTimers = []
+  }
+
+  private ambienceTick(kind: Exclude<AmbienceKind, 'none'>): void {
+    if (this._muted || !this.ctx) return
+    const at = this.ctx.currentTime + 0.02
+    switch (kind) {
+      case 'forest':
+        // 虫の音 — まばらな高い一鳴き(確率的に間引く)
+        if (Math.random() < 0.7) {
+          this.pluck(deg(9 + Math.floor(Math.random() * 3)), at + Math.random() * 0.6, 0.15, 0.05)
+        }
+        break
+      case 'zaka':
+        // 風鈴と風 — 稀に鈴、時々ノイズの風
+        if (Math.random() < 0.35) this.bellTone(deg(10), at + Math.random() * 0.8, 0.05)
+        if (Math.random() < 0.6) this.noiseSwell(at + Math.random() * 1.2, 1.6 + Math.random(), 0.035, 900)
+        break
+      case 'tani':
+        // 地鳴り — 低いドローン、ゆっくり
+        this.drone(deg(-14) + (Math.random() - 0.5) * 3, at, 3.6, 0.05)
+        break
+      case 'miyama':
+        // 重低音の静寂 — 極めて希薄で長いドローン
+        if (Math.random() < 0.5) this.drone(deg(-19), at, 6.5, 0.03)
+        break
+    }
+  }
+
   private scheduleLoop(): void {
     if (this.track === 'none' || !this.ctx) return
     const p = PATTERNS[this.track]
-    const spb = 60 / p.bpm
+    const tension = this._tension
+    // テンポは緊張度に応じて最大12%まで前のめりに
+    const spb = 60 / (p.bpm * (1 + tension * 0.12))
     const loopDur = p.beats * spb
     // サスペンド復帰などで過去に取り残されたら現在へ早送り(音の洪水を防ぐ)
     if (this.nextLoopAt < this.ctx.currentTime) {
@@ -220,12 +329,20 @@ class AudioEngine {
       for (const [t, d] of p.bass ?? []) this.bassTone(deg(d), base + t * spb, 2 * spb)
       for (const t of p.taiko ?? []) this.taikoHit(base + t * spb, t % 4 === 0)
       for (const [t, d] of p.bell ?? []) this.bellTone(deg(d), base + t * spb)
+      // 緊張度が高い場合、拍間の裏拍に低い太鼓の鼓動を追加
+      if (tension > 0.4) {
+        const pulseGain = (tension - 0.4) / 0.6 // 0..1
+        for (let beat = 0; beat < p.beats; beat += 2) {
+          this.taikoHit(base + (beat + 1) * spb, false, 0.3 + pulseGain * 0.25)
+        }
+      }
       this.nextLoopAt = base + loopDur
     }
   }
 
   // ---- 効果音 ----
-  se(kind: 'hit' | 'heal' | 'ko' | 'chain' | 'win' | 'click' | 'treasure' | 'birth' | 'death'): void {
+  se(kind: 'hit' | 'heal' | 'ko' | 'chain' | 'win' | 'click' | 'treasure' | 'birth' | 'death'
+    | 'footstep' | 'encounter' | 'slot' | 'forge' | 'lore'): void {
     if (this._muted) return
     const ctx = this.ensure()
     const at = ctx.currentTime
@@ -266,9 +383,38 @@ class AudioEngine {
         this.bellTone(deg(0), at, 0.35)
         this.bassTone(deg(-10), at + 0.2, 2.5)
         break
+      case 'footstep':
+        // 迷宮を歩む足音 — ごく小さく籠もった一打
+        this.taikoHit(at, false, 0.05)
+        break
+      case 'encounter':
+        // 断ち切り — 上昇する箏に続き、間を置いて弱い太鼓
+        this.pluck(deg(2), at, 0.1, 0.4)
+        this.pluck(deg(5), at + 0.05, 0.15, 0.45)
+        this.taikoHit(at + 0.16, false, 0.3)
+        break
+      case 'slot':
+        // 戦利品スロット — 駆け上がる3音
+        this.pluck(deg(0), at, 0.06, 0.3)
+        this.pluck(deg(2), at + 0.06, 0.06, 0.35)
+        this.pluck(deg(4), at + 0.12, 0.1, 0.4)
+        break
+      case 'forge':
+        // 鍛冶 — 金床に響く二打
+        this.taikoHit(at, true, 0.5)
+        this.bellTone(deg(9), at, 0.12)
+        this.taikoHit(at + 0.18, true, 0.55)
+        this.bellTone(deg(11), at + 0.18, 0.14)
+        break
+      case 'lore':
+        // 縁起完成 — 静かに解決する3鈴
+        this.bellTone(deg(3), at, 0.28)
+        this.bellTone(deg(5), at + 0.35, 0.28)
+        this.bellTone(deg(7), at + 0.7, 0.32)
+        break
     }
   }
 }
 
 export const audio = new AudioEngine()
-export type { TrackName }
+export type { TrackName, AmbienceKind }

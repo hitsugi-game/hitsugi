@@ -309,6 +309,7 @@ export interface GameData {
   nemeses?: NemesisRecord[] // v3.1 M16-1: 一族を殺し、名を得た魔性
   lastPlayedAt?: number // v3.1 M16-8: 留守番内職(実時間の刻印、保存時に更新)
   gossipIndex?: number // v3.1 M16-3: 郷の物語(会話キュー)の進行度
+  facilities?: Record<string, number> // v3.1 M16-6: 郷の普請(施設id→lv 0-3)。旧セーブ互換で全て未建設扱い
 }
 
 // 宿敵(名持ち) — 一族の誰かを殺した魔性が名を得て成長・再来する

@@ -5,6 +5,7 @@ import type { StatKey, MottoId } from '../core/types'
 import { isAdult, seasonsLeft } from '../core/inheritance'
 import { ITEM_BASES, reforgeCost, REFORGE_MAX } from '../core/data/items'
 import { GODS } from '../core/data/gods'
+import { FACILITIES, FACILITY_MAX_LV, facilityCost, facilityLevel } from '../core/data/facilities'
 import { VILLAGERS, villagerLine } from '../core/data/villagers'
 import { CharCard, Ico, MaybeImg, NightBackdrop, Panel, TsuzuriLine } from './components'
 import { gameImg, HOME_BG, itemIcon, villagerImg } from './img'
@@ -22,6 +23,7 @@ export function HomeScreen() {
   const [showMotto, setShowMotto] = useState(false)
   const [showVillage, setShowVillage] = useState(false)
   const [showTree, setShowTree] = useState(false)
+  const [showFacilities, setShowFacilities] = useState(false)
 
   const alive = data.family.filter((c) => c.alive)
   const adults = alive.filter((c) => isAdult(c, data.seasonIndex))
@@ -101,6 +103,7 @@ export function HomeScreen() {
         <button className="btn btn-ghost" onClick={() => setScreen({ id: 'codex' })}><Ico name="ic_codex" fb="📚" /> 図鑑</button>
         <button className="btn btn-ghost" onClick={() => setShowTree(true)}><Ico name="ic_tree" fb="🌳" /> 家系図</button>
         <button className="btn btn-ghost" onClick={() => setShowVillage(true)}><Ico name="ic_village" fb="🏘️" /> 郷を歩く</button>
+        <button className="btn btn-ghost" onClick={() => setShowFacilities(true)}><Ico name="ic_facility" fb="🏗️" /> 郷普請</button>
         <button className="btn btn-ghost" onClick={() => setShowMotto(true)}>
           <Ico name="ic_motto" fb="🏮" /> 家訓{data.motto ? `「${MOTTOS[data.motto].name}」` : 'を定める'}
         </button>
@@ -124,6 +127,7 @@ export function HomeScreen() {
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
       {showVillage && <VillageModal onClose={() => setShowVillage(false)} />}
       {showTree && <FamilyTree onClose={() => setShowTree(false)} />}
+      {showFacilities && <FacilitiesModal onClose={() => setShowFacilities(false)} />}
     </div>
   )
 }
@@ -402,6 +406,50 @@ function ForgeModal({ onClose }: { onClose: () => void }) {
             ))}
           </Panel>
         )}
+        <button className="btn btn-ghost" onClick={onClose}>
+          閉じる
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// 郷普請(v3.1 M16-6) — 奉燈を注ぎ、代を跨いで効く4つの施設を建てる/普請する
+function FacilitiesModal({ onClose }: { onClose: () => void }) {
+  const data = useGame((s) => s.data)!
+  const buildFacility = useGame((s) => s.buildFacility)
+
+  return (
+    <div className="modal-back" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h2 className="panel-title">郷普請 — 奉燈 {data.hoto}</h2>
+        <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 10 }}>
+          施設は建てるほど郷を潤す。効果は代を跨いで一族全体に及ぶ。各施設Lv{FACILITY_MAX_LV}まで普請できる。
+        </p>
+        {FACILITIES.map((f) => {
+          const lv = facilityLevel(data.facilities, f.id)
+          const maxed = lv >= FACILITY_MAX_LV
+          const cost = maxed ? 0 : facilityCost(f.id, lv)
+          return (
+            <Panel key={f.id} title={`${f.name} — Lv${lv}/${FACILITY_MAX_LV}`}>
+              <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 6 }}>{f.desc}</p>
+              <ul style={{ fontSize: 12, margin: '0 0 8px', paddingLeft: 18 }}>
+                {f.effects.map((e, i) => (
+                  <li key={i} style={{ color: i < lv ? 'var(--amber)' : 'var(--text-dim)' }}>
+                    Lv{i + 1}: {e}
+                  </li>
+                ))}
+              </ul>
+              <button
+                className="btn"
+                disabled={maxed || data.hoto < cost}
+                onClick={() => buildFacility(f.id)}
+              >
+                {maxed ? '普請済み(最大)' : lv === 0 ? `建てる — ${cost}燈` : `Lv${lv + 1}へ普請 — ${cost}燈`}
+              </button>
+            </Panel>
+          )
+        })}
         <button className="btn btn-ghost" onClick={onClose}>
           閉じる
         </button>

@@ -3,6 +3,7 @@ import { useGame } from '../core/store'
 import type { NodeType } from '../core/types'
 import { REGIONS, regionById } from '../core/data/regions'
 import { eventById } from '../core/expedition'
+import { facilityLevel } from '../core/data/facilities'
 import { dungeonByRegion } from '../dungeon/maps'
 import { isAdult } from '../core/inheritance'
 import { PARTY_SIZE } from '../core/constants'
@@ -29,6 +30,11 @@ export function DepartScreen() {
       <TsuzuriLine text="行き先と、連れて行く者を選べ。四人まで。深く潜るほど実りは多いが、灯が尽きれば常夜はお前らを喰いに来る。" />
 
       <Panel title="行き先">
+        {facilityLevel(data.facilities, 'monomi') >= 1 && (
+          <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 8 }}>
+            物見櫓の見立て — 星の数は、その地に潜む魔性の強さの目安だ。
+          </p>
+        )}
         {REGIONS.map((r) => {
           const unlocked = data.fame >= r.unlockFame
           return (
