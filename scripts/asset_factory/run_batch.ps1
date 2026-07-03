@@ -89,15 +89,34 @@ for ($s = 0; $s -lt $MaxSessions; $s++) {
     -ArgumentList '-NoProfile', '-File', $codexShim, 'exec', '--skip-git-repo-check', '--sandbox', 'workspace-write', '-C', "$root", '-' `
     -RedirectStandardInput $promptFile -RedirectStandardOutput $log -RedirectStandardError $errLog `
     -NoNewWindow -PassThru
-  if (-not $proc.WaitForExit(2700000)) {
-    Write-Output "FACTORY: session $s TIMEOUT (45min) — killing codex tree"
-    taskkill /T /F /PID $proc.Id 2>$null | Out-Null
-    Start-Sleep 3
+  # codexは生成完了後(ALL COMPLETE後)もWebSocketを掴んでハングしがち。
+  # errLogに ALL COMPLETE が出たら猶予後に強制終了し、45分の空待ちを避ける。
+  $deadline = (Get-Date).AddMinutes(45)
+  while (-not $proc.HasExited) {
+    Start-Sleep -Seconds 10
+    if ((Test-Path $errLog) -and (Select-String -Path $errLog -Pattern 'ALL COMPLETE' -Quiet -ErrorAction SilentlyContinue)) {
+      Write-Output "FACTORY: session $s ALL COMPLETE — grace 8s then close"
+      Start-Sleep -Seconds 8
+      if (-not $proc.HasExited) { taskkill /T /F /PID $proc.Id 2>$null | Out-Null }
+      break
+    }
+    if ((Get-Date) -gt $deadline) {
+      Write-Output "FACTORY: session $s TIMEOUT (45min) — killing codex tree"
+      taskkill /T /F /PID $proc.Id 2>$null | Out-Null
+      Start-Sleep 3
+      break
+    }
   }
 
-  # DONE行と生成フォルダの照合コピー(codexが直接保存していない場合の保険)
-  $doneNames = Select-String -Path $log -Pattern 'DONE: ([a-z0-9_]+\.png)' -AllMatches |
-    ForEach-Object { $_.Matches } | ForEach-Object { $_.Groups[1].Value }
+  # DONE行と生成フォルダの照合コピー(codexが直接保存していない場合の保険)。
+  # 【重要】codexはDONE:/ALL COMPLETEをstderrに出す — errLogを主に、logも併せてgrep(重複除去)。
+  $doneNames = @()
+  foreach ($lf in @($errLog, $log)) {
+    if (Test-Path $lf) {
+      Select-String -Path $lf -Pattern 'DONE: ([a-z0-9_]+\.png)' -AllMatches |
+        ForEach-Object { $_.Matches } | ForEach-Object { $n = $_.Groups[1].Value; if ($doneNames -notcontains $n) { $doneNames += $n } }
+    }
+  }
   $genRoot = Join-Path $env:USERPROFILE '.codex\generated_images'
   $sessDir = Get-ChildItem $genRoot -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
   $genFiles = @(Get-ChildItem $sessDir.FullName -Filter *.png | Sort-Object LastWriteTime)
