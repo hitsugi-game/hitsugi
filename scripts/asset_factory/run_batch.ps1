@@ -77,8 +77,18 @@ for ($s = 0; $s -lt $MaxSessions; $s++) {
   $promptFile = Join-Path $env:TEMP "factory_prompt_$s.txt"
   Set-Content -Path $promptFile -Value $prompt -Encoding utf8
   Write-Output "FACTORY: session $s starting ($($todo.Count) images)"
-  # プロンプトはstdinパイプで渡す(複数行対応+パイプEOFでstdinが閉じ、codexの永久待機を防ぐ)
-  Get-Content $promptFile -Raw | codex exec --skip-git-repo-check --sandbox workspace-write -C "$root" - *> $log
+  # プロンプトはstdin リダイレクトで渡す(EOFでstdinが閉じ、codexの永久待機を防ぐ)。
+  # WebSocket切断後にcodexがハングする事例があるため、45分で子プロセスごと強制終了して次へ進む
+  $errLog = "$log.err"
+  $proc = Start-Process -FilePath 'codex' `
+    -ArgumentList 'exec', '--skip-git-repo-check', '--sandbox', 'workspace-write', '-C', "$root", '-' `
+    -RedirectStandardInput $promptFile -RedirectStandardOutput $log -RedirectStandardError $errLog `
+    -NoNewWindow -PassThru
+  if (-not $proc.WaitForExit(2700000)) {
+    Write-Output "FACTORY: session $s TIMEOUT (45min) — killing codex tree"
+    taskkill /T /F /PID $proc.Id 2>$null | Out-Null
+    Start-Sleep 3
+  }
 
   # DONE行と生成フォルダの照合コピー(codexが直接保存していない場合の保険)
   $doneNames = Select-String -Path $log -Pattern 'DONE: ([a-z0-9_]+\.png)' -AllMatches |
