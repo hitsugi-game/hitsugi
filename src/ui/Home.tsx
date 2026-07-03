@@ -6,9 +6,10 @@ import { isAdult, seasonsLeft } from '../core/inheritance'
 import { ITEM_BASES, reforgeCost, REFORGE_MAX } from '../core/data/items'
 import { GODS } from '../core/data/gods'
 import { VILLAGERS, villagerLine } from '../core/data/villagers'
-import { CharCard, NightBackdrop, Panel, TsuzuriLine } from './components'
-import { gameImg, HOME_BG } from './img'
+import { CharCard, Ico, MaybeImg, NightBackdrop, Panel, TsuzuriLine } from './components'
+import { gameImg, HOME_BG, itemIcon, villagerImg } from './img'
 import { FamilyTree } from './FamilyTree'
+import './m17_home.css'
 
 export function HomeScreen() {
   const data = useGame((s) => s.data)!
@@ -35,9 +36,9 @@ export function HomeScreen() {
       <header className="home-header">
         <span className="season-label">{seasonLabel(data.seasonIndex)}</span>
         <div className="resource-strip">
-          <span className="resource"><span className="res-ico">🏮</span><span className="res-label">奉燈</span><b>{data.hoto}</b></span>
-          <span className="resource"><span className="res-ico">💠</span><span className="res-label">血珠</span><b>{data.ketsu}</b></span>
-          <span className="resource"><span className="res-ico">🏅</span><span className="res-label">武功</span><b>{data.fame}</b></span>
+          <span className="resource"><Ico name="ic_hoto" fb="🏮" size={18} /><span className="res-label">奉燈</span><b>{data.hoto}</b></span>
+          <span className="resource"><Ico name="ic_ketsu" fb="💠" size={18} /><span className="res-label">血珠</span><b>{data.ketsu}</b></span>
+          <span className="resource"><Ico name="ic_buko" fb="🏅" size={18} /><span className="res-label">武功</span><b>{data.fame}</b></span>
         </div>
       </header>
 
@@ -55,14 +56,14 @@ export function HomeScreen() {
       <Panel title="今月の行い — 一つ選べば月が替わる">
         <div className="action-cards">
           <ActionCard
-            primary icon="⚔️" title="出立 — 夜藪へ"
+            primary iconName="ic_expedition" iconFb="⚔️" title="出立 — 夜藪へ"
             desc="夜藪へ潜り、奉燈と血珠を得る。深いほど実り多い。"
             disabled={adults.length === 0}
             note={adults.length === 0 ? '出立できる大人がいない' : undefined}
             onClick={() => setScreen({ id: 'depart' })}
           />
           <ActionCard
-            icon="⭐" title="星契り — 次代を授かる"
+            iconName="ic_pact" iconFb="⭐" title="星契り — 次代を授かる"
             desc="星神と契り、翌月に子を授かる。血を絶やすな。"
             disabled={!canPact}
             note={
@@ -73,7 +74,7 @@ export function HomeScreen() {
             onClick={() => setScreen({ id: 'pact' })}
           />
           <ActionCard
-            icon="🎆" title="祭 — 郷を潤す"
+            iconName="ic_festival" iconFb="🎆" title="祭 — 郷を潤す"
             desc={isFestivalMonth(data.seasonIndex)
               ? '奉燈30を捧げ、一族の傷と心労を癒す。星との縁も深まる。'
               : '祭は季の変わり目(弥生・水無月・長月・師走)だけ開ける。'}
@@ -86,7 +87,7 @@ export function HomeScreen() {
             onClick={doFestival}
           />
           <ActionCard
-            icon="♨️" title="静養 — 傷を癒す"
+            iconName="ic_rest" iconFb="♨️" title="静養 — 傷を癒す"
             desc="隊の傷と心労を癒す。何もない月も、月は替わる。"
             onClick={doRest}
           />
@@ -95,13 +96,13 @@ export function HomeScreen() {
       </Panel>
 
       <div className="home-links">
-        <button className="btn btn-ghost" onClick={() => setShowForge(true)}>🔨 鍛冶と蔵</button>
-        <button className="btn btn-ghost" onClick={() => setScreen({ id: 'chronicle' })}>📜 家譜を繰る</button>
-        <button className="btn btn-ghost" onClick={() => setScreen({ id: 'codex' })}>📚 図鑑</button>
-        <button className="btn btn-ghost" onClick={() => setShowTree(true)}>🌳 家系図</button>
-        <button className="btn btn-ghost" onClick={() => setShowVillage(true)}>🏘️ 郷を歩く</button>
+        <button className="btn btn-ghost" onClick={() => setShowForge(true)}><Ico name="ic_forge" fb="🔨" /> 鍛冶と蔵</button>
+        <button className="btn btn-ghost" onClick={() => setScreen({ id: 'chronicle' })}><Ico name="ic_chronicle" fb="📜" /> 家譜を繰る</button>
+        <button className="btn btn-ghost" onClick={() => setScreen({ id: 'codex' })}><Ico name="ic_codex" fb="📚" /> 図鑑</button>
+        <button className="btn btn-ghost" onClick={() => setShowTree(true)}><Ico name="ic_tree" fb="🌳" /> 家系図</button>
+        <button className="btn btn-ghost" onClick={() => setShowVillage(true)}><Ico name="ic_village" fb="🏘️" /> 郷を歩く</button>
         <button className="btn btn-ghost" onClick={() => setShowMotto(true)}>
-          🏮 家訓{data.motto ? `「${MOTTOS[data.motto].name}」` : 'を定める'}
+          <Ico name="ic_motto" fb="🏮" /> 家訓{data.motto ? `「${MOTTOS[data.motto].name}」` : 'を定める'}
         </button>
         {!!data.flags.cleared && (
           <button
@@ -112,10 +113,10 @@ export function HomeScreen() {
               if (party.length > 0) departDungeon('tokoyo_tou', party.map((c) => c.id))
             }}
           >
-            🗼 常夜百層
+            <Ico name="ic_tower" fb="🗼" /> 常夜百層
           </button>
         )}
-        <button className="btn btn-ghost" onClick={() => setShowHelp(true)}>📖 手引き</button>
+        <button className="btn btn-ghost" onClick={() => setShowHelp(true)}><Ico name="ic_help" fb="📖" /> 手引き</button>
       </div>
 
       {showMotto && <MottoModal onClose={() => setShowMotto(false)} />}
@@ -129,9 +130,10 @@ export function HomeScreen() {
 
 // 郷の行動カード — 図像・見出し・一言でわかりやすく。無効時は理由を添える。
 function ActionCard({
-  icon, title, desc, note, disabled, primary, onClick,
+  iconName, iconFb, title, desc, note, disabled, primary, onClick,
 }: {
-  icon: string
+  iconName: string
+  iconFb: string
   title: string
   desc: string
   note?: string
@@ -146,7 +148,7 @@ function ActionCard({
       onClick={onClick}
       title={note ?? ''}
     >
-      <span className="action-card-icon">{icon}</span>
+      <span className="action-card-icon"><Ico name={iconName} fb={iconFb} size={32} /></span>
       <span className="action-card-text">
         <span className="action-card-title">{title}</span>
         <span className="action-card-desc">{disabled && note ? note : desc}</span>
@@ -155,10 +157,20 @@ function ActionCard({
   )
 }
 
+// 郷人の帯(0-3)。villagers.ts内部のband()と同じ閾値(0-2年/3-5年/6-9年/10年〜)。
+function villagerBand(seasonIndex: number): 0 | 1 | 2 | 3 {
+  const years = Math.floor(seasonIndex / 12)
+  if (years < 3) return 0
+  if (years < 6) return 1
+  if (years < 10) return 2
+  return 3
+}
+
 // 郷を歩く — 普通の寿命を生きる郷人たちと言葉を交わす
 function VillageModal({ onClose }: { onClose: () => void }) {
   const data = useGame((s) => s.data)!
-  const [talk, setTalk] = useState<{ name: string; text: string } | null>(null)
+  const [talk, setTalk] = useState<{ id: string; name: string; text: string } | null>(null)
+  const band = villagerBand(data.seasonIndex)
   return (
     <div className="modal-back" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -168,13 +180,15 @@ function VillageModal({ onClose }: { onClose: () => void }) {
         </p>
         <div className="home-actions">
           {VILLAGERS.map((v) => (
-            <button key={v.id} className="btn" onClick={() => setTalk(villagerLine(v.id, data))}>
+            <button key={v.id} className="btn" onClick={() => setTalk({ id: v.id, ...villagerLine(v.id, data) })}>
+              <MaybeImg src={villagerImg(v.id, band)} className="vil-thumb" />
               {v.emoji} {v.name}({v.role})
             </button>
           ))}
         </div>
         {talk && (
           <div className="tsuzuri" style={{ marginTop: 14 }}>
+            <MaybeImg src={villagerImg(talk.id, band)} className="vil-portrait" />
             <span className="tsuzuri-name" style={{ fontSize: 10 }}>{talk.name.slice(0, 2)}</span>
             <span className="tsuzuri-text">
               <b style={{ color: 'var(--amber)' }}>{talk.name}</b> —「{talk.text}」
@@ -299,6 +313,7 @@ function ForgeModal({ onClose }: { onClose: () => void }) {
               disabled={data.hoto < b.price}
               onClick={() => buyItem(b.baseId)}
             >
+              <MaybeImg src={itemIcon(b.baseId)} className="it-ico" />
               {b.name}
               {b.atk ? ` 攻${b.atk}` : ''}
               {b.def ? ` 防${b.def}` : ''} — {b.price}燈
@@ -332,6 +347,7 @@ function ForgeModal({ onClose }: { onClose: () => void }) {
               {data.inventory.length === 0 && <p style={{ fontSize: 13 }}>蔵は空だ。</p>}
               {data.inventory.map((it) => (
                 <button key={it.id} className="btn" onClick={() => equipItem(selChar.id, it.id)}>
+                  <MaybeImg src={itemIcon(it.baseId)} className="it-ico" />
                   {it.name}
                   {it.atk ? ` 攻${it.atk}` : ''}
                   {it.def ? ` 防${it.def}` : ''}
@@ -358,6 +374,7 @@ function ForgeModal({ onClose }: { onClose: () => void }) {
                 onClick={() => forgeUpgrade(it.id)}
                 title={it.legacyOf ? `${it.legacyOf}の形見` : undefined}
               >
+                <MaybeImg src={itemIcon(it.baseId)} className="it-ico" />
                 {it.name}
                 {it.atk ? ` 攻${it.atk}` : ''}
                 {it.def ? ` 防${it.def}` : ''}

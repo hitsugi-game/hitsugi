@@ -5,15 +5,29 @@ export function gameImg(file: string): string {
   return `${import.meta.env.BASE_URL}img/${file.replace(/\.png$/, '.jpg')}`
 }
 
-// 歩行スプライトの正面立ちフレーム(down_1=中立の立ち姿)を立ち絵として転用する。
-// 灯型(tomoshigata)×性別で決まり、成人前の幼子はまだ型を成さぬため null を返す。
-export function charSprite(char: Pick<Character, 'tomoshigata' | 'sex'>): string | null {
-  if (!char.tomoshigata) return null
-  return spriteUrl(char.tomoshigata, char.sex)
+// ---- 年齢段階(M17: 画像の描き分け単位) ----
+// 幼子(<6月齢)/全盛(6-17)/灯細り(18-23)。閾値はinheritance.tsのAGE_CURVEと同期
+export type AgeStage = 'child' | 'adult' | 'elder'
+export function stageOf(ageMonths: number): AgeStage {
+  if (ageMonths < 6) return 'child'
+  if (ageMonths >= 18) return 'elder'
+  return 'adult'
+}
+// 段階別歩行フレームの接頭辞(child=walkc/elder=walke。シートはslice-walk-sheets.ps1が分割)
+export function stagePrefix(stage: AgeStage): 'walk' | 'walkc' | 'walke' {
+  return stage === 'child' ? 'walkc' : stage === 'elder' ? 'walke' : 'walk'
 }
 
-export function spriteUrl(gata: Tomoshigata, sex: 'm' | 'f'): string {
-  return `${import.meta.env.BASE_URL}img/sprites/walk_${gata}_${sex}_down_1.png`
+// 歩行スプライトの正面立ちフレーム(down_1=中立の立ち姿)を立ち絵として転用する。
+// 灯型(tomoshigata)×性別で決まり、成人前の幼子はまだ型を成さぬため null を返す。
+// stage指定時は老いの姿(walke_*)を優先し、描画側でonError連鎖により成人姿へ退避する。
+export function charSprite(char: Pick<Character, 'tomoshigata' | 'sex'>, stage: AgeStage = 'adult'): string | null {
+  if (!char.tomoshigata) return null
+  return spriteUrl(char.tomoshigata, char.sex, stage)
+}
+
+export function spriteUrl(gata: Tomoshigata, sex: 'm' | 'f', stage: AgeStage = 'adult'): string {
+  return `${import.meta.env.BASE_URL}img/sprites/${stagePrefix(stage)}_${gata}_${sex}_down_1.png`
 }
 
 // 任意の歩行スプライトファイル名を解決(v3.1 M8: 戦闘の立ち姿などに使用)
@@ -21,5 +35,32 @@ export function spriteImg(file: string): string {
   return `${import.meta.env.BASE_URL}img/sprites/${file}`
 }
 
+// ---- M17: カテゴリ別の画像URL(全て未生成なら描画側で優雅に退避する前提) ----
+// 顔絵 — 灯型×性別×性根で個人が見分けられる
+export function faceImg(char: Pick<Character, 'tomoshigata' | 'sex' | 'personalityId'>): string | null {
+  if (!char.tomoshigata) return null
+  return gameImg(`face_${char.tomoshigata}_${char.sex}_${char.personalityId}.png`)
+}
+// 戦闘立ち姿(横向き) — pose_{gata}_{sex}_{stage}
+export function poseImg(gata: Tomoshigata | string, sex: 'm' | 'f' | string, stage: AgeStage = 'adult'): string {
+  return gameImg(`pose_${gata}_${sex}_${stage}.png`)
+}
+export const itemIcon = (baseId: string) => gameImg(`it_${baseId}.png`)
+export const skillIcon = (skillId: string) => gameImg(`sk_${skillId}.png`)
+// UIアイコン(ic_*/node_*/slot_*/boon_*/job_*/emb_*/nem_* をそのまま渡す)
+export const uiIcon = (name: string) => gameImg(`${name}.png`)
+// 地域個別背景と主の間背景(無ければ従来のtier共有bgへ退避)
+export const regionBgR = (regionId: string) => gameImg(`bg_r_${regionId}.png`)
+export const bossBgImg = (regionId: string) => gameImg(`bossbg_${regionId}.png`)
+// カットイン(cutin_toza_* / cutin_god_* / cutin_boss_*)
+export const cutinImg = (name: string) => gameImg(`cutin_${name}.png`)
+// 星神・縁MAXの第二立ち絵
+export const godMaxImg = (portrait: string) => gameImg(portrait.replace(/\.png$/, '_max.png'))
+export const eventImg = (eventId: string) => gameImg(`ev_${eventId}.png`)
+export const dailyImg = (index: number) => gameImg(`life_daily_${String(index % 20).padStart(2, '0')}.png`)
+export const villagerImg = (id: string, band: number) => gameImg(`vil_${id}_${band}.png`)
+
 // 郷(ホーム)の背景。まだ生成されていなければ描画側でCSS/SVGへフォールバックする。
 export const HOME_BG = 'bg_sato.png'
+// 季節替えの郷背景(生成後はNightBackdropが季節で差し替え)
+export const HOME_BG_SEASONS = ['bg_sato_haru.png', 'bg_sato_natsu.png', 'bg_sato_aki.png', 'bg_sato_fuyu.png']

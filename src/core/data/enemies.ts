@@ -203,6 +203,7 @@ function variantsOf(base: EnemyDef): EnemyDef[] {
     hp: r(base.hp * 0.62), atk: r(base.atk * 0.7), def: r(base.def * 0.68), agi: r(base.agi * 0.9),
     hoto: r(base.hoto * 0.6), ketsu: Math.max(1, r(base.ketsu * 0.5)),
     desc: `${base.name}の若い個体。粗削りだが、怖いもの知らずの分だけ厄介。`,
+    sprite: base.sprite.replace(/\.png$/, '_w.png'), // M17: 変異専用絵(未生成時はBattle側で基礎種絵へ退避)
   }
   const old: EnemyDef = {
     ...base,
@@ -212,6 +213,7 @@ function variantsOf(base: EnemyDef): EnemyDef[] {
     hp: r(base.hp * 1.55), atk: r(base.atk * 1.35), def: r(base.def * 1.3), agi: r(base.agi * 1.05),
     hoto: r(base.hoto * 1.8), ketsu: Math.max(1, r(base.ketsu * 1.8)),
     desc: `長い夜を生き延びた${base.name}の古強者。手練れの気配を纏う。`,
+    sprite: base.sprite.replace(/\.png$/, '_o.png'),
   }
   return [young, base, old]
 }

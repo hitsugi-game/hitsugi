@@ -3,6 +3,8 @@ import type { Character } from '../core/types'
 import { godById } from '../core/data/gods'
 import { useGame } from '../core/store'
 import { downloadFamilyTreeCard } from './shareCard'
+import { MaybeImg } from './components'
+import { faceImg } from './img'
 
 // 家系図 — 世代交代の全体像を一望する(GDD_v3 M5)
 // 世代ごとに縦カラムを並べ、親子線はSVGオーバーレイで描く(人親=金、神親=薄紫の点線)。
@@ -101,6 +103,7 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
                     className={`familytree-node ${c.alive ? 'alive' : 'dead'} ${selected?.id === c.id ? 'selected' : ''}`}
                     onClick={() => setSelected(c)}
                   >
+                    {faceImg(c) && <MaybeImg src={faceImg(c)!} className="tree-face" />}
                     <span className={`element-badge el-${c.element} familytree-badge`}>
                       {c.alive ? '灯' : '逝'}
                     </span>

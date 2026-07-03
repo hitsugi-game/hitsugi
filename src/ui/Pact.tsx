@@ -8,7 +8,7 @@ import { GOD_RANK_LABELS, STAT_LABELS, ELEMENT_LABELS } from '../core/types'
 import { GODS, godUnlocked } from '../core/data/gods'
 import { isAdult, predictChild, godStatValue, pactCost } from '../core/inheritance'
 import { CharCard, NightBackdrop, Panel, TsuzuriLine } from './components'
-import { gameImg, HOME_BG } from './img'
+import { gameImg, godMaxImg, HOME_BG } from './img'
 
 // 封印中の神の解放条件を一言で(unlock条件から自動生成)
 function sealHint(g: (typeof GODS)[number]): string {
@@ -216,15 +216,31 @@ export function PactScreen() {
   )
 }
 
-// 大立ち絵パネル — god_*.jpgがあれば表示、なければ属性オーラ+星のシルエット
+// 大立ち絵パネル — 縁MAX(affinity>=5)なら第二立ち絵を優先し、god_*→炎のオーラへ静かに退避する
+const GOD_MAX_AFFINITY = 5
+
 function GodPortraitPane({ godId, affinity }: { godId: string; sealedHint: string | null; affinity: number }) {
-  const [failed, setFailed] = useState(false)
   const g = GODS.find((x) => x.id === godId)!
+  // 退避連鎖: 縁MAXの第二立ち絵 → 通常立ち絵 → (全滅)属性オーラ。godIdが変われば連鎖をやり直す。
+  const candidates = affinity >= GOD_MAX_AFFINITY ? [godMaxImg(g.portrait), gameImg(g.portrait)] : [gameImg(g.portrait)]
+  const [idx, setIdx] = useState(0)
+  const [lastGodId, setLastGodId] = useState(godId)
+  if (godId !== lastGodId) {
+    setLastGodId(godId)
+    setIdx(0)
+  }
+  const src = idx < candidates.length ? candidates[idx] : null
+  const isMax = src !== null && idx === 0 && affinity >= GOD_MAX_AFFINITY
   return (
     <div className="god-pane">
       <div className={`god-pane-art el-bg-${g.element}`}>
-        {!failed ? (
-          <img className="god-pane-img" src={gameImg(g.portrait)} alt="" onError={() => setFailed(true)} />
+        {src ? (
+          <img
+            className={`god-pane-img ${isMax ? 'god-max' : ''}`}
+            src={src}
+            alt=""
+            onError={() => setIdx((i) => i + 1)}
+          />
         ) : (
           <div className="god-pane-fallback" data-el={g.element}>
             <span className="god-pane-glyph">{GOD_EMOJI[g.id] ?? '✦'}</span>

@@ -1,0 +1,1577 @@
+[
+  {
+    "id": "spr_homura_m",
+    "file": "sprite_walk_homura_m.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "sprite sheet, 3 columns x 4 rows grid, a male warrior as elegant BLACK PAPERCUT SILHOUETTE with AMBER rim light holding a katana low, walk cycle: row1 facing down 3 frames, row2 facing up, row3 facing left, row4 facing right, flat dark background, clean grid cells"
+  },
+  {
+    "id": "spr_homura_f",
+    "file": "sprite_walk_homura_f.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "sprite sheet, 3x4 grid, a female warrior as BLACK PAPERCUT SILHOUETTE with AMBER rim light, long tied hair, katana low, walk cycle rows: down/up/left/right, flat dark background"
+  },
+  {
+    "id": "spr_iwao_m",
+    "file": "sprite_walk_iwao_m.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "sprite sheet, 3x4 grid, a broad male guardian as BLACK PAPERCUT SILHOUETTE with AMBER rim light carrying a large round shield on his back, walk cycle rows: down/up/left/right, flat dark background"
+  },
+  {
+    "id": "spr_iwao_f",
+    "file": "sprite_walk_iwao_f.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "sprite sheet, 3x4 grid, a sturdy female guardian as BLACK PAPERCUT SILHOUETTE with AMBER rim light with a wide sash and a shield, walk cycle rows: down/up/left/right, flat dark background"
+  },
+  {
+    "id": "spr_nagi_m",
+    "file": "sprite_walk_nagi_m.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "sprite sheet, 3x4 grid, a lean male scout as BLACK PAPERCUT SILHOUETTE with AMBER rim light, flowing scarf, light footed pose, walk cycle rows: down/up/left/right, flat dark background"
+  },
+  {
+    "id": "spr_nagi_f",
+    "file": "sprite_walk_nagi_f.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "sprite sheet, 3x4 grid, a swift female scout as BLACK PAPERCUT SILHOUETTE with AMBER rim light, short hair with ribbon, flowing scarf, walk cycle rows: down/up/left/right, flat dark background"
+  },
+  {
+    "id": "spr_sumi_m",
+    "file": "sprite_walk_sumi_m.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "sprite sheet, 3x4 grid, a calm male healer-monk as BLACK PAPERCUT SILHOUETTE with AMBER rim light holding a small lantern staff, walk cycle rows: down/up/left/right, flat dark background"
+  },
+  {
+    "id": "spr_sumi_f",
+    "file": "sprite_walk_sumi_f.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "sprite sheet, 3x4 grid, a gentle female healer as BLACK PAPERCUT SILHOUETTE with AMBER rim light holding a small hand lantern, long sleeves, walk cycle rows: down/up/left/right, flat dark background"
+  },
+  {
+    "id": "cg_ceremony",
+    "file": "cg_ceremony.png",
+    "w": 1600,
+    "h": 900,
+    "prompt": "event illustration: a coming-of-age ritual at night before a giant amber paper lantern shrine, a young figure kneeling receiving a small flame into cupped hands from an elder, villagers silhouettes watching, solemn and warm"
+  },
+  {
+    "id": "cg_hosori",
+    "file": "cg_hosori.png",
+    "w": 1600,
+    "h": 900,
+    "prompt": "event illustration: quiet night interior of a japanese house, two figures sitting by an irori hearth, one holding the other's hand, a small candle flame burning very low between them, tender and sad, warm amber against deep indigo shadows"
+  },
+  {
+    "id": "cg_hatsujin",
+    "file": "cg_hatsujin.png",
+    "w": 1600,
+    "h": 900,
+    "prompt": "event illustration: a young warrior silhouette standing at the village torii gate at night looking toward a dark forest, holding a lantern high, family watching from behind, first departure, hopeful and tense"
+  },
+  {
+    "id": "god_minomushi",
+    "file": "god_minomushi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a lazy but warm old man god wrapped entirely in a giant straw bagworm cocoon(mino) hanging from a branch, only his kind wrinkled face and one hand holding a tiny child's padded coat visible, earth tones"
+  },
+  {
+    "id": "god_kaiyose",
+    "file": "god_kaiyose.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a gentle beach maiden goddess collecting seashells at night, seashells floating around her sleeves, one shell glowing with a pearl, sea-blue and amber"
+  },
+  {
+    "id": "god_kagebousi",
+    "file": "god_kagebousi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a silent shadow-figure god made of lantern shadow, featureless silhouette body, making a fox hand-shadow that glows amber on a paper screen behind him, mysterious but kind"
+  },
+  {
+    "id": "god_kazaguruma",
+    "file": "god_kazaguruma.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a cheerful old man god carrying a giant eight-bladed pinwheel windmill on his back, robes fluttering, small pinwheels spinning around him, wind greens and amber"
+  },
+  {
+    "id": "god_yuya",
+    "file": "god_yuya.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a big-hearted bathhouse landlady goddess with rolled-up sleeves and a towel over her shoulder, steam clouds and a wooden bucket, milky-way water swirling in the steam, warm and bossy"
+  },
+  {
+    "id": "god_suzuriumi",
+    "file": "god_suzuriumi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: an elegant literati princess goddess rising from an inkstone sea, her long hair flowing into liquid black ink, holding a calligraphy brush, ink waves and amber moon"
+  },
+  {
+    "id": "god_kodama",
+    "file": "god_kodama.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a small cheerful echo-spirit boy god in mossy green robes cupping hands around his mouth to shout, three translucent echo-copies of himself repeating behind him, forest earth tones"
+  },
+  {
+    "id": "god_hanabi",
+    "file": "god_hanabi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a spirited fireworks craftsman god in a happi coat holding a launching tube, a giant peony firework bursting above him, sparks like falling stars, bold reds and amber"
+  },
+  {
+    "id": "god_shigure",
+    "file": "god_shigure.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a melancholic beautiful rain goddess in purple-grey kimono under a paper umbrella, fine silver rain falling only around her, wet camellia petals, quiet and tender"
+  },
+  {
+    "id": "god_noroshi",
+    "file": "god_noroshi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a swift young messenger god in runner's garb mid-stride on clouds, carrying a smoke-signal torch whose amber smoke spells a rising column behind him, dynamic diagonal composition"
+  },
+  {
+    "id": "god_hoshikaji",
+    "file": "god_hoshikaji.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a muscular old blacksmith god hammering a glowing fallen star on an anvil, sparks becoming small constellations, leather apron over kimono, forge amber against night indigo"
+  },
+  {
+    "id": "god_byakuya",
+    "file": "god_byakuya.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a serene shrine maiden goddess from the land of midnight sun, white and gold vestments, cradling a tiny glowing dawn-light inside her sleeve like a baby bird, hopeful pale golds"
+  },
+  {
+    "id": "bg_sato",
+    "file": "bg_sato.png",
+    "w": 1600,
+    "h": 900,
+    "prompt": "wide night scene of a japanese mountain village under eternal night, a giant amber paper lantern glowing at the center, thatched rooftops, distant dark ridgelines, starry indigo sky, warm lights in windows, watercolor and papercut style"
+  },
+  {
+    "id": "boss_hyakume",
+    "file": "boss_hyakume.png",
+    "w": 1024,
+    "h": 1024,
+    "prompt": "boss illustration: a towering ancient paper lantern covered in a hundred blinking amber eyes, standing on a slope lined with ruined lanterns, menacing but sorrowful, indigo night"
+  },
+  {
+    "id": "boss_hoshimukuro",
+    "file": "boss_hoshimukuro.png",
+    "w": 1024,
+    "h": 1024,
+    "prompt": "boss illustration: a colossal spectral bear made of shattered star fragments and black void, roaring at the night sky in grief, fallen glowing stars scattered in a dark valley"
+  },
+  {
+    "id": "god_hiuchi",
+    "file": "god_hiuchi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a tiny wiry old woman god striking a flint over a hearth, one huge decisive spark frozen mid-air, kind sharp eyes, ember reds"
+  },
+  {
+    "id": "god_kamado",
+    "file": "god_kamado.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a soot-cheeked child god peeking from behind a clay cooking stove, holding a rice scoop like a treasure, steam and warm firelight"
+  },
+  {
+    "id": "god_andon",
+    "file": "god_andon.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a gentle scholarly spirit emerging from an old paper lantern, reading a book by its own light, round spectacles, cozy amber glow"
+  },
+  {
+    "id": "god_hoshikuzu",
+    "file": "god_hoshikuzu.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a cheerful sweeper god with a big broom, pushing a glittering pile of stardust, a lucky pouch at the belt, night-market mood"
+  },
+  {
+    "id": "god_yobaiboshi",
+    "file": "god_yobaiboshi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a shy young shooting-star boy with a glowing tail-scarf, caught mid-dash and blushing, motion lines of light, playful"
+  },
+  {
+    "id": "god_hakoboshi",
+    "file": "god_hakoboshi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a neat precise deity sitting inside an open wooden box, folded celestial charts stacked perfectly around, serene tidy expression"
+  },
+  {
+    "id": "god_tsuyukusa",
+    "file": "god_tsuyukusa.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a fragile flower princess of dayflower blue, morning dew glistening on her sleeves in an eternal night, wistful gentle smile"
+  },
+  {
+    "id": "god_tsurube",
+    "file": "god_tsurube.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: an old well spirit rising with a wooden bucket, star reflections rippling in the water he holds, mossy stones, quiet humor"
+  },
+  {
+    "id": "god_karakaze",
+    "file": "god_karakaze.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a mischievous wind urchin boy mid-leap with laundry cloth streaming around him, dry winter wind lines, impish grin"
+  },
+  {
+    "id": "god_fuurin",
+    "file": "god_fuurin.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a silent princess whose long hair ends in small glass wind-chimes, one chime ringing with a visible circle of sound, cool blues"
+  },
+  {
+    "id": "god_azemichi",
+    "file": "god_azemichi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a scarecrow-like old farmer god standing on a rice paddy ridge, straw hat and staff, rice ears bowing to him respectfully"
+  },
+  {
+    "id": "god_yumemakura",
+    "file": "god_yumemakura.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a small moon spirit tucking a glowing good dream under a pillow, carrying a heavy sack of collected nightmares, tender night blues"
+  },
+  {
+    "id": "god_dondo",
+    "file": "god_dondo.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: an old bonfire keeper god feeding new-year charms into a tall sacred fire, sparks spiraling upward carrying away regrets, solemn warmth"
+  },
+  {
+    "id": "god_sazanami",
+    "file": "god_sazanami.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a lakeside little girl god playing with ripples, waves writing letters on sand around her bare feet, innocent joy, silver blues"
+  },
+  {
+    "id": "god_kazaana",
+    "file": "god_kazaana.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a stern gatekeeper god seated before a mountain wind-cave, ledger book in hand, seasonal winds coiled like ropes at his belt"
+  },
+  {
+    "id": "god_tsuchikure",
+    "file": "god_tsuchikure.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a cheerful little monk made of rich dark soil, sprouts growing from his shoulders, offering a perfect mud dumpling proudly"
+  },
+  {
+    "id": "god_tsukimisou",
+    "file": "god_tsukimisou.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a bashful evening-primrose princess blooming pale yellow in the dark, petals as her dress, glancing away shyly toward the moon"
+  },
+  {
+    "id": "god_hoshiami",
+    "file": "god_hoshiami.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: an old net-weaver woman knotting threads between stars, constellations forming in her mesh, patched holes glowing brighter, dignified"
+  },
+  {
+    "id": "god_tsumujikaze",
+    "file": "god_tsumujikaze.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a flamboyant kabuki-actor wind deity mid-pose, sleeves spiraling into small whirlwinds, theatrical makeup, dramatic flair"
+  },
+  {
+    "id": "god_inamura",
+    "file": "god_inamura.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a silent giant harvest god carrying an enormous perfectly-stacked rice-sheaf tower, gentle eyes, golden grain tones against night"
+  },
+  {
+    "id": "god_kamahen",
+    "file": "god_kamahen.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: an old potter god opening a glowing climbing kiln, a miracle-glazed vessel shining with unexpected colors, awe and joy in his face"
+  },
+  {
+    "id": "god_hoshiuri",
+    "file": "god_hoshiuri.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a merchant god with a shoulder pole hung with small caged stars for sale, roguish smile, one priceless star hidden in his coat"
+  },
+  {
+    "id": "god_yozora",
+    "file": "god_yozora.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a seamstress goddess stitching a torn night sky with silver thread, needle trailing the milky way, focused tender expression"
+  },
+  {
+    "id": "god_shiosai",
+    "file": "god_shiosai.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a monk deity on a night beach, sutra beads of pearls, waves rising in the shape of chanted words around him, serene"
+  },
+  {
+    "id": "god_mochitsuki",
+    "file": "god_mochitsuki.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a burly rabbit master pounding mochi in a full-moon mortar, rolled sleeves, steam and flying rice grains, proud workman grin"
+  },
+  {
+    "id": "god_kumobiki",
+    "file": "god_kumobiki.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a calm herdsman god leading a huge slow ox that tows clouds off the night sky, cleared stars sparkling behind, patient warmth"
+  },
+  {
+    "id": "god_yumihari",
+    "file": "god_yumihari.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a stern warrior goddess drawing a crescent moon as a great bow, arrow of pure moonlight, billowing sleeves, cold elegant light"
+  },
+  {
+    "id": "god_yoimachi",
+    "file": "god_yoimachi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a noble court aristocrat deity seated in patient vigil, countless waiting-knots tied on his sleeve, distant gentle gaze, dusk purples"
+  },
+  {
+    "id": "god_toudai",
+    "file": "god_toudai.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a dignified minister god keeping a celestial lighthouse, holding a flame that guides star-ships, formal court robes, amber authority"
+  },
+  {
+    "id": "god_unabara",
+    "file": "god_unabara.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a majestic sea-current goddess whose breathing moves the tides, hair flowing into ocean streams, whales as distant silhouettes"
+  },
+  {
+    "id": "god_yamanami",
+    "file": "god_yamanami.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a colossal gentle giant tucking a mountain range in like a father putting children to bed, silhouette scale, tender night earth tones"
+  },
+  {
+    "id": "god_fuhaku",
+    "file": "god_fuhaku.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: the eldest wind god with eight ribbons of wind coiled around his staff, long white beard streaming, commanding yet kindly"
+  },
+  {
+    "id": "god_ginga",
+    "file": "god_ginga.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: a ferryman god poling a wooden boat across the milky way, lantern at the bow, passengers as faint warm lights, quiet compassion"
+  },
+  {
+    "id": "god_amatsuhi",
+    "file": "god_amatsuhi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: the lingering afterglow of the eaten sun personified, a radiant figure of sunset colors fading at the edges, beautiful and lonely, holding a small dusk light"
+  },
+  {
+    "id": "god_ushimitsu",
+    "file": "god_ushimitsu.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: the lord of the deepest hour of night, elegant dark robes with a slow clock-like moon dial, faint bored smile, profound stillness"
+  },
+  {
+    "id": "god_amanogawa",
+    "file": "god_amanogawa.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity: the mother goddess of the milky way, a vast maternal figure whose robe is the star river itself, countless small stars nestled like children, warm cosmic serenity"
+  },
+  {
+    "id": "en_kokebouzu",
+    "file": "en_kokebouzu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a small moss-covered monk creature risen from a fallen log, glowing moss patterns, amber rim light"
+  },
+  {
+    "id": "en_azukiarai",
+    "file": "en_azukiarai.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a hunched creature washing azuki beans by a stream at night, only eyes and washing basin lit"
+  },
+  {
+    "id": "en_kazakiribane",
+    "file": "en_kazakiribane.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a flock of razor-sharp feathers flying in formation like blades, wind trail lines, amber glints"
+  },
+  {
+    "id": "en_dongurimujina",
+    "file": "en_dongurimujina.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a chubby badger spirit with cheeks stuffed full of acorns, autumn leaves swirling, comic menace"
+  },
+  {
+    "id": "en_yonakisuzu",
+    "file": "en_yonakisuzu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: an abandoned bell spirit crying at night, tears of sound ripples, tiny arms hugging itself"
+  },
+  {
+    "id": "en_shizukuonna",
+    "file": "en_shizukuonna.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a woman figure formed of falling rain-drops under an eave, counting droplets, melancholy amber"
+  },
+  {
+    "id": "en_karakasarounin",
+    "file": "en_karakasarounin.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a torn paper umbrella possessed by a ronin's regret, one leg stance drawing a katana, dramatic"
+  },
+  {
+    "id": "en_dorodaruma",
+    "file": "en_dorodaruma.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a huge mud daruma doll rising from a rice paddy, cracked smile, always tilting back upright"
+  },
+  {
+    "id": "en_hibashiragitsune",
+    "file": "en_hibashiragitsune.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a fox whose tail is a rising pillar of flame, vengeful elegant pose, ember trail"
+  },
+  {
+    "id": "en_tsuraraonna",
+    "file": "en_tsuraraonna.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a woman of icicles under a roof edge, breath of frost, dreaming cold beauty, pale blue against amber"
+  },
+  {
+    "id": "en_hoshimushi",
+    "file": "en_hoshimushi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a silkworm-like creature nibbling starlight, thread of darkness trailing from its mouth, star crumbs"
+  },
+  {
+    "id": "en_aoandon",
+    "file": "en_aoandon.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a tall paper lantern burning with eerie blue flame, the hundredth tale's ghost emerging from its light"
+  },
+  {
+    "id": "en_kazekurai",
+    "file": "en_kazekurai.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: an invisible maw outlined only by the wind it devours, leaves and debris spiraling into nothing"
+  },
+  {
+    "id": "en_yamaubakage",
+    "file": "en_yamaubakage.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: the shadow of a mountain crone cast on trees with no one casting it, reaching for a hearth's glow"
+  },
+  {
+    "id": "en_hitodamagyouretsu",
+    "file": "en_hitodamagyouretsu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a solemn procession of pale fireballs winding through the dark, each flame a faint face"
+  },
+  {
+    "id": "en_fuchikagami",
+    "file": "en_fuchikagami.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a bottomless pool whose surface is a perfect mirror showing a warm home that is not there, luring"
+  },
+  {
+    "id": "en_kurayamidouji",
+    "file": "en_kurayamidouji.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a child-shaped figure of pure darkness imitating play, broken toys of shadow around it, unsettling innocence"
+  },
+  {
+    "id": "en_hoshisaki",
+    "file": "en_hoshisaki.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a disembodied colossal claw that tears stars, star wounds glowing in the sky behind it, void black"
+  },
+  {
+    "id": "en_jinarigama",
+    "file": "en_jinarigama.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a mountain-sized toad half-buried in earth, a small shrine sunken on its back, croak shaking stones"
+  },
+  {
+    "id": "en_shiranuishou",
+    "file": "en_shiranuishou.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: a general made of sea-fire phantom flames in armor, waving a lantern as a war fan, lost and proud"
+  },
+  {
+    "id": "en_mizuchikage",
+    "file": "en_mizuchikage.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: the wet shadow of a river dragon that failed to ascend, coiling across a valley stream, dripping darkness"
+  },
+  {
+    "id": "en_kamikakushi",
+    "file": "en_kamikakushi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: the phenomenon of spiriting-away given form, a swirling void of wind hiding a faint doorway, names dissolving"
+  },
+  {
+    "id": "god_someiro",
+    "file": "god_someiro.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 染色姫: 色にうるさい染物名人, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_hangyoku",
+    "file": "god_hangyoku.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 半玉星: 修行中の舞い手、負けず嫌い, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_tatara",
+    "file": "god_tatara.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 踏鞴翁: 寡黙な製鉄の主, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_ryoushi",
+    "file": "god_ryoushi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 漁火翁: 海の恵みに感謝する漁師, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_kotodama",
+    "file": "god_kotodama.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 言霊使い: 言葉の重みを知る詠み人, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_kagemai",
+    "file": "god_kagemai.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 影舞太夫: 影絵芝居の花形, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_tsuribito",
+    "file": "god_tsuribito.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 釣り星: 気長な釣り好き, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_yaoya",
+    "file": "god_yaoya.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 八百屋姫: 威勢のいい売り子, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_somekawa",
+    "file": "god_somekawa.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 染革翁: 職人気質の頑固者, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_kikuza",
+    "file": "god_kikuza.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 菊座姫: 菊の香りを纏う雅な姫, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_hiwatari",
+    "file": "god_hiwatari.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 火渡り行者: 荒行を好む修験者, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_suzukake",
+    "file": "god_suzukake.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 篠懸法師: 山伏姿の旅の星, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_benikomachi",
+    "file": "god_benikomachi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 紅小町: 紅を作る美貌の職人, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_inabune",
+    "file": "god_inabune.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 稲舟翁: 実直な水運びの船頭, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_tsuzumihime",
+    "file": "god_tsuzumihime.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 鼓姫: 拍子を刻む舞台の要, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_kawaraban",
+    "file": "god_kawaraban.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 瓦版天狗: 噂話に目がない情報屋, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_komorebi",
+    "file": "god_komorebi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 木漏れ日童: 常夜に木漏れ日を届ける不思議な童, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_sumizome",
+    "file": "god_sumizome.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 墨染法師: 墨染めの衣を纏う旅の法師, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_raijuu",
+    "file": "god_raijuu.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 雷獣王: 猛々しい雷の獣神, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_kougyoku",
+    "file": "god_kougyoku.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 紅玉后: 気高き紅玉の女王, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_ryuuou",
+    "file": "god_ryuuou.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 瀧王: 荒々しくも公正な滝の主, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_seiran",
+    "file": "god_seiran.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 青嵐姫: 若葉を運ぶ颯爽とした姫, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_kongourin",
+    "file": "god_kongourin.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 金剛輪主: 不動の守護神, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_hakuba",
+    "file": "god_hakuba.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 白馬の御者: 天翔ける馬車の御者, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_gyokuran",
+    "file": "god_gyokuran.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 玉蘭仙女: 気高い蘭の仙女, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_kyokujitsu",
+    "file": "god_kyokujitsu.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 旭日直系: 朝日の血を継ぐ誇り高き者, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_hisui",
+    "file": "god_hisui.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 翡翠后妃: 深緑の宝玉を統べる后妃, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_shishiou",
+    "file": "god_shishiou.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 獅子王星: 百獣を統べる誇り高き王, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_suisho",
+    "file": "god_suisho.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 水晶宮主: 透き通る叡智の主, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_byakko",
+    "file": "god_byakko.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 白虎将軍: 西天を守る猛き将軍, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_seiryuu",
+    "file": "god_seiryuu.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 青龍将軍: 東天を守る気高き将軍, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_suzaku",
+    "file": "god_suzaku.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 朱雀将軍: 南天を守る華麗な将軍, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_genkou",
+    "file": "god_genkou.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 玄黄始祖: 天と地が分かれる前を知る最古の星, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_shukuyou",
+    "file": "god_shukuyou.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 宿曜の主: 全ての運命を記す星々の書記, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_reimei",
+    "file": "god_reimei.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 黎明の胎動: まだ生まれきっていない、次の朝そのもの, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_owarinaki",
+    "file": "god_owarinaki.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 終わりなき者: 始まりも終わりも知らぬ、円環そのもの, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_karasuguchi",
+    "file": "god_karasuguchi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 烏口の墨: 几帳面な製図の神, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_yudachi",
+    "file": "god_yudachi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 夕立小僧: 急に降って急にやむ気まぐれ, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_nawanoren",
+    "file": "god_nawanoren.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 縄暖簾守: 一杯飲み屋の縄暖簾を守る神, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_sasabune",
+    "file": "god_sasabune.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 笹舟乗り: 小川を旅する小さな冒険者, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_kingyodama",
+    "file": "god_kingyodama.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 金魚玉姫: 金魚鉢に暮らすお洒落な姫, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_chouchinboya",
+    "file": "god_chouchinboya.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 提灯坊や: 道を照らすのが大好きな子供, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_karakuri",
+    "file": "god_karakuri.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named からくり翁: 精巧な絡繰りを作る職人肌, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_mizuguruma",
+    "file": "god_mizuguruma.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 水車小町: くるくる回る働き者, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_hanabigasa",
+    "file": "god_hanabigasa.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 花火傘の精: 線香花火のように儚く可憐, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_okoze",
+    "file": "god_okoze.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 沖の翁星: 海の恵みを見張る不愛想な翁, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_sudare",
+    "file": "god_sudare.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 簾越しの姫: 簾の向こうから見守る奥ゆかしい姫, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_komainu",
+    "file": "god_komainu.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 狛犬の仔: 社を守りたがる元気な仔犬, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_suzumushi",
+    "file": "god_suzumushi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 鈴虫吟遊子: 秋の夜を彩る歌い手, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_obento",
+    "file": "god_obento.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 弁当包みの神: 誰かのために作る愛情の神, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_yosemune",
+    "file": "god_yosemune.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 寄棟の精: 屋根の四隅を守る几帳面な精, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_yuriika",
+    "file": "god_yuriika.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 百合活け姫: 花を生けるのが得意な清楚な姫, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_tokorozawa",
+    "file": "god_nogasobi.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 野遊び童子: 野原を駆け回るのが大好きな童子, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_shamisen",
+    "file": "god_shamisen.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 三味の糸姫: 三味線の音色に宿る芸達者, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_hiwa",
+    "file": "god_hiwa.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 鶸色の使い: 小鳥の姿で伝言を運ぶ使い, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_karesansui",
+    "file": "god_karesansui.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 枯山水の主: 砂紋を描き続ける寡黙な庭師, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_shiroamigasa",
+    "file": "god_shiroamigasa.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 編笠の旅人: 顔を隠して旅する謎多き旅人, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_tanabata",
+    "file": "god_tanabata.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 短冊結び姫: 願い事を集めるのが好きな姫, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_yosetaiko",
+    "file": "god_yosetaiko.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 寄せ太鼓童: 祭りの始まりを告げる元気な童, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "god_mugiwara",
+    "file": "god_mugiwara.png",
+    "w": 768,
+    "h": 1024,
+    "prompt": "standing portrait of a japanese star deity named 麦藁帽子の精: 夏の日差しを忘れられない呑気者, traditional japanese god design, indigo night background, amber rim light, watercolor and papercut style, elegant"
+  },
+  {
+    "id": "en_chochin_kui",
+    "file": "en_chochin.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 提灯喰い, japanese folklore monster, tier 1 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_kage_nezumi",
+    "file": "en_kagenezumi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 影鼠, japanese folklore monster, tier 1 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_onibi",
+    "file": "en_onibi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 鬼火, japanese folklore monster, tier 1 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_yosuzume",
+    "file": "en_yosuzume.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 夜雀, japanese folklore monster, tier 1 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_hone_dourou",
+    "file": "en_honedourou.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 骨灯籠, japanese folklore monster, tier 2 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_nureginu",
+    "file": "en_nureginu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 濡れ衣, japanese folklore monster, tier 2 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_yogumo",
+    "file": "en_yogumo.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 夜蜘蛛, japanese folklore monster, tier 2 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_naki_ishi",
+    "file": "en_nakiishi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 泣き石, japanese folklore monster, tier 2 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_kubinashi_andon",
+    "file": "en_kubinashi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 首無し行灯, japanese folklore monster, tier 2 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_hoshikui_ko",
+    "file": "en_hoshikuiko.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 星喰いの仔, japanese folklore monster, tier 3 threat, star element accent color, amber rim light"
+  },
+  {
+    "id": "en_gesshoku_juu",
+    "file": "en_gesshoku.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 月蝕獣, japanese folklore monster, tier 3 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_tanwatari",
+    "file": "en_taniwatari.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 谷渡り, japanese folklore monster, tier 3 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_kagami_kurage",
+    "file": "en_kagamikurage.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 鏡水母, japanese folklore monster, tier 3 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_ochiboshi_mukuro",
+    "file": "en_ochiboshi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 堕星の骸, japanese folklore monster, tier 3 threat, star element accent color, amber rim light"
+  },
+  {
+    "id": "en_tokoyo_musha",
+    "file": "en_tokoyomusha.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 常夜武者, japanese folklore monster, tier 4 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_hitori",
+    "file": "en_hitori.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 灯盗り, japanese folklore monster, tier 4 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_yamabiko_bone",
+    "file": "en_yamabiko.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 山彦骨, japanese folklore monster, tier 4 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_hoshikuzu_orochi",
+    "file": "en_orochi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 星屑大蛇, japanese folklore monster, tier 4 threat, star element accent color, amber rim light"
+  },
+  {
+    "id": "en_koke_bouzu",
+    "file": "en_kokebouzu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 苔坊主, japanese folklore monster, tier 1 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_azuki_arai",
+    "file": "en_azukiarai.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 小豆洗い, japanese folklore monster, tier 1 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_kazakiri_bane",
+    "file": "en_kazakiribane.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 風切り羽, japanese folklore monster, tier 1 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_donguri_mujina",
+    "file": "en_dongurimujina.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 団栗貉, japanese folklore monster, tier 1 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_yonaki_suzu",
+    "file": "en_yonakisuzu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 夜泣き鈴, japanese folklore monster, tier 1 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_shizuku_onna",
+    "file": "en_shizukuonna.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 雫女, japanese folklore monster, tier 1 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_karakasa_rounin",
+    "file": "en_karakasarounin.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 唐傘浪人, japanese folklore monster, tier 2 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_doro_daruma",
+    "file": "en_dorodaruma.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 泥達磨, japanese folklore monster, tier 2 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_hibashira_gitsune",
+    "file": "en_hibashiragitsune.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 火柱狐, japanese folklore monster, tier 2 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_tsurara_onna",
+    "file": "en_tsuraraonna.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 氷柱女, japanese folklore monster, tier 2 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_ao_andon",
+    "file": "en_aoandon.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 青行灯, japanese folklore monster, tier 3 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_kaze_kurai",
+    "file": "en_kazekurai.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 風喰らい, japanese folklore monster, tier 3 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_yamauba_kage",
+    "file": "en_yamaubakage.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 山姥影, japanese folklore monster, tier 3 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_hitodama_gyouretsu",
+    "file": "en_hitodamagyouretsu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 人魂行列, japanese folklore monster, tier 3 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_fuchi_kagami",
+    "file": "en_fuchikagami.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 淵鏡, japanese folklore monster, tier 3 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_kurayami_douji",
+    "file": "en_kurayamidouji.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 暗闇童子, japanese folklore monster, tier 4 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_jinari_gama",
+    "file": "en_jinarigama.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 地鳴り蝦蟇, japanese folklore monster, tier 4 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_shiranui_shou",
+    "file": "en_shiranuishou.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 不知火将, japanese folklore monster, tier 4 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_mizuchi_kage",
+    "file": "en_mizuchikage.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 蛟影, japanese folklore monster, tier 4 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_warabe_kage",
+    "file": "en_warabekage.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 童影, japanese folklore monster, tier 1 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_ochiba_zamurai",
+    "file": "en_ochibazamurai.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 落葉侍, japanese folklore monster, tier 1 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_hone_karasu",
+    "file": "en_honekarasu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 骨烏, japanese folklore monster, tier 1 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_chi_no_ike",
+    "file": "en_chinoike.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 血の池虫, japanese folklore monster, tier 1 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_sunakake",
+    "file": "en_sunakake.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 砂かけ狸, japanese folklore monster, tier 1 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_kuchisake_kagami",
+    "file": "en_kuchisakekagami.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 裂け鏡, japanese folklore monster, tier 1 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_nurenezumi",
+    "file": "en_nurenezumi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 濡れ鼠火, japanese folklore monster, tier 1 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_tsuchibotaru",
+    "file": "en_tsuchibotaru.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 土蛍, japanese folklore monster, tier 1 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_kazamimi",
+    "file": "en_kazamimi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 風耳, japanese folklore monster, tier 1 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_komoriuta_ningyou",
+    "file": "en_komoriutaningyou.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 子守唄人形, japanese folklore monster, tier 1 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_ame_onna",
+    "file": "en_ameonna.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 雨女房, japanese folklore monster, tier 2 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_yamawaro",
+    "file": "en_yamawaro.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 山童, japanese folklore monster, tier 2 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_kubittake",
+    "file": "en_kubittake.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 首丈, japanese folklore monster, tier 2 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_hi_no_tama",
+    "file": "en_hinotamazamurai.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 火の玉侍, japanese folklore monster, tier 2 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_ubagabi",
+    "file": "en_ubagabi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 姥が火, japanese folklore monster, tier 2 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_nozuchi",
+    "file": "en_nozuchi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 野槌, japanese folklore monster, tier 2 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_zashiki_warashi_kage",
+    "file": "en_zashikiwarashikage.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 座敷童の影, japanese folklore monster, tier 2 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_kappa_nokori",
+    "file": "en_kapparokori.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 名残河童, japanese folklore monster, tier 2 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_inbi",
+    "file": "en_inbimusha.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 陰火武者, japanese folklore monster, tier 2 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_karasuten",
+    "file": "en_karasutenkuzure.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 烏天狗崩れ, japanese folklore monster, tier 2 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_nue",
+    "file": "en_nue.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 鵺, japanese folklore monster, tier 3 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_oosakabe",
+    "file": "en_oosakabe.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 長壁女, japanese folklore monster, tier 3 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_raiju_ko",
+    "file": "en_raijuko.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 雷獣の仔, japanese folklore monster, tier 3 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_funayurei",
+    "file": "en_funayurei.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 船幽霊, japanese folklore monster, tier 3 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_ittanmomen",
+    "file": "en_ittanmomen.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 一反木綿, japanese folklore monster, tier 3 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_nurikabe_oni",
+    "file": "en_nurikabeoni.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 塗壁鬼, japanese folklore monster, tier 3 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_kasha",
+    "file": "en_kasha.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 火車, japanese folklore monster, tier 3 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_yamachichi",
+    "file": "en_yamachichi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 山地乳, japanese folklore monster, tier 3 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_akaeimusha",
+    "file": "en_akaeimusha.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 赤鱏武者, japanese folklore monster, tier 3 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_yamawarai",
+    "file": "en_yamawarai.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 山嗤い, japanese folklore monster, tier 3 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_nurarihyon",
+    "file": "en_nurarihyon.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: ぬらりひょん崩れ, japanese folklore monster, tier 4 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_daidarabotchi_ashi",
+    "file": "en_daidarabotchi.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 大太法師の足跡, japanese folklore monster, tier 4 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_gashadokuro",
+    "file": "en_gashadokuro.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: がしゃどくろ, japanese folklore monster, tier 4 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_kyuubi_kage",
+    "file": "en_kyuubikage.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 九尾の影, japanese folklore monster, tier 4 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_umibouzu",
+    "file": "en_umibouzu.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 海坊主崩れ, japanese folklore monster, tier 4 threat, water element accent color, amber rim light"
+  },
+  {
+    "id": "en_raijin_taiko",
+    "file": "en_raijintaiko.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 雷神太鼓崩れ, japanese folklore monster, tier 4 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_nue_juku",
+    "file": "en_nuejuku.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 鵺の熟れたる姿, japanese folklore monster, tier 4 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_oomukade",
+    "file": "en_oomukade.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 大百足, japanese folklore monster, tier 4 threat, earth element accent color, amber rim light"
+  },
+  {
+    "id": "en_tengu_taishou",
+    "file": "en_tengutaishou.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 天狗大将, japanese folklore monster, tier 4 threat, wind element accent color, amber rim light"
+  },
+  {
+    "id": "en_kokuyousekihime",
+    "file": "en_kokuyousekihime.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 黒曜石姫, japanese folklore monster, tier 4 threat, star element accent color, amber rim light"
+  },
+  {
+    "id": "en_boss_hyakume",
+    "file": "boss_hyakume.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 百目行灯, japanese folklore monster, tier 5 threat, fire element accent color, amber rim light"
+  },
+  {
+    "id": "en_boss_hoshimukuro",
+    "file": "boss_hoshimukuro.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 骸星の大熊, japanese folklore monster, tier 5 threat, star element accent color, amber rim light"
+  },
+  {
+    "id": "en_boss_gentou",
+    "file": "boss_gentou.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 玄冬, japanese folklore monster, tier 5 threat, moon element accent color, amber rim light"
+  },
+  {
+    "id": "en_boss_shiori",
+    "file": "boss_shiori.png",
+    "w": 512,
+    "h": 512,
+    "prompt": "yokai enemy illustration, papercut style on dark indigo background: 汐里, japanese folklore monster, tier 5 threat, star element accent color, amber rim light"
+  }
+]

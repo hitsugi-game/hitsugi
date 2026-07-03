@@ -1,0 +1,16 @@
+/* M17: 画像アセット導入に伴う追加スタイル(Scenes/Pact/Dungeonの生成画像スロット) */
+
+/* 縁MAX(affinity>=5)の第二立ち絵に、控えめな金の後光を添える */
+.god-max {
+  box-shadow: 0 0 34px rgba(217, 194, 106, 0.55), 0 0 64px rgba(232, 163, 61, 0.25);
+}
+
+/* 加護ドラフトの選択カード先頭アイコン */
+.boon-ico {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  object-fit: cover;
+}

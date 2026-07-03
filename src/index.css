@@ -1063,6 +1063,17 @@ button {
 }
 .portrait.is-child { background: radial-gradient(ellipse at 50% 60%, rgba(155, 127, 194, 0.22), rgba(8, 11, 22, 0.7)); box-shadow: none; }
 .portrait.is-child .portrait-flame { font-size: 20px; opacity: 0.85; padding-bottom: 20px; }
+/* M17: 顔絵は枠いっぱいに(歩行スプライト転用と違い、余白なしで映える) */
+.portrait.is-face img { object-fit: cover; object-position: top center; }
+/* M17: 画像アイコン(絵文字置換)。未生成時は .ico-fb(絵文字)のまま */
+.ico { vertical-align: -0.22em; border-radius: 4px; object-fit: cover; background: rgba(8, 11, 22, 0.4); }
+.ico-fb { display: inline-block; }
+/* M17: 図鑑の絵(魔性=正方/星神=縦長/土地の記=帯) */
+.codex-thumb { width: 100%; height: 110px; object-fit: cover; object-position: center 25%; border-radius: 5px; margin-bottom: 6px; border: 1px solid var(--panel-border); }
+.codex-thumb-tall { height: 150px; object-position: top center; }
+.lore-banner { width: 100%; max-height: 120px; object-fit: cover; border-radius: 5px; margin-bottom: 8px; opacity: 0.9; }
+/* M17: 家系図ノードの顔絵チップ */
+.tree-face { width: 26px; height: 26px; object-fit: cover; object-position: top center; border-radius: 50%; border: 1px solid var(--gold); margin-right: 4px; vertical-align: middle; flex-shrink: 0; }
 
 /* ---- 画面奥の一枚絵(背景) ---- */
 .backdrop { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }

@@ -1,6 +1,7 @@
-# 灯型×性別の歩行シート(3x4)を透過フレームへスライスする
-# 入力: assets_src/orig/sprite_walk_{gata}_{sex}.png
-# 出力: public/img/sprites/walk_{gata}_{sex}_{down|up|left}_{0..2}.png(右向きはエンジン側で左を反転)
+# 灯型×性別(×年齢段階)の歩行シート(3x4)を透過フレームへスライスする
+# 入力: assets_src/orig/sprite_walk_{gata}_{sex}.png / sprite_walk_{gata}_{sex}_{child|elder}.png
+# 出力: public/img/sprites/{walk|walkc|walke}_{gata}_{sex}_{down|up|left}_{0..2}.png
+#       (右向きはエンジン側で左を反転。walkc=幼子/walke=老年 — img.ts stagePrefixと同期)
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path $PSScriptRoot -Parent
@@ -11,8 +12,9 @@ New-Item -ItemType Directory -Force $outDir | Out-Null
 $dirs = @('down', 'up', 'left') # row3(右向き行)は左向きに生成されがちなので使わない
 
 Get-ChildItem $srcDir -Filter 'sprite_walk_*.png' | ForEach-Object {
-  if ($_.Name -notmatch 'sprite_walk_([a-z]+)_([mf])\.png') { return }
+  if ($_.Name -notmatch 'sprite_walk_([a-z]+)_([mf])(?:_(child|elder))?\.png') { return }
   $gata = $Matches[1]; $sex = $Matches[2]
+  $prefix = if ($Matches[3] -eq 'child') { 'walkc' } elseif ($Matches[3] -eq 'elder') { 'walke' } else { 'walk' }
   $img = [System.Drawing.Image]::FromFile($_.FullName)
   $cw = [Math]::Floor($img.Width / 3); $ch = [Math]::Floor($img.Height / 4)
   foreach ($r in 0..2) {
@@ -37,7 +39,7 @@ Get-ChildItem $srcDir -Filter 'sprite_walk_*.png' | ForEach-Object {
         }
       }
       $cell.Dispose()
-      $name = "walk_${gata}_${sex}_$($dirs[$r])_$c.png"
+      $name = "${prefix}_${gata}_${sex}_$($dirs[$r])_$c.png"
       $keyed.Save((Join-Path $outDir $name), [System.Drawing.Imaging.ImageFormat]::Png)
       $keyed.Dispose()
     }

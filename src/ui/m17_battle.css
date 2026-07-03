@@ -1,0 +1,43 @@
+/* M17: 戦闘画面の画像アセット差し込み用スタイル(Battle.tsxからのみ読み込み) */
+
+/* 技リストの小アイコン(sk_*.png) */
+.sk-ico {
+  width: 18px; height: 18px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 4px;
+  object-fit: cover;
+}
+
+/* 味方立ち姿(pose_*)— 既存walk_*と同じ表示サイズを維持 */
+.ally-pose { height: 74px; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.65)); }
+
+/* ボス登場カットイン / 灯座奥義カットイン(共通オーバーレイ機構) */
+.cutin-ovl {
+  position: absolute; inset: 0; z-index: 40; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.cutin-ovl img {
+  width: 100%; height: 100%; object-fit: cover;
+  animation: cutinSlideFade 1.6s ease both;
+}
+.cutin-ovl.cutin-ougi img { animation-duration: 1.4s; }
+@keyframes cutinSlideFade {
+  0% { opacity: 0; transform: translateX(-6%) scale(1.04); }
+  12% { opacity: 1; transform: translateX(0) scale(1.04); }
+  82% { opacity: 1; transform: translateX(0) scale(1); }
+  100% { opacity: 0; transform: translateX(6%) scale(1); }
+}
+
+/* 戦場背景 — 地域別背景(bg_r_*/bossbg_*)を多層合成。未生成の層は自然に透過する */
+.battle-stage-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: center, center, center;
+  background-size: cover, cover, cover;
+}
+.battle-stage-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(6,8,16,0.35) 0%, rgba(6,8,16,0.55) 55%, rgba(6,8,16,0.82) 100%);
+}

@@ -6,8 +6,9 @@ import { eventById } from '../core/expedition'
 import { dungeonByRegion } from '../dungeon/maps'
 import { isAdult } from '../core/inheritance'
 import { PARTY_SIZE } from '../core/constants'
-import { Bar, CharCard, NightBackdrop, Panel, TsuzuriLine } from './components'
-import { gameImg, HOME_BG } from './img'
+import { Bar, CharCard, Ico, MaybeImg, NightBackdrop, Panel, TsuzuriLine } from './components'
+import { eventImg, gameImg, HOME_BG, regionBgR } from './img'
+import './m17_home.css'
 
 export function DepartScreen() {
   const data = useGame((s) => s.data)!
@@ -82,14 +83,14 @@ export function DepartScreen() {
   )
 }
 
-const NODE_META: Record<NodeType, { icon: string; label: string }> = {
-  battle: { icon: '⚔️', label: '魔性の気配' },
-  elite: { icon: '👹', label: '強き魔性' },
-  treasure: { icon: '📦', label: '打ち捨てられた宝' },
-  camp: { icon: '🔥', label: '焚火の跡' },
-  event: { icon: '📜', label: '何かがある' },
-  boss: { icon: '💀', label: 'この地の主' },
-  start: { icon: '⛩️', label: '入口' },
+const NODE_META: Record<NodeType, { icon: string; iconImg: string; label: string }> = {
+  battle: { icon: '⚔️', iconImg: 'node_battle', label: '魔性の気配' },
+  elite: { icon: '👹', iconImg: 'node_elite', label: '強き魔性' },
+  treasure: { icon: '📦', iconImg: 'node_treasure', label: '打ち捨てられた宝' },
+  camp: { icon: '🔥', iconImg: 'node_camp', label: '焚火の跡' },
+  event: { icon: '📜', iconImg: 'node_event', label: '何かがある' },
+  boss: { icon: '💀', iconImg: 'node_boss', label: 'この地の主' },
+  start: { icon: '⛩️', iconImg: 'node_start', label: '入口' },
 }
 
 export function EventModal() {
@@ -102,6 +103,7 @@ export function EventModal() {
     <div className="modal-back">
       <div className="modal">
         <h2 className="panel-title">事件</h2>
+        <MaybeImg src={eventImg(pendingEvent.eventId)} className="ev-img" />
         <p style={{ marginBottom: 16, fontSize: 15 }}>{ev.text}</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {ev.choices.map((c, i) => (
@@ -136,7 +138,7 @@ export function ExpeditionScreen() {
     <div className="screen exp-screen">
       <div
         className="exp-bg"
-        style={{ backgroundImage: `url(${gameImg(region.bg)})` }}
+        style={{ backgroundImage: `url(${regionBgR(region.id)}), url(${gameImg(region.bg)})` }}
         aria-hidden
       />
       <div className="exp-header">
@@ -163,7 +165,9 @@ export function ExpeditionScreen() {
             <div className="node-choices">
               {choices.map((n) => (
                 <button key={n.id} className="node-btn" onClick={() => chooseNode(n.id)}>
-                  <span className="node-icon">{NODE_META[n.type].icon}</span>
+                  <span className="node-icon">
+                    <Ico name={NODE_META[n.type].iconImg} fb={NODE_META[n.type].icon} size={22} />
+                  </span>
                   <span className="node-label">{NODE_META[n.type].label}</span>
                   <div className="node-depth">深さ{n.depth}</div>
                 </button>

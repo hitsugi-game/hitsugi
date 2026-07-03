@@ -15,6 +15,24 @@ import { ENDINGS, FINALE_CHOICES } from '../core/data/story'
 import { clearSave } from '../core/save'
 import { downloadChronicleCard } from './shareCard'
 import { SceneBg } from './components'
+import './m17_scenes.css'
+
+// 章タイトル→cg_ch{n}.png の対応(CHAPTERSのtitleは固定文字列 — data/story.tsのid順と一致)
+const CHAPTER_BG: Record<string, string> = {
+  '第一章 常夜': 'cg_ch1.png',
+  '第二章 主たちの無念': 'cg_ch2.png',
+  '第三章 星喰いの影': 'cg_ch3.png',
+  '第四章 楽士の秘密': 'cg_ch4.png',
+  '第五章 頂へ': 'cg_ch5.png',
+}
+
+// 同じ場面(タイトル+台詞)なら常に同じ life_daily_*.png を引く簡易ハッシュ
+function stableDailyIndex(title: string, lines: { speaker: string; text: string }[]): number {
+  const s = title + lines.map((l) => l.speaker + l.text).join('')
+  let sum = 0
+  for (let i = 0; i < s.length; i++) sum += s.charCodeAt(i)
+  return sum % 20
+}
 
 export function BirthScene({ charId }: { charId: string }) {
   const data = useGame((s) => s.data)!
@@ -53,6 +71,7 @@ export function BirthScene({ charId }: { charId: string }) {
 
   return (
     <div className="scene-screen screen">
+      <SceneBg file="cg2_birth.png" />
       <div className="birth-flame">🔥</div>
       <h1 className="scene-title">誕生</h1>
       <div className="scene-body">
@@ -131,6 +150,7 @@ export function DeathScene({ charId }: { charId: string }) {
 
   return (
     <div className="scene-screen screen" onClick={() => !digestDone && setBeat(beat + 1)}>
+      <SceneBg file="cg2_mitori.png" />
       <div className="death-flame">🔥</div>
       <h1 className="scene-title">看取り</h1>
       <div className="scene-body">
@@ -178,14 +198,20 @@ export function DeathScene({ charId }: { charId: string }) {
   )
 }
 
-// ライフイベント — 家族の人生の一場面(初陣・絆・灯細りの夜)
+// ライフイベント — 家族の人生の一場面(初陣・絆・灯細りの夜・本編の章・日常)
+// bgが payload から来ていれば最優先(初陣=cg_hatsujin/灯細り=cg_hosori)。
+// 章語りは bg 無しで来るため title(固定文字列)から cg_ch{n}.png を引く。
+// それ以外(絆・日常)は bg 無しなので、場面文からの安定ハッシュで life_daily_* を割り当てる。
 export function LifeScene({ title, lines, bg }: { title: string; lines: { speaker: string; text: string }[]; bg?: string }) {
   const processNextScene = useGame((s) => s.processNextScene)
   const [beat, setBeat] = useState(0)
   const done = beat >= lines.length - 1
+  // SceneBg はファイル名(拡張子付き)を受け取り内部でgameImg()解決するため、
+  // dailyIndexは素のファイル名(life_daily_NN.png)として組み立てる(dailyImg()は使わない)。
+  const resolvedBg = bg ?? CHAPTER_BG[title] ?? `life_daily_${String(stableDailyIndex(title, lines)).padStart(2, '0')}.png`
   return (
     <div className="scene-screen screen" onClick={() => !done && setBeat(beat + 1)}>
-      {bg && <SceneBg file={bg} />}
+      <SceneBg file={resolvedBg} />
       <h1 className="scene-title">{title}</h1>
       <div className="scene-body" style={{ textAlign: 'left' }}>
         {lines.slice(0, beat + 1).map((l, i) => (
@@ -237,7 +263,7 @@ export function CeremonyScene({ charId }: { charId: string }) {
     const toza = tozaOf(chosen, char.element)
     return (
       <div className="scene-screen screen">
-        <SceneBg file="cg_ceremony.png" />
+        <SceneBg file="cg2_seijin.png" />
         <div className="birth-flame">🔥</div>
         <h1 className="scene-title">成人の儀</h1>
         <div className="scene-body">
@@ -305,7 +331,7 @@ export function JobRiteScene({ charId }: { charId: string }) {
     const job = jobById(chosen)
     return (
       <div className="scene-screen screen">
-        <SceneBg file="cg_ceremony.png" />
+        <SceneBg file="cg2_nariwai.png" />
         <div className="birth-flame">🔥</div>
         <h1 className="scene-title">生業の儀</h1>
         <div className="scene-body">
@@ -427,6 +453,7 @@ export function FinaleScene() {
   const resolveFinale = useGame((s) => s.resolveFinale)
   return (
     <div className="scene-screen screen">
+      <SceneBg file="cg_kiro.png" />
       <div className="birth-flame">🔥</div>
       <h1 className="scene-title">千年の岐路</h1>
       <div className="scene-body">
@@ -456,8 +483,11 @@ export function EndingScene() {
   const endType = (typeof data.flags.endingType === 'number'
     ? (['cut', 'save', 'inherit'] as const)[data.flags.endingType]
     : 'cut')
-  const beats = cleared ? [...ENDINGS[endType].beats, ...ENDING_CLEARED] : ENDING_EXTINCT
+  const climaxBeats = ENDINGS[endType].beats
+  const beats = cleared ? [...climaxBeats, ...ENDING_CLEARED] : ENDING_EXTINCT
   const done = beat >= beats.length - 1
+  // 山場(cut/save/inherit別)→_a、その後の共通エピローグ(ENDING_CLEARED)→_b。断絶(未clear)は画無し。
+  const endingBg = cleared ? (beat < climaxBeats.length ? `cg_end_${endType}_a.png` : `cg_end_${endType}_b.png`) : null
 
   const gens = Math.max(...data.family.map((c) => c.gen))
   const fallenCount = data.family.filter((c) => !c.alive).length
@@ -465,6 +495,7 @@ export function EndingScene() {
 
   return (
     <div className="scene-screen screen" onClick={() => !done && setBeat(beat + 1)}>
+      {endingBg && <SceneBg file={endingBg} />}
       <h1 className="scene-title">{cleared ? '灯継ぎ' : '断絶'}</h1>
       <div className="scene-body">
         {beats.slice(Math.max(0, beat - 2), beat + 1).map((t, i, arr) => (

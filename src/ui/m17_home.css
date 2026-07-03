@@ -1,0 +1,42 @@
+/* M17: 生成画像スロット用の追加スタイル。
+   画像が無い間は現状の絵文字表示のまま(レイアウト崩れ無し)、
+   生成後は自動でここのサイズ・配置に収まる。 */
+
+/* 蔵アイテムのアイコン(購入/装備/打ち直しリストの行頭) */
+.it-ico {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 4px;
+  object-fit: cover;
+}
+
+/* 郷を歩く — 郷人ボタンの小サムネイル */
+.vil-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 6px;
+  object-fit: cover;
+}
+
+/* 郷を歩く — 会話表示欄の大きな立ち絵 */
+.vil-portrait {
+  width: 72px;
+  height: 72px;
+  border-radius: 6px;
+  object-fit: cover;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+/* 夜藪の出来事(EventModal) — 挿絵 */
+.ev-img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}

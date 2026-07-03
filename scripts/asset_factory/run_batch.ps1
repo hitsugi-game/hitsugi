@@ -11,6 +11,17 @@ param(
 $root = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $manifestPath = Join-Path $PSScriptRoot 'manifest.json'
 $statePath = Join-Path $root 'assets_src\factory_state.json'
+
+# 多重起動ロック(生成フォルダ照合とstateが壊れるため同時実行は不可)
+$lockPath = Join-Path $PSScriptRoot '.factory.lock'
+if (Test-Path $lockPath) {
+  $oldPid = Get-Content $lockPath -ErrorAction SilentlyContinue
+  if ($oldPid -and (Get-Process -Id $oldPid -ErrorAction SilentlyContinue)) {
+    Write-Output "FACTORY: already running (pid $oldPid) — exit"; exit 0
+  }
+}
+Set-Content $lockPath $PID
+try {
 $outDir = Join-Path $root 'public\img'
 $origDir = Join-Path $root 'assets_src\orig'
 New-Item -ItemType Directory -Force $origDir | Out-Null
@@ -23,9 +34,14 @@ $doneSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$state.do
 
 Add-Type -AssemblyName System.Drawing
 function Compress-One([string]$png, [string]$name) {
-  $maxW = if ($name -like 'bg_*' -or $name -like 'cg_*' -or $name -like 'title_*') { 1600 }
-          elseif ($name -like 'boss_*' -or $name -like 'tile_*') { 1024 }
-          elseif ($name -like 'icon_*') { 256 }
+  $maxW = if ($name -like 'bg_*' -or $name -like 'bossbg_*' -or $name -like 'cg_*' -or $name -like 'cg2_*' -or
+              $name -like 'fes_*' -or $name -like 'sc_*' -or $name -like 'title_*') { 1600 }
+          elseif ($name -like 'cutin_*') { 1280 }
+          elseif ($name -like 'boss_*' -or $name -like 'tile_*' -or $name -like 'ev_*' -or $name -like 'life_*') { 1024 }
+          elseif ($name -like 'icon_*' -or $name -like 'ic_*' -or $name -like 'node_*' -or $name -like 'slot_*' -or
+                  $name -like 'boon_*' -or $name -like 'job_*' -or $name -like 'emb_*' -or $name -like 'nem_*' -or
+                  $name -like 'it_*' -or $name -like 'sk_*') { 256 }
+          elseif ($name -like 'face_*' -or $name -like 'vil_*') { 384 }
           else { 768 }
   $img = [System.Drawing.Image]::FromFile($png)
   try {
@@ -86,3 +102,6 @@ for ($s = 0; $s -lt $MaxSessions; $s++) {
   [pscustomobject]@{ done = @($doneSet) } | ConvertTo-Json | Set-Content $statePath
 }
 Write-Output "FACTORY: state -> $statePath ($($doneSet.Count) done)"
+# 歩行シートが届いていればフレームへ自動分割(冪等)
+& (Join-Path $root 'scripts\slice-walk-sheets.ps1') | Select-Object -Last 1
+} finally { Remove-Item $lockPath -Force -ErrorAction SilentlyContinue }

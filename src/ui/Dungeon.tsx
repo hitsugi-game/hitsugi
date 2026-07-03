@@ -5,7 +5,9 @@ import { MONTH_NAMES } from '../core/types'
 import { dungeonByRegion } from '../dungeon/maps'
 import { DungeonEngine } from '../dungeon/engine'
 import { boonById } from '../core/data/boons'
-import { Bar } from './components'
+import { Bar, MaybeImg } from './components'
+import { stageOf, uiIcon } from './img'
+import { ageOf } from '../core/inheritance'
 import { EventModal } from './Expedition'
 
 // 灯籠の炎リング — 灯ゲージの視覚化(俺屍の月齢リング様式)
@@ -94,9 +96,13 @@ function DungeonFloor() {
           }
         },
       },
-      // 隊列の先頭が歩く姿になる(灯型×性別のスプライト)
+      // 隊列の先頭が歩く姿になる(灯型×性別×年齢段階のスプライト — 老いた当主は老い姿で歩く)
       party[0]
-        ? { gata: party[0].tomoshigata ?? 'homura', sex: party[0].sex }
+        ? {
+            gata: party[0].tomoshigata ?? 'homura',
+            sex: party[0].sex,
+            stage: stageOf(ageOf(party[0], data.seasonIndex)),
+          }
         : undefined,
       // v3.1: テーマ/照明/プロップ散布のためのフロア情報
       {
@@ -256,6 +262,7 @@ function DungeonFloor() {
                   style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 6 }}
                   onClick={() => chooseBoon(id)}
                 >
+                  <MaybeImg src={uiIcon(`boon_${b.id}`)} className="boon-ico" />
                   <b>{b.name}</b>
                   <span style={{ display: 'block', fontSize: 12, color: 'var(--text-dim)' }}>{b.desc}</span>
                 </button>

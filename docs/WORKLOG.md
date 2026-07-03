@@ -530,6 +530,65 @@
 - **次回**: M16残り(3会話キュー/4加護ドラフト/5眷属/6郷発展/7日替わり/8内職)
 - **commit**: (この直後)
 
+## 2026-07-03 (v3.1 M16-8 留守番内職 — 前セッション作業分の確定)
+
+- **やったこと**(前セッションで実装済み・未コミットだった分を検証してコミット):
+  saveGameが`lastPlayedAt`(実時間)を刻印、continueGameで離席時間×4燈/時(上限24h)を復帰時に付与+家譜に文付きで記録。
+  types.tsに`lastPlayedAt?`/`gossipIndex?`(M16-3予約、未使用)を追加
+- **検証**: tsc 0エラー(M17統合チェックに含めて確認)
+- **commit**: (この直後)
+
+## 2026-07-03 (M17-2 画像受け皿の全面配線 — 3エージェント並列)
+
+- **やったこと**(共有基盤=自前、UI配線=sonnet×3並列でファイル分割所有):
+  - **共有基盤**: img.ts拡張(stageOf/faceImg/poseImg/itemIcon/skillIcon/uiIcon/regionBgR/bossBgImg/cutinImg/godMaxImg/eventImg/dailyImg/villagerImg)。
+    components.tsxに`Ico`(絵文字→画像、未生成時は絵文字のまま)+`MaybeImg`(404で静かに消える)。
+    `Portrait`を顔絵(face_*)→老い姿(walke_*)→成人姿→炎の退避連鎖に強化
+  - **Battle系**(enemies.ts/Battle.tsx): 変異敵の個別絵(_w/_o、無ければ基礎種絵→SVGの連鎖)。味方立ち姿pose→歩行→炎。
+    技ボタンにsk_*アイコン。ボス入場カットイン+灯座奥義カットイン(Image()プリロード成功時のみ表示、1.4-1.6s)。
+    戦闘背景を主の間(bossbg_)→地域(bg_r_)→tier共有の3層CSS背景で解決。
+    ※指示書の奥義ID正規表現の誤り(`4`終わり)をエージェントが実データ(`tz_??o`)で検証・修正
+  - **Home/遠征系**(Home.tsx/Expedition.tsx): 資源ピル・行動カード・ナビの絵文字26箇所をIco化。
+    郷人ボタン+会話に齢帯別肖像(vil_*)。鍛冶の購入/装備/打ち直しリストに装備アイコン(it_*)。
+    地域ヘッダを個別絵優先の2層背景化。ノード絵文字7種→node_*。出来事モーダルに挿絵(ev_*)
+  - **Scenes/Pact/Dungeon系**: 誕生=cg2_birth/看取り=cg2_mitori/成人の儀=cg2_seijin/生業の儀=cg2_nariwai。
+    章語り=タイトル一致でcg_ch1-5/岐路=cg_kiro/結末=cg_end_{type}_a→最終ビートで_b。
+    絆・日常はテキストの安定ハッシュでlife_daily_00-19を割当。契り画面は縁5+でgod_*_max優先の連鎖。
+    加護ドラフト三択にboon_*アイコン。※当主継承はstoreにシーン発火が無いため未配線(コード変更が必要、保留)
+  - **図鑑/家系図**(自前): 魔性・星神カードに立ち絵サムネ、土地の記に地域帯絵、家系図ノードに顔チップ
+  - **探索エンジン**(自前): leaderに`stage`追加(Dungeon.tsxがageOf→stageOfで受け渡し)、老いた当主はwalke_*で歩く(未生成時は成人姿へcatch退避)。
+    slice-walk-sheets.ps1を_child/_elderシート対応(walkc_/walke_接頭辞)に拡張、run_batch.ps1終了時に自動実行
+- **検証**: 全エージェント合流後 tsc -b 0エラー/lint既存1件のみ(engine.ts:468、HEAD由来)。
+  実機: タイトル→導入→郷→契りをプレイ、コンソールエラー0。**bg_sato.jpg(本日工場生成)が郷背景に自動反映**、
+  god_ishiusu.jpgが契り右パネルに表示 — 生成→配置→自動表示のパイプライン全通を確認。アイコン類は絵文字フォールバックで無傷
+- **工場進捗**: セッション0完了(15枚、ボス絵中心)。白骨大将の画風=藍夜+琥珀月+墨輪郭で完全準拠。毎時タスクスケジューラ登録済み(hitsugi_asset_factory)
+- **commit**: (この直後)
+
+## 2026-07-03 (M17 画像フル生産 — 素材工場v2稼働)
+
+- **決定**: 「固有の名前と説明を持つものには固有の絵を与える」方針で全カテゴリ約2,100枚体制へ
+  (神120+縁MAX120+奥義24 / 敵387=変異個別化+入場カットイン27 / 装備540全点 / 技353+奥義カットイン48 /
+   地域背景27+主の間27 / 出来事175+日常20 / 顔64+幼老シート16+立ち姿24 / 章・結末・儀式CG30 /
+   UIアイコン103 / 郷人16 ほか)
+- **やったこと**:
+  - `scripts/asset_factory/extract_entry.ts`新設 — dataモジュール(GODS/ENEMIES/ITEM_BASES/SKILLS+灯座96+家業192/
+    EVENTS4連結/REGIONS/CHAPTERS/ENDINGS/BOONS/PERSONALITIES/VILLAGERS)をDUMPとして輸出
+  - `scripts/asset_factory/gen_manifest.mjs`新設 — rolldown(vite8同梱)でバンドル→import→
+    全カテゴリのプロンプトをテンプレ機械生成。既存手書きプロンプト179件はfileキーで継承、
+    file重複21件を解消、生成済み25件は除外、優先度P0-P13で整列。**manifest.json=2,073件**(重複0検証済み)
+  - `run_batch.ps1`更新 — 新プレフィックスの圧縮幅(cutin=1280/ev・life=1024/ic・it・sk等=256/face・vil=384)+
+    多重起動ロック(.factory.lock、PID生存確認)
+  - 従来manifestは`manifest.backup.json`に退避
+- **稼働**: codex画像工場をバックグラウンド起動(150セッション×15枚、〜全2,073枚)。
+  進捗は`assets_src/factory_state.json`(done配列)と`%TEMP%/factory_s*.log`で追跡
+- **命名規約(コード連携用)**: 敵変異=`en_*_w/_o` / 地域=`bg_r_<id>`・`bossbg_<id>` / 装備=`it_<baseId>` /
+  技=`sk_<skillId>` / 顔=`face_{gata}_{sex}_{personality}` / 幼老シート=`sprite_walk_*_child/_elder` /
+  神MAX=`god_<id>_max` / カットイン=`cutin_*` / UI=`ic_*`・`node_*`・`slot_*` / 加護=`boon_<id>` /
+  家業=`job_<id>` / 灯座紋=`emb_{gata}_{vein}` / 出来事=`ev_<eventId>` / 日常=`life_daily_NN` / 郷人=`vil_<id>_<band>`
+- **次**: 生成と並行してコード側の受け皿(変異スプライトのフォールバック連鎖/地域個別背景/装備・技アイコン表示/
+  顔ライブラリ/幼老スプライト/カットイン/絵文字→アイコン置換)をM17-2として実装
+- **commit**: (受け皿実装とまとめて)
+
 ## 2026-07-03 (v3.1 M16-4 灯の加護ドラフト)
 
 - **やったこと**: ローグライトの三択加護 — `data/boons.ts`(12種: 火勢+12%/鉄壁+18%/韋駄天+8/強運+15/

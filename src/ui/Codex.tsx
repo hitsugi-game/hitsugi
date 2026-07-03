@@ -7,8 +7,8 @@ import { ENEMIES } from '../core/data/enemies'
 import { GODS } from '../core/data/gods'
 import { REGIONS } from '../core/data/regions'
 import { REGION_LORE } from '../core/data/lore'
-import { NightBackdrop, Panel } from './components'
-import { gameImg, HOME_BG } from './img'
+import { MaybeImg, NightBackdrop, Panel } from './components'
+import { gameImg, HOME_BG, regionBgR } from './img'
 
 type Tab = 'enemies' | 'gods' | 'lore'
 
@@ -73,6 +73,7 @@ export function CodexScreen() {
                 </div>
                 {v && (
                   <div className="lore-body">
+                    <MaybeImg src={regionBgR(r.id)} className="lore-banner" />
                     {lore.intro.map((l, i) => <p key={`i${i}`}>{l}</p>)}
                     {f >= 1 && lore.stir.map((l, i) => <p key={`s${i}`} className="lore-stir">{l}</p>)}
                     {f >= 3 && lore.core.map((l, i) => <p key={`c${i}`} className="lore-core">{l}</p>)}
@@ -93,6 +94,7 @@ export function CodexScreen() {
               const seen = seenEnemies.has(e.id)
               return (
                 <div key={e.id} className={`codex-card ${seen ? '' : 'unknown'}`}>
+                  {seen && <MaybeImg src={gameImg(e.sprite)} className="codex-thumb" />}
                   <div className="codex-name">{seen ? e.name : '???'}</div>
                   <div className="codex-meta">
                     {seen ? `${ELEMENT_LABELS[e.element]} / 剛${e.tier}` : '—'}
@@ -112,6 +114,7 @@ export function CodexScreen() {
               const known = knownGods.has(g.id)
               return (
                 <div key={g.id} className={`codex-card ${known ? '' : 'unknown'}`}>
+                  {known && <MaybeImg src={gameImg(g.portrait)} className="codex-thumb codex-thumb-tall" />}
                   <div className="codex-name">{known ? g.name : '???'}</div>
                   <div className="codex-meta">
                     {known ? `${GOD_RANK_LABELS[g.rank]} / ${ELEMENT_LABELS[g.element]}の星` : '—'}

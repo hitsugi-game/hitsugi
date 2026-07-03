@@ -10,8 +10,9 @@ import { audio } from '../core/audio'
 import { skillById } from '../core/data/skills'
 import { enemyById } from '../core/data/enemies'
 import { regionById } from '../core/data/regions'
-import { Bar } from './components'
-import { gameImg, spriteImg } from './img'
+import { Bar, MaybeImg } from './components'
+import { gameImg, spriteImg, poseImg, skillIcon, cutinImg, regionBgR, bossBgImg } from './img'
+import './m17_battle.css'
 
 type Menu = { kind: 'root' } | { kind: 'skill' } | { kind: 'target'; skillId?: string; side: 'enemy' | 'ally' }
 
@@ -43,6 +44,8 @@ export function BattleScreen() {
   const [fx, setFx] = useState<Record<string, FxEvent[]>>({})
   const [bossShown, setBossShown] = useState(false)
   const [slotPhase, setSlotPhase] = useState<'spin' | 'done'>('spin')
+  const [bossCutinUrl, setBossCutinUrl] = useState<string | null>(null)
+  const [ougiCutinUrl, setOugiCutinUrl] = useState<string | null>(null)
   const logRef = useRef<HTMLDivElement>(null)
 
   const stageFamily = (() => {
@@ -56,6 +59,17 @@ export function BattleScreen() {
 
   const isBossBattle = !!battle?.enemies.some((e) => e.enemyId?.startsWith('boss_'))
   const bossName = battle?.enemies.find((e) => e.enemyId?.startsWith('boss_'))?.name
+
+  // M17: 地域別の戦場背景。主戦は専用主背景→地域別背景→従来のtier共有bg、の3層。
+  // 手前の層が未生成(404)でも下の層がそのまま見えるので退避は自然に成立する。
+  const stageBgLayers = regionId
+    ? [
+        ...(isBossBattle ? [bossBgImg(regionId)] : []),
+        regionBgR(regionId),
+        gameImg(regionById(regionId).bg),
+      ]
+    : []
+  const stageBgCss = stageBgLayers.length > 0 ? stageBgLayers.map((u) => `url(${u})`).join(', ') : undefined
 
   // 演出キューへ変換
   const applyFx = (entry: BattleLogEntry) => {
@@ -131,6 +145,24 @@ export function BattleScreen() {
       return () => clearTimeout(t)
     }
   }, [isBossBattle])
+
+  // M17: ボス登場カットイン — 絵が実在する時だけ静かに差し込む(無ければ何も出さない)
+  useEffect(() => {
+    if (!isBossBattle) return
+    const bossId = battle?.enemies.find((e) => e.enemyId?.startsWith('boss_'))?.enemyId
+    if (!bossId) return
+    const url = cutinImg(bossId)
+    const img = new Image()
+    let cancelled = false
+    img.onload = () => {
+      if (cancelled) return
+      setBossCutinUrl(url)
+      setTimeout(() => setBossCutinUrl(null), 1600)
+    }
+    img.src = url
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBossBattle])
   useEffect(() => {
     const t = setTimeout(() => setSlotPhase('done'), 1500)
     return () => clearTimeout(t)
@@ -158,9 +190,28 @@ export function BattleScreen() {
 
   const over = battle.phase !== 'input' && battle.phase !== 'anim' && !revealing
 
+  const charOf = (c: Combatant) => family.find((f) => f.id === c.charId)
+
+  // M17: 灯座奥義カットイン — tz_{gata2}{vein1}o形式の第4技(奥義)判定。
+  // Combatant自体は灯型/星脈を持たないため、行動者のCharacterから安価に引く。
+  const OUGI_ID_RE = /^tz_[a-z]{2}o$/
+  const tryShowOugiCutin = (skillId: string) => {
+    if (!OUGI_ID_RE.test(skillId) || !actor) return
+    const ch = charOf(actor)
+    if (!ch?.tomoshigata) return
+    const url = cutinImg(`toza_${ch.tomoshigata}_${ch.element}`)
+    const img = new Image()
+    img.onload = () => {
+      setOugiCutinUrl(url)
+      setTimeout(() => setOugiCutinUrl(null), 1400)
+    }
+    img.src = url
+  }
+
   const onEnemyClick = (e: Combatant) => {
     if (!isPlayerTurn || e.hp <= 0) return
     if (menu.kind === 'target' && menu.side === 'enemy') {
+      if (menu.skillId) tryShowOugiCutin(menu.skillId)
       battleCommand(menu.skillId ? { type: 'skill', skillId: menu.skillId, targetKey: e.key } : { type: 'attack', targetKey: e.key })
       setMenu({ kind: 'root' })
     }
@@ -168,6 +219,7 @@ export function BattleScreen() {
   const onAllyClick = (a: Combatant) => {
     if (!isPlayerTurn || a.hp <= 0) return
     if (menu.kind === 'target' && menu.side === 'ally' && menu.skillId) {
+      tryShowOugiCutin(menu.skillId)
       battleCommand({ type: 'skill', skillId: menu.skillId, targetKey: a.key })
       setMenu({ kind: 'root' })
     }
@@ -177,12 +229,11 @@ export function BattleScreen() {
     if (sk.target === 'enemy') setMenu({ kind: 'target', skillId, side: 'enemy' })
     else if (sk.target === 'ally') setMenu({ kind: 'target', skillId, side: 'ally' })
     else {
+      tryShowOugiCutin(skillId)
       battleCommand({ type: 'skill', skillId })
       setMenu({ kind: 'root' })
     }
   }
-
-  const charOf = (c: Combatant) => family.find((f) => f.id === c.charId)
 
   return (
     <div className={`screen battle-screen stage-${stageFamily}`}>
@@ -193,9 +244,21 @@ export function BattleScreen() {
         </div>
       )}
 
+      {bossCutinUrl && (
+        <div className="cutin-ovl cutin-boss">
+          <img src={bossCutinUrl} alt="" aria-hidden />
+        </div>
+      )}
+      {ougiCutinUrl && (
+        <div className="cutin-ovl cutin-ougi">
+          <img src={ougiCutinUrl} alt="" aria-hidden />
+        </div>
+      )}
+
       {slotPhase === 'spin' && <LootSlot />}
 
       <div className="battle-stage">
+        {stageBgCss && <div className="battle-stage-bg" style={{ backgroundImage: stageBgCss }} />}
         <div className="stage-ground" />
 
         {isPlayerTurn && actor && (
@@ -278,6 +341,7 @@ export function BattleScreen() {
                     const sk = skillById(id)
                     return (
                       <button key={id} className="cmd-btn" disabled={actor.mp < sk.mpCost} onClick={() => castSkill(id)}>
+                        <MaybeImg src={skillIcon(sk.id)} className="sk-ico" />
                         {sk.name} <span className="mp-cost">{sk.mpCost}</span>
                       </button>
                     )
@@ -385,18 +449,26 @@ function CombatantNode({
   )
 }
 
-// 味方の立ち姿 — 歩行スプライトのleft向き(敵の方を向く)
+// 味方の立ち姿 — M17: 戦闘立ち姿(pose_*)→歩行スプライトのleft向き(旧来)→灯の炎、の順に退避
 function AllyVisual({ gata, sex, element }: { gata: string; sex: string; element: string }) {
-  const [failed, setFailed] = useState(false)
-  if (failed) {
+  const candidates = [poseImg(gata, sex, 'adult'), spriteImg(`walk_${gata}_${sex}_left_1.png`)]
+  const key = `${gata}:${sex}`
+  const [idx, setIdx] = useState(0)
+  const [lastKey, setLastKey] = useState(key)
+  if (key !== lastKey) {
+    setLastKey(key)
+    setIdx(0)
+  }
+  if (idx >= candidates.length) {
     return <span className="ally-flame" data-el={element}>🔥</span>
   }
+  const isPose = idx === 0
   return (
     <img
-      className="ally-stand"
-      src={spriteImg(`walk_${gata}_${sex}_left_1.png`)}
+      className={isPose ? 'ally-pose' : 'ally-stand'}
+      src={candidates[idx]}
       alt=""
-      onError={() => setFailed(true)}
+      onError={() => setIdx((i) => i + 1)}
     />
   )
 }
@@ -406,13 +478,30 @@ const SPECIES_BY_ELEMENT: Record<string, 'beast' | 'wisp' | 'oni' | 'float'> = {
   fire: 'wisp', moon: 'float', star: 'float', water: 'float', wind: 'beast', earth: 'oni',
 }
 
+// M17: variantsOf()が_w/_o専用絵を付与するため、退避連鎖は「変異絵→基礎種絵→SVG」の3段
+function baseSpriteOf(sprite: string): string | null {
+  return /_[wo]\.png$/.test(sprite) ? sprite.replace(/_[wo]\.png$/, '.png') : null
+}
+
 function EnemyVisual2({ e }: { e: Combatant }) {
-  const [failed, setFailed] = useState(false)
   const def = e.enemyId ? enemyById(e.enemyId) : null
-  if (def && !failed) {
+  const [stage, setStage] = useState<'primary' | 'base' | 'svg'>('primary')
+  const key = e.enemyId ?? def?.sprite ?? e.key
+  const [lastKey, setLastKey] = useState(key)
+  if (key !== lastKey) {
+    setLastKey(key)
+    setStage('primary')
+  }
+  if (def && stage !== 'svg') {
+    const baseSprite = baseSpriteOf(def.sprite)
+    const src = stage === 'base' && baseSprite ? gameImg(baseSprite) : gameImg(def.sprite)
+    const onError = () => {
+      if (stage === 'primary' && baseSprite) setStage('base')
+      else setStage('svg')
+    }
     return (
       <span className="enemy-sprite2">
-        <img className="enemy-img" src={gameImg(def.sprite)} alt="" onError={() => setFailed(true)} />
+        <img className="enemy-img" src={src} alt="" onError={onError} />
       </span>
     )
   }

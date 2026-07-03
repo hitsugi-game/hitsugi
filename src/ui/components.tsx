@@ -6,7 +6,7 @@ import { ageOf } from '../core/inheritance'
 import { personalityById } from '../core/data/personalities'
 import { godById } from '../core/data/gods'
 import { tozaOf } from '../core/data/toza'
-import { charSprite, gameImg } from './img'
+import { charSprite, faceImg, gameImg, stageOf, uiIcon } from './img'
 
 // 命の灯 — 炎ひとつが一季(三月)。八つの炎が「八季の命」を表す(本作の象徴UI)
 export function LifeFlames({ char, seasonIndex }: { char: Character; seasonIndex: number }) {
@@ -50,28 +50,65 @@ export function StatGrid({ stats }: { stats: Character['stats'] }) {
   )
 }
 
-// 立ち絵 — 灯型×性別の切り絵歩行スプライトを転用。幼子/未読込は灯のシルエットへ。
+// 立ち絵 — 顔絵(性根で個人が見分く)→老い姿→成人姿→灯のシルエット、の順に静かに退避。
+// 幼子はまだ型を成さぬため常に灯のシルエット。
 export function Portrait({
   char, seasonIndex, size,
 }: { char: Character; seasonIndex: number; size?: 'sm' }) {
-  const [failed, setFailed] = useState(false)
   const age = ageOf(char, seasonIndex)
-  const src = charSprite(char)
+  const stage = stageOf(age)
   const isChild = age < 6 || !char.tomoshigata
-  const showImg = !isChild && !!src && !failed
+  // 退避連鎖: 候補srcを順に試し、全滅なら炎(charのidが変われば連鎖をやり直す)
+  const candidates = isChild
+    ? []
+    : ([faceImg(char), stage === 'elder' ? charSprite(char, 'elder') : null, charSprite(char)]
+        .filter(Boolean) as string[])
+  const [idx, setIdx] = useState(0)
+  const key = `${char.id}:${stage}`
+  const [lastKey, setLastKey] = useState(key)
+  if (key !== lastKey) {
+    setLastKey(key)
+    setIdx(0)
+  }
+  const src = idx < candidates.length ? candidates[idx] : null
+  const isFace = src !== null && idx === 0 && !!faceImg(char)
   return (
     <span
-      className={`portrait ${size === 'sm' ? 'portrait-sm' : ''} ${isChild ? 'is-child' : ''}`}
+      className={`portrait ${size === 'sm' ? 'portrait-sm' : ''} ${isChild ? 'is-child' : ''} ${isFace ? 'is-face' : ''}`}
       data-el={char.element}
       aria-hidden
     >
-      {showImg ? (
-        <img src={src!} alt="" onError={() => setFailed(true)} />
+      {src ? (
+        <img src={src} alt="" onError={() => setIdx((i) => i + 1)} />
       ) : (
         <span className="portrait-flame">{'\u{1F525}'}</span>
       )}
     </span>
   )
+}
+
+// 画像アイコン — 生成済みなら絵に、未生成なら従来の絵文字のまま(M17)
+export function Ico({ name, fb, size = 20 }: { name: string; fb: string; size?: number }) {
+  const [ok, setOk] = useState(true)
+  if (!ok) return <span className="ico-fb">{fb}</span>
+  return (
+    <img
+      className="ico" width={size} height={size} src={uiIcon(name)} alt="" aria-hidden
+      onError={() => setOk(false)}
+    />
+  )
+}
+
+// あれば表示・なければ静かに消える汎用画像(M17)
+export function MaybeImg({ src, className, alt = '' }: { src: string; className?: string; alt?: string }) {
+  const [ok, setOk] = useState(true)
+  const [lastSrc, setLastSrc] = useState(src)
+  if (src !== lastSrc) {
+    setLastSrc(src)
+    setOk(true)
+  }
+  if (!ok) return null
+  return <img className={className} src={src} alt={alt} aria-hidden={alt === ''} onError={() => setOk(false)} />
 }
 
 export function CharCard({

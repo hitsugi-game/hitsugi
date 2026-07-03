@@ -76,7 +76,7 @@ export class DungeonEngine {
   private walkTex: Record<string, Texture[]> = {}
   private facing = 'down'
   private animT = 0
-  private leader: { gata: string; sex: string } = { gata: 'homura', sex: 'm' }
+  private leader: { gata: string; sex: string; stage?: 'child' | 'adult' | 'elder' } = { gata: 'homura', sex: 'm' }
   private baseScale = 1
   private shades: Shade[] = []
   private px = 1
@@ -135,7 +135,7 @@ export class DungeonEngine {
     usedKeys: string[],
     floorIndex: number,
     events: EngineEvents,
-    leader?: { gata: string; sex: string },
+    leader?: { gata: string; sex: string; stage?: 'child' | 'adult' | 'elder' },
     opts?: EngineOpts,
   ) {
     this.host = host
@@ -240,10 +240,16 @@ export class DungeonEngine {
     this.player.addChild(this.playerShadow)
     try {
       const base = import.meta.env.BASE_URL
-      const { gata, sex } = this.leader
+      const { gata, sex, stage } = this.leader
+      // 老いた当主は老い姿(walke_*)で歩く。シート未生成なら成人姿へ静かに退避(M17)
+      const prefix = stage === 'elder' ? 'walke' : stage === 'child' ? 'walkc' : 'walk'
       for (const dir of ['down', 'up', 'left']) {
         this.walkTex[dir] = await Promise.all(
-          [0, 1, 2].map((i) => Assets.load<Texture>(`${base}img/sprites/walk_${gata}_${sex}_${dir}_${i}.png`)),
+          [0, 1, 2].map((i) => Assets.load<Texture>(`${base}img/sprites/${prefix}_${gata}_${sex}_${dir}_${i}.png`)),
+        ).catch(() =>
+          Promise.all(
+            [0, 1, 2].map((i) => Assets.load<Texture>(`${base}img/sprites/walk_${gata}_${sex}_${dir}_${i}.png`)),
+          ),
         )
       }
       const sp = new Sprite(this.walkTex.down[1])
