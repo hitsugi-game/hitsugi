@@ -443,3 +443,34 @@ class AudioEngine {
 
 export const audio = new AudioEngine()
 export type { TrackName, AmbienceKind }
+
+// M10 第二版: UIクリックにイベントデリゲーションでSEを添える。main.tsxで一度attachすると
+// 以後 button クラス名から適切なSE(confirm/cancel/error/tab)を自動で鳴らす。
+// 個別の onClick は不要 — 全UI画面(Home/Codex/Chronicle/Pact/Expedition/FamilyTree/Battle)を1箇所でカバー。
+export function attachUiClickSfx(): void {
+  if (typeof document === 'undefined') return
+  document.addEventListener(
+    'click',
+    (ev) => {
+      const target = ev.target
+      if (!(target instanceof Element)) return
+      // 押せないボタン(disabled/aria-disabled)は無音——click自体来ないケースも多い
+      const btn = target.closest('button, .cmd-btn')
+      if (!btn) return
+      if ((btn as HTMLButtonElement).disabled) { audio.se('error'); return }
+      const cls = btn.className || ''
+      // タブ・チップ系(面替え)
+      if (cls.includes('filter-tab') || cls.includes('elem-chip') || cls.includes('codex-tab') ||
+          cls.includes('cmd-ghost')) { audio.se('tab'); return }
+      // 決定系(主要行動)
+      if (cls.includes('btn-main') || cls.includes('cmd-main')) { audio.se('confirm'); return }
+      // 「戻る/やめる/題目へ/ホーム」のような取消系(btn-ghost はtabと重ならないよう順序後置)
+      const text = (btn.textContent ?? '').trim()
+      if (cls.includes('btn-ghost') || /^(戻る|やめる|閉じる|題目へ|ホーム|中断)/.test(text)) { audio.se('cancel'); return }
+      // その他汎用ボタン(default) — page相当の軽い一音
+      audio.se('page')
+    },
+    // capturingで拾い、React onClickより先に鳴る(ただしpreventDefaultはしない)
+    true,
+  )
+}

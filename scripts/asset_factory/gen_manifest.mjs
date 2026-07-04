@@ -183,6 +183,10 @@ const NOUN = {
   sw_katana: 'katana', sw_yumi: 'japanese bow', sw_yari: 'yari spear', sw_tsuchi: 'war hammer', sw_kama: 'sickle', sw_kusarigama: 'chain-sickle', sw_jutte: 'jutte baton', sw_tantou: 'tanto dagger', sw_shakujo: 'monk ring-staff', sw_tessen: 'iron war fan', sw_fundou: 'weighted chain', sw_kunai: 'kunai blade',
   sa_doumaru: 'dou torso armor', sa_haori: 'haori jacket', sa_kote: 'armored gauntlets', sa_kabuto: 'kabuto helmet', sa_shitagi: 'under-robe', sa_suneate: 'shin guards', sa_men: 'face guard mask', sa_tate: 'wooden shield', sa_kataate: 'shoulder guard', sa_zukin: 'protective hood', sa_haidate: 'thigh guards', sa_jinbaori: 'battle surcoat',
   sc_omamori: 'omamori amulet', sc_kushi: 'ornamental comb', sc_obidome: 'sash clip', sc_netsuke: 'netsuke figurine', sc_kinchaku: 'drawstring pouch', sc_juzu: 'prayer beads', sc_udewa: 'bracelet', sc_nioibukuro: 'scent pouch', sc_sensyafuda: 'votive slip card', sc_mimikazari: 'earring', sc_yubiwa: 'ring',
+  // M13で追加した18系譜 — 270アイテムの生成品質を左右する
+  sw_ono: 'battle axe', sw_kanabo: 'kanabo iron studded club', sw_nagamaki: 'nagamaki long-hilted sword', sw_bisento: 'bisento heavy polearm glaive', sw_chigiriki: 'chigiriki chain flail', sw_masakari: 'masakari broad axe',
+  sa_wakibiki: 'side plate under-armor', sa_nodowa: 'throat guard collar', sa_kusazuri: 'kusazuri skirt plates', sa_manchira: 'chest breastplate', sa_tekkou: 'armored hand guard', sa_koshiate: 'waist and hip guard',
+  sc_inrou: 'inro medicine case', sc_ema: 'ema wooden votive tablet', sc_temari: 'temari embroidered thread ball', sc_hamaya: 'hamaya ritual arrow', sc_hyoutan: 'lacquered gourd flask', sc_koma: 'wooden spinning top',
 }
 const SLOT_FALLBACK = { weapon: 'traditional japanese weapon', armor: 'traditional japanese armor piece', charm: 'small japanese charm accessory' }
 function tierFlavor(t) {

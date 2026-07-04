@@ -22,9 +22,12 @@ export class Minimap {
   private back = new Graphics()
   private g = new Graphics()
   private sg = new Graphics() // 眷属「夜目」(月): 敵影ドット(毎フレーム更新)
+  private hud = new Graphics() // 自機facing矢印+進度バー(毎フレーム更新)
   private grid: TileKind[][]
   private visited = new Set<string>()
+  private walkableTotal = 0 // フロア進度計算用の分母
   private nvRadius = 0 // 0 = 夜目オフ / >0 = 敵影検知半径(マス)
+  private facing: 'up' | 'down' | 'left' | 'right' = 'down'
   private dirty = true
   private px = 0
   private py = 0
@@ -35,11 +38,34 @@ export class Minimap {
     this.grid = grid
     this.h = grid.length
     this.w = grid[0]?.length ?? 0
-    this.container.addChild(this.back, this.g, this.sg)
+    this.container.addChild(this.back, this.g, this.sg, this.hud)
     this.back
-      .roundRect(-PAD, -PAD, this.w * CELL + PAD * 2, this.h * CELL + PAD * 2, 5)
+      .roundRect(-PAD, -PAD, this.w * CELL + PAD * 2, this.h * CELL + PAD * 2 + 8, 5)
       .fill({ color: 0x0b0f1e, alpha: 0.6 })
       .stroke({ color: 0xc9a86a, alpha: 0.35, width: 1 })
+    // 進度%計算用: 歩行可タイル総数を1度だけ数える
+    for (let y = 0; y < this.h; y++) {
+      for (let x = 0; x < this.w; x++) {
+        const k = this.grid[y]?.[x]
+        if (k && isWalkable(k)) this.walkableTotal++
+      }
+    }
+  }
+
+  setFacing(dir: 'up' | 'down' | 'left' | 'right'): void {
+    this.facing = dir
+  }
+
+  /** 訪問済み歩行タイル数 / 歩行可タイル総数(0〜1)。HUDのフロア進度表示に使う。 */
+  exploreRatio(): number {
+    if (this.walkableTotal <= 0) return 0
+    let visitedWalk = 0
+    for (const key of this.visited) {
+      const [x, y] = key.split(':').map(Number)
+      const k = this.grid[y]?.[x]
+      if (k && isWalkable(k)) visitedWalk++
+    }
+    return Math.min(1, visitedWalk / this.walkableTotal)
   }
 
   // 画面右上に配置(HTMLの上部HUDと重ならない高さ)
@@ -93,10 +119,18 @@ export class Minimap {
           g.rect(x * CELL, y * CELL, CELL, CELL).fill({ color: 0x2a3552, alpha: 0.75 })
         }
         const dot = SPECIAL_DOT[kind]
-        if (dot) g.circle(x * CELL + CELL / 2, y * CELL + CELL / 2, CELL * 0.62).fill(dot)
+        if (dot) {
+          const cx = x * CELL + CELL / 2
+          const cy = y * CELL + CELL / 2
+          if (kind === 'monument') {
+            // 石碑=ダイヤ型で区別(縁起の欠片を拾う場所を目立たせる)
+            const r = CELL * 0.7
+            g.moveTo(cx, cy - r).lineTo(cx + r, cy).lineTo(cx, cy + r).lineTo(cx - r, cy).closePath().fill(dot)
+          } else {
+            g.circle(cx, cy, CELL * 0.62).fill(dot)
+          }
+        }
       }
-      // 自機
-      g.circle(this.px * CELL + CELL / 2, this.py * CELL + CELL / 2, CELL * 0.85).fill(0xffd23e)
     }
     // 夜目(月眷属): 敵影を検知半径内で点描(visited非依存・毎フレーム更新)
     if (this.nvRadius > 0 && shades) {
@@ -109,6 +143,27 @@ export class Minimap {
         }
       }
     }
+    // 自機facing三角矢印 + フロア進度バー(毎フレーム更新でfacing追従)
+    const hud = this.hud
+    hud.clear()
+    const cx = this.px * CELL + CELL / 2
+    const cy = this.py * CELL + CELL / 2
+    const r = CELL * 1.1
+    // facing別の三角形頂点(先端・左右)
+    const tri: Record<'up' | 'down' | 'left' | 'right', [number, number][]> = {
+      up: [[cx, cy - r], [cx - r * 0.7, cy + r * 0.5], [cx + r * 0.7, cy + r * 0.5]],
+      down: [[cx, cy + r], [cx + r * 0.7, cy - r * 0.5], [cx - r * 0.7, cy - r * 0.5]],
+      left: [[cx - r, cy], [cx + r * 0.5, cy + r * 0.7], [cx + r * 0.5, cy - r * 0.7]],
+      right: [[cx + r, cy], [cx - r * 0.5, cy - r * 0.7], [cx - r * 0.5, cy + r * 0.7]],
+    }
+    const p = tri[this.facing]
+    hud.moveTo(p[0][0], p[0][1]).lineTo(p[1][0], p[1][1]).lineTo(p[2][0], p[2][1]).closePath().fill(0xffd23e)
+    // 進度バー(minimap下端)
+    const barY = this.h * CELL + 2
+    const barW = this.w * CELL
+    const ratio = this.exploreRatio()
+    hud.rect(0, barY, barW, 3).fill({ color: 0x1a2033, alpha: 0.6 })
+    if (ratio > 0) hud.rect(0, barY, barW * ratio, 3).fill({ color: 0x7fae8f, alpha: 0.9 })
     this.container.alpha = 0.92 + Math.sin(timeMs / 600) * 0.08
   }
 }

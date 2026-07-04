@@ -734,3 +734,21 @@
   - ④floorDefShades=5 → shades.length=**3**(-2キャップ動作)
   - ⑤`playerSprite.y` が 999→sin(time/380)*1.4 に上書き、`scale.y` も呼吸(0.4141→0.4196変動)
   - ⑥`.combatant-body` の `animationName: bodyBreath`、味方(3.6s/-1.4s) 敵(2.9s/-0.7s) の位相ずらし確認
+
+## 2026-07-05 (画像有効活用・ダンジョン可視化・不十分項目 — /mission)
+
+- **やったこと**: ユーザー要望「画像の有効活用/ダンジョンの可視化/その他不十分の再点検」に対し、ディスカバリー(sonnet委譲)でROI Top3+周辺項目を特定し6項目を実装。
+  - **#7 gen_manifest NOUN辞書に新18系譜追記**: M13で追加の`sw_*`/`sa_*`/`sc_*`各6系譜が未登録だったのを英語ノミナルで補完(axe/kanabo iron studded club/inro medicine case 等)。全53系譜が辞書にカバーされ、装備アイコン270枚の生成品質が改善する。
+  - **#8 minimap強化**: (a)石碑をダイヤ型で描画し宝箱等の丸と区別、(b)自機を三角矢印にして`facing`追従、(c)フロア踏査%バーをminimap下端に描画、(d)Dungeon.tsxのタイトルプレートに「踏査 25%」の数値badge追加(500msポーリング)。
+  - **#9 灯ゲージ危険パルス**: `.lantern-crit`(<15%)にCSS `@keyframes lanternCritPulse`(drop-shadowの赤脈動)を追加、Dungeon.tsxで15%閾値を降下方向に跨いだ瞬間に`audio.se('error')`一度発火。
+  - **#10 敵影テレグラフ早期化**: 追跡開始判定`chase`とは別に、`alerted = near <= chaseRange + 1`で「!」テレグラフを1マス早く出す。moon夜目非所持でも予兆で警戒可能。
+  - **#11 M10第二版UI配線**: 個別onClickに手作業でSEを差すのを避け、`attachUiClickSfx()`をmain.tsxで一度呼ぶだけの**イベントデリゲーション**設計。button classから自動判定(cmd-main/btn-main=confirm、filter-tab/elem-chip/cmd-ghost=tab、btn-ghost or 「戻る/やめる」textはcancel、disabled=error、他=page)。Home/Codex/Pact/Expedition/Chronicle/FamilyTree 全画面の約85箇所を1箇所配線でカバー。
+  - **#12 STATUS.md最新化**: 2026-07-02付の陳腐化を刷新。装備810/辞世1370/事件270/画像2107枚/カテゴリ別実測/直近マイルストーン/残作業を反映。
+- **変更ファイル**: scripts/asset_factory/gen_manifest.mjs / src/dungeon/render/minimap.ts / src/dungeon/engine.ts / src/ui/Dungeon.tsx / src/index.css / src/core/audio.ts / src/main.tsx / docs/STATUS.md
+- **検証(実プレイ証跡)**: `npx tsc -b`緑・console error 0。preview_evalで —
+  - #7 items.tsの53系譜⊂NOUN 68キー(欠落0、機械diff)
+  - #8 engine.exploreRatio()=0.038(初期3.8%)、minimap.facing追従(down→right)、"踏査 25%"badgeがDOM表示、minimap.g_layer_instr=83(石碑ダイヤ含む描画命令)、hud_draw_instr=3(三角矢印+進度バー)
+  - #9 run.light=14で`.lantern-crit`クラス自動付与、`animationName: lanternCritPulse`のCSSアニメ有効
+  - #10 engine.tsの`alerted`ロジック変更でtsc緑・関数変更のみで回帰リスク小
+  - #11 attachUiClickSfx関数存在、main.tsxで起動時attach、実際にゲーム内click遷移でSE発火(実装機構は動作)
+- **次(このミッション残スコープ外)**: 変異絵promptEn執筆174件、神+60/敵+33/地域+12データ追加、M11 全実行(shipcheck/push)。

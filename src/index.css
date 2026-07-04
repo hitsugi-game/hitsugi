@@ -952,6 +952,13 @@ button {
 .lantern-ring .ring-flame { animation: ringFlicker 1.6s ease-in-out infinite; transform-origin: 32px 36px; }
 .lantern-low .ring-flame { animation-duration: 0.9s; opacity: 0.85; }
 .lantern-crit .ring-flame { animation-duration: 0.45s; opacity: 0.6; }
+/* 危険域(pct<15%)のリング本体を明滅させて視覚警告 */
+.lantern-crit { animation: lanternCritPulse 0.9s ease-in-out infinite; }
+@keyframes lanternCritPulse {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(199, 62, 58, 0.35)); }
+  50% { filter: drop-shadow(0 0 12px rgba(255, 90, 70, 0.95)); }
+}
+.lantern-crit .ring-label { color: #ff7060; font-weight: 700; }
 @keyframes ringFlicker {
   0%, 100% { transform: translate(32px, 36px) scale(1); }
   30% { transform: translate(32px, 36px) scale(1.06) rotate(-2deg); }

@@ -17,6 +17,19 @@ const AMBIENCE_BY_BG: Record<string, 'forest' | 'zaka' | 'tani' | 'miyama'> = {
 }
 
 // 灯籠の炎リング — 灯ゲージの視覚化(俺屍の月齢リング様式)
+// フロア探索進度を1秒に1度だけ更新して表示(engineをpollingするが軽負荷)
+function ExploreBadge({ engineRef }: { engineRef: React.MutableRefObject<{ exploreRatio(): number } | null> }) {
+  const [pct, setPct] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => {
+      const r = engineRef.current?.exploreRatio() ?? 0
+      setPct(Math.round(r * 100))
+    }, 500)
+    return () => clearInterval(t)
+  }, [engineRef])
+  return <span className="explore-badge" style={{ marginLeft: 8, fontSize: 11, opacity: 0.75 }}>踏査 {pct}%</span>
+}
+
 function LanternRing({ pct }: { pct: number }) {
   const R = 24
   const C = 2 * Math.PI * R
@@ -144,8 +157,14 @@ function DungeonFloor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [region.bg])
 
+  const lastLightRef = useRef(run.light)
   useEffect(() => {
     engineRef.current?.setLight(run.light)
+    // 灯が危険域(15%)を跨いで降下した瞬間だけ error 警告音(連打を避ける)
+    if (lastLightRef.current >= 15 && run.light < 15 && run.light > 0) {
+      audio.se('error')
+    }
+    lastLightRef.current = run.light
   }, [run.light])
 
   // 熱狂の赤い火(v3.1 M12-6): 松明が緋に燃え、敵影が凶暴化する
@@ -195,6 +214,7 @@ function DungeonFloor() {
 
       <div className="dungeon-title-plate" key={run.floor}>
         {region.name} 地下{run.floor + 1}層
+        <ExploreBadge engineRef={engineRef} />
       </div>
 
       <div className="dungeon-hud-top">

@@ -349,6 +349,11 @@ export class DungeonEngine {
     this.lighting?.setLightPct(pct)
   }
 
+  /** フロア探索進度(0〜1)。訪問済み歩行タイル÷歩行可総数。 */
+  exploreRatio(): number {
+    return this.minimap?.exploreRatio() ?? 0
+  }
+
   setPaused(p: boolean): void {
     this.paused = p
   }
@@ -377,6 +382,7 @@ export class DungeonEngine {
       }
     }
     this.lighting?.update(dms, this.world.x, this.world.y)
+    this.minimap?.setFacing(this.facing as 'up' | 'down' | 'left' | 'right')
     this.minimap?.update(this.time, this.nightVision ? this.shades : undefined)
 
     // エンカウント演出中: 白閃2連→虹彩暗転→コールバック(入力/AIは凍結)
@@ -469,10 +475,12 @@ export class DungeonEngine {
       const chaseRange = Math.max(2, (this.lightPct < 40 ? 6 : 4) + (this.frantic ? 2 : 0) - (this.stealth ? 2 : 0))
       const chase = !s.visual.golden && near <= chaseRange
       const flee = s.visual.golden && near <= 6
+      // 「!」テレグラフは追跡開始の1マス前から出す(急襲の理不尽さを緩和し、moon夜目非所持でも予兆で警戒可能)
+      const alerted = !s.visual.golden && near <= chaseRange + 1
       s.cd = SHADE_BASE_MS * speedMult * (s.visual.golden ? 0.55 : chase ? 0.75 : 1) * (0.8 + Math.random() * 0.4)
-      if (chase !== s.alert) {
-        s.alert = chase
-        s.visual.setAlert(chase)
+      if (alerted !== s.alert) {
+        s.alert = alerted
+        s.visual.setAlert(alerted)
       }
       let dx = 0
       let dy = 0
