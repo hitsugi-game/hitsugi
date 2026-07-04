@@ -531,6 +531,26 @@
     "pose_nagi_f_child",
     "pose_nagi_f_adult",
     "pose_nagi_f_elder",
-    "face_sumi_m_brave"
+    "face_sumi_m_brave",
+    "face_sumi_m_timid",
+    "face_sumi_m_kind",
+    "face_sumi_m_rival",
+    "face_sumi_m_easy",
+    "face_sumi_m_cool",
+    "face_sumi_m_wild",
+    "face_sumi_m_lonely",
+    "sprite_walk_sumi_m_child",
+    "sprite_walk_sumi_m_elder",
+    "pose_sumi_m_child",
+    "pose_sumi_m_adult",
+    "pose_sumi_m_elder",
+    "face_sumi_f_brave",
+    "face_sumi_f_timid",
+    "face_sumi_f_kind",
+    "face_sumi_f_rival",
+    "face_sumi_f_easy",
+    "face_sumi_f_cool",
+    "face_sumi_f_wild",
+    "face_sumi_f_lonely"
   ]
 }
