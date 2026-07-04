@@ -471,6 +471,26 @@
     "face_homura_f_kind",
     "face_homura_f_rival",
     "face_homura_f_easy",
-    "face_homura_f_cool"
+    "face_homura_f_cool",
+    "face_homura_f_wild",
+    "face_homura_f_lonely",
+    "sprite_walk_homura_f_child",
+    "sprite_walk_homura_f_elder",
+    "pose_homura_f_child",
+    "pose_homura_f_adult",
+    "pose_homura_f_elder",
+    "face_iwao_m_brave",
+    "face_iwao_m_timid",
+    "face_iwao_m_kind",
+    "face_iwao_m_rival",
+    "face_iwao_m_easy",
+    "face_iwao_m_cool",
+    "face_iwao_m_wild",
+    "face_iwao_m_lonely",
+    "sprite_walk_iwao_m_child",
+    "sprite_walk_iwao_m_elder",
+    "pose_iwao_m_child",
+    "pose_iwao_m_adult",
+    "pose_iwao_m_elder"
   ]
 }
