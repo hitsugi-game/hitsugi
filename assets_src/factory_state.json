@@ -1370,6 +1370,26 @@
     "sk_g_suzuriumi",
     "sk_g_kodama",
     "sk_g_hanabi",
-    "sk_g_shigure"
+    "sk_g_shigure",
+    "sk_g_noroshi",
+    "sk_g_hoshikaji",
+    "sk_g_byakuya",
+    "sk_gs_fire1",
+    "sk_gs_fire2",
+    "sk_gs_fire3",
+    "sk_gs_fire4",
+    "sk_gs_water1",
+    "sk_gs_water2",
+    "sk_gs_water3",
+    "sk_gs_water4",
+    "sk_gs_wind1",
+    "sk_gs_wind2",
+    "sk_gs_wind3",
+    "sk_gs_wind4",
+    "sk_gs_earth1",
+    "sk_gs_earth2",
+    "sk_gs_earth3",
+    "sk_gs_earth4",
+    "sk_gs_moon1"
   ]
 }
