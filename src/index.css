@@ -591,7 +591,19 @@ button {
   right: calc(7% + (1 - var(--depth)) * 9%);
   top: calc(16% + var(--slot) * 16%);
 }
-.combatant .combatant-body { position: relative; }
+.combatant .combatant-body { position: relative; animation: bodyBreath 3.4s ease-in-out infinite; }
+/* 味方と敵で位相をずらして群れ感を消す */
+.is-enemy .combatant-body { animation-duration: 2.9s; animation-delay: -0.7s; }
+.is-ally .combatant-body { animation-duration: 3.6s; animation-delay: -1.4s; }
+@keyframes bodyBreath {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-2px) scaleY(1.012); }
+}
+/* 死亡・KO演出中は待機モーションを止めて、既存演出を優先 */
+.combatant.dead .combatant-body,
+.combatant.fx-lunge .combatant-body,
+.combatant.fx-hit .combatant-body,
+.combatant.fx-ko .combatant-body { animation: none; }
 .combatant.dead { opacity: 0.18; filter: grayscale(1) brightness(0.6); pointer-events: none; }
 .combatant.targetable { cursor: pointer; }
 .combatant.targetable .combatant-body { animation: targetPulse 1s ease-in-out infinite; }

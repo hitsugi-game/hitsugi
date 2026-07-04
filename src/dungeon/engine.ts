@@ -276,9 +276,11 @@ export class DungeonEngine {
     this.player.zIndex = this.player.y + TILE
 
     // 敵影(妖怪シルエット: 地域tierの主属性2種+稀に金の変種)
+    // UX調整: フロア定義よりも実生成数を2減、下限2で快適な密度に(データは不変・要再バランス時のみ調整)
     this.archetypes = shadeArchetypes(this.opts.tier ?? 1)
-    const goldenIdx = Math.random() < 0.18 ? Math.floor(Math.random() * this.floor.shades) : -1
-    for (let i = 0; i < this.floor.shades; i++) this.spawnShade(i === goldenIdx)
+    const shadeCount = Math.max(2, this.floor.shades - 2)
+    const goldenIdx = Math.random() < 0.18 ? Math.floor(Math.random() * shadeCount) : -1
+    for (let i = 0; i < shadeCount; i++) this.spawnShade(i === goldenIdx)
 
     // ミニマップ(訪問霧)
     this.minimap = new Minimap(this.grid)
@@ -418,6 +420,9 @@ export class DungeonEngine {
         this.animT += dms
         const frame = [0, 1, 2, 1][Math.floor(this.animT / 130) % 4]
         this.applyFacing(frame)
+        // 歩行中は微かな縦揺れ(足取り)+ 待機bobをリセット
+        this.playerSprite.y = Math.sin(this.animT / 65) * 0.9
+        this.playerSprite.scale.y = this.baseScale
       }
       if (t >= 1) {
         this.moving = false
@@ -426,6 +431,9 @@ export class DungeonEngine {
       }
     } else if (this.playerSprite) {
       this.applyFacing(1)
+      // 停止時の待機モーション(呼吸bob) — 見た目に「生きている」印象を足す
+      this.playerSprite.y = Math.sin(this.time / 380) * 1.4
+      this.playerSprite.scale.y = this.baseScale * (1 + Math.sin(this.time / 620) * 0.02)
     }
     // プレイヤー移動開始
     if (!this.moving && this.held.size > 0) {

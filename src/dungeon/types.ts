@@ -41,4 +41,5 @@ export interface DungeonRun {
   bossDown: boolean
   frantic?: number // v3.1 M12-6: 熱狂の赤い火の残り歩数(>0で発動中)
   boons?: string[] // v3.1 M16-4: この遠征で授かった灯の加護(最大3)
+  autoBattle?: boolean // オート戦闘を戦闘越しに継続(遠征単位)
 }

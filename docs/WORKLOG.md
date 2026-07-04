@@ -716,3 +716,21 @@
 ## 2026-07-04 (M10 和風UI音 — 第一版)
 
 - **やったこと**: 既存Web Audio SE合成(pluck/bellTone/taikoHit/bassTone/deg の和風合成、既存15種)に**UI効果音5種を追加**(page=頁めくり/confirm=決定/cancel=戻る/error=不可/tab=面替え)。場面送り(綴りの巻物を手繰る等)に page を配線。
+
+## 2026-07-04 (UX改善6件 — /forge収束)
+
+- **やったこと**: ユーザーレビュー「戦闘で攻撃が選べない/マップ移動も戦闘も画像が動いてるだけ/敵影が多い/オートが継続しない/戦果を得るが手動」を6項目に分解し実装。
+  - **①攻撃ワンタップ化(バグ修正)**: 「攻撃」ボタンで chainTarget/先頭生存敵に即発火(Battle.tsx `doQuickAttack`)、敵タップも即攻撃発火(menu.kind='root'時)。技の target 選択は現行維持。
+  - **②オート戦闘の永続化**: `DungeonRun.autoBattle`を追加し、`setAutoBattle`アクションを新設。Battle.tsxの auto state を `dungeonRun.autoBattle` から初期化・書き戻し。**戦闘越しに継続**。
+  - **③戦果自動遷移**: オートON時、勝利/逃走のログ流し切り後 1.2秒 で `finishBattle` 自動発動(useEffect)。敗北時は手動維持。
+  - **④敵影密度の適正化**: engine.ts で実生成数を `Math.max(2, floor.shades - 2)` にキャップ(データ不変、要再バランス時のみ gen 再実行)。
+  - **⑤マップ待機アニメ**: プレイヤースプライトに停止時の呼吸bob(y=sin(t/380)*1.4、scale.y は sin(t/620)*0.02の呼吸)、歩行時にも足取り微揺れ。
+  - **⑥戦闘待機アニメ**: `.combatant-body` に `@keyframes bodyBreath`(translateY+scaleY)、味方3.6s/敵2.9sの位相ずらしで生体感。lunge/hit/ko/dead時は待機モーション停止(既存演出を優先)。
+- **変更ファイル**: src/ui/Battle.tsx / src/core/store.ts / src/dungeon/types.ts / src/dungeon/engine.ts / src/index.css
+- **検証(実プレイ証跡)**: `npx tsc -b`緑・console error 0。preview_eval で以下を機械確認 —
+  - ①敵HP 46→0(先頭敵撃破)、攻撃ボタン click で発火
+  - ②`setAutoBattle(true/false/true)`→`dungeonRun.autoBattle`即反映、戦闘後も継続
+  - ③オート戦闘→勝利→自動で `hasBattle:false` / `screen:'dungeon'` 復帰
+  - ④floorDefShades=5 → shades.length=**3**(-2キャップ動作)
+  - ⑤`playerSprite.y` が 999→sin(time/380)*1.4 に上書き、`scale.y` も呼吸(0.4141→0.4196変動)
+  - ⑥`.combatant-body` の `animationName: bodyBreath`、味方(3.6s/-1.4s) 敵(2.9s/-0.7s) の位相ずらし確認

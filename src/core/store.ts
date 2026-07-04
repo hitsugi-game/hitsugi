@@ -100,6 +100,7 @@ interface GameStore {
   // 歩行ダンジョン(v2)
   departDungeon: (regionId: string, partyIds: string[]) => void
   dungeonSetPos: (x: number, y: number) => void
+  setAutoBattle: (on: boolean) => void
   dungeonStep: () => void
   dungeonEncounter: (boss?: boolean, golden?: boolean) => void
   goldenBattle: boolean // v3.1 M15-5: 金の敵影との戦闘中(勝てば実り2.5倍)
@@ -1150,6 +1151,13 @@ export const useGame = create<GameStore>((set, get) => {
       const run = get().dungeonRun
       if (!run) return
       set({ dungeonRun: { ...run, x, y } })
+    },
+
+    // オート戦闘のON/OFFを遠征に記憶(戦闘間で継続)
+    setAutoBattle: (on) => {
+      const run = get().dungeonRun
+      if (!run) return
+      set({ dungeonRun: { ...run, autoBattle: on } })
     },
 
     dungeonStep: () => {

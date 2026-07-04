@@ -35,12 +35,16 @@ export function BattleScreen() {
   const battleCommand = useGame((s) => s.battleCommand)
   const finishBattle = useGame((s) => s.finishBattle)
   const regionId = useGame((s) => s.dungeonRun?.regionId)
+  const initialAuto = useGame((s) => !!s.dungeonRun?.autoBattle)
+  const setAutoBattleFlag = useGame((s) => s.setAutoBattle)
   const family = useGame((s) => s.data?.family) ?? []
 
   const [displayed, setDisplayed] = useState<BattleLogEntry[]>([])
   const [pending, setPending] = useState<BattleLogEntry[]>([])
   const [menu, setMenu] = useState<Menu>({ kind: 'root' })
-  const [auto, setAuto] = useState(false)
+  const [auto, setAutoRaw] = useState(initialAuto)
+  // オート状態は遠征越しに継続 — 変更したら遠征ランへも書き戻す
+  const setAuto = (next: boolean) => { setAutoRaw(next); setAutoBattleFlag(next) }
   const [fx, setFx] = useState<Record<string, FxEvent[]>>({})
   const [bossShown, setBossShown] = useState(false)
   const [slotPhase, setSlotPhase] = useState<'spin' | 'done'>('spin')
@@ -186,6 +190,14 @@ export function BattleScreen() {
     return () => clearTimeout(t)
   }, [auto, isPlayerTurn, battle, actor, battleCommand])
 
+  // オート中の戦果自動遷移 — 勝利/逃走で、ログを流し切ってから finishBattle
+  useEffect(() => {
+    if (!auto || !battle || pending.length > 0) return
+    if (battle.phase !== 'won' && battle.phase !== 'fled') return
+    const t = setTimeout(() => finishBattle(), 1200)
+    return () => clearTimeout(t)
+  }, [auto, battle, pending.length, finishBattle])
+
   if (!battle) return null
 
   const over = battle.phase !== 'input' && battle.phase !== 'anim' && !revealing
@@ -210,11 +222,27 @@ export function BattleScreen() {
 
   const onEnemyClick = (e: Combatant) => {
     if (!isPlayerTurn || e.hp <= 0) return
+    // 技のターゲット選択中はそれを消化
     if (menu.kind === 'target' && menu.side === 'enemy') {
       if (menu.skillId) tryShowOugiCutin(menu.skillId)
       battleCommand(menu.skillId ? { type: 'skill', skillId: menu.skillId, targetKey: e.key } : { type: 'attack', targetKey: e.key })
       setMenu({ kind: 'root' })
+      return
     }
+    // それ以外は敵タップ=即通常攻撃(ワンタップ攻撃)
+    if (menu.kind === 'root') {
+      battleCommand({ type: 'attack', targetKey: e.key })
+    }
+  }
+  // 「攻撃」ボタン=chainTarget/先頭生存敵に即発火(ワンタップ攻撃)
+  const doQuickAttack = () => {
+    if (!battle || !isPlayerTurn) return
+    const foes = battle.enemies.filter((e) => e.hp > 0)
+    if (foes.length === 0) return
+    const target = battle.chainTarget && foes.some((f) => f.key === battle.chainTarget)
+      ? battle.chainTarget
+      : foes[0].key
+    battleCommand({ type: 'attack', targetKey: target })
   }
   const onAllyClick = (a: Combatant) => {
     if (!isPlayerTurn || a.hp <= 0) return
@@ -326,7 +354,7 @@ export function BattleScreen() {
             <div className="cmd-panel">
               {isPlayerTurn && menu.kind === 'root' && (
                 <>
-                  <button className="cmd-btn cmd-main" onClick={() => setMenu({ kind: 'target', side: 'enemy' })}>攻撃</button>
+                  <button className="cmd-btn cmd-main" onClick={doQuickAttack}>攻撃</button>
                   <button className="cmd-btn" onClick={() => setMenu({ kind: 'skill' })}>技</button>
                   <button className="cmd-btn" onClick={() => battleCommand({ type: 'guard' })}>防御</button>
                   <button className="cmd-btn" onClick={() => battleCommand({ type: 'flee' })}>逃げる</button>
@@ -354,6 +382,9 @@ export function BattleScreen() {
                   <p className="cmd-hint-line">的を選べ</p>
                   <button className="cmd-btn cmd-ghost" onClick={() => setMenu({ kind: 'root' })}>やめる</button>
                 </>
+              )}
+              {isPlayerTurn && menu.kind === 'root' && (
+                <p className="cmd-hint-line" style={{ opacity: 0.6, fontSize: 11 }}>攻撃=chain継続 / 敵をタップして狙う</p>
               )}
               {!isPlayerTurn && <p className="cmd-hint-line">{revealing ? '' : '……'}</p>}
             </div>
