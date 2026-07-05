@@ -11,17 +11,16 @@ import { BattleScreen } from './ui/Battle'
 import { ChronicleScreen } from './ui/Chronicle'
 import { CodexScreen } from './ui/Codex'
 import { BirthScene, CeremonyScene, DeathScene, DreamScene, EndingScene, FinaleScene, JobRiteScene, LifeScene } from './ui/Scenes'
+import { SettingsModal } from './ui/Settings'
 
-function MuteButton() {
-  const [muted, setMuted] = useState(audio.muted)
+// 全画面共通の設定ボタン(⚙)。音量/ミュート/演出軽減/オート既定へアクセス。
+function SettingsButton() {
+  const [open, setOpen] = useState(false)
   return (
-    <button
-      className="mute-btn"
-      title={muted ? '音を出す' : '音を消す'}
-      onClick={() => setMuted(audio.toggleMute())}
-    >
-      {muted ? '🔇' : '🔊'}
-    </button>
+    <>
+      <button className="mute-btn" title="設定" onClick={() => setOpen(true)}>⚙</button>
+      {open && <SettingsModal onClose={() => setOpen(false)} />}
+    </>
   )
 }
 
@@ -121,7 +120,7 @@ function App() {
   return (
     <>
       {view}
-      <MuteButton />
+      <SettingsButton />
     </>
   )
 }

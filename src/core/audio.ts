@@ -78,6 +78,7 @@ const PATTERNS: Record<Exclude<TrackName, 'none'>, Pattern> = {
 }
 
 const STORAGE_KEY = 'hitsugi_audio'
+const VOLUME_KEY = 'hitsugi_audio_vol'
 
 class AudioEngine {
   private ctx: AudioContext | null = null
@@ -90,18 +91,38 @@ class AudioEngine {
   private ambience: AmbienceKind = 'none'
   private ambienceTimers: number[] = []
 
+  private _volume: number // 0..1 マスター音量(既定0.5)
+
   constructor() {
     this._muted = localStorage.getItem(STORAGE_KEY) === 'muted'
+    const v = parseFloat(localStorage.getItem(VOLUME_KEY) ?? '')
+    this._volume = Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5
   }
 
   get muted(): boolean {
     return this._muted
   }
 
+  // 実効ゲイン(ミュート中は0)
+  private effectiveGain(): number {
+    return this._muted ? 0 : this._volume
+  }
+
+  get volume(): number {
+    return this._volume
+  }
+
+  // 0..1 でマスター音量を設定・永続化。0にしても mute フラグとは独立。
+  setVolume(v: number): void {
+    this._volume = Math.min(1, Math.max(0, v))
+    localStorage.setItem(VOLUME_KEY, String(this._volume))
+    if (this.master) this.master.gain.value = this.effectiveGain()
+  }
+
   toggleMute(): boolean {
     this._muted = !this._muted
     localStorage.setItem(STORAGE_KEY, this._muted ? 'muted' : 'on')
-    if (this.master) this.master.gain.value = this._muted ? 0 : 0.5
+    if (this.master) this.master.gain.value = this.effectiveGain()
     if (this._muted) this.clearAmbienceTimers()
     return this._muted
   }
@@ -110,7 +131,7 @@ class AudioEngine {
     if (!this.ctx) {
       this.ctx = new AudioContext()
       this.master = this.ctx.createGain()
-      this.master.gain.value = this._muted ? 0 : 0.5
+      this.master.gain.value = this.effectiveGain()
       this.master.connect(this.ctx.destination)
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume()

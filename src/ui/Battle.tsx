@@ -7,6 +7,7 @@ import { useGame } from '../core/store'
 import type { BattleLogEntry, Combatant } from '../core/types'
 import { currentActor } from '../core/battle'
 import { audio } from '../core/audio'
+import { getAutoBattleDefault } from '../core/settings'
 import { skillById } from '../core/data/skills'
 import { enemyById } from '../core/data/enemies'
 import { regionById } from '../core/data/regions'
@@ -35,7 +36,8 @@ export function BattleScreen() {
   const battleCommand = useGame((s) => s.battleCommand)
   const finishBattle = useGame((s) => s.finishBattle)
   const regionId = useGame((s) => s.dungeonRun?.regionId)
-  const initialAuto = useGame((s) => !!s.dungeonRun?.autoBattle)
+  // 遠征でオートを一度も触っていなければ、設定の「オート既定」を初期値にする
+  const initialAuto = useGame((s) => s.dungeonRun?.autoBattle ?? getAutoBattleDefault())
   const setAutoBattleFlag = useGame((s) => s.setAutoBattle)
   const family = useGame((s) => s.data?.family) ?? []
 

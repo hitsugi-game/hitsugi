@@ -1170,6 +1170,32 @@ button {
 }
 .mute-btn:hover { opacity: 1; }
 
+/* ---- 設定モーダル ---- */
+.settings-modal { max-width: 440px; }
+.settings-modal .modal-title { font-size: 20px; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 16px; text-align: center; }
+.setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.setting-label { flex-shrink: 0; font-size: 14px; }
+.setting-slider { flex: 1; accent-color: var(--flame); }
+.setting-val { width: 30px; text-align: right; color: var(--gold); font-size: 13px; }
+.setting-toggle {
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
+  padding: 11px 14px; margin-bottom: 6px; border: 1px solid var(--panel-border); border-radius: 6px;
+  background: rgba(11, 15, 30, 0.5); cursor: pointer; transition: all 0.18s;
+}
+.setting-toggle:hover { border-color: var(--amber); }
+.setting-toggle.on { border-color: var(--flame); background: rgba(255, 122, 70, 0.1); }
+.toggle-state { font-size: 12px; color: var(--gold); letter-spacing: 0.1em; }
+.setting-hint { font-size: 11px; color: var(--text-dim); margin: -2px 0 12px; line-height: 1.5; }
+.settings-modal .btn-main { width: 100%; margin-top: 8px; }
+
+/* ---- 演出を控えめに(reduce-motion) — アニメ/トランジションを実質無効化 ---- */
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
 /* ---- 立ち絵(ポートレート) ---- */
 .char-card-row { display: flex; gap: 12px; align-items: flex-start; }
 /* 灯座紋章(emb_<gata>_<element>) — Portrait右下に小さく重ねる */
