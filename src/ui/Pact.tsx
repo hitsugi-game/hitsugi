@@ -130,6 +130,13 @@ export function PactScreen() {
                     {sealed ? '???' : g.name}
                     {sealed && <span className="god-row-hint">{sealHint(g)}</span>}
                   </span>
+                  {!sealed && (
+                    <span className="god-row-bias">
+                      {topBias(g.statBias).map(([k]) => (
+                        <span key={k} className="bias-chip">{STAT_LABELS[k]}</span>
+                      ))}
+                    </span>
+                  )}
                   {affinity > 0 && !sealed && <span className="god-row-affinity">縁{affinity}</span>}
                   <span className="god-row-cost">
                     {sealed ? '—' : eff}
@@ -218,6 +225,14 @@ export function PactScreen() {
       )}
     </div>
   )
+}
+
+// 神の血潮の得意分野・上位2ステータス(神選びの比較材料)
+function topBias(statBias: Partial<Record<StatKey, number>>): [StatKey, number][] {
+  return (Object.entries(statBias) as [StatKey, number][])
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
 }
 
 // 大立ち絵パネル — 縁MAX(affinity>=5)なら第二立ち絵を優先し、god_*→炎のオーラへ静かに退避する

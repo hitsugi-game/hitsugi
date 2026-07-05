@@ -378,6 +378,13 @@ button {
 .god-row-hint { display: block; font-size: 10px; color: var(--text-dim); letter-spacing: 0; }
 .god-row-base { display: block; font-size: 10px; color: var(--text-dim); text-decoration: line-through; font-weight: 400; }
 .god-row-cost { width: 52px; text-align: right; color: var(--amber); font-weight: 700; font-variant-numeric: tabular-nums; }
+/* 神の得意ステータス(比較材料) */
+.god-row-bias { display: flex; gap: 3px; flex-shrink: 0; }
+.bias-chip {
+  font-size: 10px; padding: 0 4px; border-radius: 3px; letter-spacing: 0;
+  background: rgba(120, 150, 90, 0.22); color: #cfe0a8; border: 1px solid rgba(160, 200, 120, 0.3);
+}
+@media (max-width: 560px) { .god-row-bias { display: none; } }
 
 .god-stage { min-height: 320px; }
 .god-stage-empty {
