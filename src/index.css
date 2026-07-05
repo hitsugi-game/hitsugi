@@ -972,6 +972,16 @@ button {
   padding: 20px 24px;
   max-height: 60vh; overflow-y: auto;
 }
+/* 一族の記録 — 統計グリッド */
+.records-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.rec-cell {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: rgba(11, 15, 30, 0.5); border: 1px solid var(--panel-border);
+  border-radius: 5px; padding: 8px 4px;
+}
+.rec-num { font-size: 22px; font-weight: 800; color: var(--gold); letter-spacing: 0.05em; }
+.rec-num small { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+.rec-lbl { font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; text-align: center; }
 .chron-entry { display: flex; gap: 10px; margin-bottom: 8px; font-size: 14px; align-items: flex-start; }
 /* 年代記の故人・当該人物の顔絵(あれば) */
 .chron-face {

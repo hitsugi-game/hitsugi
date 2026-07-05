@@ -1,11 +1,47 @@
 import { useState } from 'react'
 import { useGame } from '../core/store'
 import { seasonLabel } from '../core/types'
-import { godById } from '../core/data/gods'
+import type { GameData } from '../core/types'
+import { godById, GODS } from '../core/data/gods'
+import { ENEMIES } from '../core/data/enemies'
+import { REGIONS } from '../core/data/regions'
+import { REGION_LORE } from '../core/data/lore'
 import { downloadChronicleCard, copyShareText } from './shareCard'
 import { MaybeImg, Panel } from './components'
 import { faceImg } from './img'
 import { FamilyTree } from './FamilyTree'
+
+// 一族の記録 — 既存のdataから純粋関数で集計(新規storeフィールド不要)
+function computeRecords(data: GameData) {
+  const fam = data.family
+  const gens = fam.length > 0 ? Math.max(...fam.map((c) => c.gen)) : 0
+  const alive = fam.filter((c) => c.alive).length
+  const fallenN = fam.length - alive
+  const kills = fam.reduce((s, c) => s + (c.kills ?? 0), 0)
+  const exped = fam.reduce((s, c) => s + (c.expeditions ?? 0), 0)
+  const years = Math.floor(data.seasonIndex / 12) + 1
+  const towerBest = typeof data.flags?.towerBest === 'number' ? data.flags.towerBest : 0
+  // 収集(Codexと同じ基準)
+  const seenEnemies = new Set((data.codex?.enemies ?? []).map((id) => id.replace(/_[wo]$/, '')))
+  const knownGods = new Set([...(data.codex?.gods ?? []), ...Object.entries(data.godAffinity).filter(([, v]) => v > 0).map(([k]) => k)])
+  const cleared = new Set(data.regionsCleared)
+  const frags = data.loreFrags ?? {}
+  const baseEnemies = ENEMIES.filter((e) => !/_[wo]$/.test(e.id))
+  const loreRegions = REGIONS.filter((r) => REGION_LORE[r.id])
+  const enemySeen = baseEnemies.filter((e) => seenEnemies.has(e.id)).length
+  const godSeen = GODS.filter((g) => knownGods.has(g.id)).length
+  const loreDone = loreRegions.filter((r) => cleared.has(r.id) && (frags[r.id] ?? 0) >= 3).length
+  const collTotal = baseEnemies.length + GODS.length + loreRegions.length
+  const collDone = enemySeen + godSeen + loreDone
+  const collPct = collTotal > 0 ? Math.round((collDone / collTotal) * 100) : 0
+  return {
+    gens, alive, fallenN, kills, exped, years, towerBest, fame: data.fame,
+    godsPacted: knownGods.size, familiars: data.familiars?.length ?? 0,
+    regionsCleared: data.regionsCleared.length, regionsTotal: REGIONS.length,
+    enemySeen, enemyTotal: baseEnemies.length, godSeen, godTotal: GODS.length,
+    loreDone, loreTotal: loreRegions.length, collPct,
+  }
+}
 
 export function ChronicleScreen() {
   const data = useGame((s) => s.data)!
@@ -13,10 +49,29 @@ export function ChronicleScreen() {
   const [copied, setCopied] = useState(false)
   const [showTree, setShowTree] = useState(false)
   const fallen = data.family.filter((c) => !c.alive)
+  const rec = computeRecords(data)
 
   return (
     <div className="screen">
       <h1 className="season-label" style={{ marginBottom: 14 }}>家譜 — 燈守家千年紀</h1>
+
+      <Panel title={`一族の記録 — 総合収集率 ${rec.collPct}%`}>
+        <div className="records-grid">
+          <div className="rec-cell"><span className="rec-num">{rec.gens}</span><span className="rec-lbl">紡いだ世代</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.years}</span><span className="rec-lbl">歳月(年)</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.fame}</span><span className="rec-lbl">武功</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.kills}</span><span className="rec-lbl">討った魔性</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.exped}</span><span className="rec-lbl">夜藪行</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.alive}<small>/{rec.alive + rec.fallenN}</small></span><span className="rec-lbl">存命 / 一族</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.godsPacted}</span><span className="rec-lbl">契った星神</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.familiars}</span><span className="rec-lbl">懐いた眷属</span></div>
+          {rec.towerBest > 0 && <div className="rec-cell"><span className="rec-num">{rec.towerBest}<small>層</small></span><span className="rec-lbl">常夜百層 最高</span></div>}
+          <div className="rec-cell"><span className="rec-num">{rec.regionsCleared}<small>/{rec.regionsTotal}</small></span><span className="rec-lbl">鎮めた地</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.enemySeen}<small>/{rec.enemyTotal}</small></span><span className="rec-lbl">見た魔性</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.godSeen}<small>/{rec.godTotal}</small></span><span className="rec-lbl">識る星神</span></div>
+          <div className="rec-cell"><span className="rec-num">{rec.loreDone}<small>/{rec.loreTotal}</small></span><span className="rec-lbl">土地の記</span></div>
+        </div>
+      </Panel>
 
       <Panel title="逝きし者たち">
         <div className="chronicle-scroll">
