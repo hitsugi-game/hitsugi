@@ -13,10 +13,12 @@ import { faceImg } from './img'
 interface Line {
   x1: number; y1: number; x2: number; y2: number
   kind: 'human' | 'god'
+  affinity?: number // 神親線のみ: その神との現在の縁(太さ/濃さに反映)
 }
 
 export function FamilyTree({ onClose }: { onClose: () => void }) {
   const family: Character[] = useGame((s) => s.data?.family ?? [])
+  const godAffinity = useGame((s) => s.data?.godAffinity ?? {})
   const containerRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const [lines, setLines] = useState<Line[]>([])
@@ -55,11 +57,12 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
           })
         }
       }
-      // 神親は画面外(星界)にいるため、子の少し上から短い点線を垂らして示す
-      next.push({ x1: cx, y1: cy - 22, x2: cx, y2: cy, kind: 'god' })
+      // 神親は画面外(星界)にいるため、子の少し上から短い点線を垂らして示す。
+      // 線の太さ/濃さは、その神との現在の縁の深さを映す(血脈と星の絆の可視化)。
+      next.push({ x1: cx, y1: cy - 26, x2: cx, y2: cy, kind: 'god', affinity: godAffinity[c.godParentId] ?? 0 })
     }
     setLines(next)
-  }, [family, byGen])
+  }, [family, byGen, godAffinity])
 
   return (
     <div className="modal-back" onClick={onClose}>
@@ -76,7 +79,7 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
         </h2>
         <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 10 }}>
           <span className="tree-legend"><i className="tree-legend-swatch human" />人の親</span>
-          <span className="tree-legend"><i className="tree-legend-swatch god" />星の親</span>
+          <span className="tree-legend"><i className="tree-legend-swatch god" />星の親(縁が深いほど太く濃い)</span>
           {' '}— 家名をクリックすると詳細を見られる。
         </p>
         <div className="familytree-scroll" ref={containerRef}>
@@ -86,6 +89,9 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
                 key={i}
                 x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
                 className={`tree-line tree-line-${l.kind}`}
+                style={l.kind === 'god'
+                  ? { strokeWidth: 1 + Math.min(l.affinity ?? 0, 5) * 0.7, opacity: 0.3 + Math.min(l.affinity ?? 0, 5) * 0.14 }
+                  : undefined}
               />
             ))}
           </svg>
@@ -121,7 +127,7 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
             <span className="tsuzuri-name">{selected.name.slice(0, 2)}</span>
             <span className="tsuzuri-text">
               <b style={{ color: 'var(--amber)' }}>{selected.name}</b>(第{selected.gen}代) —
-              {' '}{godById(selected.godParentId).name}の子。
+              {' '}{godById(selected.godParentId).name}の子(縁{Math.floor(godAffinity[selected.godParentId] ?? 0)})。
               {selected.alive ? '存命。' : `享年八季。${selected.epitaph ? `辞世「${selected.epitaph}」` : ''}`}
               {' '}討った魔性{selected.kills}、夜藪行{selected.expeditions}度。
             </span>
