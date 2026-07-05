@@ -904,6 +904,8 @@ button {
   animation: screenIn 0.4s ease both;
 }
 .victory-line { font-size: 15px; color: var(--gold); letter-spacing: 2px; }
+.victory-loot { font-size: 13px; color: var(--text); margin-top: 4px; letter-spacing: 0.06em; }
+.victory-loot b { color: var(--el-star); font-variant-numeric: tabular-nums; }
 
 /* 縦画面: 敵=上段/味方=下段、コマンドは最下部 */
 @media (max-width: 560px) {

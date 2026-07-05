@@ -46,6 +46,7 @@ export function BattleScreen() {
   const battleCommand = useGame((s) => s.battleCommand)
   const finishBattle = useGame((s) => s.finishBattle)
   const regionId = useGame((s) => s.dungeonRun?.regionId)
+  const runLoot = useGame((s) => s.dungeonRun?.loot)
   // 遠征でオートを一度も触っていなければ、設定の「オート既定」を初期値にする
   const initialAuto = useGame((s) => s.dungeonRun?.autoBattle ?? getAutoBattleDefault())
   const setAutoBattleFlag = useGame((s) => s.setAutoBattle)
@@ -367,6 +368,12 @@ export function BattleScreen() {
             <p className="victory-line">
               {battle.phase === 'won' ? '勝鬨を上げよ — 夜藪に僅かな静けさが戻った' : battle.phase === 'fled' ? '一族は闇に紛れて退いた' : '一族の灯が、闇に呑まれた……'}
             </p>
+            {battle.phase === 'won' && runLoot && (runLoot.hoto > 0 || runLoot.ketsu > 0 || runLoot.items.length > 0) && (
+              <p className="victory-loot">
+                この夜の実り — 奉燈 <b>{runLoot.hoto}</b> ／ 血珠 <b>{runLoot.ketsu}</b>
+                {runLoot.items.length > 0 && <> ／ 遺物 <b>{runLoot.items.length}</b></>}
+              </p>
+            )}
             <button className="btn btn-main" onClick={finishBattle}>
               {battle.phase === 'won' ? '戦果を得る' : battle.phase === 'fled' ? '先へ' : '……'}
             </button>
