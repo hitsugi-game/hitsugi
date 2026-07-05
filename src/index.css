@@ -988,6 +988,9 @@ button {
   padding: 20px 24px;
   max-height: 60vh; overflow-y: auto;
 }
+/* 誕生の兆し */
+.birth-omen { color: var(--gold); font-size: 14px; font-style: italic; letter-spacing: 0.05em; margin: 2px 0 10px; opacity: 0.92; }
+
 /* 獲得トースト — 画面下中央に数秒 */
 .toast-stack {
   position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 95;

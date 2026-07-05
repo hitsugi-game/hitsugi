@@ -35,6 +35,44 @@ function stableDailyIndex(title: string, lines: { speaker: string; text: string 
   return sum % 20
 }
 
+// 誕生の兆し — 神の属性ごとに、生まれた刹那の星のしるしを彩る(bornSeasonで選ぶ)。
+const BIRTH_OMENS: Record<string, string[]> = {
+  fire: [
+    '産声の刹那、郷の大燈籠がひときわ強く燃え上がったという。',
+    '囲炉裏の火が、招くように子のほうへ揺れた。熱を宿す血の子だ。',
+    '赤子の掌は、生まれながらに温かかった。灯を絶やさぬ者になろう。',
+  ],
+  water: [
+    '生まれた子の頬に、どこからか雫がひとつ落ちた。星の涙か、恵みか。',
+    '産湯はいらぬほど、その子は静かに濡れて生まれてきた。',
+    '遠くの涸れ沢に、その夜だけ水音が戻ったと、年寄りは言う。',
+  ],
+  wind: [
+    '夜藪を渡る風が、赤子の産声を遠くの峰まで運んでいった。',
+    '窓もないのに、産屋の灯がふわりと一度だけ揺れた。風の子の証。',
+    'その子が生まれた朝、郷に久方ぶりの涼風が吹いたという。',
+  ],
+  earth: [
+    '踏みしめた郷の土が、ほんの少し温もった。根を張る者が来た。',
+    '産声とともに、庭の枯れ石がひとつ、ことりと落ち着いた。',
+    'その子の生まれた年は、痩せた畑にも実がよく成ったと伝わる。',
+  ],
+  moon: [
+    '欠けた月が、雲間から一瞬だけ、その子を照らして去った。',
+    '常夜のはずの空に、うっすらと月の輪郭が滲んだ夜だった。',
+    '赤子は、闇のほうをじっと見て泣かなかった。夜目の子だ。',
+  ],
+  star: [
+    '空のどこかで、名もなき星がひとつ、静かに瞬いたという。',
+    '玄冬に喰われ残った星の光が、その子の額に一点、宿った気がした。',
+    '産声の瞬間、夜藪の露がいっせいに、星の色に光ったと語られる。',
+  ],
+}
+function birthOmen(element: string, bornSeason: number): string {
+  const bank = BIRTH_OMENS[element] ?? BIRTH_OMENS.star
+  return bank[Math.abs(bornSeason) % bank.length]
+}
+
 export function BirthScene({ charId }: { charId: string }) {
   const data = useGame((s) => s.data)!
   const processNextScene = useGame((s) => s.processNextScene)
@@ -79,6 +117,7 @@ export function BirthScene({ charId }: { charId: string }) {
         <p>
           {parent?.name}と{god.name}の子、生まれる。
         </p>
+        <p className="birth-omen">{birthOmen(char.element, char.bornSeason)}</p>
         {/* 命名(v3.1 M16-2): 候補から選ぶか、自由に授ける */}
         <div className="naming-box">
           <input
