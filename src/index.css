@@ -986,6 +986,12 @@ button {
   padding: 20px 24px;
   max-height: 60vh; overflow-y: auto;
 }
+/* 綴ヒントの行動導線 */
+.tsuzuri-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tsuzuri-row .tsuzuri { flex: 1; min-width: 200px; }
+.tsuzuri-go { flex-shrink: 0; font-size: 13px; padding: 6px 14px; border-color: var(--flame); color: var(--gold); animation: tsuzuriGoPulse 2s ease-in-out infinite; }
+@keyframes tsuzuriGoPulse { 0%, 100% { box-shadow: 0 0 0 rgba(255,122,70,0); } 50% { box-shadow: 0 0 10px rgba(255,122,70,0.5); } }
+
 /* 戦闘: 敵の属性チップ＋相性(▲有利/▽不利)。現在の行動者の属性で色づく */
 .el-chip {
   display: inline-block; font-size: 10px; padding: 0 4px; margin-right: 4px; border-radius: 3px;

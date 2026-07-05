@@ -48,7 +48,14 @@ export function HomeScreen() {
         </div>
       </header>
 
-      <TsuzuriLine text={hint} />
+      <div className="tsuzuri-row">
+        <TsuzuriLine text={hint.text} />
+        {hint.go && (
+          <button className="btn tsuzuri-go" onClick={() => setScreen({ id: hint.go!.id })}>
+            → {hint.go.label}
+          </button>
+        )}
+      </div>
 
       <Panel title="燈守家の一族">
         <div className="family-grid">
@@ -280,18 +287,19 @@ function HelpModal({ onClose }: { onClose: () => void }) {
   )
 }
 
-function tsuzuriHint(data: ReturnType<typeof useGame.getState>['data'] & object, adultCount: number): string {
+type HintGo = { id: 'pact' | 'depart'; label: string }
+function tsuzuriHint(data: ReturnType<typeof useGame.getState>['data'] & object, adultCount: number): { text: string; go?: HintGo } {
   const alive = data.family.filter((c) => c.alive)
   const head = alive.find((c) => c.isHead)
-  if (alive.length === 0) return '……一族は今、腹の中の子ひとりに懸かっとる。祈って待て。'
+  if (alive.length === 0) return { text: '……一族は今、腹の中の子ひとりに懸かっとる。祈って待て。' }
   if (head && seasonsLeft(head, data.seasonIndex) <= 3) {
-    return `${head.name}の灯は、もってあとひと季。……契りを済ませたか? 家譜に次の名を書かせてくれよ。`
+    return { text: `${head.name}の灯は、もってあとひと季。……契りを済ませたか? 家譜に次の名を書かせてくれよ。`, go: { id: 'pact', label: '星契りへ' } }
   }
   if (adultCount > 0 && data.pendingBirths.length === 0 && alive.length <= 2 && data.hoto >= 80) {
-    return '血が細い。星契りを急げ。一族が絶えれば、郷の大燈籠も消える。'
+    return { text: '血が細い。星契りを急げ。一族が絶えれば、郷の大燈籠も消える。', go: { id: 'pact', label: '星契りへ' } }
   }
   if (data.fame >= 60 && data.regionsCleared.length === 0) {
-    return '武功が上がったな。提灯坂への道が開けとるぞ。あそこの主は……まあ、行けば分かる。'
+    return { text: '武功が上がったな。提灯坂への道が開けとるぞ。あそこの主は……まあ、行けば分かる。', go: { id: 'depart', label: '出立へ' } }
   }
   const lines = [
     '書くことがないのは良い日だ、と千年書いてきて思う。……さ、今月はどう動く?',
@@ -299,7 +307,7 @@ function tsuzuriHint(data: ReturnType<typeof useGame.getState>['data'] & object,
     '奉燈は使ってこそ。蔵で錆びさせるな、契りに、装備に、祭に回せ。',
     '同じ的を家族で続けて狙え。「継足」の連撃は、血の繋がりの技よ。',
   ]
-  return lines[data.seasonIndex % lines.length]
+  return { text: lines[data.seasonIndex % lines.length] }
 }
 
 // 家訓(v3.1 M12-8) — 当主が家風を定める。一族全体への小さな加護
