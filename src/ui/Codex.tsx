@@ -10,7 +10,7 @@ import { REGION_LORE } from '../core/data/lore'
 import { MaybeImg, NightBackdrop, Panel } from './components'
 import { gameImg, HOME_BG, regionBgR } from './img'
 
-type Tab = 'enemies' | 'gods' | 'lore'
+type Tab = 'enemies' | 'gods' | 'lore' | 'nemesis'
 
 // 変異(若_w/老_o)を基礎種に畳む
 function baseEnemyId(id: string): string {
@@ -37,6 +37,9 @@ export function CodexScreen() {
   const godSeen = GODS.filter((g) => knownGods.has(g.id)).length
   const loreRegions = REGIONS.filter((r) => REGION_LORE[r.id])
   const loreDone = loreRegions.filter((r) => cleared.has(r.id) && (frags[r.id] ?? 0) >= 3).length
+  const nemeses = data.nemeses ?? []
+  const enemyOf = (id: string) => ENEMIES.find((e) => e.id === id)
+  const regionName = (id: string) => REGIONS.find((r) => r.id === id)?.name ?? '夜藪'
 
   return (
     <div className="screen">
@@ -53,6 +56,11 @@ export function CodexScreen() {
         <button className={`btn btn-ghost filter-tab ${tab === 'gods' ? 'active' : ''}`} onClick={() => setTab('gods')}>
           星神 {godSeen}/{GODS.length}
         </button>
+        {nemeses.length > 0 && (
+          <button className={`btn btn-ghost filter-tab ${tab === 'nemesis' ? 'active' : ''}`} onClick={() => setTab('nemesis')}>
+            宿敵 {nemeses.length}
+          </button>
+        )}
       </div>
 
       {tab === 'lore' && (
@@ -103,6 +111,28 @@ export function CodexScreen() {
                     {seen ? `${ELEMENT_LABELS[e.element]} / 剛${e.tier}` : '—'}
                   </div>
                   {seen && <p className="codex-desc">{e.desc}</p>}
+                </div>
+              )
+            })}
+          </div>
+        </Panel>
+      )}
+
+      {tab === 'nemesis' && (
+        <Panel title="宿敵 — 一族の血を吸い、名を得た魔性">
+          {nemeses.length === 0 && <p style={{ fontSize: 13 }}>まだ宿敵はいない。……それは幸運か、まだ夜が浅いか。</p>}
+          <div className="codex-grid">
+            {nemeses.map((n) => {
+              const e = enemyOf(n.enemyId)
+              return (
+                <div key={n.id} className="codex-card nemesis-card">
+                  {e && <MaybeImg src={gameImg(e.sprite)} className="codex-thumb nemesis-thumb" />}
+                  <div className="codex-name">{n.name}</div>
+                  <div className="nemesis-level">{'★'.repeat(n.level)}{'☆'.repeat(Math.max(0, 5 - n.level))}</div>
+                  <p className="codex-desc">
+                    <b style={{ color: '#d8a7a0' }}>{n.victim}</b>を喰らい、{regionName(n.regionId)}にて名を得た。
+                    逃すたび強くなる。討てば、特別な実りを遺す。
+                  </p>
                 </div>
               )
             })}
