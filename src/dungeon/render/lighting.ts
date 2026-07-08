@@ -10,6 +10,12 @@ import type { DungeonTheme } from './theme'
 
 export type LightMode = 'rt' | 'simple'
 
+// 全灯モード(視認性優先) — マップ全体を常に見せる薄い環境ベールに固定する。
+// テーマの veilAlpha(0.8前後の暗黒)は用いない。灯ゲージのゲーム性(消灯で敵狂暴化・帰り火)は
+// engine 側の別ロジックなので不変 — ここで変えるのは視覚の明るさだけ。
+const FLOOD_AMBIENT = 0.1 // 灯100%時の全画面の翳り(ほぼ全灯)
+const FLOOD_DRAIN_MAX = 0.16 // 灯0%でもこの濃さまで(暗くしすぎず、帰り火の切迫だけ残す)
+
 interface LightSource {
   id: string
   wx: number // ワールドpx(中心)
@@ -67,7 +73,7 @@ export class LightingSystem {
     const h2 = Math.max(2, Math.ceil(renderer.height / 2))
     this.rt = RenderTexture.create({ width: w2, height: h2 })
     this.veil.rect(0, 0, w2, h2).fill(0x000000)
-    this.veil.alpha = theme.veilAlpha
+    this.veil.alpha = FLOOD_AMBIENT // 全灯: テーマの暗黒veilAlphaは使わない(初フレームの暗転防止)
     this.scene.addChild(this.veil)
 
     this.out = new Sprite(this.rt)
@@ -168,10 +174,10 @@ export class LightingSystem {
     const retarget = this.flickerT >= 70
     if (retarget) this.flickerT = 0
 
-    // ベール: 灯が減るほど濃く、虹彩で全閉へ
-    const base = this.theme.veilAlpha
-    const drain = (1 - this.lightPct / 100) * 0.08
-    const veilA = Math.min(0.97, base + drain)
+    // ベール: 全灯モード。薄い環境光に固定し、灯が細るとほんの少し翳る(帰り火の切迫のみ残す)。
+    // 虹彩暗転(エンカウント遷移)は irisK で従来どおり全黒まで閉じる。
+    const drain = (1 - this.lightPct / 100) * (FLOOD_DRAIN_MAX - FLOOD_AMBIENT)
+    const veilA = FLOOD_AMBIENT + drain
     this.veil.alpha = veilA + (1 - veilA) * (1 - this.irisK)
 
     // プレイヤー松明: 半径=灯%連動(5.5→2タイル)×虹彩

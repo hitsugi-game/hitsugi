@@ -35,9 +35,10 @@ export function vignetteTexture(): Texture {
   canvas.width = size
   canvas.height = size
   const ctx = canvas.getContext('2d')!
-  const g = ctx.createRadialGradient(size / 2, size / 2, size * 0.32, size / 2, size / 2, size * 0.72)
+  // 全灯モードに合わせ端の翳りを弱める(透明域を広げ、最外周も 0.55→0.28)。額縁程度に留める。
+  const g = ctx.createRadialGradient(size / 2, size / 2, size * 0.45, size / 2, size / 2, size * 0.75)
   g.addColorStop(0, 'rgba(0,0,0,0)')
-  g.addColorStop(1, 'rgba(0,0,0,0.55)')
+  g.addColorStop(1, 'rgba(0,0,0,0.28)')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, size, size)
   vignetteTex = Texture.from(canvas)
