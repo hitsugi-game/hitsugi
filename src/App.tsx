@@ -10,7 +10,7 @@ import { DungeonScreen } from './ui/Dungeon'
 import { BattleScreen } from './ui/Battle'
 import { ChronicleScreen } from './ui/Chronicle'
 import { CodexScreen } from './ui/Codex'
-import { BirthScene, CeremonyScene, DeathScene, DreamScene, EndingScene, FinaleScene, JobRiteScene, LifeScene } from './ui/Scenes'
+import { BirthScene, CeremonyScene, DeathScene, DreamScene, DreamEpScene, EndingScene, FinaleScene, JobRiteScene, LifeScene } from './ui/Scenes'
 import { SettingsModal } from './ui/Settings'
 import { setToastSink, emitToast, type ToastKind } from './ui/toast'
 
@@ -107,6 +107,7 @@ function App() {
         case 'birth':
         case 'death':
         case 'dream':
+        case 'dreamEp':
         case 'ceremony':
         case 'jobrite':
         case 'life':
@@ -155,6 +156,8 @@ function App() {
         return <DeathScene charId={screen.charId} />
       case 'dream':
         return <DreamScene />
+      case 'dreamEp':
+        return <DreamEpScene epId={screen.epId} />
       case 'ending':
         return <EndingScene />
       default:

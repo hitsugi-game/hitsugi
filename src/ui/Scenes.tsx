@@ -12,6 +12,7 @@ import type { JobRole } from '../core/data/jobs'
 import { skillById } from '../core/data/skills'
 import { MALE_NAMES, FEMALE_NAMES } from '../core/data/names'
 import { ENDINGS, FINALE_CHOICES } from '../core/data/story'
+import { dreamEpisodeById } from '../core/data/dreams'
 import { clearSave } from '../core/save'
 import { downloadChronicleCard } from './shareCard'
 import { MaybeImg, SceneBg } from './components'
@@ -474,6 +475,45 @@ export function DreamScene() {
       <h1 className="scene-title">夢渡り</h1>
       <div className="scene-body">
         {DREAM_BEATS.slice(Math.max(0, beat - 2), beat + 1).map((t, i, arr) => (
+          <p key={beat - arr.length + i} className={i === arr.length - 1 ? 'intro-current' : 'intro-past'}>
+            {t}
+          </p>
+        ))}
+      </div>
+      {done ? (
+        <button className="btn btn-main" onClick={processNextScene}>
+          目を覚ます
+        </button>
+      ) : (
+        <div className="intro-hint">クリックで進む</div>
+      )}
+    </div>
+  )
+}
+
+// 夢渡りの連作(data/dreams.ts) — 看取りの数だけ深く見る、千年前の記憶。
+// 様式は初回DreamSceneと同一(cg_kiro背景・朗読形式)。epIdが変われば読み進みをリセット。
+export function DreamEpScene({ epId }: { epId: string }) {
+  const processNextScene = useGame((s) => s.processNextScene)
+  const [beat, setBeat] = useState(0)
+  const [lastEp, setLastEp] = useState(epId)
+  if (epId !== lastEp) {
+    setLastEp(epId)
+    setBeat(0)
+  }
+  const ep = dreamEpisodeById(epId)
+  if (!ep) {
+    // 未知のepId(将来のセーブ互換等) — 詰まらせず静かに次へ
+    processNextScene()
+    return null
+  }
+  const done = beat >= ep.beats.length - 1
+  return (
+    <div className="scene-screen screen" onClick={() => { if (!done) { audio.se('page'); setBeat(beat + 1) } }}>
+      <SceneBg file="cg_kiro.png" />
+      <h1 className="scene-title">{ep.title}</h1>
+      <div className="scene-body">
+        {ep.beats.slice(Math.max(0, beat - 2), beat + 1).map((t, i, arr) => (
           <p key={beat - arr.length + i} className={i === arr.length - 1 ? 'intro-current' : 'intro-past'}>
             {t}
           </p>

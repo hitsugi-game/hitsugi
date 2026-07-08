@@ -284,6 +284,7 @@ export type Screen =
   | { id: 'finale' } // 千年の岐路(v3.1 M15-4: 結末の選択)
   | { id: 'death'; charId: string }
   | { id: 'dream' } // 夢渡り — 汐里との邂逅
+  | { id: 'dreamEp'; epId: string } // 夢渡りの連作 — 千年前の記憶(data/dreams.ts)
   | { id: 'ending' }
 
 // ---- ゲーム全体状態 ----

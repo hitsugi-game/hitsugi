@@ -37,6 +37,7 @@ import { tozaOf } from './data/toza'
 import { jobById, JOB_SKILL_UNLOCK_AGES } from './data/jobs'
 import { hatsujinScene, kizunaScene, hosoriScene, dailyScene } from './lifeEvents'
 import { nextGossip } from './data/gossip'
+import { nextDreamEpisode } from './data/dreams'
 
 // UIへ流す演出イベント(誕生・死亡は順に画面表示)
 type PendingScene =
@@ -45,6 +46,7 @@ type PendingScene =
   | { kind: 'ceremony'; charId: string }
   | { kind: 'jobrite'; charId: string } // 生業の儀(月齢12)
   | { kind: 'dream' }
+  | { kind: 'dreamEp'; epId: string } // 夢渡りの連作(data/dreams.ts) — 看取りが深めた夢
   | { kind: 'life'; title: string; lines: { speaker: string; text: string }[]; bg?: string }
 
 interface GameStore {
@@ -429,6 +431,14 @@ export const useGame = create<GameStore>((set, get) => {
       d = { ...d, flags: { ...d.flags, dreamSeen: true } }
       d = chronicle(d, 'event', '当主、不思議な夢を見る。目覚めた頬に、涙の痕。')
       scenes.push({ kind: 'dream' })
+    } else {
+      // 夢渡りの連作 — 看取りの数だけ、千年前の記憶へ深く招かれる(1季に一篇まで)
+      const ep = nextDreamEpisode(d)
+      if (ep) {
+        d = { ...d, flags: { ...d.flags, [`dreamEp_${ep.id}`]: true } }
+        d = chronicle(d, 'event', `当主、深い夢を見る。——「${ep.title}」が家譜の余白に記された。`)
+        scenes.push({ kind: 'dreamEp', epId: ep.id })
+      }
     }
 
     // 血脈断絶チェック
@@ -592,7 +602,9 @@ export const useGame = create<GameStore>((set, get) => {
                   ? { id: 'jobrite', charId: next.charId }
                   : next.kind === 'life'
                     ? { id: 'life', title: next.title, lines: next.lines, bg: next.bg }
-                    : { id: 'dream' },
+                    : next.kind === 'dreamEp'
+                      ? { id: 'dreamEp', epId: next.epId }
+                      : { id: 'dream' },
       })
     },
 
