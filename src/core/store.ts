@@ -72,6 +72,8 @@ interface GameStore {
   claimOdai: () => { hoto: number; ketsu: number } | null
   // 郷の声の既読カーソル(M18 P2: 帳の新着badge用。ゲームロジックには影響しない)
   markGossipSeen: () => void
+  // 図鑑の既読カーソル(M19 A1: 新着フィルタ/帳badge用。ゲームロジックには影響しない)
+  markCodexSeen: () => void
   setScreen: (s: Screen) => void
   processNextScene: () => void
 
@@ -631,6 +633,19 @@ export const useGame = create<GameStore>((set, get) => {
       set({ data: nd })
       saveGame(nd)
       return { hoto: odai.reward.hoto, ketsu: odai.reward.ketsu }
+    },
+
+    markCodexSeen: () => {
+      const d = get().data
+      if (!d) return
+      const en = d.codex?.enemies?.length ?? 0
+      const gd = d.codex?.gods?.length ?? 0
+      const curEn = typeof d.flags.codexSeenEn === 'number' ? d.flags.codexSeenEn : 0
+      const curGd = typeof d.flags.codexSeenGods === 'number' ? d.flags.codexSeenGods : 0
+      if (en <= curEn && gd <= curGd) return
+      const nd: GameData = { ...d, flags: { ...d.flags, codexSeenEn: en, codexSeenGods: gd } }
+      set({ data: nd })
+      saveGame(nd)
     },
 
     markGossipSeen: () => {

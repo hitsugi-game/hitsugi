@@ -3,7 +3,7 @@
 // 発見判定・データ導出のロジックは既存を移動のみ(変更禁止)。store/core は読むだけ。
 // 未知は個別カードで並べず章/属性/tierごとに集約行へ。カード選択→詳細面(右ペイン/下部)へ長文を逃がす。
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../core/store'
 import {
   ELEMENT_LABELS, GOD_RANK_LABELS,
@@ -146,7 +146,24 @@ function NemesisDetail({ n, enemy, regionName }: { n: NemesisRecord; enemy: Enem
 export function CodexScreen() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
+  const markCodexSeen = useGame((s) => s.markCodexSeen)
   const [tab, setTab] = useState<Tab>('lore')
+  // M19 A1: 新着 — 開いた瞬間の未読集合をセッション内に固定してから既読カーソルを進める
+  // (StrictMode二重実行でもref初期化は一度きり)
+  const freshRef = useRef<{ en: Set<string>; gods: Set<string> } | null>(null)
+  if (!freshRef.current) {
+    const enArr = data.codex?.enemies ?? []
+    const gdArr = data.codex?.gods ?? []
+    const enCur = typeof data.flags.codexSeenEn === 'number' ? data.flags.codexSeenEn : 0
+    const gdCur = typeof data.flags.codexSeenGods === 'number' ? data.flags.codexSeenGods : 0
+    freshRef.current = {
+      en: new Set(enArr.slice(enCur).map(baseEnemyId)),
+      gods: new Set(gdArr.slice(gdCur)),
+    }
+  }
+  const fresh = freshRef.current
+  const [freshOnly, setFreshOnly] = useState(false)
+  useEffect(() => { markCodexSeen() }, [markCodexSeen])
   // タブごとに選択カード/表示件数を保持(§6.3: 滞在中は状態を失わない)
   const [selByTab, setSelByTab] = useState<Partial<Record<Tab, string>>>({})
   const [shownByTab, setShownByTab] = useState<Record<Tab, number>>({ lore: PAGE, enemies: PAGE, gods: PAGE, nemesis: PAGE })
@@ -185,7 +202,7 @@ export function CodexScreen() {
   )
   // 属性ごとに束ねる
   const enemyGroups = groupItems(
-    baseEnemies,
+    freshOnly ? baseEnemies.filter((e) => fresh.en.has(e.id)) : baseEnemies,
     (e) => seenEnemies.has(e.id),
     (e) => e.element,
     (k) => `${ELEMENT_LABELS[k as keyof typeof ELEMENT_LABELS]}の魔性`,
@@ -193,17 +210,17 @@ export function CodexScreen() {
   )
   // 位(下つ星〜極ツ星)ごとに束ねる
   const godGroups = groupItems(
-    GODS,
+    freshOnly ? GODS.filter((g) => fresh.gods.has(g.id)) : GODS,
     (g) => knownGods.has(g.id),
     (g) => String(g.rank),
     (k) => GOD_RANK_LABELS[Number(k) as keyof typeof GOD_RANK_LABELS],
     ['1', '2', '3', '4'],
   )
 
-  const TABS: { key: Tab; label: string }[] = [
+  const TABS: { key: Tab; label: string; badge?: number }[] = [
     { key: 'lore', label: `土地 ${loreDone}/${loreRegions.length}` },
-    { key: 'enemies', label: `魔性 ${enemySeen}/${baseEnemies.length}` },
-    { key: 'gods', label: `星神 ${godSeen}/${GODS.length}` },
+    { key: 'enemies', label: `魔性 ${enemySeen}/${baseEnemies.length}`, badge: fresh.en.size },
+    { key: 'gods', label: `星神 ${godSeen}/${GODS.length}`, badge: fresh.gods.size },
     ...(nemeses.length > 0 ? [{ key: 'nemesis' as const, label: `宿敵 ${nemeses.length}` }] : []),
   ]
 
@@ -222,6 +239,16 @@ export function CodexScreen() {
       <NightBackdrop bg={gameImg(HOME_BG)} />
       <div className="codex-layout">
         <div className="codex-list">
+          {(tab === 'enemies' || tab === 'gods') && (fresh.en.size + fresh.gods.size > 0 || freshOnly) && (
+            <div className="codex-fresh-row">
+              <button
+                className={`btn btn-ghost filter-tab ${freshOnly ? 'active' : ''}`}
+                onClick={() => setFreshOnly(!freshOnly)}
+              >
+                新着だけ見る{tab === 'enemies' ? `(${fresh.en.size})` : `(${fresh.gods.size})`}
+              </button>
+            </div>
+          )}
           {tab === 'lore' && (
             <GroupedCards
               groups={loreGroups}

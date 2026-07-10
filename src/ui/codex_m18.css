@@ -55,3 +55,6 @@
 .codex-detail-meta { font-size: 12.5px; color: var(--el-star); margin: 4px 0 10px; }
 .codex-detail-body { font-size: 13px; line-height: 1.8; color: var(--text); }
 .codex-detail-body p { margin-bottom: 4px; }
+
+/* M19 A1: 新着フィルタ行 */
+.codex-fresh-row { margin-bottom: 8px; }

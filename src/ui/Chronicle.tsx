@@ -57,6 +57,12 @@ const ACHIEVEMENTS: { name: string; hint: string; test: (r: RecordSummary) => bo
   { name: '長寿の一族', hint: '二十年を生き延びる', test: (r) => r.years >= 20 },
   { name: '大家族', hint: '一族の総数が三十に至る', test: (r) => r.alive + r.fallenN >= 30 },
   { name: '百の魔性を討つ', hint: '討伐数100', test: (r) => r.kills >= 100 },
+  // M19 B3: 図鑑コンプの節目称号 — 収集率に到達の褒美を与える
+  { name: '見聞の徒', hint: '魔性図鑑を半分(50%)まで埋める', test: (r) => r.enemyTotal > 0 && r.enemySeen / r.enemyTotal >= 0.5 },
+  { name: '夜藪の博士', hint: '魔性図鑑を全て(100%)埋める', test: (r) => r.enemyTotal > 0 && r.enemySeen >= r.enemyTotal },
+  { name: '星に親しむ家', hint: '星神の半分(50%)と契る', test: (r) => r.godTotal > 0 && r.godSeen / r.godTotal >= 0.5 },
+  { name: '星霊の盟家', hint: '全ての星神(100%)と契る', test: (r) => r.godTotal > 0 && r.godSeen >= r.godTotal },
+  { name: '千年の識者', hint: '総合収集率100%に至る', test: (r) => r.collPct >= 100 },
   { name: '千の魔性を討つ', hint: '討伐数1000', test: (r) => r.kills >= 1000 },
   { name: '千年の武', hint: '武功500', test: (r) => r.fame >= 500 },
   { name: '眷属を率いる者', hint: '眷属を六体懐かせる', test: (r) => r.familiars >= 6 },

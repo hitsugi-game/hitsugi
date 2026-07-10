@@ -950,3 +950,4 @@
 - 2026-07-11 M18 P1-P4実装(共通殻shell.tsx+UI_SHELL_API.md/郷ホーム=血脈診断・状況別推奨6条・月送り確認Sheet・郷の帳LiveBadge/鍛冶4タブ独立画面Forge.tsx・普請Facilities.tsx・星契りステップ+固定CTA・出立準備バー+固定CTA(sonnet3体並列)/戦闘=行動順6手・火脈中央印・中央寄せ人数連動サイズ・ログ戦場下端+全履歴・技戻る固定・対象キーボード操作)。逸脱: preview障害でP0のDOM計測とJ実測は保留(機械検証は全緑)・Phase個別コミットはindex.css跨ぎのため統合。
 - 2026-07-11 M18 P5(sonnet3体並列): 家譜=概要/称号/故人/年代記4タブ+種別絞込+200件刻み/図鑑=タブ上部固定・未知を章/属性/位で集約(あとN種)・詳細面・50件刻み・タブ別状態保持/家系図=全画面化・当主へ戻る・人物検索・存命絞込(減光)。+P4探索: 確認面Sheet化・帰り火の損失明示・dpad safe-area。図鑑「新着フィルタ」は永続状態なしのため見送り(GAPS行き)。
 - 2026-07-11 M18検収(部分達成): 独立code-review出荷可(CRIT0/HIGH0)・指摘3件即修正。GAPSレポート=docs/M18_GAPS.md。preview系ツール障害(1h超)によりチェックリストA-I/Jシナリオ実測は保留 — 再開手順はMISSION_UIUX_M18.md⑨。
+- 2026-07-11 M19後半: save硬化(devil攻撃1回→必須4点反映: 意味検証/saveSeq単調・NG+安全/BAK予算/quota梯子1200→600→0+DOMException限定+初回限定toast)/vitest導入27テスト(bound/検証/BAK復旧/推奨6条/御題/夢解禁)+CIゲート(lint+validate+test)/図鑑コンプ称号5種/図鑑新着フィルタ+帳badge(既読カーソルflags)。

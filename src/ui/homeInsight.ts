@@ -123,6 +123,9 @@ export function ledgerStats(d: GameData, odaiClaimable: boolean): { work: Ledger
   const gossipUnlocked = Math.min(d.gossipIndex ?? 0, GOSSIP.length)
   const gossipSeen = typeof d.flags.gossipSeen === 'number' ? d.flags.gossipSeen : 0
   const gossipNew = Math.max(0, gossipUnlocked - gossipSeen)
+  // 図鑑の新着(M19 A1): 既読カーソル(flags)以降に増えた発見数
+  const codexNew = Math.max(0, (d.codex?.enemies?.length ?? 0) - (typeof d.flags.codexSeenEn === 'number' ? d.flags.codexSeenEn : 0))
+    + Math.max(0, (d.codex?.gods?.length ?? 0) - (typeof d.flags.codexSeenGods === 'number' ? d.flags.codexSeenGods : 0))
   const fam = d.familiars ?? []
   const activeFam = fam.find((f) => f.enemyId === d.activeFamiliar)
 
@@ -134,7 +137,7 @@ export function ledgerStats(d: GameData, odaiClaimable: boolean): { work: Ledger
   ]
   const record: LedgerEntry[] = [
     { key: 'chronicle', label: '家譜', value: `第${gen}代・故人${deaths}` },
-    { key: 'codex', label: '図鑑', value: `魔性${codexPct}%` },
+    { key: 'codex', label: '図鑑', value: `魔性${codexPct}%`, badge: codexNew },
     { key: 'tree', label: '家系図', value: `存命${aliveN}・全${d.family.length}` },
     { key: 'gossip', label: '郷の声', value: `${gossipUnlocked}話`, badge: gossipNew },
   ]

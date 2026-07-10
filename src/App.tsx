@@ -15,6 +15,7 @@ import { FacilitiesScreen } from './ui/Facilities'
 import { BirthScene, CeremonyScene, DeathScene, DreamScene, DreamEpScene, EndingScene, FinaleScene, JobRiteScene, LifeScene } from './ui/Scenes'
 import { SettingsModal } from './ui/Settings'
 import { setToastSink, emitToast, type ToastKind } from './ui/toast'
+import { setSaveTroubleSink } from './core/save'
 
 // 全画面共通の設定ボタン(⚙)。音量/ミュート/演出軽減/オート既定へアクセス。
 function SettingsButton() {
@@ -37,7 +38,9 @@ function Toaster() {
       setToasts((t) => [...t, { id, msg, kind }].slice(-4))
       setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3200)
     })
-    return () => setToastSink(null)
+    // M19 C3: セーブ層のトラブル通知(quota/破損復旧)をtoastへ配線(core→ui依存を作らずsink経由)
+    setSaveTroubleSink((msg) => emitToast(msg, 'error'))
+    return () => { setToastSink(null); setSaveTroubleSink(null) }
   }, [])
   if (toasts.length === 0) return null
   return (
