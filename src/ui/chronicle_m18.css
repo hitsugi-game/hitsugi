@@ -1,0 +1,22 @@
+/* M18 P5: 家譜(独立画面)専用スタイル。トークン/契約は docs/UI_SHELL_API.md */
+
+/* 年代記タブ: 種別絞り込み行 */
+.chron-filter-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+
+/* 年代記: 種別未定義色の補い(index.cssは誕生/死/勝鬨/節目のみ定義) */
+.chron-pact { color: var(--el-star); }
+.chron-event { color: var(--text); }
+
+/* さらに繰る */
+.chron-more { display: block; margin: 10px auto 0; }
+
+/* 「残す」節 — ActionDock内で共有・画像保存ボタンを視覚的にひとまとめにする */
+.chron-keep-group {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding-left: 12px; margin-left: 4px;
+  border-left: 1px solid var(--panel-border);
+}
+.chron-keep-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; }
+@media (max-width: 640px) {
+  .chron-keep-group { border-left: none; padding-left: 0; margin-left: 0; flex-basis: 100%; justify-content: center; }
+}

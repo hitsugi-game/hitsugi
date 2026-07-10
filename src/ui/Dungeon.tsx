@@ -6,6 +6,7 @@ import { dungeonByRegion } from '../dungeon/maps'
 import { DungeonEngine } from '../dungeon/engine'
 import { boonById } from '../core/data/boons'
 import { Bar, MaybeImg } from './components'
+import { Sheet } from './layout/shell'
 import { stageOf, uiIcon } from './img'
 import { ageOf } from '../core/inheritance'
 import { EventModal } from './Expedition'
@@ -265,82 +266,64 @@ function DungeonFloor() {
         <div />
       </div>
 
-      {confirm && (
-        <div className="modal-back">
-          <div className="modal" style={{ maxWidth: 420 }}>
-            {confirm.kind === 'pause' ? (
-              <>
-                <h2 className="panel-title" style={{ textAlign: 'center' }}>小休止</h2>
-                <p style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.8, marginBottom: 12 }}>
-                  移動: 矢印キー / 画面をタップ。<br />
-                  設定(音量・演出): 画面右上の ⚙。<br />
-                  灯が細るほど魔性は狂暴になる。深追いは禁物。
-                </p>
-                <button className="btn btn-main" onClick={() => setConfirm(null)}>探索に戻る</button>
-                <button className="btn btn-danger" onClick={() => { setConfirm({ kind: 'return' }) }}>帰り火を焚く(郷へ)</button>
-              </>
-            ) : confirm.kind === 'stairs' ? (
-              <>
-                <p style={{ marginBottom: 12 }}>下り階段がある。さらに深く潜るか?(深いほど実りは多いが、夜も濃い)</p>
-                <button
-                  className="btn btn-main"
-                  onClick={() => {
-                    setConfirm(null)
-                    dungeonAdvanceFloor()
-                  }}
-                >
-                  降りる
-                </button>
-              </>
-            ) : (
-              <>
-                <p style={{ marginBottom: 12 }}>
-                  帰り火を焚いて郷へ戻るか? 奉燈{run.loot.hoto}・血珠{run.loot.ketsu}を持ち帰る。(今月を使う)
-                </p>
-                <button
-                  className="btn btn-main"
-                  onClick={() => {
-                    setConfirm(null)
-                    dungeonReturn()
-                  }}
-                >
-                  帰還する
-                </button>
-              </>
-            )}
-            <button className="btn btn-ghost" onClick={() => setConfirm(null)}>
-              やめる
-            </button>
+      {/* 特殊床/帰還の確認 — 中央モーダルでなく下部の短い選択面(§5.3。SheetはPC=中央小窓/モバイル=下から) */}
+      {confirm && confirm.kind === 'pause' && (
+        <Sheet title="小休止" onClose={() => setConfirm(null)} closeLabel="探索に戻る">
+          <p style={{ fontSize: 12.5, color: 'var(--text-dim)', lineHeight: 1.8, marginBottom: 12 }}>
+            移動: 矢印キー / 画面をタップ。<br />
+            設定(音量・演出): 画面右上の ⚙。<br />
+            灯が細るほど魔性は狂暴になる。深追いは禁物。
+          </p>
+          <div className="confirm-actions">
+            <button className="btn btn-danger" onClick={() => { setConfirm({ kind: 'return' }) }}>帰り火を焚く(郷へ)</button>
+            <button className="btn btn-main" onClick={() => setConfirm(null)}>探索に戻る</button>
           </div>
-        </div>
+        </Sheet>
+      )}
+      {confirm && confirm.kind === 'stairs' && (
+        <Sheet title="下り階段" onClose={() => setConfirm(null)} closeLabel="やめる">
+          <p style={{ marginBottom: 12, fontSize: 13.5 }}>さらに深く潜るか? 深いほど実りは多いが、夜も濃い。</p>
+          <div className="confirm-actions">
+            <button className="btn btn-ghost" onClick={() => setConfirm(null)}>やめる</button>
+            <button className="btn btn-main" onClick={() => { setConfirm(null); dungeonAdvanceFloor() }}>降りる</button>
+          </div>
+        </Sheet>
+      )}
+      {confirm && confirm.kind === 'return' && (
+        <Sheet title="帰り火を焚く" onClose={() => setConfirm(null)} closeLabel="やめる">
+          <p style={{ marginBottom: 6, fontSize: 13.5 }}>
+            いま帰れば、奉燈<b>{run.loot.hoto}</b>・血珠<b>{run.loot.ketsu}</b>を確実に持ち帰る。(今月を使う)
+          </p>
+          <p style={{ marginBottom: 12, fontSize: 12.5, color: 'var(--text-dim)' }}>
+            進み続ければ実りは増えるが、隊が倒れれば持ち帰りは望めない。
+          </p>
+          <div className="confirm-actions">
+            <button className="btn btn-ghost" onClick={() => setConfirm(null)}>やめる</button>
+            <button className="btn btn-main" onClick={() => { setConfirm(null); dungeonReturn() }}>帰還する</button>
+          </div>
+        </Sheet>
       )}
 
       {/* 灯の加護ドラフト(v3.1 M16-4) — この遠征だけの三択 */}
       {boonDraft && (
-        <div className="modal-back">
-          <div className="modal" style={{ maxWidth: 440 }}>
-            <h2 className="panel-title">灯の加護 — ひとつだけ、授かれる</h2>
-            {boonDraft.map((id) => {
-              const b = boonById(id)
-              if (!b) return null
-              return (
-                <button
-                  key={id}
-                  className="btn"
-                  style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 6 }}
-                  onClick={() => chooseBoon(id)}
-                >
-                  <MaybeImg src={uiIcon(`boon_${b.id}`)} className="boon-ico" />
-                  <b>{b.name}</b>
-                  <span style={{ display: 'block', fontSize: 12, color: 'var(--text-dim)' }}>{b.desc}</span>
-                </button>
-              )
-            })}
-            <button className="btn btn-ghost" onClick={() => chooseBoon(null)}>
-              見送る
-            </button>
-          </div>
-        </div>
+        <Sheet title="灯の加護 — ひとつだけ、授かれる" onClose={() => chooseBoon(null)} closeLabel="見送る">
+          {boonDraft.map((id) => {
+            const b = boonById(id)
+            if (!b) return null
+            return (
+              <button
+                key={id}
+                className="btn"
+                style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 6 }}
+                onClick={() => chooseBoon(id)}
+              >
+                <MaybeImg src={uiIcon(`boon_${b.id}`)} className="boon-ico" />
+                <b>{b.name}</b>
+                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--text-dim)' }}>{b.desc}</span>
+              </button>
+            )
+          })}
+        </Sheet>
       )}
 
       {/* 授かった加護の帯 */}

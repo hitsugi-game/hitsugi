@@ -1,7 +1,10 @@
+// M18 P5: 家譜 — 独立作業画面(UI_UX_REDESIGN_PLAN §5.10)
+// 概要/称号/故人/年代記の4タブ。表示ロジック(computeRecords/ACHIEVEMENTS)は移動のみ・計算変更なし。
+// 契約: docs/UI_SHELL_API.md。store/core の変更はしない(表示専用の定数・絞り込みのみ追加)。
 import { useState } from 'react'
 import { useGame } from '../core/store'
 import { seasonLabel } from '../core/types'
-import type { GameData } from '../core/types'
+import type { ChronicleEntry, GameData } from '../core/types'
 import { godById, GODS } from '../core/data/gods'
 import { ENEMIES } from '../core/data/enemies'
 import { REGIONS } from '../core/data/regions'
@@ -10,6 +13,8 @@ import { downloadChronicleCard, copyShareText } from './shareCard'
 import { MaybeImg, Panel } from './components'
 import { faceImg } from './img'
 import { FamilyTree } from './FamilyTree'
+import { ScreenShell, WorkspaceTabs, ActionDock } from './layout/shell'
+import './chronicle_m18.css'
 
 // 一族の記録 — 既存のdataから純粋関数で集計(新規storeフィールド不要)
 function computeRecords(data: GameData) {
@@ -63,115 +68,173 @@ const ACHIEVEMENTS: { name: string; hint: string; test: (r: RecordSummary) => bo
   { name: '総べてを蒐む', hint: '総合収集率100%', test: (r) => r.collPct >= 100 },
 ]
 
+// 年代記の種別絞り込み(M18 P5: 表示専用の定数・store/coreは変更しない)
+const KIND_LABEL: Record<ChronicleEntry['kind'], string> = {
+  birth: '誕生', death: '死', pact: '契り', triumph: '勝鬨', event: '出来事', era: '節目',
+}
+type KindFilter = 'all' | ChronicleEntry['kind']
+const KIND_FILTERS: KindFilter[] = ['all', 'birth', 'death', 'pact', 'triumph', 'event', 'era']
+const CHRON_PAGE = 200 // 大量一覧対策(§7契約): 直近200件+さらに繰る(200件刻み)
+
+type Tab = 'overview' | 'titles' | 'fallen' | 'chronicle'
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'overview', label: '概要' },
+  { key: 'titles', label: '称号' },
+  { key: 'fallen', label: '故人' },
+  { key: 'chronicle', label: '年代記' },
+]
+
 export function ChronicleScreen() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
+  const [tab, setTab] = useState<Tab>('overview')
   const [copied, setCopied] = useState(false)
   const [showTree, setShowTree] = useState(false)
+  const [kindFilter, setKindFilter] = useState<KindFilter>('all')
+  const [chronShown, setChronShown] = useState(CHRON_PAGE)
+
   const fallen = data.family.filter((c) => !c.alive)
   const rec = computeRecords(data)
   const achieved = ACHIEVEMENTS.filter((a) => a.test(rec))
+  const head = data.family.find((c) => c.isHead)
+
+  const chronAll = [...data.chronicle].reverse()
+  const chronFiltered = kindFilter === 'all' ? chronAll : chronAll.filter((e) => e.kind === kindFilter)
+
+  const changeKindFilter = (k: KindFilter) => {
+    setKindFilter(k)
+    setChronShown(CHRON_PAGE)
+  }
 
   return (
-    <div className="screen">
-      <h1 className="season-label" style={{ marginBottom: 14 }}>家譜 — 燈守家千年紀</h1>
+    <ScreenShell
+      title="家譜 — 燈守家千年紀"
+      onBack={() => setScreen({ id: 'home' })}
+      resources={head ? <>当主 <b>{head.name}</b>(第{head.gen}代)</> : undefined}
+      tabs={<WorkspaceTabs tabs={TABS} active={tab} onChange={setTab} />}
+      dock={
+        <ActionDock>
+          <button className="btn btn-main" onClick={() => setShowTree(true)}>
+            🌳 家系図を見る
+          </button>
+          <span className="chron-keep-group">
+            <span className="chron-keep-label">残す</span>
+            <button className="btn" onClick={() => downloadChronicleCard(data)}>
+              画像保存
+            </button>
+            <button
+              className="btn"
+              onClick={async () => {
+                const ok = await copyShareText(data)
+                setCopied(ok)
+                setTimeout(() => setCopied(false), 2000)
+              }}
+            >
+              {copied ? '写した!' : '共有文コピー'}
+            </button>
+          </span>
+        </ActionDock>
+      }
+    >
+      {tab === 'overview' && (
+        <Panel title={`一族の記録 — 総合収集率 ${rec.collPct}%`}>
+          <div className="records-grid">
+            <div className="rec-cell"><span className="rec-num">{rec.gens}</span><span className="rec-lbl">紡いだ世代</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.years}</span><span className="rec-lbl">歳月(年)</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.fame}</span><span className="rec-lbl">武功</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.kills}</span><span className="rec-lbl">討った魔性</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.exped}</span><span className="rec-lbl">夜藪行</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.alive}<small>/{rec.alive + rec.fallenN}</small></span><span className="rec-lbl">存命 / 一族</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.godsPacted}</span><span className="rec-lbl">契った星神</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.familiars}</span><span className="rec-lbl">懐いた眷属</span></div>
+            {rec.towerBest > 0 && <div className="rec-cell"><span className="rec-num">{rec.towerBest}<small>層</small></span><span className="rec-lbl">常夜百層 最高</span></div>}
+            <div className="rec-cell"><span className="rec-num">{rec.regionsCleared}<small>/{rec.regionsTotal}</small></span><span className="rec-lbl">鎮めた地</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.enemySeen}<small>/{rec.enemyTotal}</small></span><span className="rec-lbl">見た魔性</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.godSeen}<small>/{rec.godTotal}</small></span><span className="rec-lbl">識る星神</span></div>
+            <div className="rec-cell"><span className="rec-num">{rec.loreDone}<small>/{rec.loreTotal}</small></span><span className="rec-lbl">土地の記</span></div>
+          </div>
+        </Panel>
+      )}
 
-      <Panel title={`一族の記録 — 総合収集率 ${rec.collPct}%`}>
-        <div className="records-grid">
-          <div className="rec-cell"><span className="rec-num">{rec.gens}</span><span className="rec-lbl">紡いだ世代</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.years}</span><span className="rec-lbl">歳月(年)</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.fame}</span><span className="rec-lbl">武功</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.kills}</span><span className="rec-lbl">討った魔性</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.exped}</span><span className="rec-lbl">夜藪行</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.alive}<small>/{rec.alive + rec.fallenN}</small></span><span className="rec-lbl">存命 / 一族</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.godsPacted}</span><span className="rec-lbl">契った星神</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.familiars}</span><span className="rec-lbl">懐いた眷属</span></div>
-          {rec.towerBest > 0 && <div className="rec-cell"><span className="rec-num">{rec.towerBest}<small>層</small></span><span className="rec-lbl">常夜百層 最高</span></div>}
-          <div className="rec-cell"><span className="rec-num">{rec.regionsCleared}<small>/{rec.regionsTotal}</small></span><span className="rec-lbl">鎮めた地</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.enemySeen}<small>/{rec.enemyTotal}</small></span><span className="rec-lbl">見た魔性</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.godSeen}<small>/{rec.godTotal}</small></span><span className="rec-lbl">識る星神</span></div>
-          <div className="rec-cell"><span className="rec-num">{rec.loreDone}<small>/{rec.loreTotal}</small></span><span className="rec-lbl">土地の記</span></div>
-        </div>
-      </Panel>
+      {tab === 'titles' && (
+        <Panel title={`称号 — ${achieved.length}/${ACHIEVEMENTS.length}`}>
+          <div className="titles-grid">
+            {ACHIEVEMENTS.map((a) => {
+              const got = a.test(rec)
+              return (
+                <div key={a.name} className={`title-badge ${got ? 'earned' : 'locked'}`} title={a.hint}>
+                  <span className="title-badge-mark">{got ? '◉' : '○'}</span>
+                  <span className="title-badge-name">{got ? a.name : '？？？'}</span>
+                  <span className="title-badge-hint">{a.hint}</span>
+                </div>
+              )
+            })}
+          </div>
+        </Panel>
+      )}
 
-      <Panel title={`称号 — ${achieved.length}/${ACHIEVEMENTS.length}`}>
-        <div className="titles-grid">
-          {ACHIEVEMENTS.map((a) => {
-            const got = a.test(rec)
-            return (
-              <div key={a.name} className={`title-badge ${got ? 'earned' : 'locked'}`} title={a.hint}>
-                <span className="title-badge-mark">{got ? '◉' : '○'}</span>
-                <span className="title-badge-name">{got ? a.name : '？？？'}</span>
-                <span className="title-badge-hint">{a.hint}</span>
+      {tab === 'fallen' && (
+        <Panel title="逝きし者たち">
+          <div className="chronicle-scroll">
+            {fallen.length === 0 && <p>まだ誰も欠けていない。……それがどれほど稀有なことか。</p>}
+            {fallen.map((c) => (
+              <div key={c.id} className="fallen-card">
+                <MaybeImg src={faceImg(c)} className="fallen-face" />
+                <div className="fallen-body">
+                  <span className="fallen-name">
+                    {c.name}(第{c.gen}代)
+                  </span>
+                  <span className="fallen-cause">
+                    {c.deathCause} — {godById(c.godParentId).name}の子
+                  </span>
+                  {c.deeds.length > 0 && (
+                    <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 2 }}>
+                      {c.deeds.join('。')}。討った魔性{c.kills}、夜藪行{c.expeditions}度。
+                    </div>
+                  )}
+                  {c.epitaph && <div className="fallen-epitaph">「{c.epitaph}」</div>}
+                </div>
               </div>
-            )
-          })}
-        </div>
-      </Panel>
+            ))}
+          </div>
+        </Panel>
+      )}
 
-      <Panel title="逝きし者たち">
-        <div className="chronicle-scroll">
-          {fallen.length === 0 && <p>まだ誰も欠けていない。……それがどれほど稀有なことか。</p>}
-          {fallen.map((c) => (
-            <div key={c.id} className="fallen-card">
-              <MaybeImg src={faceImg(c)} className="fallen-face" />
-              <div className="fallen-body">
-                <span className="fallen-name">
-                  {c.name}(第{c.gen}代)
-                </span>
-                <span className="fallen-cause">
-                  {c.deathCause} — {godById(c.godParentId).name}の子
-                </span>
-                {c.deeds.length > 0 && (
-                  <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 2 }}>
-                    {c.deeds.join('。')}。討った魔性{c.kills}、夜藪行{c.expeditions}度。
-                  </div>
-                )}
-                {c.epitaph && <div className="fallen-epitaph">「{c.epitaph}」</div>}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Panel>
-
-      <Panel title="年代記">
-        <div className="chronicle-scroll">
-          {[...data.chronicle].reverse().map((e, i) => {
-            const ch = e.charId ? data.family.find((c) => c.id === e.charId) : undefined
-            return (
-              <div key={i} className={`chron-entry chron-kind-${e.kind}`}>
-                {ch && <MaybeImg src={faceImg(ch)} className="chron-face" />}
-                <span className="chron-season">{seasonLabel(e.season)}</span>
-                <span className={`chron-${e.kind}`}>{e.text}</span>
-              </div>
-            )
-          })}
-        </div>
-      </Panel>
-
-      <div className="home-actions">
-        <button className="btn btn-main" onClick={() => setShowTree(true)}>
-          🌳 家系図を見る
-        </button>
-        <button className="btn" onClick={() => downloadChronicleCard(data)}>
-          家譜を一枚絵に残す(画像保存)
-        </button>
-        <button
-          className="btn"
-          onClick={async () => {
-            const ok = await copyShareText(data)
-            setCopied(ok)
-            setTimeout(() => setCopied(false), 2000)
-          }}
-        >
-          {copied ? '写した!' : '語り草を写す(共有文コピー)'}
-        </button>
-        <button className="btn btn-ghost" onClick={() => setScreen({ id: 'home' })}>
-          郷へ戻る
-        </button>
-      </div>
+      {tab === 'chronicle' && (
+        <Panel title={`年代記 — ${chronFiltered.length}件`}>
+          <div className="chron-filter-row">
+            {KIND_FILTERS.map((k) => (
+              <button
+                key={k}
+                className={`btn btn-ghost filter-tab ${kindFilter === k ? 'active' : ''}`}
+                onClick={() => changeKindFilter(k)}
+              >
+                {k === 'all' ? '全て' : KIND_LABEL[k]}
+              </button>
+            ))}
+          </div>
+          <div className="chronicle-scroll">
+            {chronFiltered.length === 0 && <p>まだ何も記されていない。</p>}
+            {chronFiltered.slice(0, chronShown).map((e, i) => {
+              const ch = e.charId ? data.family.find((c) => c.id === e.charId) : undefined
+              return (
+                <div key={i} className={`chron-entry chron-kind-${e.kind}`}>
+                  {ch && <MaybeImg src={faceImg(ch)} className="chron-face" />}
+                  <span className="chron-season">{seasonLabel(e.season)}</span>
+                  <span className={`chron-${e.kind}`}>{e.text}</span>
+                </div>
+              )
+            })}
+          </div>
+          {chronFiltered.length > chronShown && (
+            <button className="btn btn-ghost chron-more" onClick={() => setChronShown(chronShown + CHRON_PAGE)}>
+              さらに繰る(残り{chronFiltered.length - chronShown}件)
+            </button>
+          )}
+        </Panel>
+      )}
 
       {showTree && <FamilyTree onClose={() => setShowTree(false)} />}
-    </div>
+    </ScreenShell>
   )
 }

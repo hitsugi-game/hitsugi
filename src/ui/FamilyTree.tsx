@@ -1,10 +1,11 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { Character } from '../core/types'
 import { godById } from '../core/data/gods'
 import { useGame } from '../core/store'
 import { downloadFamilyTreeCard } from './shareCard'
 import { MaybeImg } from './components'
 import { faceImg } from './img'
+import './familytree_m18.css'
 
 // 家系図 — 世代交代の全体像を一望する(GDD_v3 M5)
 // 世代ごとに縦カラムを並べ、親子線はSVGオーバーレイで描く(人親=金、神親=薄紫の点線)。
@@ -23,6 +24,8 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const [lines, setLines] = useState<Line[]>([])
   const [selected, setSelected] = useState<Character | null>(null)
+  const [query, setQuery] = useState('')
+  const [aliveOnly, setAliveOnly] = useState(false)
 
   const byGen = useMemo(() => {
     const gens = new Map<number, Character[]>()
@@ -64,20 +67,80 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
     setLines(next)
   }, [family, byGen, godAffinity])
 
+  // ESC で閉じる(Sheetは入れ子禁止のため使わず、個別に配線)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  // ノードが画面中央に来るよう familytree-scroll の scrollLeft/Top を調整する(命脈線の計算には触れない)
+  const scrollNodeIntoView = (id: string) => {
+    const container = containerRef.current
+    const el = nodeRefs.current.get(id)
+    if (!container || !el) return
+    const cRect = container.getBoundingClientRect()
+    const eRect = el.getBoundingClientRect()
+    const targetLeft = container.scrollLeft + (eRect.left - cRect.left) - container.clientWidth / 2 + eRect.width / 2
+    const targetTop = container.scrollTop + (eRect.top - cRect.top) - container.clientHeight / 2 + eRect.height / 2
+    container.scrollTo({ left: Math.max(0, targetLeft), top: Math.max(0, targetTop), behavior: 'smooth' })
+  }
+
+  const goToHead = () => {
+    const head = family.find((c) => c.isHead)
+    if (head) scrollNodeIntoView(head.id)
+  }
+
+  const trimmedQuery = query.trim()
+  const hitIds = useMemo(() => {
+    if (!trimmedQuery) return new Set<string>()
+    return new Set(family.filter((c) => c.name.includes(trimmedQuery)).map((c) => c.id))
+  }, [family, trimmedQuery])
+
+  useEffect(() => {
+    if (!trimmedQuery) return
+    const first = family.find((c) => c.name.includes(trimmedQuery))
+    if (first) scrollNodeIntoView(first.id)
+  }, [trimmedQuery, family])
+
   return (
     <div className="modal-back" onClick={onClose}>
-      <div className="modal familytree-modal" onClick={(e) => e.stopPropagation()}>
-        <h2 className="panel-title">
-          家系図 — 燈守家の世代交代
-          <button
-            className="btn btn-ghost"
-            style={{ marginLeft: 12, fontSize: 12 }}
-            onClick={() => { const d = useGame.getState().data; if (d) void downloadFamilyTreeCard(d) }}
-          >
-            📷 一枚絵にして残す
+      <div className="modal familytree-modal familytree-fullscreen" onClick={(e) => e.stopPropagation()}>
+        <div className="familytree-topbar">
+          <h2 className="panel-title familytree-title">家系図</h2>
+          <div className="familytree-toolbar">
+            <input
+              type="text"
+              className="familytree-search"
+              placeholder="人物名で検索"
+              aria-label="人物検索"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <button className="btn btn-ghost" onClick={goToHead}>
+              当主へ戻る
+            </button>
+            <button
+              className={`btn btn-ghost filter-tab ${aliveOnly ? 'active' : ''}`}
+              aria-pressed={aliveOnly}
+              onClick={() => setAliveOnly((v) => !v)}
+            >
+              存命のみ
+            </button>
+            <button
+              className="btn btn-ghost"
+              onClick={() => { const d = useGame.getState().data; if (d) void downloadFamilyTreeCard(d) }}
+            >
+              📷 一枚絵にして残す
+            </button>
+          </div>
+          <button className="btn btn-ghost familytree-close" onClick={onClose}>
+            閉じる
           </button>
-        </h2>
-        <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 10 }}>
+        </div>
+        <p className="familytree-legend-row" style={{ fontSize: 12, color: 'var(--text-dim)' }}>
           <span className="tree-legend"><i className="tree-legend-swatch human" />人の親</span>
           <span className="tree-legend"><i className="tree-legend-swatch god" />星の親(縁が深いほど太く濃い)</span>
           {' '}— 家名をクリックすると詳細を見られる。
@@ -99,23 +162,34 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
             {byGen.map(([gen, members]) => (
               <div key={gen} className="familytree-col">
                 <div className="familytree-gen-label">第{gen}代</div>
-                {members.map((c) => (
-                  <div
-                    key={c.id}
-                    ref={(el) => {
-                      if (el) nodeRefs.current.set(c.id, el)
-                      else nodeRefs.current.delete(c.id)
-                    }}
-                    className={`familytree-node ${c.alive ? 'alive' : 'dead'} ${selected?.id === c.id ? 'selected' : ''}`}
-                    onClick={() => setSelected(c)}
-                  >
-                    {faceImg(c) && <MaybeImg src={faceImg(c)!} className="tree-face" />}
-                    <span className={`element-badge el-${c.element} familytree-badge`}>
-                      {c.alive ? '灯' : '逝'}
-                    </span>
-                    <span className="familytree-name">{c.name}</span>
-                  </div>
-                ))}
+                {members.map((c) => {
+                  const isHit = hitIds.has(c.id)
+                  const isDimmed = aliveOnly && !c.alive
+                  const nodeClass = [
+                    'familytree-node',
+                    c.alive ? 'alive' : 'dead',
+                    selected?.id === c.id ? 'selected' : '',
+                    isHit ? 'is-hit' : '',
+                    isDimmed ? 'is-dimmed' : '',
+                  ].filter(Boolean).join(' ')
+                  return (
+                    <div
+                      key={c.id}
+                      ref={(el) => {
+                        if (el) nodeRefs.current.set(c.id, el)
+                        else nodeRefs.current.delete(c.id)
+                      }}
+                      className={nodeClass}
+                      onClick={() => setSelected(c)}
+                    >
+                      {faceImg(c) && <MaybeImg src={faceImg(c)!} className="tree-face" />}
+                      <span className={`element-badge el-${c.element} familytree-badge`}>
+                        {c.alive ? '灯' : '逝'}
+                      </span>
+                      <span className="familytree-name">{c.name}</span>
+                    </div>
+                  )
+                })}
               </div>
             ))}
             {byGen.length === 0 && <p style={{ padding: 16 }}>まだ一人も記されていない。</p>}
@@ -123,7 +197,7 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
         </div>
 
         {selected && (
-          <div className="tsuzuri" style={{ marginTop: 12 }}>
+          <div className="tsuzuri familytree-detail-band" style={{ marginTop: 12 }}>
             <span className="tsuzuri-name">{selected.name.slice(0, 2)}</span>
             <span className="tsuzuri-text">
               <b style={{ color: 'var(--amber)' }}>{selected.name}</b>(第{selected.gen}代) —
@@ -133,10 +207,6 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
             </span>
           </div>
         )}
-
-        <button className="btn btn-ghost" onClick={onClose} style={{ marginTop: 12 }}>
-          閉じる
-        </button>
       </div>
     </div>
   )
