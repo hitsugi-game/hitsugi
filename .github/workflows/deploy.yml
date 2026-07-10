@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run lint # M19 C1: 出荷ゲート(oxlint)
+      - run: node scripts/validate_data.mjs # M19 C1: データ整合ゲート
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

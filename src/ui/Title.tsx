@@ -217,7 +217,10 @@ export function IntroScreen() {
           </p>
         ))}
       </div>
-      <div className="intro-hint">クリックで進む</div>
+      <div className="scene-pager" onClick={(e) => e.stopPropagation()}>
+        <span className="scene-page-mark">頁 {beat + 1}／{INTRO_BEATS.length}</span>
+        <button className="btn scene-next" onClick={advance}>次へ ▸</button>
+      </div>
       <button
         className="btn btn-ghost intro-skip"
         onClick={(e) => {

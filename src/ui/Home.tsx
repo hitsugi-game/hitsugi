@@ -12,7 +12,7 @@ import { FAMILIAR_KINDS } from '../core/data/familiars'
 import { todaysOdai } from '../core/data/dailyOdai'
 import type { GameData } from '../core/types'
 import { census, recommendAction, nextMonthNotes, ledgerStats, type ActionKind } from './homeInsight'
-import { Sheet, StatusCallout, LiveBadge } from './layout/shell'
+import { Sheet, StatusCallout, LiveBadge, LifeThread } from './layout/shell'
 import { CharCard, Ico, MaybeImg, NightBackdrop, Panel, TsuzuriLine } from './components'
 import { gameImg, HOME_BG, HOME_BG_SEASONS, villagerImg } from './img'
 import { FamilyTree } from './FamilyTree'
@@ -286,6 +286,16 @@ function BloodlineDiagnosis({ data, onGo }: { data: GameData; onGo: (a: ActionKi
   return (
     <div className="blood-diag">
       <div className="blood-diag-title">血脈診断</div>
+      {/* 命脈 — 存命を灯る節、懐妊をまだ点らぬ節として一本の火の線で結ぶ(A案署名要素) */}
+      <div className="blood-diag-thread" title={`存命${c.alive.length}・懐妊${c.pregnant}`}>
+        <LifeThread
+          nodes={[
+            ...c.alive.map(() => ({ lit: true })),
+            ...Array.from({ length: c.pregnant }, () => ({ lit: false })),
+          ]}
+          dim={c.alive.length === 0}
+        />
+      </div>
       <div className="blood-diag-counts">
         存命<b>{c.alive.length}</b> ／ 成人<b>{c.adults.length}</b> ／ 幼子<b>{c.children.length}</b>
         {c.pregnant > 0 && <> ／ 懐妊<b>{c.pregnant}</b></>}

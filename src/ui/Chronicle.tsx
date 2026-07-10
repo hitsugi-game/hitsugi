@@ -13,7 +13,7 @@ import { downloadChronicleCard, copyShareText } from './shareCard'
 import { MaybeImg, Panel } from './components'
 import { faceImg } from './img'
 import { FamilyTree } from './FamilyTree'
-import { ScreenShell, WorkspaceTabs, ActionDock } from './layout/shell'
+import { ScreenShell, WorkspaceTabs, ActionDock, LifeThread } from './layout/shell'
 import './chronicle_m18.css'
 
 // 一族の記録 — 既存のdataから純粋関数で集計(新規storeフィールド不要)
@@ -115,7 +115,7 @@ export function ChronicleScreen() {
       dock={
         <ActionDock>
           <button className="btn btn-main" onClick={() => setShowTree(true)}>
-            🌳 家系図を見る
+            家系図を見る
           </button>
           <span className="chron-keep-group">
             <span className="chron-keep-label">残す</span>
@@ -138,6 +138,10 @@ export function ChronicleScreen() {
     >
       {tab === 'overview' && (
         <Panel title={`一族の記録 — 総合収集率 ${rec.collPct}%`}>
+          {/* 命脈 — 継がれた世代を灯る節で、次代をまだ点らぬ節で結ぶ(A案署名要素) */}
+          <div className="chron-thread" title={`第${rec.gens}代まで継承`}>
+            <LifeThread nodes={[...Array.from({ length: Math.max(1, rec.gens) }, () => ({ lit: true })), { lit: false }]} />
+          </div>
           <div className="records-grid">
             <div className="rec-cell"><span className="rec-num">{rec.gens}</span><span className="rec-lbl">紡いだ世代</span></div>
             <div className="rec-cell"><span className="rec-num">{rec.years}</span><span className="rec-lbl">歳月(年)</span></div>

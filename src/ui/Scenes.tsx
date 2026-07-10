@@ -222,7 +222,7 @@ export function DeathScene({ charId }: { charId: string }) {
             {digest.slice(0, Math.max(1, beat)).map((l, i) => (
               <p key={i} className="life-scroll-line">{l}</p>
             ))}
-            {!digestDone && <p className="lore-hint">(触れて、巻物を手繰る)</p>}
+            {!digestDone && <ScenePager page={Math.min(Math.max(1, beat) , digest.length)} total={digest.length} onNext={() => { audio.se('page'); setBeat(beat + 1) }} />}
           </div>
         )}
         {digestDone && (
@@ -293,7 +293,7 @@ export function LifeScene({ title, lines, bg }: { title: string; lines: { speake
           この夜を憶えておく
         </button>
       ) : (
-        <div className="intro-hint">クリックで進む</div>
+        <ScenePager page={beat + 1} total={lines.length} onNext={() => { audio.se('page'); setBeat(beat + 1) }} />
       )}
     </div>
   )
@@ -465,6 +465,17 @@ const DREAM_BEATS = [
   '目が覚める。頬に涙の痕。綴は何も聞かず、黙って墨を磨っていた。',
 ]
 
+// M19 A4: 頁印+明示的「次へ」— 画面全体クリック進行は維持しつつ、確実な操作面を下部に置く。
+// stopPropagationで背景クリックと二重発火しない。選択UI表示後は各シーンのguard(!done)が背景進行を止める。
+function ScenePager({ page, total, onNext }: { page: number; total: number; onNext: () => void }) {
+  return (
+    <div className="scene-pager" onClick={(e) => e.stopPropagation()}>
+      <span className="scene-page-mark">頁 {page}／{total}</span>
+      <button className="btn scene-next" onClick={onNext}>次へ ▸</button>
+    </div>
+  )
+}
+
 export function DreamScene() {
   const processNextScene = useGame((s) => s.processNextScene)
   const [beat, setBeat] = useState(0)
@@ -485,7 +496,7 @@ export function DreamScene() {
           目を覚ます
         </button>
       ) : (
-        <div className="intro-hint">クリックで進む</div>
+        <ScenePager page={beat + 1} total={DREAM_BEATS.length} onNext={() => { audio.se('page'); setBeat(beat + 1) }} />
       )}
     </div>
   )
@@ -524,7 +535,7 @@ export function DreamEpScene({ epId }: { epId: string }) {
           目を覚ます
         </button>
       ) : (
-        <div className="intro-hint">クリックで進む</div>
+        <ScenePager page={beat + 1} total={ep.beats.length} onNext={() => { audio.se('page'); setBeat(beat + 1) }} />
       )}
     </div>
   )
@@ -651,7 +662,7 @@ export function EndingScene() {
           </button>
         </>
       )}
-      {!done && <div className="intro-hint">クリックで進む</div>}
+      {!done && <ScenePager page={beat + 1} total={beats.length} onNext={() => { audio.se('page'); setBeat(beat + 1) }} />}
     </div>
   )
 }
