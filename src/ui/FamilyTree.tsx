@@ -4,6 +4,7 @@ import { godById } from '../core/data/gods'
 import { useGame } from '../core/store'
 import { downloadFamilyTreeCard } from './shareCard'
 import { MaybeImg } from './components'
+import { useSheetBehavior } from './layout/shell'
 import { faceImg } from './img'
 import './familytree_m18.css'
 
@@ -67,14 +68,9 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
     setLines(next)
   }, [family, byGen, godAffinity])
 
-  // ESC で閉じる(Sheetは入れ子禁止のため使わず、個別に配線)
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  // M22 §4: フルスクリーンmodalにもSheetと同じ契約を配線
+  // (ESC/フォーカストラップ/開閉フォーカス復帰/背景scroll lock — useSheetBehaviorへ集約)
+  const dialogRef = useSheetBehavior(onClose)
 
   // ノードが画面中央に来るよう familytree-scroll の scrollLeft/Top を調整する(命脈線の計算には触れない)
   const scrollNodeIntoView = (id: string) => {
@@ -107,7 +103,14 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="modal-back" onClick={onClose}>
-      <div className="modal familytree-modal familytree-fullscreen" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal familytree-modal familytree-fullscreen"
+        role="dialog"
+        aria-modal="true"
+        aria-label="家系図"
+        ref={dialogRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="familytree-topbar">
           <h2 className="panel-title familytree-title">家系図</h2>
           <div className="familytree-toolbar">

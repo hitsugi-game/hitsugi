@@ -7,7 +7,7 @@ import { facilityLevel } from '../core/data/facilities'
 import { dungeonByRegion } from '../dungeon/maps'
 import { isAdult } from '../core/inheritance'
 import { PARTY_SIZE } from '../core/constants'
-import { ActionDock } from './layout/shell'
+import { ActionDock, useForcedDialog } from './layout/shell'
 import { DepartPartyPicker } from './DepartParty'
 import { Bar, Ico, MaybeImg, NightBackdrop, Panel, TsuzuriLine } from './components'
 import { eventImg, gameImg, HOME_BG, regionBgR } from './img'
@@ -266,16 +266,23 @@ const NODE_META: Record<NodeType, { icon: string; iconImg: string; label: string
 }
 
 export function EventModal() {
-  const data = useGame((s) => s.data)!
   const pendingEvent = useGame((s) => s.pendingEvent)
-  const resolveEvent = useGame((s) => s.resolveEvent)
   if (!pendingEvent) return null
-  const ev = eventById(pendingEvent.eventId)
+  return <EventDialog eventId={pendingEvent.eventId} />
+}
+
+// M22 §4: 事件は「取り返しのつかない確定」— ESC/外側クリックで閉じない(誤閉鎖防止の例外)。
+// role/aria/scroll lock/初期フォーカスのみ共通契約(useForcedDialog)を配線する。
+function EventDialog({ eventId }: { eventId: string }) {
+  const data = useGame((s) => s.data)!
+  const resolveEvent = useGame((s) => s.resolveEvent)
+  const ref = useForcedDialog()
+  const ev = eventById(eventId)
   return (
-    <div className="modal-back">
-      <div className="modal">
+    <div className="modal-back" role="presentation">
+      <div className="modal" role="dialog" aria-modal="true" aria-label="事件 — 選ばねば先へ進めない" ref={ref}>
         <h2 className="panel-title">事件</h2>
-        <MaybeImg src={eventImg(pendingEvent.eventId)} className="ev-img" />
+        <MaybeImg src={eventImg(eventId)} className="ev-img" />
         <p style={{ marginBottom: 16, fontSize: 15 }}>{ev.text}</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {ev.choices.map((c, i) => (

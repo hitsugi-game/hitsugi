@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { audio } from '../core/audio'
 import { getReduceMotion, setReduceMotion, getAutoBattleDefault, setAutoBattleDefault } from '../core/settings'
+import { Sheet } from './layout/shell'
 
-// 設定モーダル — 音量/ミュート/モーション軽減/オート戦闘既定。
-// localStorage永続なので開くたびに現在値を読む。onClose で閉じる。
+// 設定 — 音量/ミュート/モーション軽減/オート戦闘既定。
+// localStorage永続なので開くたびに現在値を読む。M22 §4: 共通Sheet契約(ESC/外側/フォーカス復帰/scroll lock)。
 export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [vol, setVol] = useState(Math.round(audio.volume * 100))
   const [muted, setMuted] = useState(audio.muted)
@@ -11,10 +12,8 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [autoDefault, setAutoDef] = useState(getAutoBattleDefault())
 
   return (
-    <div className="modal-back" onClick={onClose}>
-      <div className="modal settings-modal" onClick={(e) => e.stopPropagation()}>
-        <h2 className="modal-title">設定</h2>
-
+    <Sheet title="設定" onClose={onClose}>
+      <div className="settings-modal">
         <div className="setting-row">
           <label className="setting-label">音量</label>
           <input
@@ -40,9 +39,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           <span className="toggle-state">{autoDefault ? 'オート既定' : '手動から'}</span>
         </button>
         <p className="setting-hint">出立するたびオート戦闘を自動でONにします。</p>
-
-        <button className="btn btn-main" onClick={onClose}>閉じる</button>
       </div>
-    </div>
+    </Sheet>
   )
 }

@@ -8,9 +8,17 @@ import { useEffect, useRef, type ReactNode } from 'react'
 // ---- フォーカス管理(Sheet/確認面で共用) ----
 const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
-function useSheetBehavior(onClose: () => void) {
+// M22 §4: Sheet系は同時に1枚だけ(入れ子非対応)。2枚目のマウントは設計違反として開発時に検知する。
+let activeSheetCount = 0
+
+// フルスクリーンmodal(家系図など)にも同じ契約を配線できるようexport(M22 §4)
+export function useSheetBehavior(onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
+    activeSheetCount += 1
+    if (activeSheetCount > 1) {
+      console.error('[Sheet] 同時に2枚以上のSheetが開いている(入れ子非対応)。呼び出し側の排他を確認せよ。')
+    }
     const opener = document.activeElement as HTMLElement | null
     // 背景スクロールロック(入れ子は想定しない — API文書に明記)
     const prevOverflow = document.body.style.overflow
@@ -43,11 +51,31 @@ function useSheetBehavior(onClose: () => void) {
     }
     document.addEventListener('keydown', onKey)
     return () => {
+      activeSheetCount -= 1
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prevOverflow
       opener?.focus() // 呼び出し元へフォーカス復帰
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return ref
+}
+
+// M22 §4: 閉じられない確定ダイアログ(事件の選択・取り返しのつかない確定)用。
+// scroll lock+初期フォーカスのみ配線し、ESC/外側クリックでは閉じない(誤閉鎖防止の例外)。
+// 使用側は選択肢ボタンを必ず提供すること。
+export function useForcedDialog() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const first = ref.current
+      ? [...ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)].find((el) => !el.hasAttribute('disabled'))
+      : undefined
+    first?.focus()
+    return () => {
+      document.body.style.overflow = prevOverflow
+    }
   }, [])
   return ref
 }

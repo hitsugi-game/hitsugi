@@ -482,24 +482,20 @@ function HelpModal({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<string>('basic')
   const active = HELP_TABS.find((t) => t.key === tab) ?? HELP_TABS[0]
   return (
-    <div className="modal-back" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2 className="panel-title">綴の手引き — 千年ぶん、要点だけな</h2>
-        <div className="god-filter-row" style={{ marginBottom: 12 }}>
-          {HELP_TABS.map((t) => (
-            <button key={t.key} className={`btn btn-ghost filter-tab ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div style={{ fontSize: 14, lineHeight: 1.9, minHeight: 220 }}>
-          {active.items.map(([head, body], i) => (
-            <p key={i}><b style={{ color: 'var(--amber)' }}>{head}</b>{body}</p>
-          ))}
-        </div>
-        <button className="btn btn-ghost" onClick={onClose}>閉じる</button>
+    <Sheet title="綴の手引き — 千年ぶん、要点だけな" onClose={onClose}>
+      <div className="god-filter-row" style={{ marginBottom: 12 }}>
+        {HELP_TABS.map((t) => (
+          <button key={t.key} className={`btn btn-ghost filter-tab ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
+            {t.label}
+          </button>
+        ))}
       </div>
-    </div>
+      <div style={{ fontSize: 14, lineHeight: 1.9, minHeight: 220 }}>
+        {active.items.map(([head, body], i) => (
+          <p key={i}><b style={{ color: 'var(--amber)' }}>{head}</b>{body}</p>
+        ))}
+      </div>
+    </Sheet>
   )
 }
 
@@ -568,9 +564,7 @@ function ObjectivesModal({ onClose }: { onClose: () => void }) {
   ]
   const go = (id: Obj['go']) => { if (id) { onClose(); setScreen({ id }) } }
   return (
-    <div className="modal-back" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
-        <h2 className="panel-title">務め — 一族の目標</h2>
+    <Sheet title="務め — 一族の目標" onClose={onClose}>
         <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 10 }}>
           今すぐ・この代・千年紀 — 三つの時の尺で、進むべき道を映す。
         </p>
@@ -607,9 +601,7 @@ function ObjectivesModal({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         ))}
-        <button className="btn btn-ghost" onClick={onClose} style={{ marginTop: 8 }}>閉じる</button>
-      </div>
-    </div>
+    </Sheet>
   )
 }
 
@@ -642,29 +634,25 @@ function MottoModal({ onClose }: { onClose: () => void }) {
   const setMotto = useGame((s) => s.setMotto)
   const head = data.family.find((c) => c.alive && c.isHead)
   return (
-    <div className="modal-back" onClick={onClose}>
-      <div className="modal" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
-        <h2 className="panel-title">家訓 — {head?.name ?? '当主'}が掲げる家風</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 10 }}>
-          家訓は一族の生き方を定め、静かな加護をもたらす。掲げ直すのも当主の器量。
-        </p>
-        {(Object.keys(MOTTOS) as MottoId[]).map((id) => (
-          <button
-            key={id}
-            className={`btn ${data.motto === id ? 'btn-main' : ''}`}
-            style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 6 }}
-            onClick={() => {
-              setMotto(id)
-              onClose()
-            }}
-          >
-            <b>{MOTTOS[id].name}</b>
-            <span style={{ fontSize: 12, color: 'var(--text-dim)', marginLeft: 8 }}>{MOTTOS[id].desc}</span>
-          </button>
-        ))}
-        <button className="btn btn-ghost" onClick={onClose}>閉じる</button>
-      </div>
-    </div>
+    <Sheet title={`家訓 — ${head?.name ?? '当主'}が掲げる家風`} onClose={onClose} closeLabel="やめる">
+      <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 10 }}>
+        家訓は一族の生き方を定め、静かな加護をもたらす。掲げ直すのも当主の器量。
+      </p>
+      {(Object.keys(MOTTOS) as MottoId[]).map((id) => (
+        <button
+          key={id}
+          className={`btn ${data.motto === id ? 'btn-main' : ''}`}
+          style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 6 }}
+          onClick={() => {
+            setMotto(id)
+            onClose()
+          }}
+        >
+          <b>{MOTTOS[id].name}</b>
+          <span style={{ fontSize: 12, color: 'var(--text-dim)', marginLeft: 8 }}>{MOTTOS[id].desc}</span>
+        </button>
+      ))}
+    </Sheet>
   )
 }
 
@@ -674,31 +662,25 @@ function GossipModal({ onClose }: { onClose: () => void }) {
   const unlocked = data.gossipIndex ?? 0
 
   return (
-    <div className="modal-back" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2 className="panel-title">郷の声 — 聞こえてきた話</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 10 }}>
-          死や代替わり、夜藪からの帰還のたび、郷の誰かの一言がひとつずつ届く。
-        </p>
-        <div className="chronicle-scroll">
-          {GOSSIP.map((g, i) => (
-            <div key={g.id} className="chron-entry">
-              {i < unlocked ? (
-                <>
-                  <b style={{ color: 'var(--amber)' }}>{g.speaker}</b>
-                  <span className="chron-era" style={{ fontWeight: 400, marginLeft: 6 }}>「{g.text}」</span>
-                </>
-              ) : (
-                <span style={{ color: 'var(--text-dim)' }}>？？？</span>
-              )}
-            </div>
-          ))}
-        </div>
-        <button className="btn btn-ghost" onClick={onClose} style={{ marginTop: 10 }}>
-          閉じる
-        </button>
+    <Sheet title="郷の声 — 聞こえてきた話" onClose={onClose}>
+      <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 10 }}>
+        死や代替わり、夜藪からの帰還のたび、郷の誰かの一言がひとつずつ届く。
+      </p>
+      <div className="chronicle-scroll">
+        {GOSSIP.map((g, i) => (
+          <div key={g.id} className="chron-entry">
+            {i < unlocked ? (
+              <>
+                <b style={{ color: 'var(--amber)' }}>{g.speaker}</b>
+                <span className="chron-era" style={{ fontWeight: 400, marginLeft: 6 }}>「{g.text}」</span>
+              </>
+            ) : (
+              <span style={{ color: 'var(--text-dim)' }}>？？？</span>
+            )}
+          </div>
+        ))}
       </div>
-    </div>
+    </Sheet>
   )
 }
 
@@ -709,9 +691,7 @@ function FamiliarsModal({ onClose }: { onClose: () => void }) {
   const familiars = data.familiars ?? []
 
   return (
-    <div className="modal-back" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2 className="panel-title">眷属 — 懐いた魔性たち</h2>
+    <Sheet title="眷属 — 懐いた魔性たち" onClose={onClose}>
         <p style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 10 }}>
           討った魔性は、ごく稀に懐いて眷属となる。一体だけを随行させられる — 夜藪で小さな助けになる。
         </p>
@@ -742,10 +722,6 @@ function FamiliarsModal({ onClose }: { onClose: () => void }) {
             )
           })
         )}
-        <button className="btn btn-ghost" onClick={onClose}>
-          閉じる
-        </button>
-      </div>
-    </div>
+    </Sheet>
   )
 }
