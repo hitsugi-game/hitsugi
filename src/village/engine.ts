@@ -157,6 +157,14 @@ export class VillageEngine {
     return this.focused
   }
 
+  // 会話済みの頭上「話」印をその場で消す(滞在中の即時反映 — レビュー反映)
+  markNewsCleared(id: string): void {
+    const nodes = this.npcBadges.get(id)
+    if (!nodes) return
+    for (const n of nodes) n.destroy()
+    this.npcBadges.delete(id)
+  }
+
   // ---- 内部 ----
 
   private layout = () => {
@@ -488,12 +496,14 @@ export class VillageEngine {
         mark.x = 16
         mark.y = -V_TILE * 0.95
         node.addChild(mark)
+        this.npcBadges.set(n.id, [badge, mark])
       }
       this.mid.addChild(node)
     }
   }
 
   private kinNodes: { id: string; name: string; node: Container }[] = []
+  private npcBadges = new Map<string, (Graphics | Text)[]>()
 
   private buildKin(): void {
     this.opts.kin.slice(0, KIN_SPOTS.length).forEach((k, i) => {

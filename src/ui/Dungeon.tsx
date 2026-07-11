@@ -368,10 +368,9 @@ function FirstActIntro() {
   const [visible, setVisible] = useState(run.floor === 0 && !run.introSeen)
   useEffect(() => {
     if (!visible) return
-    const done = () => {
-      setVisible(false)
-      dungeonIntroSeen()
-    }
+    // 見せた時点で即記録する — 解散(2秒/入力)前に敵影遭遇で戦闘へ落ちても再表示しない(レビュー反映)
+    dungeonIntroSeen()
+    const done = () => setVisible(false)
     const timer = window.setTimeout(done, 2000)
     const onInput = () => done()
     window.addEventListener('keydown', onInput)

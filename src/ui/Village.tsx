@@ -88,6 +88,7 @@ export function VillageScreen() {
     const v = VILLAGERS.find((x) => x.id === id)
     setTalk({ name: line.name, role: v?.role, text: line.text, imgUrl: villagerImg(id, band) })
     markVillagerTalked(id, lineKey)
+    engineRef.current?.markNewsCleared(id) // 頭上の「話」印もその場で消す
   }
 
   const kinLine = (c: Character): string => {

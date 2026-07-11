@@ -1320,6 +1320,7 @@ export const useGame = create<GameStore>((set, get) => {
     },
 
     dungeonEncounter: (boss = false, golden = false) => {
+      let mikiriFlagToSet: string | null = null
       const { rng } = get()
       const run = get().dungeonRun
       const d = get().data
@@ -1401,15 +1402,16 @@ export const useGame = create<GameStore>((set, get) => {
         const prelude = loreFor(run.regionId)?.bossPrelude ?? []
         // M23(指示7 V3): 痕跡を読み切った初回のボス戦でだけ「見切り」を明示する。
         // 「回避方法の明示」型 — 数値バフは付けない(バランス不変)。unshift順で導入文の末尾に出る。
+        // フラグの書き込みは後段の図鑑mutateへ相乗りさせ、dataの二重置換を避ける(レビュー反映)。
         {
           const dd = get().data!
           const intel = traceIntelOf(dd, run.regionId)
-          const mikiriFlag = `mikiri_${run.regionId}`
-          if (intel.mikiri && !dd.flags[mikiriFlag]) {
+          const flag = `mikiri_${run.regionId}`
+          if (intel.mikiri && !dd.flags[flag]) {
             const line = bossMikiriLine(region.bossId)
             if (line) {
               battle.log.unshift({ text: line, kind: 'info' })
-              mutate((prev) => ({ ...prev, flags: { ...prev.flags, [mikiriFlag]: true } }))
+              mikiriFlagToSet = flag
             }
           }
         }
@@ -1420,9 +1422,10 @@ export const useGame = create<GameStore>((set, get) => {
         }
       }
       if (dark) battle.log.push({ text: '灯は尽きた。常夜の重圧が魔性を狂わせている……!', kind: 'info' })
-      // 図鑑: 遭遇した魔性を記録(M14)
+      // 図鑑: 遭遇した魔性を記録(M14)+見切り初回フラグ(M23)を1回のmutateで
       mutate((dd) => ({
         ...dd,
+        flags: mikiriFlagToSet ? { ...dd.flags, [mikiriFlagToSet]: true } : dd.flags,
         codex: {
           enemies: [...new Set([...(dd.codex?.enemies ?? []), ...enemyIds])],
           gods: dd.codex?.gods ?? [],
