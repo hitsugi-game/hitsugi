@@ -266,3 +266,131 @@
     font-size: 12.5px;
   }
 }
+
+/* ================================================================
+   M22 P1-5 — 出立の初期選択+地域/ボス予告(POLISH_FIX §6 / VISUAL_RECOVERY §3-4)
+   署名演出「灯写し」: 選択時に一度だけ灯に透かされるようにrevealし、常時脈動しない。 */
+
+.region-hiutsushi {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  min-height: 130px;
+  background: #0d1226;
+}
+.region-hiutsushi .region-detail-img {
+  height: 150px;
+  margin-bottom: 0;
+  display: block;
+  animation: hiutsushi 0.5s ease-out both;
+}
+
+/* 灯写し — 0-120ms暗い和紙、120-350ms中央から灯色が広がる、以後静止 */
+@keyframes hiutsushi {
+  0% { opacity: 0.2; clip-path: circle(7% at 50% 55%); filter: brightness(0.35) sepia(0.5); }
+  24% { opacity: 1; }
+  100% { clip-path: circle(120% at 50% 55%); filter: none; }
+}
+
+/* 未討伐の主 — 立ち絵を黒い輪郭でだけ見せる(全身の色は初遭遇で解禁) */
+.region-boss-sil {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  height: 82%;
+  filter: brightness(0);
+  opacity: 0.85;
+  pointer-events: none;
+  animation: bossSilIn 0.5s ease 0.3s both;
+}
+@keyframes bossSilIn {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 0.85; transform: none; }
+}
+
+/* 討伐済みの鎮印 */
+.region-shizume-seal {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  color: var(--gold);
+  font-size: 16px;
+  font-weight: 700;
+  background: rgba(10, 14, 29, 0.65);
+  transform: rotate(-8deg);
+}
+
+/* 地域画404の墨絵シルエット — 地域名で必ず識別できる */
+.region-art-fallback {
+  position: relative;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.region-art-fallback svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.region-art-name {
+  z-index: 1;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--text);
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+}
+.region-art-note {
+  z-index: 1;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  background: rgba(10, 14, 29, 0.6);
+  border-radius: 8px;
+  padding: 1px 8px;
+}
+
+/* 主・署名・物見の行 */
+.region-boss-line {
+  font-size: 12.5px;
+  color: var(--text);
+  margin-top: 6px;
+}
+.region-boss-line b { color: var(--ember-text); }
+.region-sign-line {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.region-monomi-line {
+  font-size: 12.5px;
+  color: var(--gold);
+  margin-top: 4px;
+}
+
+/* reduced motion: 灯写しはクロスフェードのみ(情報は欠落させない) */
+@media (prefers-reduced-motion: reduce) {
+  .region-hiutsushi .region-detail-img,
+  .region-boss-sil {
+    animation: rdFade 0.25s ease both;
+  }
+}
+.reduce-motion .region-hiutsushi .region-detail-img,
+.reduce-motion .region-boss-sil {
+  animation: rdFade 0.25s ease both;
+}
+/* toフレームを書かない=終了時は各要素の通常opacity(0.9/0.85)へ自然に戻る */
+@keyframes rdFade {
+  from { opacity: 0; }
+}

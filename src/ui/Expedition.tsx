@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../core/store'
 import type { NodeType, Region } from '../core/types'
+import { ELEMENT_LABELS } from '../core/types'
 import { REGIONS, regionById } from '../core/data/regions'
+import { ENEMIES } from '../core/data/enemies'
+import { regionSignOf } from '../core/data/region_visuals'
 import { eventById } from '../core/expedition'
 import { facilityLevel } from '../core/data/facilities'
 import { dungeonByRegion } from '../dungeon/maps'
@@ -40,14 +43,18 @@ function AscentMap({
   // y は上下反転(配列先頭=麓=下端)
   const posOf = (i: number) => { const p = nodePos(i); return { x: p.x, y: H - p.y } }
 
-  // 初回表示: 最前線(解禁済みの最上段)を視界の中央へ
+  // 初回表示: 選択中の地(なければ最前線)を視界の中央へ
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
-    let frontier = 0
-    regions.forEach((r, i) => { if (fame >= r.unlockFame) frontier = i })
+    let target = 0
+    regions.forEach((r, i) => { if (fame >= r.unlockFame) target = i })
+    if (selected) {
+      const i = regions.findIndex((r) => r.id === selected)
+      if (i >= 0) target = i
+    }
     const scale = el.clientWidth / MAP_W
-    el.scrollTop = Math.max(0, posOf(frontier).y * scale - el.clientHeight / 2)
+    el.scrollTop = Math.max(0, posOf(target).y * scale - el.clientHeight / 2)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -146,13 +153,75 @@ function AscentMap({
   )
 }
 
+// 前回選んだ地(localStorage) — M22 §5: 開いた瞬間から右ペインを非空にする
+const LAST_REGION_KEY = 'hitsugi_last_region_v1'
+
+// 初期選択: 前回選んだ地が今も有効ならそれを、なければ最前線(解禁済みの最上段)を選ぶ
+function initialRegionId(fame: number): string | null {
+  const unlocked = REGIONS.filter((r) => fame >= r.unlockFame)
+  if (unlocked.length === 0) return null
+  let last: string | null = null
+  try {
+    last = localStorage.getItem(LAST_REGION_KEY)
+  } catch {
+    // private mode等で読めなくても初期選択は成立させる
+  }
+  if (last && unlocked.some((r) => r.id === last)) return last
+  return unlocked[unlocked.length - 1].id
+}
+
+// 地域画 — 404時は同じ森へ黙って差し替えず、地域名入りの墨絵シルエット+「遠見が利かぬ」(M22 §5)
+function RegionArt({ region }: { region: Region }) {
+  const [ok, setOk] = useState(true)
+  const [lastId, setLastId] = useState(region.id)
+  if (region.id !== lastId) {
+    setLastId(region.id)
+    setOk(true)
+  }
+  if (!ok) {
+    // 地域idから決定的に山影をずらす(欠落した地同士が同一に見えないように+名前で必ず識別)
+    const h = [...region.id].reduce((a, ch) => a + ch.charCodeAt(0), 0)
+    const dx = h % 60
+    const mx = 50 + (h % 200)
+    return (
+      <div className="region-art-fallback">
+        <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMax slice" aria-hidden>
+          <circle cx={mx} cy={34} r={16} fill="#b9c4e8" opacity={0.5} />
+          <path d={`M0 130 L${58 + dx} 62 L${118 + dx} 104 L${182 + dx} 54 L${248 + dx} 102 L320 66 L320 130 Z`} fill="#141b36" />
+          <path d={`M0 130 L${34 + dx} 96 L${96 + dx} 118 L${170 + dx} 88 L320 116 L320 130 Z`} fill="#0d1226" />
+          <rect x={0} y={96} width={320} height={20} fill="#a9b7d8" opacity={0.12} />
+        </svg>
+        <span className="region-art-name">{region.name}</span>
+        <span className="region-art-note">遠見が利かぬ — 絵姿準備中</span>
+      </div>
+    )
+  }
+  return (
+    <img
+      className="region-detail-img"
+      src={regionBgR(region.id)}
+      alt=""
+      aria-hidden
+      onError={() => setOk(false)}
+    />
+  )
+}
+
 export function DepartScreen() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
   const depart = useGame((s) => s.depart)
   const departDungeon = useGame((s) => s.departDungeon)
-  const [regionId, setRegionId] = useState<string | null>(null)
+  const [regionId, setRegionId] = useState<string | null>(() => initialRegionId(data.fame))
   const [party, setParty] = useState<string[]>([])
+  const selectRegion = (id: string) => {
+    setRegionId(id)
+    try {
+      localStorage.setItem(LAST_REGION_KEY, id)
+    } catch {
+      // 保存できなくても選択は成立する
+    }
+  }
 
   const adults = data.family.filter((c) => c.alive && isAdult(c, data.seasonIndex))
   const toggle = (id: string) =>
@@ -186,7 +255,7 @@ export function DepartScreen() {
             fame={data.fame}
             cleared={data.regionsCleared}
             selected={regionId}
-            onSelect={setRegionId}
+            onSelect={selectRegion}
           />
           <div className="depart-side">
             {!selectedRegion ? (
@@ -204,21 +273,54 @@ export function DepartScreen() {
                 )}
               </div>
             ) : (
-              <div className="region-detail">
-                <MaybeImg src={regionBgR(selectedRegion.id)} className="region-detail-img" />
-                <div className="region-detail-head">
-                  <span className="region-name">{selectedRegion.name}</span>
-                  <span className="region-tier">{'★'.repeat(selectedRegion.tier)}</span>
-                </div>
-                <p className="region-desc">{selectedRegion.desc}</p>
-                <p className="region-detail-sub">
-                  深さ{selectedRegion.depth}
-                  {data.regionsCleared.includes(selectedRegion.id) ? ' ・ 主討伐済(鎮)' : selectedRegion.bossId ? ' ・ 主あり(未討伐)' : ''}
-                </p>
-                <p className="region-detail-risk">
-                  見立て★{selectedRegion.tier} ／ 推奨武功 {selectedRegion.unlockFame}
-                </p>
-              </div>
+              (() => {
+                const isCleared = data.regionsCleared.includes(selectedRegion.id)
+                const boss = selectedRegion.bossId ? ENEMIES.find((e) => e.id === selectedRegion.bossId) : undefined
+                const sign = regionSignOf(selectedRegion.id)
+                const monomiLv = facilityLevel(data.facilities, 'monomi')
+                return (
+                  // key=地域id: 選び直すたび灯写し(一度だけのreveal)をやり直す
+                  <div className="region-detail" key={selectedRegion.id}>
+                    <div className="region-hiutsushi">
+                      <RegionArt region={selectedRegion} />
+                      {boss && !isCleared && (
+                        <MaybeImg src={gameImg(boss.sprite)} className="region-boss-sil" />
+                      )}
+                      {isCleared && <span className="region-shizume-seal" aria-hidden>鎮</span>}
+                    </div>
+                    <div className="region-detail-head">
+                      <span className="region-name">{selectedRegion.name}</span>
+                      <span className="region-tier">{'★'.repeat(selectedRegion.tier)}</span>
+                    </div>
+                    <p className="region-desc">{selectedRegion.desc}</p>
+                    <p className="region-detail-sub">
+                      深さ{selectedRegion.depth}
+                      {isCleared ? ' ・ 主討伐済(鎮)' : selectedRegion.bossId ? ' ・ 主あり(未討伐)' : ''}
+                    </p>
+                    <p className="region-detail-risk">
+                      見立て★{selectedRegion.tier} ／ 推奨武功 {selectedRegion.unlockFame}
+                    </p>
+                    {boss && (
+                      <p className="region-boss-line">
+                        主 <b>{boss.name}</b>
+                        {isCleared
+                          ? ' — 鎮められた'
+                          : ` — 討てば奉燈${boss.hoto}・血珠${boss.ketsu}`}
+                      </p>
+                    )}
+                    {sign && (
+                      <p className="region-sign-line">
+                        署名 {sign.landmark} ／ 兆し 「{sign.omen}」
+                      </p>
+                    )}
+                    {monomiLv >= 1 && boss && !isCleared && (
+                      <p className="region-monomi-line">
+                        物見の見立て — 主は{ELEMENT_LABELS[boss.element]}の気配を帯びる。
+                      </p>
+                    )}
+                  </div>
+                )
+              })()
             )}
           </div>
         </div>
