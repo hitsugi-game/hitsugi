@@ -1,0 +1,230 @@
+/* M24: 戦闘UI改善「灯脈の間」(docs/BATTLE_DUNGEON_OVERHAUL_M24.md §3)
+   index.css / m17_battle.css より後にBattle.tsxからimportされる前提で、
+   同名セレクタを「後勝ち」で上書きする。index.css自体は一切編集しない。
+   ダンジョン系・戦闘計算/AI/報酬には触れない(視覚のみ)。 */
+
+/* ---- §3.1 三段grid — min-height:60vh依存を断ち、戦場を画面高65〜72%に固定する ---- */
+.battle-screen {
+  display: grid;
+  grid-template-rows: 52px minmax(0, 1fr) 152px;
+}
+.battle-stage {
+  min-height: 0; /* index.css の flex:1;min-height:60vh を実質無効化(grid行が寸法を決める) */
+}
+
+/* ---- §3.2 敵味方の共通地平線 — 既存left/rightは変えず、topだけ揃える ---- */
+.is-enemy,
+.is-ally {
+  top: calc(48% + (var(--slot) - (var(--n, 1) - 1) / 2) * 17% - 60px);
+}
+
+/* ---- §3.1/§3.7 人物拡大 — 通常140〜180px程度・1体は180px超。ボスは別枠(--szを使わない固定値) ---- */
+.combatant .enemy-img,
+.combatant .enemy-sprite2 .enemy-img {
+  width: calc(150px * var(--sz, 1));
+  height: calc(150px * var(--sz, 1));
+  max-height: none;
+}
+.combatant .ally-stand,
+.combatant .ally-pose {
+  height: calc(150px * var(--sz, 1));
+  width: auto;
+}
+.combatant .ally-flame { font-size: calc(46px * var(--sz, 1)); }
+.combatant .enemy-sprite2.silhouette svg {
+  width: calc(150px * var(--sz, 1));
+  height: calc(150px * var(--sz, 1));
+}
+
+/* ボス専用スケール — 画像経路(.enemy-img)とSVG退避経路(silhouette svg)の両方に通す。--szの人数式は使わない */
+.combatant.is-boss .enemy-img,
+.combatant.is-boss .enemy-sprite2 .enemy-img,
+.combatant.is-boss .enemy-sprite2.silhouette svg {
+  width: 260px;
+  height: 260px;
+  max-height: none;
+}
+
+/* 接地影 — 敵味方の足元を共通の地平線として読ませる(装飾。厳密な脚位置合わせは目視未検証) */
+.combatant-shadow {
+  position: absolute; left: 50%; bottom: 40px; z-index: 0; pointer-events: none;
+  width: 56px; height: 14px; transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0) 72%);
+}
+.combatant.is-boss .combatant-shadow { width: 130px; height: 26px; bottom: 44px; }
+
+/* ---- §3.4 状態異常アイコン — 戦場上combatant-plateへ名前+HP+状態を常設 ---- */
+.status-icons { display: inline-flex; gap: 3px; margin-left: 4px; vertical-align: middle; }
+.combatant-plate .status-icons { display: block; margin: 2px 0 0; }
+.status-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; line-height: 1; padding: 2px 4px; border-radius: 3px;
+  background: rgba(255, 157, 69, 0.16); border: 1px solid var(--flame); color: var(--flame);
+  white-space: nowrap;
+}
+.combatant-plate .status-chip { font-size: 9px; padding: 1px 3px; }
+
+/* ---- §3.5 対象選択の番号バッジ(1〜4キー対応の可視化) ---- */
+.target-num-badge {
+  position: absolute; top: -8px; left: -8px; z-index: 9;
+  min-width: 22px; height: 22px; padding: 0 4px;
+  border-radius: 50%; background: var(--flame); color: var(--night-deep);
+  font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--night-deep); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* ---- §3.3 灯脈 — 行動者→対象の足元を結ぶ一時的な線。座標は.battle-stage比の%(0-100viewBox) ---- */
+.hitvein-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; overflow: visible; }
+.hitvein-line {
+  stroke: var(--flame); stroke-width: 2; stroke-linecap: round;
+  opacity: 0; vector-effect: non-scaling-stroke;
+  animation: veinDraw 150ms ease-out forwards;
+}
+.hitvein-line.hitvein-heal { animation: veinHeal 150ms ease-out forwards; }
+.hitvein-line.hitvein-pulse { animation: veinDraw 150ms ease-out forwards, veinPulse 300ms ease-in-out 150ms 1; }
+@keyframes veinDraw {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes veinHeal {
+  0% { opacity: 0; stroke: var(--flame); }
+  40% { opacity: 1; }
+  100% { opacity: 1; stroke: var(--text); }
+}
+@keyframes veinPulse {
+  0%, 100% { opacity: 1; stroke-width: 2; }
+  50% { opacity: 0.5; stroke-width: 3.6; }
+}
+/* reduced-motion: 線は静止(既存の全体!important規則でも実質同じ結果になるが、明示して確実にする) */
+@media (prefers-reduced-motion: reduce) {
+  .hitvein-line, .hitvein-line.hitvein-heal, .hitvein-line.hitvein-pulse {
+    animation: none !important; opacity: 1; stroke-width: 2;
+  }
+  .hitvein-line.hitvein-heal { stroke: var(--text); }
+}
+.reduce-motion .hitvein-line { animation: none !important; opacity: 1; stroke-width: 2; }
+.reduce-motion .hitvein-line.hitvein-heal { stroke: var(--text); }
+.reduce-motion .hitvein-line.hitvein-pulse { stroke-width: 2; }
+
+/* ---- §3.3 倍率の常設表示(行動順bar横)。中央chain-veinは装飾化して残す ---- */
+.turn-chain-mult {
+  font-size: 11.5px; color: var(--sel); font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 2px 8px; border: 1px solid var(--sel); border-radius: 10px; margin-right: 4px;
+  white-space: nowrap; background: rgba(255, 157, 69, 0.12);
+}
+.chain-vein { opacity: 0.72; transform: translate(-50%, -50%) scale(0.86); }
+
+/* ---- §3.7 主専用HPゲージ — 通常敵の枠へ混ぜず画面上部へ分離。目盛りで段階変化を示唆 ---- */
+.boss-hp-bar {
+  position: absolute; top: 4px; left: 50%; transform: translateX(-50%); z-index: 11;
+  width: min(72vw, 520px);
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(11, 15, 30, 0.82); border: 1px solid var(--ember); border-radius: 6px;
+  padding: 4px 10px;
+}
+.boss-hp-name { font-size: 12.5px; color: var(--ember-text); letter-spacing: 0.12em; white-space: nowrap; flex-shrink: 0; }
+.boss-hp-track {
+  position: relative; flex: 1; height: 12px; background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 3px; overflow: hidden;
+}
+.boss-hp-fill { height: 100%; background: linear-gradient(90deg, var(--ember), var(--ember-text)); transition: width 0.45s ease; }
+.boss-hp-tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(0, 0, 0, 0.5); }
+.boss-hp-num { font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--text); flex-shrink: 0; }
+
+/* ボス名/輪郭の重なり順 — cutin(z-index:40)より前面へ、主名が読める順にする(§3.7) */
+.boss-banner { z-index: 41; }
+
+/* 勝利演出の順序 — ボスの灯が消える(既存.deadで自動)→一族が呼吸→紙吹雪、の順に一拍ずつ遅らせる */
+.battle-stage.stage-won-boss .ally-side .combatant-body { animation-delay: 250ms; }
+.battle-stage.stage-won-boss.stage-won::before { animation-delay: 500ms; }
+.battle-stage.stage-won-boss .ally-side::after { animation-delay: 700ms; }
+
+/* ---- §3.4 報酬予告化 — 開幕の大スロットを右上の小型札へ ---- */
+.loot-slot {
+  top: 8px; left: auto; right: 8px; transform: none;
+  padding: 4px 8px; gap: 4px;
+}
+.loot-slot .slot-label { font-size: 10px; }
+.loot-slot .slot-reel { width: 34px; height: 18px; }
+.loot-slot .slot-item { height: 18px; line-height: 18px; font-size: 10.5px; }
+@keyframes slotLife { /* 右上固定なのでtranslateXの往復は不要 — 上下フェードのみに差し替え */
+  0% { opacity: 0; transform: translateY(-8px); }
+  12% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---- §3.5 コマンド盤3分割 — 左:手番者 中央:主要4コマンド/技一覧 右:選択中の技の詳細 ---- */
+.battle-bottom {
+  display: grid;
+  grid-template-columns: minmax(140px, 210px) minmax(0, 1fr) minmax(150px, 230px);
+  gap: 8px;
+  padding: 6px 10px;
+  align-items: stretch;
+  min-height: 0;
+  overflow: hidden;
+}
+.turnpanel-actor, .turnpanel-center, .turnpanel-detail {
+  min-width: 0; min-height: 0; overflow: hidden;
+  background: linear-gradient(160deg, rgba(30, 20, 14, 0.92), rgba(16, 10, 8, 0.95));
+  border: 1px solid var(--gold); border-radius: 6px;
+  padding: 6px 8px;
+}
+.turnpanel-actor { display: flex; flex-direction: column; gap: 3px; justify-content: center; }
+.turnpanel-actor-name { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.turnpanel-party-mp {
+  display: flex; gap: 6px; flex-wrap: wrap; font-size: 10.5px; color: var(--text-dim);
+  font-variant-numeric: tabular-nums; margin-top: 2px;
+}
+.turnpanel-party-mp .is-now { color: var(--sel); font-weight: 700; }
+.turnpanel-party-mp .is-dead { opacity: 0.4; text-decoration: line-through; }
+
+.turnpanel-center { display: flex; flex-direction: column; }
+.turnpanel-center .skill-panel { flex: 1; min-height: 0; }
+.turnpanel-center .skill-list { flex: 1; min-height: 0; max-height: none; overflow-y: auto; }
+
+.cmd-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; flex: 1; align-content: center; }
+.cmd-grid .cmd-auto { grid-column: 1 / -1; font-size: 11px; padding: 3px; }
+
+.target-hint { display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; height: 100%; }
+.cmd-hint-sub { font-size: 10.5px; opacity: 0.7; margin-top: -4px; }
+
+.turnpanel-detail { font-size: 12px; overflow-y: auto; }
+.skill-detail-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.skill-detail-row { margin: 2px 0; font-size: 12px; }
+.skill-detail-row b { color: var(--text); font-variant-numeric: tabular-nums; }
+.detail-hint { font-size: 12px; color: var(--text-dim); text-align: center; margin-top: 20%; }
+
+/* ---- §3.8 モバイル(390×844想定) — 戦場45〜55%/コマンド盤下部固定/技一覧はbottom sheet ---- */
+@media (max-width: 560px) {
+  .battle-screen { grid-template-rows: 44px minmax(0, 1fr) clamp(220px, 42vh, 420px); }
+
+  .battle-bottom {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    overflow-y: auto;
+  }
+  .turnpanel-detail { display: none; } /* 技説明はbottom sheet(.skill-panel)側に統合 */
+  .cmd-grid { grid-template-columns: repeat(2, 1fr); }
+  .cmd-btn { min-height: 44px; }
+  .cmd-grid .cmd-btn { min-height: 46px; font-size: 15px; }
+
+  .skill-panel {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 55;
+    background: linear-gradient(180deg, rgba(24, 16, 10, 0.97), rgba(10, 7, 5, 0.99));
+    border: 1px solid var(--gold); border-bottom: none;
+    border-radius: 14px 14px 0 0;
+    padding: 10px 12px max(10px, env(safe-area-inset-bottom));
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.55);
+    max-height: 64vh;
+  }
+  .skill-panel .skill-list { max-height: calc(64vh - 60px); }
+  .skill-back { min-height: 44px; }
+
+  .combatant.is-boss .enemy-img,
+  .combatant.is-boss .enemy-sprite2 .enemy-img,
+  .combatant.is-boss .enemy-sprite2.silhouette svg {
+    width: auto; height: auto; max-height: 52vh; max-width: 70vw;
+  }
+  .boss-hp-bar { width: min(94vw, 360px); }
+}
