@@ -7,12 +7,19 @@
 必ず先に読む:
 
 1. `AGENTS.md`
-2. `docs/GDD_v3.md` §8.5
-3. `docs/UI_UX_REDESIGN_PLAN.md`
-4. `docs/UI_UX_ACCEPTANCE_CHECKLIST.md`
-5. `docs/DESIGNSPEC.md`
-6. `docs/STATUS.md`
-7. `docs/WORKLOG.md` 末尾
+2. `docs/POLISH_FIX_INSTRUCTIONS_CLAUDE.md`
+3. `docs/GDD_v3.md` §8.5〜§8.8
+4. `docs/UI_UX_REDESIGN_PLAN.md`
+5. `docs/UI_UX_ACCEPTANCE_CHECKLIST.md`
+6. `docs/DESIGNSPEC.md`
+7. `docs/STATUS.md`
+8. `docs/WORKLOG.md` 末尾
+9. `docs/ENGAGEMENT_COMFORT_ASSET_PLAN.md`
+10. `docs/GOD_ART_AUDIT_2026-07-11.md`
+11. `assets_src/GOD_ART_STYLE_GUIDE.md`
+12. `docs/VISUAL_ASSET_AUDIT_2026-07-11.md`
+13. `docs/VISUAL_RECOVERY_DUNGEON_PLAN.md`
+14. `assets_src/VISUAL_RECOVERY_BATCH.md`
 
 ## 現状判断
 
@@ -21,6 +28,32 @@
 - ホーム内に9個のモーダル状態があり、鍛冶のような複合作業も家訓のような短い選択も同じmodal契約。
 - 家譜/図鑑/家系図/鍛冶/普請は情報量的に独立作業画面が適切。
 - 戦闘は素材より配置が問題。中央が空き、敵味方が小さく、ログ/隊員札が広い。
+- 神データ180柱に対して通常絵120、縁MAX絵120。新規60柱は両方とも未配置。
+- 神カットイン24枚は生成仕様が先頭24柱限定であり、156件の単純な生成漏れではない。
+- 継続動機は日課化ではなく「前回の灯」「家の火種」「神縁の三幕」「宿敵の傷跡」で作る。
+
+## M18後の次工程
+
+M18の各Phaseを検収した後、`docs/ENGAGEMENT_COMFORT_ASSET_PLAN.md` のPhase Aから着手する。
+
+1. 前回の灯、家の火種、次月の兆し、月送り差分まとめ。
+2. 帰還の「今回変わったこと」と神縁の三幕。
+3. 宿敵の傷跡と世代の問い。
+4. 神絵はrank 1不足20柱＋rank 4不足10柱をP0とする。
+
+連続ログイン損失、期間限定、時限報酬、行動力待ちは導入しない。
+
+## ビジュアル復旧を先行する場合
+
+ユーザーレビューで出立画面・地域・ボス・ダンジョンの魅力不足が再指摘されたため、M18検収と並行可能な独立レーンとする。
+
+1. `docs/VISUAL_ASSET_AUDIT_2026-07-11.md` の348件を現環境で再監査する。
+2. 出立画面を開いた時点で最前線を自動選択し、空の右ペインをなくす。
+3. 新12地域の背景/ボスの間/ボス/カットインを最優先で投入する。
+4. `docs/VISUAL_RECOVERY_DUNGEON_PLAN.md` の `RegionVisualProfile` と四幕の道行きを実装する。
+5. 神MAX・敵若老は承認済み基礎絵を参照するimg2imgへ切り替える。
+
+既存画像627枚に画素完全一致はなく、参照重複も0。共通代替表示を「画像の使い回し」と誤認させているため、参照の付け替えで済ませず欠落ファイルを埋める。
 
 ## 実装順
 
@@ -140,6 +173,8 @@ git diff --check
 - 正典は `docs/GDD_v3.md`。旧GDDは参照しない。
 - ゲームロジック変更をUI Phaseへ混ぜない。
 - 既存の未追跡sprite画像を削除・移動・一括追加しない。
+- 通常神絵とMAX神絵を別々のtext-to-imageで作らず、承認済み通常絵をMAX差分の参照にする。
+- `factory_state.json` のdoneだけで画像実在を判断せず、`public/img` とデータ参照を突合する。
 - 金は見出し/当主/確定、命火は選択/推奨、朱文字は危機。
 - 色だけで状態を伝えない。
 - モバイルで説明や比較材料を削らない。
@@ -155,3 +190,11 @@ git diff --check
 - キーボード/ESC/フォーカス結果
 - build/lint/data検証結果
 - 次Phaseへ残した項目
+
+## M18/M19後のブラッシュアップ追加指示（2026-07-11）
+
+添付画面で確認された「隊を組む」の単独カード横幅過大、装備区分/レアリティ/比較不足、神絵欠落フォールバック、modal操作、郷の歩行化、出立/ダンジョン予告の修正は次を正本とする。
+
+- `docs/POLISH_FIX_INSTRUCTIONS_CLAUDE.md`
+
+特に隊編成は共通 `.exp-party` を直接変更しない。`Expedition.tsx` の編成候補だけへ専用gridを導入し、PCは4列、モバイルは1列コンパクト、常時4つの隊列枠を表示する。1人でも横一杯へ伸ばさないことをP0受入条件とする。

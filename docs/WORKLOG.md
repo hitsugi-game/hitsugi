@@ -952,3 +952,52 @@
 - 2026-07-11 M18検収(部分達成): 独立code-review出荷可(CRIT0/HIGH0)・指摘3件即修正。GAPSレポート=docs/M18_GAPS.md。preview系ツール障害(1h超)によりチェックリストA-I/Jシナリオ実測は保留 — 再開手順はMISSION_UIUX_M18.md⑨。
 - 2026-07-11 M19後半: save硬化(devil攻撃1回→必須4点反映: 意味検証/saveSeq単調・NG+安全/BAK予算/quota梯子1200→600→0+DOMException限定+初回限定toast)/vitest導入27テスト(bound/検証/BAK復旧/推奨6条/御題/夢解禁)+CIゲート(lint+validate+test)/図鑑コンプ称号5種/図鑑新着フィルタ+帳badge(既読カーソルflags)。
 - 2026-07-11 M19終了(部分達成): 実装6項全✅(A4/C1/A9/C3/C2/B3+A1)・最終code-review出荷可(C0/H0/M1修正済)。⑦実測のみpreview障害で⚠️(再開手順=docs/MISSION_M19.md ④)。
+
+## 2026-07-11 (継続動機・快適性・神絵監査 — 実装はClaude/Fable 5へ引継ぎ)
+
+- **依頼**: より快適に遊べる改善、素材追加、足りない神絵の確認、プレイヤーが続きを遊びたくなる仕組みを設計する。Codexはゲームソースを実装しない。
+- **監査**: 神180柱に対し通常立ち絵120/180、縁MAX立ち絵120/180。両方とも新規追加60柱が欠落。固有神カットイン24/180は `DUMP.gods.slice(0, 24)` による現行仕様。manifest通常絵登録96/180に対し実ファイル120/180でドリフトを確認。
+- **設計**: 「中毒性」をFOMOやstreakではなく、前回の灯・家の火種三段目標・次月の兆し・帰還差分・神縁の三幕・宿敵の傷跡・世代の問いによる健全な継続性として定義。
+- **画像優先**: P0=序盤rank 1不足20柱＋終盤rank 4不足10柱、P1=rank 2不足15柱、P2=rank 3不足15柱。通常絵を先に承認し、MAX差分は同一画像参照で制作。カットインは極ツ星＋鍵神へ選抜。
+- **成果物**: `docs/ENGAGEMENT_COMFORT_ASSET_PLAN.md` / `docs/GOD_ART_AUDIT_2026-07-11.md` / `assets_src/GOD_ART_STYLE_GUIDE.md` / `docs/GDD_v3.md` §8.6 / Claude引継ぎ追記。
+- **コード変更**: なし。既存のゲームソース、未追跡sprite画像、配信用画像は変更していない。
+- **検証**: `npm run build`成功 / `npm run lint`成功 / `npm test -- --run` 27件全成功 / `node scripts/validate_data.mjs` errors 0・既知warn 1(神位階が旧最終目標を超過) / `git diff --check`問題なし。
+- **素材候補**: 欠落しているrank 4「月夜見の大神」の通常立ち絵候補 `assets_src/god_candidates/god_tsukiyomikami_v1.png` を追加。未採用候補であり、Claudeが目視承認後に配信用ファイルへ変換・配置する。
+- **次**: ClaudeはM18検収→継続計画Phase A→神絵P0の順で着手。pushはユーザー承認後のみ。
+
+## 2026-07-11 (全素材監査・出立/ダンジョン刷新設計)
+
+- **依頼**: 神絵の使い回し感、画像のない出立地図、ボス不明、ダンジョンの魅力不足を改善し、不足素材を一括生成可能にする。ゲームソース実装はClaude/Fable 5へ引き継ぐ。
+- **横断監査**: 神180/敵579/ボス39/地域40を実ファイルと突合。重要不足は神通常60+MAX60、敵基礎60+若老120、ボス12、地域12、ボスの間12、新ボスカットイン12=348枚。
+- **重複確認**: 神/敵/ボス既存627ファイルのデコード後画素ハッシュ重複0。データのportrait/sprite参照重複0。神通常120枚のdHash近似距離4以下0。使い回し感の主因は404時の共通フォールバックと40地域に対する4描画テーマの反復。
+- **出立原因**: `selectedRegion === null` の初期状態では右ペインに画像を描かず、クリック後も新12地域は画像404で `MaybeImg` が消える構造を確認。
+- **設計**: 署名要素「灯写し」、最前線初期選択、地域画+ボス輪郭+物見櫓情報、40地域別RegionVisualProfile、署名ランドマーク、痕跡三段階、四幕の道行き、討伐後の光景差分。
+- **成果物**: `docs/VISUAL_ASSET_AUDIT_2026-07-11.md` / `docs/VISUAL_RECOVERY_DUNGEON_PLAN.md` / `assets_src/VISUAL_RECOVERY_BATCH.md` / GDD §8.7 / Claude引継ぎ追記。
+- **工場**: ComfyUI `192.168.1.10:8188` は監査時タイムアウト。正典manifestを現データで再生成し、未生成618件(重要復旧348+装備270)へ更新。生成順をボス→地域/ボスの間→神通常→敵基礎→ボスカットイン→神MAX→敵若老→装備へ変更。生成時は `-NoCommit` 必須。
+- **検証**: `npm run build`成功 / `npm run lint`成功 / `npm test -- --run` 27件全成功 / `node scripts/validate_data.mjs` errors 0・既知warn 1 / `node --check scripts/asset_factory/gen_manifest.mjs`成功 / `git diff --check`問題なし。
+- **先行素材7枚**: 蛍火の窪地背景/ボスの間、蛍火姫立ち絵/初遭遇カットイン、蛍火童女通常/MAX、月夜見の大神通常を生成。生成元PNGは `assets_src/*_candidates/`、配信用JPEGは期待名で `public/img/` へ非上書き配置。manifestを再生成し、残611件(重要復旧341+装備270)。
+- **次**: Claudeは先行素材を出立/星契り/戦闘で目視確認し、工場復帰後に残341枚をバッチ継続する。神MAX/敵若老はimg2img化後に正式生成。pushはユーザー承認後のみ。
+
+## 2026-07-11 (UI/UX検収ブラッシュアップ指示 — 実装はClaude/Fable 5へ引継ぎ)
+
+- **依頼**: 「隊を組む」で候補が1人しかいない時に人物カードが横幅いっぱいになる違和感を含め、これまでの画面監査結果を実装可能な修正指示へまとめる。
+- **原因確認**: `src/index.css` の共通 `.exp-party .char-card { flex: 1; }` が単独カードを行全体へ拡張している。`.exp-party` は複数画面で共有されるため、共通指定の変更は回帰リスクがある。
+- **修正指示**: 出立編成だけに専用4列gridを設け、4つの隊列枠を常時表示する。PCは1人でも第1列のみ、モバイルは1列コンパクト表示。選択順、空き枠、解除、上限理由、キーボード操作を仕様化した。
+- **横断項目**: 装備部位/希少度/比較、神絵欠落、modal/Sheet、郷の歩行化、出立地域/ボス予告、ダンジョン地域差分の優先順と受入条件を統合した。
+- **成果物**: `docs/POLISH_FIX_INSTRUCTIONS_CLAUDE.md` / `docs/HANDOFF_UI_UX_CLAUDE.md` / `docs/GDD_v3.md` §8.8。
+- **コード変更**: なし。ゲームソース実装とpushは行っていない。
+- **次**: ClaudeはP0「隊編成」から実装し、成人1/2/4/6人、成人0人、PC 1280×720、モバイル390×844、キーボード操作を実測する。
+
+## 2026-07-11 (M22 UI/UX検収ブラッシュアップ 実装順1〜5 — /mission)
+
+- **契約**: POLISH_FIX_INSTRUCTIONS_CLAUDE.md(M22)の実装順1〜5を完遂。指示6(郷歩行マップ)・7(RegionVisualProfile本体)は明示スコープ外(頭金=新12地域署名データのみ先行)。devil-advocate攻撃1回→必須6点を契約へ反映(神名焼き込み/品質・希少度は描画時導出/単一Sheetガード/Village除外/5-7分割明示/旧セーブ耐性テスト)。STATE=docs/MISSION_STATE.md。
+- **M1 隊編成(P0)**: DepartParty.tsx新設 — 隊列4枠常時表示+選択順=隊列番号+PC4列(上限280px)/2列/1列コンパクト+Enter/Space+aria-pressed+上限時近接警告+成人0人の空状態案内+詳細はSheetへ退避。共通`.exp-party`は不変(Pact/出立後表示への回帰なし)。
+- **M2 装備5軸(P0)**: core/item_axes.ts新設(単一情報源) — 品質=shopTier帯から描画時導出(粗末/良品/名品/秘宝/神器)、希少度=産地+継承駆動で独立(並/稀/逸/秘/伝)、由来=Item.source optional追加のみ(旧品=古くから家にある品)。diffItemsで攻/防+六能力の軸別差分(charm「同等」誤表示を修正、薦=パレート優越のみ)。鍛冶UI: 字印/品質・希少度チップ/由来・継承行/検索/希少度絞り込み/買える物のみ/カテゴリ見出し/奉燈不足明示。**独立code-review→出荷可(C0/H0)、MEDIUM2件即修正**(打ち直しプレビューをpreviewReforgeで単一情報源化/奉燈不足のdisabled減光打ち消し)。
+- **M3 神絵(P0)**: GodArtFallback.tsx新設 — 共通✦を廃し属性別御影シルエット(炎冠/波紋/風渦/山冠/月輪/八芒)+神名/かな焼き込み+「絵姿準備中」章。神名が必ず入るため欠落二柱が同一に見えない。Pact大立ち絵+Codex神詳細に配線、空状態✦は温存。先行素材7枚(蛍火系6+月夜見)の実在×データ参照突合は機械確認済み。
+- **M4 modal/Sheet(P1)**: Home5件(手引き/務め/家訓/郷の声/眷属)+設定をSheet化。家系図はuseSheetBehavior配線(trap/scroll lock/フォーカス復帰+role=dialog)。事件=誤閉鎖防止の例外(useForcedDialog: scroll lock+初期フォーカス+aria、閉じる手段は選択肢のみ)。単一activeSheetガード(2枚目でconsole.error)。VillageModalは指示5で置換予定のため対象外。dialogフックはdialogs.tsへ分離しfast-refresh警告0。
+- **M5 出立(P1)**: 最前線自動選択(前回選択をlocalStorageで優先)で右ペイン空状態を廃止。地域画404時=地域名入り墨絵シルエット+「遠見が利かぬ」。未討伐主の黒輪郭+討伐報酬常時表示+討伐済み鎮印。署名演出「灯写し」(一度だけのreveal、reduce-motion=クロスフェード)。頭金: 新12地域の署名/主の痕跡をregion_visuals.tsにデータ化しVISUAL_RECOVERY §7.1を出立予告へ接続。物見Lv1=主の属性気配。
+- **変更ファイル**: src/ui/DepartParty.tsx(新)/GodArtFallback.tsx(新)/layout/dialogs.ts(新)/core/item_axes.ts(新)/core/data/region_visuals.ts(新)/Expedition.tsx/Forge.tsx/Pact.tsx/Codex.tsx/Home.tsx/Settings.tsx/FamilyTree.tsx/layout/shell.tsx/core/types.ts/core/data/items.ts/core/store.ts/core/expedition.ts/depart_m18.css/forge_m18.css/pact_m18.css/tests/item_axes.test.ts(新13本)
+- **機械検証**: build 10.5s成功 / oxlint警告0 / vitest **40/40緑**(既存27+新規13) / validate_data errors0・既知warn1 / git diff --check クリーン。
+- **未解決**: preview系(ブラウザ実測)が分類器障害で3回失敗 — PC1280×720/モバイル390×844のDOM実測・スクリーンショット・キーボード実走は保留(再開手順=MISSION_STATE.md④)。指示6/7本体は次期ミッション。
+- **最終独立code-review(opus独立コンテキスト)**: 要修正(C0/H2/M1/L2)→**全件即修正**: [H]隊編成カードの入れ子ボタン解消(選択トグルを実button化・詳細は兄弟配置) / [H]事件ダイアログのShift+Tab回避経路を遮断(useForcedDialogへTabトラップ共通化+chooseNode/useReturnFireにpendingEventガード) / [M]図鑑一覧サムネもGodImgOrFallback化 / [L]デッドCSS除去。修正後 tsc/lint/test/build/validate_data 全緑を再確認。
+- **監査**: docs/MISSION_M22_POLISH.md ⑧に最終監査表(自己監査+独立レビュー2回)。終了判定=**部分達成**(実装6/6✅・ブラウザ実測のみ分類器障害5連続で⚠️保留、再開手順は④)。
