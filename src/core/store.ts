@@ -1094,6 +1094,7 @@ export const useGame = create<GameStore>((set, get) => {
     },
 
     chooseNode: (nodeId) => {
+      if (get().pendingEvent) return // 事件の選択が先(M22 §4: 誤閉鎖防止のキーボード回避対策)
       const { rng } = get()
       const d = get().data!
       const exp = d.expedition
@@ -1186,6 +1187,7 @@ export const useGame = create<GameStore>((set, get) => {
     },
 
     useReturnFire: () => {
+      if (get().pendingEvent) return // 事件の選択が先(M22 §4)
       const d = get().data!
       const exp = d.expedition
       if (!exp) return

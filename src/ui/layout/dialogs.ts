@@ -9,6 +9,34 @@ const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabi
 // StrictModeの二重実行はmount→unmount→mountの順で走るため誤検知しない。
 let activeSheetCount = 0
 
+function firstFocusable(root: HTMLElement | null): HTMLElement | undefined {
+  if (!root) return undefined
+  return [...root.querySelectorAll<HTMLElement>(FOCUSABLE)].find((el) => !el.hasAttribute('disabled'))
+}
+
+// フォーカストラップ: Tabで端に達したら反対側へ循環させる(Sheet/確定ダイアログ共用)
+function trapTabWithin(e: KeyboardEvent, root: HTMLElement | null) {
+  if (e.key !== 'Tab' || !root) return
+  const items = [...root.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => !el.hasAttribute('disabled'))
+  if (items.length === 0) return
+  const firstEl = items[0]
+  const lastEl = items[items.length - 1]
+  // ダイアログ外へフォーカスが逃げていた場合も先頭へ引き戻す
+  const active = document.activeElement as HTMLElement | null
+  if (!active || !root.contains(active)) {
+    e.preventDefault()
+    firstEl.focus()
+    return
+  }
+  if (e.shiftKey && active === firstEl) {
+    e.preventDefault()
+    lastEl.focus()
+  } else if (!e.shiftKey && active === lastEl) {
+    e.preventDefault()
+    firstEl.focus()
+  }
+}
+
 export function useSheetBehavior(onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -21,10 +49,7 @@ export function useSheetBehavior(onClose: () => void) {
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     // 初期フォーカスは小窓内の最初の操作要素へ
-    const first = ref.current
-      ? [...ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)].find((el) => !el.hasAttribute('disabled'))
-      : undefined
-    first?.focus()
+    firstFocusable(ref.current)?.focus()
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -32,19 +57,7 @@ export function useSheetBehavior(onClose: () => void) {
         onClose()
         return
       }
-      if (e.key !== 'Tab' || !ref.current) return
-      // フォーカストラップ: 端で反対側へ循環
-      const items = [...ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => !el.hasAttribute('disabled'))
-      if (items.length === 0) return
-      const firstEl = items[0]
-      const lastEl = items[items.length - 1]
-      if (e.shiftKey && document.activeElement === firstEl) {
-        e.preventDefault()
-        lastEl.focus()
-      } else if (!e.shiftKey && document.activeElement === lastEl) {
-        e.preventDefault()
-        firstEl.focus()
-      }
+      trapTabWithin(e, ref.current)
     }
     document.addEventListener('keydown', onKey)
     return () => {
@@ -59,18 +72,19 @@ export function useSheetBehavior(onClose: () => void) {
 }
 
 // 閉じられない確定ダイアログ(事件の選択・取り返しのつかない確定)用。
-// scroll lock+初期フォーカスのみ配線し、ESC/外側クリックでは閉じない(誤閉鎖防止の例外)。
+// scroll lock+初期フォーカス+Tabトラップを配線し、ESC/外側クリックでは閉じない(誤閉鎖防止の例外)。
+// トラップがないとShift+Tabで背後の操作(道選び/帰り火)へ届いてしまう(M22最終レビューHIGH反映)。
 // 使用側は選択肢ボタンを必ず提供すること。
 export function useForcedDialog() {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    const first = ref.current
-      ? [...ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)].find((el) => !el.hasAttribute('disabled'))
-      : undefined
-    first?.focus()
+    firstFocusable(ref.current)?.focus()
+    const onKey = (e: KeyboardEvent) => trapTabWithin(e, ref.current)
+    document.addEventListener('keydown', onKey)
     return () => {
+      document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prevOverflow
     }
   }, [])

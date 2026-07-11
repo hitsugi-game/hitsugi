@@ -61,10 +61,10 @@ function ElementMotif({ el, c }: { el: Element; c: string }) {
   }
 }
 
-export function GodArtFallback({ g, compact }: { g: Pick<God, 'id' | 'name' | 'kana' | 'element'>; compact?: boolean }) {
+export function GodArtFallback({ g, compact, className }: { g: Pick<God, 'id' | 'name' | 'kana' | 'element'>; compact?: boolean; className?: string }) {
   const c = EL_COLOR[g.element]
   return (
-    <div className={`god-pane-fallback god-fallback ${compact ? 'god-fallback-sm' : ''}`} data-el={g.element}>
+    <div className={`god-pane-fallback god-fallback ${compact ? 'god-fallback-sm' : ''} ${className ?? ''}`} data-el={g.element}>
       <span className="god-pane-aura" />
       <svg className="god-fallback-svg" viewBox="0 0 200 260" aria-hidden>
         <ElementMotif el={g.element} c={c} />
@@ -96,7 +96,7 @@ export function GodImgOrFallback({
     setLastId(g.id)
     setOk(true)
   }
-  if (!ok) return <GodArtFallback g={g} compact={compact} />
+  if (!ok) return <GodArtFallback g={g} compact={compact} className={className ? `${className} is-fallback` : undefined} />
   return (
     <img
       className={className}

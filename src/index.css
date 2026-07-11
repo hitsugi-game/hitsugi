@@ -1365,7 +1365,6 @@ button {
 
 /* ---- 設定モーダル ---- */
 .settings-modal { max-width: 440px; }
-.settings-modal .modal-title { font-size: 20px; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 16px; text-align: center; }
 .setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .setting-label { flex-shrink: 0; font-size: 14px; }
 .setting-slider { flex: 1; accent-color: var(--flame); }
@@ -1379,7 +1378,6 @@ button {
 .setting-toggle.on { border-color: var(--flame); background: rgba(255, 122, 70, 0.1); }
 .toggle-state { font-size: 12px; color: var(--gold); letter-spacing: 0.1em; }
 .setting-hint { font-size: 11px; color: var(--text-dim); margin: -2px 0 12px; line-height: 1.5; }
-.settings-modal .btn-main { width: 100%; margin-top: 8px; }
 
 /* ---- 演出を控えめに(reduce-motion) — アニメ/トランジションを実質無効化 ---- */
 .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {

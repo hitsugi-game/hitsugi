@@ -71,10 +71,11 @@
   color: var(--text-dim);
   background: rgba(10, 14, 29, 0.55);
 }
-/* 図鑑詳細などの小型枠 */
+/* 図鑑詳細・一覧などの小型枠(高さは転送されたclassName側が優先) */
 .god-fallback-sm {
-  min-height: 170px;
+  min-height: 150px;
 }
+.god-fallback.is-fallback { overflow: hidden; }
 .god-fallback-sm .god-fallback-svg { width: 96px; }
 .god-fallback-sm .god-fallback-name { font-size: 15px; letter-spacing: 0.2em; }
 .god-fallback-sm .god-fallback-note { font-size: 11.5px; margin-top: 5px; }

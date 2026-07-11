@@ -301,7 +301,7 @@ export function CodexScreen() {
                   className={`btn codex-card codex-card-btn ${selectedId === g.id ? 'is-sel' : ''}`}
                   onClick={() => select(g.id)}
                 >
-                  <MaybeImg src={gameImg(g.portrait)} className="codex-thumb codex-thumb-tall" />
+                  <GodImgOrFallback g={g} className="codex-thumb codex-thumb-tall" compact />
                   <span className="codex-name">{g.name}</span>
                   <span className="codex-meta">{GOD_RANK_LABELS[g.rank]} / {ELEMENT_LABELS[g.element]}の星</span>
                 </button>

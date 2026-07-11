@@ -36,59 +36,49 @@ function CandidateCard({
   const selected = order > 0
   const age = ageOf(c, seasonIndex)
   const warns = departWarnings(c, seasonIndex)
+  // 入れ子の対話要素を作らない(M22最終レビューHIGH反映):
+  // 選択トグルは実<button>、詳細ボタンはその兄弟。Enter/Spaceはnative buttonに任せる。
   return (
-    <div
-      className={`depart-cand ${selected ? 'selected' : ''}`}
-      role="button"
-      tabIndex={0}
-      aria-pressed={selected}
-      aria-label={`${c.name}(${ELEMENT_LABELS[c.element]}・${c.gen}代)${selected ? ` 隊列${order}番 — 押すと外す` : ' — 押すと隊に加える'}`}
-      onClick={onToggle}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onToggle()
-        }
-      }}
-    >
+    <div className={`depart-cand ${selected ? 'selected' : ''}`}>
       {selected && (
         <span className="depart-cand-order" aria-hidden>
           ✓{order}
         </span>
       )}
-      <div className="depart-cand-row">
-        <Portrait char={c} seasonIndex={seasonIndex} size="sm" />
-        <div className="depart-cand-main">
-          <div className="depart-cand-head">
-            <span className={`element-badge el-${c.element}`}>{ELEMENT_LABELS[c.element]}</span>
-            <b className="depart-cand-name">
-              {c.isHead && <span className="head-mark">当主</span>}
-              {c.name}
-            </b>
-            <span className="char-gen">{c.gen}代</span>
+      <button
+        type="button"
+        className="depart-cand-toggle"
+        aria-pressed={selected}
+        aria-label={`${c.name}(${ELEMENT_LABELS[c.element]}・${c.gen}代)${selected ? ` 隊列${order}番 — 押すと外す` : ' — 押すと隊に加える'}`}
+        onClick={onToggle}
+      >
+        <div className="depart-cand-row">
+          <Portrait char={c} seasonIndex={seasonIndex} size="sm" />
+          <div className="depart-cand-main">
+            <div className="depart-cand-head">
+              <span className={`element-badge el-${c.element}`}>{ELEMENT_LABELS[c.element]}</span>
+              <b className="depart-cand-name">
+                {c.isHead && <span className="head-mark">当主</span>}
+                {c.name}
+              </b>
+              <span className="char-gen">{c.gen}代</span>
+            </div>
+            <div className="depart-cand-sub">
+              月齢{age}月 ・ {c.jobClass ? jobById(c.jobClass).name : '家業なし'}
+            </div>
+            <LifeFlames char={c} seasonIndex={seasonIndex} />
           </div>
-          <div className="depart-cand-sub">
-            月齢{age}月 ・ {c.jobClass ? jobById(c.jobClass).name : '家業なし'}
-          </div>
-          <LifeFlames char={c} seasonIndex={seasonIndex} />
         </div>
-      </div>
-      <Bar value={c.hp} max={c.maxHp} kind="hp" />
-      <Bar value={c.mp} max={c.maxMp} kind="mp" />
-      {warns.length > 0 && <p className="depart-cand-warn">⚠ {warns.join(' ・ ')}</p>}
+        <Bar value={c.hp} max={c.maxHp} kind="hp" />
+        <Bar value={c.mp} max={c.maxMp} kind="mp" />
+        {warns.length > 0 && <span className="depart-cand-warn">⚠ {warns.join(' ・ ')}</span>}
+      </button>
       {blocked && (
         <p className="depart-cand-limit" role="status">
           隊は四人まで。誰かを外してから加えよ。
         </p>
       )}
-      <button
-        className="btn btn-ghost depart-cand-detail"
-        onClick={(e) => {
-          e.stopPropagation()
-          onDetail()
-        }}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
+      <button className="btn btn-ghost depart-cand-detail" onClick={onDetail}>
         仔細を見る
       </button>
     </div>
