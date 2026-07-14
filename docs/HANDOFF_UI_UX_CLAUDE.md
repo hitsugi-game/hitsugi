@@ -8,7 +8,7 @@
 
 1. `AGENTS.md`
 2. `docs/POLISH_FIX_INSTRUCTIONS_CLAUDE.md`
-3. `docs/GDD_v3.md` §8.5〜§8.8
+3. `docs/GDD_v3.md` §8.5〜§8.9
 4. `docs/UI_UX_REDESIGN_PLAN.md`
 5. `docs/UI_UX_ACCEPTANCE_CHECKLIST.md`
 6. `docs/DESIGNSPEC.md`
@@ -20,6 +20,7 @@
 12. `docs/VISUAL_ASSET_AUDIT_2026-07-11.md`
 13. `docs/VISUAL_RECOVERY_DUNGEON_PLAN.md`
 14. `assets_src/VISUAL_RECOVERY_BATCH.md`
+15. `docs/BATTLE_DUNGEON_OVERHAUL_M24.md`
 
 ## 現状判断
 
@@ -198,3 +199,11 @@ git diff --check
 - `docs/POLISH_FIX_INSTRUCTIONS_CLAUDE.md`
 
 特に隊編成は共通 `.exp-party` を直接変更しない。`Expedition.tsx` の編成候補だけへ専用gridを導入し、PCは4列、モバイルは1列コンパクト、常時4つの隊列枠を表示する。1人でも横一杯へ伸ばさないことをP0受入条件とする。
+
+## M24 戦闘/ダンジョン全面改善（2026-07-12）
+
+戦闘人物の小ささ、攻撃者と対象の断絶、ダンジョンの過広角表示、暗色面の識別不足、HUD分散は次を実装正本とする。
+
+- `docs/BATTLE_DUNGEON_OVERHAUL_M24.md`
+
+実装順は、ダンジョンzoomと床/壁コントラスト、戦闘三段gridと人物拡大、灯路/灯脈、HUD統合、地域/主戦差分の順。敵の兆しや地形生成変更は視覚Phaseと別commitにする。

@@ -1050,3 +1050,24 @@
 - **終了判定=部分達成(terminal)**: 契約Phase A-Dの実装5項全✅(コード+機械検証**vitest 211**+独立レビュー+devil反映10緩和)。**実描画/fps実測のみpreview障害で⚠️**(再開手順=docs/MISSION_M24_BATTLE_DUNGEON.md④)。Phase E(敵の兆し/room archetype)は契約スコープ外=次期。push未実施(ユーザーゲート)。
 
 - **push実行**(ユーザー承認 2026-07-12): main→origin(a538ad4..a90d893、M24の7コミット)。出荷ゲート=build成功/vitest211/tsc0を再確認後にpush。GitHub Actions "Deploy to GitHub Pages"(run 29172729742)。公開URL: https://umine2025.github.io/hitsugi/ 。**実描画/fps実測は依然⚠️**(preview障害継続)— 機械検証+独立レビュー通過を根拠に公開。
+
+## 2026-07-13 (M25 戦闘・ダンジョン実描画検収と空間再設計指示)
+
+- **依頼**: M24実装後の戦闘シーン表示とダンジョンマップをさらに全体改善する。ソース実装はClaude/Fable 5へ引き継ぐ。
+- **実ブラウザ検収**: `main=f11ac8b`をローカルdevで1280×720/390×844、宵の森地下1層→味方1対敵2→攻撃まで実走。console error 0(GoatCounterのlocalhost非計測warnのみ)。
+- **ダンジョン判定**: 主人公拡大、床/プロップ分離、タップ接敵は改善。一方でマップ端でも主人公中心を維持するため画面下半分近くが無情報暗部となり、M24受入「純黒面25%未満」は未達。390pxでは上端HUDとミニマップ/操作が競合。床矩形と同型プロップの反復で地域より生成タイル感が強い。
+- **戦闘判定**: PCの三段構造とワンタップ攻撃は成立。味方縦長札・敵正方形札・小型暗色札がraw比率で混在し、敵2体から重複。390pxでは味方/敵札、名札、HP、長印、ログが大きく交差し、1体撃破後も読み取り困難。行動処理中の下段が空箱になる。
+- **設計**: P0=安全表示領域を含むcamera clamp+モバイルHUD2段化+共通戦絵札+人数別slot/敵味方二帯+action layer。P1=敵の兆し(表示のみ、AI変更と別)+生成器由来room archetype/記憶室/空の行き止まり0。P2=既存経済を変えない環境反応。
+- **成果物**: `docs/BATTLE_DUNGEON_M25_VISUAL_QA_AND_REFINEMENT.md` / `docs/GDD_v3.md` §8.10。
+- **コード変更**: なし。既存のゲームソース、画像、生成マップは変更していない。
+- **次**: ClaudeはPhase 1/2だけを先に実装し、1280×720/390×844の探索と味方1対敵2の4画面で暗部率、札重なり、名札/ログ/コマンド交差を合格させてから敵の兆し/room archetypeへ進む。pushはユーザー確認待ち。
+
+## 2026-07-14 (M26 郷・鍛冶・普請・全メニューUI/UX総点検指示)
+
+- **依頼**: 戦闘/ダンジョン以外も含め、郷、鍛冶と蔵、郷普請、配置メニューの先を徹底的に洗い出し、Claude/Fable 5が実装できる修正指示へする。
+- **監査対象**: Home / Forge / Facilities / Pact / Expedition / DepartParty / Village + village engine / Chronicle / Codex / FamilyTree / Settings / Title / Scenes / 共通shellとCSS。M22/M23で実装済みの装備5軸、4枠編成、Sheet契約、郷歩行は後退させない差分監査とした。
+- **重大所見**: 星契り、普請、血珠鍛錬など不可逆操作の確認不足。購うタブの推薦対象が内部だけで当主へ決まる。disabled項目が詳細閲覧も塞ぐ。図鑑はmobile詳細到達と新着既読に問題。郷は全景fitで人物が小さく、季節/普請/制覇状態が景色へ反映されない。家系図/タブ/場面送りにキーボードと誤タップ課題が残る。
+- **設計**: 一覧即実行を「選ぶ→比較→確定」へ統一。ホームの重複推薦を「今月の要」一件へ集約。PCはmaster/detail、mobileは詳細Sheet。普請を施設Lv0〜3の外観と郷歩行へ接続し、家譜/図鑑は大量一覧から物語と実用情報を先に出す。
+- **素材監査**: public/imgのsc_forge/sc_shop/sc_shrine/sc_bath/sc_gate、四季のbg_sato、祭、村人、装備、神絵は既存だが一部メニューで未活用。新規は施設4種×Lv0〜3の16枚とsc_library/sc_watchtowerの2枚を最小セットに限定。
+- **成果物**: docs/MENU_UI_UX_AUDIT_M26.md / docs/GDD_v3.md §8.11。
+- **検証**: 文書のみのためソースbuildは未実行。Markdown構造、git diff、既存dirty stateを確認する。実装、実描画検収、pushはClaude/Fable 5とユーザー確認へ引き継ぐ。
