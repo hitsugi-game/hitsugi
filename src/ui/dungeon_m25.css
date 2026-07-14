@@ -1,0 +1,101 @@
+/* M25 §3.2: モバイル(390px級)ダンジョンHUDの一枚化(docs/BATTLE_DUNGEON_M25_VISUAL_QA_AND_REFINEMENT.md)。
+   src/index.css は編集しない方針のため、dungeon_m23/m24.css より後に Dungeon.tsx から import し、
+   同名セレクタを「後勝ち」で上書きする。PC(769px以上)は現行配置を維持し、390px幅だけを2段gridへ再編する。
+   実測フック: data-zone="hud-top|minimap|dpad|party|return-fire" を対象要素へ付与済み(Dungeon.tsx側)。 */
+
+/* ---- ミニマップ拡大ボタン(§3.2 row2) — 既定は非表示。モバイルの2段目にだけ現れる。
+   Pixi描画を覆う不可視tap-zone(.minimap-tap-zone)と役割は同じ(toggleMinimapZoom)だが、
+   HUDの文字列に並ぶ可視の操作導線として別に持たせる(二重導線として併存させる)。 ---- */
+.hud-minimap-btn {
+  display: none;
+}
+
+/* ---- 小休止sheet内: 暦・今回の実りを表示(§3.2-2)。帰り火ボタンは既存のconfirm-actions側にある ---- */
+.pause-info-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.pause-calendar {
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+
+/* ---- D-pad: 48px以上を保証(§3.2要件5)。index.cssの46px定義を上書きする ---- */
+.dpad {
+  grid-template-columns: repeat(3, 48px);
+  grid-auto-rows: 48px;
+}
+
+/* ---- ミニマップの不可視tap-zone — 通常表示はPC128pxを目安に近似(§3.2要件4)。
+   minimap.ts は非所有のため実際のPixi描画寸法とは独立した近似値(M24既存コメントの方針を継承)。 ---- */
+.minimap-tap-zone {
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  right: calc(8px + env(safe-area-inset-right, 0px));
+  width: 128px;
+  height: 128px;
+}
+
+/* ================= 390px級モバイル ================= */
+@media (max-width: 560px) {
+  /* ---- 上端HUDを2段gridへ(§3.2-1)
+     1段目 44-48px: 灯リング / 地名・階層 / 小休止
+     2段目 34-38px: 短期目的+進捗(objective-plate) / ミニマップ拡大 ---- */
+  .dungeon-hud-band {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: 46px 36px;
+    grid-template-areas:
+      "ring title pause"
+      "obj  obj   mmbtn";
+    row-gap: 3px;
+    column-gap: 8px;
+    align-items: center;
+    /* index.cssの.mute-btn(⚙, fixed top:12/right:12, 38px, z-index:90)は全画面共通の固定要素で非所有。
+       row1右端(小休止)がその真下に来て実クリックを奪われる実測不具合があったため、右側に確実な逃げを作る。 */
+    padding-right: calc(56px + env(safe-area-inset-right, 0px));
+  }
+  .dungeon-hud-band .lantern-ring { grid-area: ring; }
+  .hud-band-text { display: contents; } /* title/objectiveを個別gridセルへ解放する(PC側は非media rule未変更のためflex-columnのまま) */
+  .hud-band-title { grid-area: title; min-width: 0; overflow: hidden; }
+  .objective-plate { grid-area: obj; min-width: 0; overflow: hidden; }
+  .hud-pause-btn {
+    grid-area: pause;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+  }
+  .hud-minimap-btn {
+    grid-area: mmbtn;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    padding: 2px 8px;
+    font-size: 15px;
+  }
+  /* 暦・今回の実り・帰り火は小休止sheetへ寄せる(§3.2-2)。帰り火は「小休止→sheet内ボタン」の2操作で到達する */
+  .dungeon-hud-band .hud-band-spacer,
+  .dungeon-hud-band .hud-calendar,
+  .dungeon-hud-band .hud-resource-chip,
+  .dungeon-hud-band .hud-return-btn {
+    display: none;
+  }
+
+  /* ---- ミニマップ通常表示: モバイル104pxを目安に、2段HUDの下へ配置する ---- */
+  .minimap-tap-zone {
+    top: calc(104px + env(safe-area-inset-top, 0px));
+    right: calc(8px + env(safe-area-inset-right, 0px));
+    width: 104px;
+    height: 104px;
+  }
+
+  /* ---- 隊員札はD-padと8px以上離す(§3.2要件5)。
+     62vw(≈242px)のままだとD-pad(48px×3+gap=148px、right 14px+inset起点)と競合しうるため、固定px上限で確実に隙間を作る。 ---- */
+  .dungeon-hud-party {
+    max-width: 200px;
+  }
+}

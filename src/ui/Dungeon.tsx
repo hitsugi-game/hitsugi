@@ -17,10 +17,16 @@ import { EventModal } from './Expedition'
 import { audio } from '../core/audio'
 import './dungeon_m23.css'
 import './dungeon_m24.css'
+import './dungeon_m25.css'
 
 // 地域背景 → 環境音レイヤーの対応(M10)
 const AMBIENCE_BY_BG: Record<string, 'forest' | 'zaka' | 'tani' | 'miyama'> = {
   'bg_forest.png': 'forest', 'bg_zaka.png': 'zaka', 'bg_tani.png': 'tani', 'bg_miyama.png': 'miyama',
+}
+
+// M25 §3.2(7): D-padの各方向ボタンへ個別のaria-labelを付ける
+const DPAD_ARIA_LABEL: Record<'up' | 'down' | 'left' | 'right', string> = {
+  up: '上', down: '下', left: '左', right: '右',
 }
 
 // M24 §4.5: 短期目的の算出(石碑の残数はfloorDef.ascii+run.usedから導出、階段発見/灯不足はengine/runから)
@@ -68,8 +74,8 @@ function ObjectivePlate({
   const goal = shortTermGoal(run.light, stairs, monuments)
   return (
     <div className="objective-plate">
-      <span className="objective-goal">{goal}</span>
-      <span className="objective-explore">踏査 {pct}%</span>
+      <span className="objective-goal" data-zone="hud-top">{goal}</span>
+      <span className="objective-explore" data-zone="hud-top">踏査 {pct}%</span>
     </div>
   )
 }
@@ -102,7 +108,7 @@ function LanternRing({ pct }: { pct: number }) {
   const C = 2 * Math.PI * R
   const level = pct < 15 ? 'crit' : pct < 40 ? 'low' : 'ok'
   return (
-    <div className={`lantern-ring lantern-${level}`} title={`灯 ${Math.round(pct)}/100`}>
+    <div className={`lantern-ring lantern-${level}`} data-zone="hud-top" title={`灯 ${Math.round(pct)}/100`}>
       <svg viewBox="0 0 64 64" width="64" height="64">
         <circle cx="32" cy="32" r={R} fill="rgba(11,15,30,0.7)" stroke="rgba(201,168,106,0.25)" strokeWidth="3" />
         <circle
@@ -277,6 +283,8 @@ function DungeonFloor() {
   const dpad = (dir: 'up' | 'down' | 'left' | 'right', label: string) => (
     <button
       className="dpad-btn"
+      data-zone="dpad"
+      aria-label={DPAD_ARIA_LABEL[dir]}
       onPointerDown={(e) => {
         e.preventDefault()
         engineRef.current?.pressDir(dir, true)
@@ -292,11 +300,12 @@ function DungeonFloor() {
     <div className="dungeon-screen">
       <div className="dungeon-canvas" ref={hostRef} />
 
-      {/* M24 §4.6: 灯・地名・階層・短期目的を左上〜上中央の一帯へ統合。資源/暦は右寄せの小型表示。 */}
+      {/* M24 §4.6→M25 §3.2: 灯・地名・階層・短期目的を左上〜上中央の一帯へ統合。資源/暦は右寄せの小型表示。
+          390px幅ではdungeon_m25.cssが2段gridへ再配置し、暦・資源・帰り火は非表示にして小休止sheetへ寄せる。 */}
       <div className="dungeon-hud-band" key={run.floor}>
         <LanternRing pct={run.light} />
         <div className="hud-band-text">
-          <div className="hud-band-title">
+          <div className="hud-band-title" data-zone="hud-top">
             <span className="hud-region-name">{region.name}</span>
             <span className="hud-floor-num">地下{run.floor + 1}層</span>
           </div>
@@ -309,8 +318,25 @@ function DungeonFloor() {
         <span className="hud-resource-chip">
           奉燈<b>{run.loot.hoto}</b> 血珠<b>{run.loot.ketsu}</b>
         </span>
-        <button className="btn" onClick={() => setConfirm({ kind: 'pause' })} title="小休止(ESC)">☰ 小休止</button>
-        <button className="btn btn-danger" onClick={() => setConfirm({ kind: 'return' })}>
+        <button
+          className="btn hud-pause-btn"
+          data-zone="hud-top"
+          onClick={() => setConfirm({ kind: 'pause' })}
+          title="小休止(ESC)"
+        >
+          ☰ 小休止
+        </button>
+        {/* M25 §3.2 row2: モバイルの2段目に置く可視ミニマップ拡大ボタン(既存の不可視tap-zoneと併存) */}
+        <button
+          className="btn btn-ghost hud-minimap-btn"
+          data-zone="hud-top"
+          aria-label="地図を拡大表示する"
+          title="地図を拡大"
+          onClick={() => engineRef.current?.toggleMinimapZoom()}
+        >
+          🗺
+        </button>
+        <button className="btn btn-danger hud-return-btn" data-zone="return-fire" onClick={() => setConfirm({ kind: 'return' })}>
           帰り火
         </button>
       </div>
@@ -318,6 +344,7 @@ function DungeonFloor() {
       {/* M24 §4.6: ミニマップ(Pixi描画)の上に重ねる不可視タップ域 — 拡大トグル */}
       <button
         className="minimap-tap-zone"
+        data-zone="minimap"
         aria-label="地図の拡大表示を切り替える"
         onClick={() => engineRef.current?.toggleMinimapZoom()}
       />
@@ -326,7 +353,7 @@ function DungeonFloor() {
 
       <div className="dungeon-hud-party">
         {party.map((c) => (
-          <div key={c.id} className="ally-cell">
+          <div key={c.id} className="ally-cell" data-zone="party">
             <div className="ally-name">{c.name}</div>
             <Bar value={c.hp} max={c.maxHp} kind="hp" />
           </div>
@@ -350,13 +377,23 @@ function DungeonFloor() {
       {/* 特殊床/帰還の確認 — 中央モーダルでなく下部の短い選択面(§5.3。SheetはPC=中央小窓/モバイル=下から) */}
       {confirm && confirm.kind === 'pause' && (
         <Sheet title="小休止" onClose={() => setConfirm(null)} closeLabel="探索に戻る">
+          {/* M25 §3.2: 暦・今回の実りは小休止sheetへ寄せる(モバイルの上端HUDからは外す) */}
+          <div className="pause-info-row">
+            <span className="pause-calendar">
+              {MONTH_NAMES[data.seasonIndex % 12]}・{Math.floor(data.seasonIndex / 12) + 1}年目
+            </span>
+            <span className="hud-resource-chip">
+              奉燈<b>{run.loot.hoto}</b> 血珠<b>{run.loot.ketsu}</b>
+            </span>
+          </div>
           <p style={{ fontSize: 12.5, color: 'var(--text-dim)', lineHeight: 1.8, marginBottom: 12 }}>
             移動: 矢印キー / 画面をタップ。<br />
             設定(音量・演出): 画面右上の ⚙。<br />
             灯が細るほど魔性は狂暴になる。深追いは禁物。
           </p>
           <div className="confirm-actions">
-            <button className="btn btn-danger" onClick={() => { setConfirm({ kind: 'return' }) }}>帰り火を焚く(郷へ)</button>
+            {/* M25: 帰り火は小休止→本ボタンの2操作で到達できる導線 */}
+            <button className="btn btn-danger" data-zone="return-fire" onClick={() => { setConfirm({ kind: 'return' }) }}>帰り火を焚く(郷へ)</button>
             <button className="btn btn-main" onClick={() => setConfirm(null)}>探索に戻る</button>
           </div>
         </Sheet>
