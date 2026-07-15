@@ -16,6 +16,7 @@ import { CharCard, Ico, NightBackdrop, Panel, TsuzuriLine } from './components'
 import { gameImg, HOME_BG, HOME_BG_SEASONS } from './img'
 import { FamilyTree } from './FamilyTree'
 import './m17_home.css'
+import './home_m26.css'
 
 export function HomeScreen() {
   const data = useGame((s) => s.data)!
@@ -82,7 +83,7 @@ export function HomeScreen() {
       </header>
 
       {visitGift && (
-        <div className="daily-visit" onClick={() => setVisitGift(null)}>
+        <div className="daily-visit">
           <span className="daily-visit-mark">参</span>
           <span className="daily-visit-body">
             <b>綴</b>「{visitGift.text}」
@@ -90,7 +91,14 @@ export function HomeScreen() {
               日参りの授かり — 奉燈 {visitGift.hoto}{visitGift.ketsu ? ` ・ 血珠 ${visitGift.ketsu}` : ''}
             </span>
           </span>
-          <span className="daily-visit-close">閉じる</span>
+          <button
+            type="button"
+            className="daily-visit-close"
+            onClick={() => setVisitGift(null)}
+            data-testid="nippari-close"
+          >
+            閉じる
+          </button>
         </div>
       )}
 

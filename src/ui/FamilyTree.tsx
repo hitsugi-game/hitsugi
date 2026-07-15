@@ -7,6 +7,7 @@ import { MaybeImg } from './components'
 import { useSheetBehavior } from './layout/dialogs'
 import { faceImg } from './img'
 import './familytree_m18.css'
+import './familytree_m26.css'
 
 // 家系図 — 世代交代の全体像を一望する(GDD_v3 M5)
 // 世代ごとに縦カラムを並べ、親子線はSVGオーバーレイで描く(人親=金、神親=薄紫の点線)。
@@ -22,7 +23,7 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
   const family: Character[] = useGame((s) => s.data?.family ?? [])
   const godAffinity = useGame((s) => s.data?.godAffinity ?? {})
   const containerRef = useRef<HTMLDivElement>(null)
-  const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const nodeRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
   const [lines, setLines] = useState<Line[]>([])
   const [selected, setSelected] = useState<Character | null>(null)
   const [query, setQuery] = useState('')
@@ -176,21 +177,23 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
                     isDimmed ? 'is-dimmed' : '',
                   ].filter(Boolean).join(' ')
                   return (
-                    <div
+                    <button
                       key={c.id}
+                      type="button"
                       ref={(el) => {
                         if (el) nodeRefs.current.set(c.id, el)
                         else nodeRefs.current.delete(c.id)
                       }}
                       className={nodeClass}
                       onClick={() => setSelected(c)}
+                      data-testid="familytree-node"
                     >
                       {faceImg(c) && <MaybeImg src={faceImg(c)!} className="tree-face" />}
                       <span className={`element-badge el-${c.element} familytree-badge`}>
                         {c.alive ? '灯' : '逝'}
                       </span>
                       <span className="familytree-name">{c.name}</span>
-                    </div>
+                    </button>
                   )
                 })}
               </div>

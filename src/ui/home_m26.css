@@ -1,0 +1,25 @@
+/* M26 Phase0 (P0-13): ホーム日参り通知の「閉じる」を onClick付きdiv内のspan から
+   実buttonへ分離したことに伴う調整。
+   通知本文(.daily-visit)はもうクリックで閉じない — 本文と閉じる操作を分離するため、
+   本文側のcursorも「押せる」見た目を残さないよう上書きする(m17_home.css側の
+   cursor:pointerは既存行のため触らない)。
+   .daily-visit-close は元がspanでUA buttonの枠線/背景を持たないため、button化に伴う
+   見た目差分(枠線・背景・既定padding)だけをここで打ち消し、既存の文字色/サイズ
+   (m17_home.css)をそのまま活かす。focus-visibleも新規付与する(designspec §15.3)。 */
+.daily-visit {
+  cursor: default;
+}
+.daily-visit-close {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+.daily-visit-close:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}

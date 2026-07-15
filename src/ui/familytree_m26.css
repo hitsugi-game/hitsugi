@@ -1,0 +1,19 @@
+/* M26 Phase0 (P0-10): 家系図の人物ノードを onClick付きdiv から button へ変更したことに伴う
+   UAデフォルトの打ち消しのみを行う。既存の外観(familytree_m18.css / index.css側の
+   .familytree-node)はそのまま活かし、button化で新たに紛れ込む font/color/枠線だけを戻す。
+   index.css側の .familytree-node には同名プロパティの宣言が無いため、カスケード順に
+   依存せず安全に加算できる。
+   focus-visibleは index.css 側の一覧(.btn/.action-card等)に .familytree-node が
+   含まれていないため、ここで新規に付与する(designspec §15.3)。 */
+.familytree-node {
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+.familytree-node:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
