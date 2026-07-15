@@ -89,6 +89,7 @@ push / 契約・スコープの変更 / バランス変更が必要と判明 / *
 - **M3 戦闘 戦絵札正規化** ✅ commit `8f92275`(BattleArtFrame+art_profiles/人数別slot/action layer/非空箱。実測 25/25緑・core非編集)
 - **M4 プロップ+奥壁細粒** ✅ commit `f43ae50`(等間隔解消/細粒樹冠。ベタ塗り失敗→細粒へ修正の経緯を記録)
 - **★進行ゲート(正典§11)** ✅ **45/45緑**(4画面×5viewport。暗部 PC14.0%/1440<15%/tablet<18%/mobile11-19%、戦闘の重なり≤12%・矩形交差0)。→ **M25 Phase1+2 完了。Phase3以降へ進める。**
+- **M8 郷の追従カメラ・報告バグ是正** ✅ commit `d84600f`(ユーザー当初報告「4体の金色人型」)。根因: layout()の全マップfit(主人公20px)+ buildNpcsの金色肖像札。修正: 追従カメラ(主人公56-88pxクランプ)+見渡すボタン+NPC接地(影+台、金縁0.7→0.3)+D-pad aria-label。実測 全5viewport 15/15緑(主人公 PC85px/モバイル56px)。`village_m26.css`新規・index.css非編集・core非編集。`src/village/*`はCodex非対象で衝突なし。
 
 ## ④保留リスト(再開手順)
 - **【Codex衝突・保留】M5(敵の兆し)/M6(room archetype)/M7の図鑑個別既読(セーブ移行)** — ユーザー判断(2026-07-15)により、Codexミッション(地域固有ダンジオン・稀少魔性)が共通インフラ(`store.ts`/`types.ts`/`maps.gen.ts`/`gen_all_maps.mjs`/`engine.ts`)を編集中のため保留。**Codexのインフラがコミットされてから着手**する。M5設計(enemyActionを不変に保ちキャッシュ)・M6設計(個数不変条件)は本STATEに確定済み。
@@ -104,7 +105,7 @@ push / 契約・スコープの変更 / バランス変更が必要と判明 / *
 - Phase0: 正典2文書読了 → 報告バグ根因特定(`village/engine.ts:465` 金縁立ち絵札) → 契約草案 → **devil-advocate 攻撃(REWORK / 12条)** → ユーザーへスコープ2択提示 → 確定(2026-07-15)。
 
 ## ⑦次の一手
-**M8(報告バグ: 郷NPCの金色立ち絵札→適切な人物表示+追従カメラ)** を実装する — Codex非対象で衝突なし、ユーザー当初報告のバグ。`src/village/engine.ts:465` の `roundRect+金ストローク` 肖像札を是正し、全マップfit→主人公追従カメラ(§6.2)へ。続いてM26 Phase0の非衝突部。M5/M6/M7-移行はCodexのインフラコミット後。
+M8完了。次は **M26 Phase0の非衝突部**: WorkspaceTabs ARIA(`shell.tsx`)/ clickable div→button(`FamilyTree.tsx`/`Home.tsx`/`Scenes.tsx`)/ 場面送り誤タップ防止(`Scenes.tsx`)/ 確認Sheet(Pact/Facilities/Forgeのcomponent内・store非変更で可能な範囲)。いずれもCodex非対象を都度確認してから着手。**M5/M6/M7-図鑑既読移行はCodexのインフラ(store/types/maps)コミット後**まで保留。
 
 ## ⑧最終監査表
 (未実施)
