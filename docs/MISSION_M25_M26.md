@@ -106,8 +106,15 @@ push / 契約・スコープの変更 / バランス変更が必要と判明 / *
 ## ⑥マイルストーン履歴
 - Phase0: 正典2文書読了 → 報告バグ根因特定(`village/engine.ts:465` 金縁立ち絵札) → 契約草案 → **devil-advocate 攻撃(REWORK / 12条)** → ユーザーへスコープ2択提示 → 確定(2026-07-15)。
 
-## ⑦次の一手
-M26 Phase0の残り非衝突部: **郷普請の確認Sheet(§8.3/P0-02)** / **星契りの確認Sheet(§9.5/P0-01・大restructureは避け確認だけ)** / **clickable div→button**(FamilyTree P0-10 / Home日参り P0-13)/ **場面送り誤タップ防止**(Scenes P0-12・ゲーム進行の根幹で相対的に高リスク)。**M5/M6/M7-図鑑既読移行はCodexのインフラ(store/types/maps)コミット後**まで保留。Facilities/Pact/FamilyTree/Home/Scenes は都度Codex非対象を確認してから着手。
+## ⑦次の一手 — 【第2局面: 2026-07-16 /mission再起動】
+ユーザー指示: 灯篭崩れ道バグ + M5/M6/M7 + M26 Phase0残り全部。Codex完了。
+- **灯篭崩れ道バグ**: 現ツリーで10通り全条件で正常描画を確認(再現せず)。原因=デプロイ版(旧M24)の陳腐化。ユーザー確認済み「公開サイトで見ている」。→ **本作業完了後のデプロイ(push)で解消**。単独修正不要。
+- **Codex基盤コミット済** commit `d412f23`(2093行・build/lint/vitest524/validate緑を統合者が確認)。M5/M6/M7の衝突解消。
+- **M5 敵の兆し**(§5): enemyActionを不変に保ちキャッシュ→カテゴリ導出(攻/術/群3種)。ゴールデンテスト。本体担当。
+- **M6 room archetype**(§6/正典M25): gen_floor.mjs/gen_all_maps.mjs へ6種以上追加し再生成。**Codexの地域固有性を壊さず追加**。個数不変条件をmaps.gen.ts読むvitestで。本体担当。
+- **M7 図鑑個別既読**(§12): flags件数マーク→ID集合。移行=旧セーブは既知を既読初期化。往復テスト。本体担当。
+- **M26 Phase0残り**: 郷普請確認(P0-02)/星契り確認(P0-01)/clickable div→button(FamilyTree P0-10・Home P0-13)/場面送り誤タップ防止(P0-12)。sonnet並列委譲(component内・store非変更範囲)。
+- **監査区分**: 依然自己監査(push=ユーザーゲートで完了定義外)。ただしCodex基盤は精読未レビュー(機械検証のみ)と⑧に明記。
 
 ## ⑧最終監査表
 (未実施)
