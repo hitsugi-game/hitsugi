@@ -146,6 +146,26 @@ function migrateV3(d: GameData): GameData {
   }
 }
 
+// M26 §12.1: 図鑑の個別既読への移行。旧セーブは flags.codexSeenEn/Gods(件数の高水位マーク)で
+// 既読を記録していた。件数が示す「既読分」を忠実にID集合へ変換する — これにより、旧セーブで
+// 未読だった項目(件数を超える分)は移行後も新着のまま残り、偽の新着爆発も偽既読も起きない。
+// codexSeenIds が既にあれば何もしない(冪等)。isValidSave を壊さない optional フィールド。
+function migrateCodexSeen(d: GameData): GameData {
+  if (d.codexSeenIds) return d
+  const en = d.codex?.enemies ?? []
+  const gd = d.codex?.gods ?? []
+  const enCount = typeof d.flags?.codexSeenEn === 'number' ? d.flags.codexSeenEn : 0
+  const gdCount = typeof d.flags?.codexSeenGods === 'number' ? d.flags.codexSeenGods : 0
+  const baseId = (id: string) => id.replace(/_[wo]$/, '') // Codex.baseEnemyId と同義
+  return {
+    ...d,
+    codexSeenIds: {
+      enemies: [...new Set(en.slice(0, enCount).map(baseId))],
+      gods: [...new Set(gd.slice(0, gdCount))],
+    },
+  }
+}
+
 export function loadGame(): GameData | null {
   try {
     const main = readRaw(KEY)
@@ -153,25 +173,25 @@ export function loadGame(): GameData | null {
     // 両方有効: saveSeq(単調増分)が大きい方=より新しい正常セーブ。通常はmain。
     if (main && bak && (bak.data.saveSeq ?? 0) > (main.data.saveSeq ?? 0)) {
       warnOnce('記に乱れがあった — 一つ前の正常な記から復した。')
-      return bak.data
+      return migrateCodexSeen(bak.data)
     }
-    if (main) return main.data
+    if (main) return migrateCodexSeen(main.data)
     if (bak) {
       // 本体が破損/欠落 — 検証済みの控えから復旧
       warnOnce('記が壊れていた — 控えの記から復した。')
-      return bak.data
+      return migrateCodexSeen(bak.data)
     }
     // v4が無い/破損 — 旧版からの移行を試す
     const rawV3 = localStorage.getItem(KEY_V3)
     if (rawV3) {
-      const migrated = migrateV3(JSON.parse(rawV3) as GameData)
+      const migrated = migrateCodexSeen(migrateV3(JSON.parse(rawV3) as GameData))
       saveGame(migrated)
       localStorage.removeItem(KEY_V3)
       return migrated
     }
     const rawV1 = localStorage.getItem(KEY_V1)
     if (rawV1) {
-      const migrated = migrateV3(migrateV1(JSON.parse(rawV1) as GameData))
+      const migrated = migrateCodexSeen(migrateV3(migrateV1(JSON.parse(rawV1) as GameData)))
       saveGame(migrated)
       localStorage.removeItem(KEY_V1)
       return migrated
@@ -181,6 +201,9 @@ export function loadGame(): GameData | null {
     return null
   }
 }
+
+// テスト用にエクスポート(移行の冪等性・忠実性を機械検証する)
+export { migrateCodexSeen }
 
 export function hasSave(): boolean {
   return (

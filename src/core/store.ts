@@ -79,8 +79,8 @@ interface GameStore {
   claimOdai: () => { hoto: number; ketsu: number } | null
   // 郷の声の既読カーソル(M18 P2: 帳の新着badge用。ゲームロジックには影響しない)
   markGossipSeen: () => void
-  // 図鑑の既読カーソル(M19 A1: 新着フィルタ/帳badge用。ゲームロジックには影響しない)
-  markCodexSeen: () => void
+  // 図鑑の個別既読(M26 §12.1: 項目を開いた時だけ既読化。ゲームロジックには影響しない)
+  markCodexItemSeen: (kind: 'enemies' | 'gods', id: string) => void
   // 郷人と話した台詞キーの記録(M23: 郷マップの「新しい話」印用。ゲームロジックには影響しない)
   markVillagerTalked: (id: string, lineKey: number) => void
   // 第一幕(入場導入)の既視フラグ(M23: run単位・表示専用)
@@ -655,15 +655,13 @@ export const useGame = create<GameStore>((set, get) => {
       return { hoto: odai.reward.hoto, ketsu: odai.reward.ketsu }
     },
 
-    markCodexSeen: () => {
+    // M26 §12.1: 図鑑の個別既読 — 項目を開いた時だけ、そのIDを既読集合へ足す(画面mountで全既読化しない)。
+    markCodexItemSeen: (kind, id) => {
       const d = get().data
       if (!d) return
-      const en = d.codex?.enemies?.length ?? 0
-      const gd = d.codex?.gods?.length ?? 0
-      const curEn = typeof d.flags.codexSeenEn === 'number' ? d.flags.codexSeenEn : 0
-      const curGd = typeof d.flags.codexSeenGods === 'number' ? d.flags.codexSeenGods : 0
-      if (en <= curEn && gd <= curGd) return
-      const nd: GameData = { ...d, flags: { ...d.flags, codexSeenEn: en, codexSeenGods: gd } }
+      const seen = d.codexSeenIds ?? { enemies: [], gods: [] }
+      if (seen[kind].includes(id)) return
+      const nd: GameData = { ...d, codexSeenIds: { ...seen, [kind]: [...seen[kind], id] } }
       set({ data: nd })
       saveGame(nd)
     },

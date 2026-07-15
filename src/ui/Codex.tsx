@@ -147,24 +147,26 @@ function NemesisDetail({ n, enemy, regionName }: { n: NemesisRecord; enemy: Enem
 export function CodexScreen() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
-  const markCodexSeen = useGame((s) => s.markCodexSeen)
+  const markCodexItemSeen = useGame((s) => s.markCodexItemSeen)
   const [tab, setTab] = useState<Tab>('lore')
-  // M19 A1: 新着 — 開いた瞬間の未読集合をセッション内に固定してから既読カーソルを進める
+  // M26 §12.1: 新着 = 発見済みだが「まだ開いていない」項目。開いた瞬間の未読集合をセッション内に固定し、
+  // その項目を開いた時だけ個別に既読化する(画面mountで全件を消さない)。
   // (StrictMode二重実行でもref初期化は一度きり)
   const freshRef = useRef<{ en: Set<string>; gods: Set<string> } | null>(null)
   if (!freshRef.current) {
-    const enArr = data.codex?.enemies ?? []
+    const seenEn = new Set(data.codexSeenIds?.enemies ?? [])
+    const seenGd = new Set(data.codexSeenIds?.gods ?? [])
+    const enArr = (data.codex?.enemies ?? []).map(baseEnemyId)
     const gdArr = data.codex?.gods ?? []
-    const enCur = typeof data.flags.codexSeenEn === 'number' ? data.flags.codexSeenEn : 0
-    const gdCur = typeof data.flags.codexSeenGods === 'number' ? data.flags.codexSeenGods : 0
     freshRef.current = {
-      en: new Set(enArr.slice(enCur).map(baseEnemyId)),
-      gods: new Set(gdArr.slice(gdCur)),
+      en: new Set(enArr.filter((id) => !seenEn.has(id))),
+      gods: new Set(gdArr.filter((id) => !seenGd.has(id))),
     }
   }
   const fresh = freshRef.current
   const [freshOnly, setFreshOnly] = useState(false)
-  useEffect(() => { markCodexSeen() }, [markCodexSeen])
+  // freshOnly はタブ別に振る舞う: タブを移ったら解除し、空一覧を引き継がない(§12.1)
+  useEffect(() => { setFreshOnly(false) }, [tab])
   // タブごとに選択カード/表示件数を保持(§6.3: 滞在中は状態を失わない)
   const [selByTab, setSelByTab] = useState<Partial<Record<Tab, string>>>({})
   const [shownByTab, setShownByTab] = useState<Record<Tab, number>>({ lore: PAGE, enemies: PAGE, gods: PAGE, nemesis: PAGE })
@@ -189,7 +191,12 @@ export function CodexScreen() {
   const regionName = (id: string) => REGIONS.find((r) => r.id === id)?.name ?? '夜藪'
 
   const selectedId = selByTab[tab] ?? null
-  const select = (id: string) => setSelByTab((m) => ({ ...m, [tab]: id }))
+  // 項目を開いた時に個別既読化する(§12.1: mount一括ではなく開いた時だけ)
+  const select = (id: string) => {
+    setSelByTab((m) => ({ ...m, [tab]: id }))
+    if (tab === 'enemies') markCodexItemSeen('enemies', id)
+    else if (tab === 'gods') markCodexItemSeen('gods', id)
+  }
   const shown = shownByTab[tab]
   const showMore = () => setShownByTab((m) => ({ ...m, [tab]: m[tab] + PAGE }))
 

@@ -318,6 +318,9 @@ export interface GameData {
   motto?: MottoId // v3.1 M12-8: 家訓(当主ごとに定める家風)
   // v3.1 M14: 図鑑と地域縁起(全てoptional=旧セーブ互換)
   codex?: { enemies: string[]; gods: string[] } // 遭遇した魔性/契った星神
+  // M26 §12.1: 図鑑の個別既読(項目を開いた時だけ既読化)。旧セーブは件数マーク(flags.codexSeen*)から移行。
+  // 表示専用 — ゲームロジックには影響しない。enemies は baseEnemyId 正規化後のID。
+  codexSeenIds?: { enemies: string[]; gods: string[] }
   loreFrags?: Record<string, number> // 地域ごとの縁起の欠片(0〜3)
   regionsVisited?: string[] // 足を踏み入れた地域
   nemeses?: NemesisRecord[] // v3.1 M16-1: 一族を殺し、名を得た魔性
