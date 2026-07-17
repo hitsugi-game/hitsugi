@@ -89,6 +89,13 @@ export interface Item {
   rareOrigin?: string // M27: 稀相遺物を残した魔性名。optionalで旧セーブ互換
 }
 
+// M28-C: 消耗品の所持スタック(回復薬など)。定義本体は data/consumables.ts。
+// 装備(Item)とは別系統 — セーブ破損を避けるため equipment/inventory には決して入れない。
+export interface ConsumableStack {
+  id: string // ConsumableDef.id
+  count: number
+}
+
 // ---- 灯型(灯座システムの育成軸。定義本体は data/toza.ts) ----
 export type Tomoshigata = 'homura' | 'iwao' | 'nagi' | 'sumi'
 
@@ -309,6 +316,7 @@ export interface GameData {
   hoto: number // 奉燈
   ketsu: number // 血珠
   inventory: Item[]
+  consumables?: ConsumableStack[] // M28-C: 回復薬など消耗品(optional=旧セーブ互換・equipmentとは別系統)
   godAffinity: Record<string, number>
   fame: number // 武功(地域解放)
   regionsCleared: string[]

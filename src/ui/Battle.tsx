@@ -19,6 +19,7 @@ function matchup(atk: Element | undefined, def: Element): Matchup {
 import { audio } from '../core/audio'
 import { getAutoBattleDefault } from '../core/settings'
 import { skillById } from '../core/data/skills'
+import { consumableById } from '../core/data/consumables'
 import { enemyById } from '../core/data/enemies'
 import { regionById } from '../core/data/regions'
 import { Bar, MaybeImg } from './components'
@@ -28,7 +29,11 @@ import './m17_battle.css'
 import './battle_m24.css'
 import './battle_m25.css'
 
-type Menu = { kind: 'root' } | { kind: 'skill' } | { kind: 'target'; skillId?: string; side: 'enemy' | 'ally' }
+type Menu =
+  | { kind: 'root' }
+  | { kind: 'skill' }
+  | { kind: 'item' } // M28-C: 道具(回復薬)一覧
+  | { kind: 'target'; skillId?: string; itemId?: string; side: 'enemy' | 'ally' }
 
 interface FxEvent {
   id: number
@@ -102,6 +107,7 @@ export function BattleScreen() {
   const initialAuto = useGame((s) => s.dungeonRun?.autoBattle ?? getAutoBattleDefault())
   const setAutoBattleFlag = useGame((s) => s.setAutoBattle)
   const family = useGame((s) => s.data?.family) ?? []
+  const consumables = useGame((s) => s.data?.consumables) // M28-C: 所持している回復薬など
 
   const [displayed, setDisplayed] = useState<BattleLogEntry[]>([])
   const [pending, setPending] = useState<BattleLogEntry[]>([])
@@ -311,12 +317,16 @@ export function BattleScreen() {
       if (!Number.isInteger(n) || n < 1 || n > pool.length) return
       ev.preventDefault()
       const target = pool[n - 1]
-      const actionName = menu.skillId ? skillById(menu.skillId).name : '攻撃'
+      const actionName = menu.itemId
+        ? consumableById(menu.itemId)?.name ?? '道具'
+        : menu.skillId ? skillById(menu.skillId).name : '攻撃'
       setPendingActionLabel(actionLabel(battle, actionName, target.key))
       battleCommand(
-        menu.skillId
-          ? { type: 'skill', skillId: menu.skillId, targetKey: target.key }
-          : { type: 'attack', targetKey: target.key },
+        menu.itemId
+          ? { type: 'item', itemId: menu.itemId, targetKey: target.key }
+          : menu.skillId
+            ? { type: 'skill', skillId: menu.skillId, targetKey: target.key }
+            : { type: 'attack', targetKey: target.key },
       )
       setMenu({ kind: 'root' })
     }
@@ -416,6 +426,13 @@ export function BattleScreen() {
   }
   const onAllyClick = (a: Combatant) => {
     if (!isPlayerTurn || a.hp <= 0) return
+    // M28-C: 道具(単体回復)の対象選択を消化
+    if (menu.kind === 'target' && menu.side === 'ally' && menu.itemId) {
+      const def = consumableById(menu.itemId)
+      runCommand({ type: 'item', itemId: menu.itemId, targetKey: a.key }, actionLabel(battle, def?.name ?? '道具', a.key))
+      setMenu({ kind: 'root' })
+      return
+    }
     if (menu.kind === 'target' && menu.side === 'ally' && menu.skillId) {
       tryShowOugiCutin(menu.skillId)
       runCommand(
@@ -433,6 +450,23 @@ export function BattleScreen() {
       tryShowOugiCutin(skillId)
       runCommand({ type: 'skill', skillId }, sk.name)
       setMenu({ kind: 'root' })
+    }
+  }
+  // M28-C: 所持している回復薬(count>0)を定義と結合。道具コマンドの一覧に使う。
+  const availItems = (consumables ?? [])
+    .filter((s) => s.count > 0)
+    .map((s) => ({ count: s.count, def: consumableById(s.id) }))
+    .filter((x): x is { count: number; def: NonNullable<typeof x.def> } => !!x.def)
+  // 道具を選ぶ — 全体回復は即発火、単体回復は対象(味方)選択へ。
+  // (関数名は use 接頭辞を避ける: React Hook 誤判定のため)
+  const pickItem = (itemId: string) => {
+    const def = consumableById(itemId)
+    if (!def) return
+    if (def.effect.scope === 'party') {
+      runCommand({ type: 'item', itemId }, def.name)
+      setMenu({ kind: 'root' })
+    } else {
+      setMenu({ kind: 'target', itemId, side: 'ally' })
     }
   }
 
@@ -715,6 +749,15 @@ export function BattleScreen() {
                     </button>
                     <button className="cmd-btn" disabled={!isPlayerTurn} data-zone="command" onClick={() => runCommand({ type: 'guard' }, '防御')}>防御</button>
                     <button className="cmd-btn" disabled={!isPlayerTurn} data-zone="command" onClick={() => runCommand({ type: 'flee' }, '逃げる')}>逃げる</button>
+                    {/* M28-C: 道具(回復薬)。所持が無ければ無効表示で領域は保つ。 */}
+                    <button
+                      className="cmd-btn"
+                      disabled={!isPlayerTurn || availItems.length === 0}
+                      data-zone="command"
+                      onClick={() => setMenu({ kind: 'item' })}
+                    >
+                      道具{availItems.length > 0 && <span className="sk-info">{availItems.reduce((n, x) => n + x.count, 0)}</span>}
+                    </button>
                     {/* A(M28): オートの入切は常時可能にする(処理中も無効化しない)。
                         無効化していたため「オート中に止め時が無い」不具合が出ていた。 */}
                     <button
@@ -750,6 +793,22 @@ export function BattleScreen() {
                     })}
                   </div>
                   {/* 戻るはスクロール外に固定(§3.8/§5.4) */}
+                  <button className="cmd-btn cmd-ghost skill-back" onClick={() => setMenu({ kind: 'root' })}>選ばず戻る</button>
+                </div>
+              )}
+              {/* M28-C: 道具一覧。技盤と同じ骨格を流用(scrollは.skill-list、戻るは外固定) */}
+              {isPlayerTurn && menu.kind === 'item' && (
+                <div className="skill-panel">
+                  <div className="skill-list">
+                    {availItems.map(({ def, count }) => (
+                      <button key={def.id} className="cmd-btn" onClick={() => pickItem(def.id)} title={def.desc}>
+                        <span className="item-ico" aria-hidden>{def.icon}</span>
+                        {def.name}
+                        <span className="sk-info">{def.effect.scope === 'party' ? '全' : ''}{def.effect.stat === 'hp' ? '傷' : '灯'}{def.effect.amount}</span>
+                        <span className="mp-cost">×{count}</span>
+                      </button>
+                    ))}
+                  </div>
                   <button className="cmd-btn cmd-ghost skill-back" onClick={() => setMenu({ kind: 'root' })}>選ばず戻る</button>
                 </div>
               )}

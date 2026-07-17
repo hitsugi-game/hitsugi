@@ -3,6 +3,7 @@ import type {
   BattleLogEntry, BattleState, Character, Combatant, Element, GameData, Item, MottoId, Screen,
 } from './types'
 import type { BattleAction } from './battle'
+import { consumableById } from './data/consumables'
 import { LIFESPAN_MONTHS, seasonLabel, isFestivalMonth } from './types'
 import { Rng } from './rng'
 import { todaysOdai } from './data/dailyOdai'
@@ -108,6 +109,7 @@ interface GameStore {
 
   // 店・装備・修練(季を消費しない)
   buyItem: (baseId: string) => void
+  buyConsumable: (id: string) => void // M28-C: 回復薬など消耗品を買う(奉燈で。GameData.consumablesへ)
   equipItem: (charId: string, itemId: string) => void
   trainStat: (charId: string, key: keyof GameData['family'][number]['potential']) => void
 
@@ -529,6 +531,8 @@ export const useGame = create<GameStore>((set, get) => {
         hoto: 150,
         ketsu: 0,
         inventory: [],
+        // M28-C: 出立の初備え — 回復薬を少しだけ持たせ「道具」コマンドを最初から示す(以後は鍛冶で購う)
+        consumables: [{ id: 'araigusa', count: 3 }, { id: 'tomoshi_abura', count: 1 }],
         godAffinity: {},
         fame: 0,
         regionsCleared: [],
@@ -1097,6 +1101,21 @@ export const useGame = create<GameStore>((set, get) => {
       })
     },
 
+    // M28-C: 消耗品(回復薬)を買う。equipment/inventoryとは別系統の consumables スタックへ積む。
+    buyConsumable: (id) => {
+      mutate((d) => {
+        const def = consumableById(id)
+        if (!def || d.hoto < def.price) return d
+        const stacks = d.consumables ?? []
+        const idx = stacks.findIndex((s) => s.id === id)
+        const next =
+          idx >= 0
+            ? stacks.map((s, i) => (i === idx ? { ...s, count: s.count + 1 } : s))
+            : [...stacks, { id, count: 1 }]
+        return { ...d, hoto: d.hoto - def.price, consumables: next }
+      })
+    },
+
     equipItem: (charId, itemId) => {
       mutate((d) => {
         const item = d.inventory.find((i) => i.id === itemId)
@@ -1644,6 +1663,22 @@ export const useGame = create<GameStore>((set, get) => {
       const actor = currentActor(battle)
       if (!actor || !actor.isAlly) return
 
+      // M28-C: 道具は在庫を確認し、使用時に1つ減らす(在庫は GameData.consumables)。
+      // 在庫が無ければ無効(誤操作でターンを消費させない)。
+      let dataUpdate: GameData | null = null
+      if (action.type === 'item') {
+        const d = get().data
+        const stacks = d?.consumables ?? []
+        const idx = stacks.findIndex((s) => s.id === action.itemId)
+        if (!d || idx < 0 || stacks[idx].count <= 0) return
+        dataUpdate = {
+          ...d,
+          consumables: stacks
+            .map((s, i) => (i === idx ? { ...s, count: s.count - 1 } : s))
+            .filter((s) => s.count > 0),
+        }
+      }
+
       let entries: BattleLogEntry[] = []
       let st = battle
       const r1 = performAction(st, actor.key, action, rng)
@@ -1665,7 +1700,11 @@ export const useGame = create<GameStore>((set, get) => {
 
       // M25 §5: 味方の入力番に戻ったら敵の兆しを先読み更新(rngクローンで挙動不変)
       const stWithIntents = st.phase === 'input' ? { ...st, intents: computeIntents(st, rng) } : st
-      set({ battle: stWithIntents, battleLogQueue: [...get().battleLogQueue, ...entries] })
+      set({
+        battle: stWithIntents,
+        battleLogQueue: [...get().battleLogQueue, ...entries],
+        ...(dataUpdate ? { data: dataUpdate } : {}),
+      })
     },
 
     // M25 §5: 戦闘開始直後など、入力番の兆しを設定する(Battle.tsx がマウント時に呼ぶ)

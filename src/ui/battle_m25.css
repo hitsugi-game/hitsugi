@@ -374,3 +374,11 @@
 }
 /* オートON時のコマンドボタンも「停止」と分かる強調(cmd-onは既存) */
 .cmd-auto.cmd-on { font-weight: 700; }
+
+/* M28-C: 道具(回復薬)一覧のアイコン字(素材追加までは絵文字1字) */
+.item-ico {
+  display: inline-block;
+  width: 1.4em; text-align: center;
+  margin-right: 0.15em;
+  font-size: 1.05em; line-height: 1;
+}

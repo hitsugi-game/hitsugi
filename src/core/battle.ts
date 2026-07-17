@@ -2,6 +2,7 @@ import type { BattleState, BattleLogEntry, Character, Combatant, EnemyDef, Enemy
 import { ELEMENT_ADVANTAGE } from './types'
 import { Rng, uid } from './rng'
 import { skillById } from './data/skills'
+import { consumableById } from './data/consumables'
 import { personalityById } from './data/personalities'
 import { voiceFor } from './data/voices'
 import { tomoshigataById } from './data/toza'
@@ -133,8 +134,9 @@ function elementMult(atkEl: Element | undefined, defEl: Element): number {
 }
 
 export interface BattleAction {
-  type: 'attack' | 'skill' | 'guard' | 'flee'
+  type: 'attack' | 'skill' | 'guard' | 'flee' | 'item'
   skillId?: string
+  itemId?: string // M28-C: type==='item' のとき消耗品ID(在庫の増減は store 側)
   targetKey?: string
 }
 
@@ -188,6 +190,30 @@ export function performAction(st0: BattleState, actorKey: string, action: Battle
       return { state: st, entries }
     }
     push('退路を塞がれた!', 'info')
+  } else if (action.type === 'item') {
+    // M28-C: 消耗品(回復薬)。灯力は消費せず、効果を対象へ適用する。在庫の増減は store 側。
+    const def = action.itemId ? consumableById(action.itemId) : undefined
+    if (!def) return endOfAction(st, entries, rng)
+    const friends = actor.isAlly ? st.allies : st.enemies
+    const targets =
+      def.effect.scope === 'party'
+        ? friends.filter((c) => c.hp > 0)
+        : [findCombatant(st, action.targetKey ?? '') ?? actor].filter((c) => c.hp > 0)
+    for (const t of targets) {
+      if (def.effect.stat === 'hp') {
+        const amount = def.effect.amount
+        updateCombatant(t.key, (c) => ({ ...c, hp: Math.min(c.maxHp, c.hp + amount) }))
+        push(`${actor.name}は${def.name}を使った — ${t.name}の傷が${amount}癒えた。`, 'heal', {
+          actorKey: actor.key, targetKey: t.key, amount,
+        })
+      } else {
+        const amount = def.effect.amount
+        updateCombatant(t.key, (c) => ({ ...c, mp: Math.min(c.maxMp, c.mp + amount) }))
+        push(`${actor.name}は${def.name}を使った — ${t.name}の灯力が${amount}満ちた。`, 'heal', {
+          actorKey: actor.key, targetKey: t.key, amount,
+        })
+      }
+    }
   } else {
     // attack / skill — 静心の加護(v3.1 M16-4)で灯力の消費が減る
     const skill = action.type === 'skill' && action.skillId ? skillById(action.skillId) : undefined
