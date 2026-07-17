@@ -17,6 +17,7 @@ import { gameImg, HOME_BG, HOME_BG_SEASONS } from './img'
 import { FamilyTree } from './FamilyTree'
 import './m17_home.css'
 import './home_m26.css'
+import './home_polish_m29.css' // M29+: 郷ホームの視覚改善(情報階層・カードの奥行き。後勝ち)
 
 export function HomeScreen() {
   const data = useGame((s) => s.data)!

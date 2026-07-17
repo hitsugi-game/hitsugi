@@ -13,6 +13,7 @@ import { charSprite, stageOf, villagerImg, walkBasePath } from './img'
 import { MaybeImg } from './components'
 import './village.css'
 import './village_m26.css' // M26 §6: 追従カメラUI(village.cssより後 — 後勝ち)
+import './village_polish_m29.css' // M29+: 郷歩行画面の視覚改善。village-stageの寸法には触れない(後勝ち)
 
 // NPCの立ち位置(engine側MAPの歩行可タイルに合わせる)
 const NPC_SPOTS: Record<string, [number, number]> = {

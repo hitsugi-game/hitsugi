@@ -1,0 +1,87 @@
+/* ============================================================
+   ホーム(郷の拠点ハブ) — M29+ UI視覚改善(視覚のみ・state/handlerは不変)
+   m17_home.css / home_m26.css より後にHome.tsxからimport(後勝ち)。
+   ねらい: 情報階層(見出し/主値/補足)をタイポと余白で明確にし、
+   節ごとのカードに奥行きを持たせて「何が押せるか」を分かりやすくする。
+   色は既存トークン(--gold/--amber/--sel/--text/--text-dim等)のみ再利用。
+   ============================================================ */
+
+/* ---- 資源ヘッダ — pillにグラデ+微光を足し「今の持ち駒」を一目で読める重さに ---- */
+.home-header {
+  background: linear-gradient(180deg, rgba(201, 168, 106, 0.06), rgba(201, 168, 106, 0) 70%);
+  border-radius: 8px 8px 0 0;
+  padding: 6px 8px 10px;
+  margin: -6px -8px 14px;
+}
+.resource-strip .resource {
+  background: linear-gradient(180deg, rgba(22, 17, 10, 0.55), rgba(8, 6, 4, 0.5));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 6px rgba(0, 0, 0, 0.25);
+  border-color: rgba(201, 168, 106, 0.28);
+}
+.resource-strip .resource b {
+  text-shadow: 0 0 8px rgba(232, 163, 61, 0.22);
+}
+
+/* ---- 節(Panel) — 奥行きを足して章立てを強調(既存の綴じ目アクセントはそのまま活かす) ---- */
+.home-screen .panel {
+  background: linear-gradient(165deg, rgba(24, 18, 12, 0.26), rgba(8, 10, 20, 0) 60%), var(--panel);
+  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ---- 綴の一言 — 縦アクセントに微光、本文の可読性を一段上げる ---- */
+.tsuzuri {
+  box-shadow: inset 2px 0 0 rgba(201, 168, 106, 0.15);
+}
+.tsuzuri-text {
+  line-height: 1.6;
+}
+
+/* ---- 今月の決断: 行動カード — グラデ+内影で触感を底上げ、推奨カードは琥珀寄りに ---- */
+.home-screen .action-card {
+  background: linear-gradient(160deg, rgba(30, 23, 15, 0.55), rgba(10, 14, 30, 0.66));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+.home-screen .action-card-icon {
+  background: linear-gradient(160deg, rgba(201, 168, 106, 0.16), rgba(0, 0, 0, 0.35));
+}
+.home-screen .action-card.rec .action-card-icon {
+  background: linear-gradient(160deg, rgba(255, 157, 69, 0.24), rgba(0, 0, 0, 0.3));
+  border-color: var(--sel);
+}
+.home-screen .action-card.primary .action-card-icon {
+  background: linear-gradient(160deg, rgba(232, 163, 61, 0.24), rgba(0, 0, 0, 0.3));
+  border-color: var(--amber);
+}
+
+/* ---- 一族欄: 血脈診断 — 見出し/数値/一覧の階層を強調 ---- */
+.blood-diag {
+  background: linear-gradient(160deg, rgba(16, 20, 40, 0.5), rgba(8, 10, 20, 0.76));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 3px 14px rgba(0, 0, 0, 0.3);
+}
+.blood-diag-counts b {
+  text-shadow: 0 0 6px rgba(239, 230, 212, 0.14);
+}
+
+/* ---- 郷の帳 — 3冊を見出し罫でくっきり分け、行にホバー質感を足す ---- */
+.ledger-book {
+  padding: 8px 10px 4px;
+  border-radius: 6px;
+  background: rgba(8, 10, 20, 0.32);
+}
+.ledger-entry {
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+.ledger-entry:hover:not(:disabled) {
+  background: rgba(201, 168, 106, 0.1);
+}
+
+/* ---- 日参りbanner — 金の縁取りにわずかな光暈を足す ---- */
+.daily-visit {
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.28);
+}
+
+/* ---- 今日の御題 — 達成時の存在感を一段強調 ---- */
+.odai-card.met {
+  box-shadow: 0 0 0 1px rgba(255, 157, 69, 0.16), 0 3px 12px rgba(0, 0, 0, 0.28);
+}

@@ -1,0 +1,180 @@
+/* ============================================================
+   郷普請(Facilities) — M29+ UI視覚改善(視覚のみ・データ/フロー/寸法契約は不変)
+   facilities.css / facilities_m26.css より後にFacilities.tsxからimport(後勝ち)。
+   ねらい: カードで「現在Lv→次Lv」「費用」「効果」の3要素を一目で読み取れるようにする。
+   店・カード押下=確認Sheetを開くだけの既存フロー、data-testid、ボタン文言には触れない。
+   色は既存トークン(--gold/--amber/--sel/--text/--text-dim等)のみ再利用。
+   ============================================================ */
+
+/* ---- カード全体 — 平板な単色地に奥行きを足す ---- */
+.facility-card {
+  position: relative;
+  background:
+    linear-gradient(160deg, rgba(32, 25, 16, 0.5), rgba(10, 12, 22, 0) 55%),
+    var(--panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+/* 建設可能 — 命火色の縁取りをわずかに発光させ、行動の呼びかけを明確に */
+.facility-card--buildable {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 157, 69, 0.1);
+}
+.facility-card--buildable:hover {
+  border-left-color: var(--sel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    0 0 16px rgba(255, 157, 69, 0.18);
+  transform: translateY(-2px);
+}
+
+/* 普請済み(最大) — 金の落ち着いた輝き */
+.facility-card--maxed {
+  background:
+    linear-gradient(160deg, rgba(58, 46, 24, 0.38), rgba(10, 12, 22, 0) 60%),
+    var(--panel);
+}
+
+/* 奉燈不足 — 控えめに沈める(理由の文字自体は既存契約どおり通常コントラストのまま) */
+.facility-card--insufficient {
+  background: linear-gradient(160deg, rgba(16, 18, 30, 0.3), rgba(10, 12, 22, 0) 55%), var(--panel);
+}
+
+/* ---- 見出し行 — 段階印(丸ドット)を名前の右へ。現在Lv→次Lvを視覚化 ---- */
+.facility-card-head {
+  align-items: center;
+}
+.facility-card-head .stagemark-dot.is-done {
+  box-shadow: 0 0 4px rgba(255, 157, 69, 0.5);
+}
+
+/* ---- Lv/費用の対 — 「読み取りやすさ」の核。2つの主要数値を並べて強調する ---- */
+.facility-lv-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed rgba(201, 168, 106, 0.22);
+}
+.facility-lv {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.facility-lv-max {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim);
+  margin-left: 1px;
+}
+.facility-cost {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.facility-cost-label {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  margin-right: 1px;
+}
+.facility-cost b {
+  font-size: 17px;
+  color: var(--amber);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+/* ---- 次Lv効果 — タグ+帯で「次に得る効果」だと一目で分かるように ---- */
+.facility-next {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0;
+  padding: 6px 9px;
+  border-radius: 4px;
+  border-left: 2px solid var(--sel);
+  background: rgba(255, 157, 69, 0.07);
+  color: var(--text);
+}
+.facility-next-tag {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  color: var(--sel);
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+/* ---- 効果一覧 — 達成済み/未達を色点でも示す(色+文言+印の三重) ---- */
+.facility-effects li {
+  position: relative;
+  padding-left: 13px;
+}
+.facility-effects li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--panel-border);
+}
+.facility-effects li.is-achieved::before {
+  background: var(--sel);
+  box-shadow: 0 0 4px rgba(255, 157, 69, 0.55);
+}
+
+/* ---- 建設ボタン — 触れる質感(グラデ+内影)。状態ごとに温度を変える ---- */
+.facility-build-btn {
+  background: linear-gradient(180deg, rgba(58, 42, 26, 0.55), rgba(18, 13, 9, 0.72));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.32);
+  font-weight: 700;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.facility-card--buildable .facility-build-btn {
+  border-color: var(--amber);
+  background: linear-gradient(180deg, rgba(232, 163, 61, 0.3), rgba(120, 72, 20, 0.5));
+}
+.facility-card--buildable .facility-build-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(232, 163, 61, 0.42), rgba(120, 72, 20, 0.62));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 12px rgba(232, 163, 61, 0.25);
+}
+.facility-card--maxed .facility-build-btn {
+  border-color: var(--gold);
+}
+
+/* buildable時のわずかな脈動 — 抑えめの振幅、reduced-motionでは無効 */
+@media (prefers-reduced-motion: no-preference) {
+  .facility-card--buildable {
+    animation: facilityBuildableGlow 3.4s ease-in-out infinite;
+  }
+}
+@keyframes facilityBuildableGlow {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 157, 69, 0.1);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 0 9px 1px rgba(255, 157, 69, 0.2);
+  }
+}

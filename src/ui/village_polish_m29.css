@@ -1,0 +1,87 @@
+/* ============================================================
+   郷を歩く(Village) — M29+ UI視覚改善(視覚のみ)
+   village.css / village_m26.css より後にVillage.tsxからimport(後勝ち)。
+
+   重要な制約: .village-stage / .village-host の width・height・padding・
+   border-width は engine.ts の applyZoom() が app.screen.width(=host実寸)から
+   camScale を算出する入力そのもの(§6.5「主人公56〜88px」の受入根拠)。
+   ここでは寸法に影響しないプロパティ(色/グラデ/box-shadow/文字/アニメ)だけを足す。
+   ============================================================ */
+
+/* ---- ヘッダ — 戻る導線+題を少し重厚に(高さは変えない) ---- */
+.village-head {
+  padding-bottom: 6px;
+  border-bottom: 1px double var(--panel-border);
+}
+.village-title {
+  text-shadow: 0 0 12px rgba(201, 168, 106, 0.22);
+}
+
+/* ---- すぐ行くバー — 「常設の導線」であることをpill地で強調 ---- */
+.village-quickbar {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(10, 14, 29, 0.4);
+  border: 1px solid rgba(201, 168, 106, 0.14);
+}
+.village-quickbar .filter-tab {
+  background: rgba(201, 168, 106, 0.06);
+}
+.village-quickbar .filter-tab:hover:not(:disabled) {
+  border-color: var(--amber);
+  background: rgba(232, 163, 61, 0.14);
+}
+
+/* ---- ステージ枠 — border-widthは不変。外周の艶(box-shadow)だけを足す
+   (box-shadowはボックス寸法に影響せずcanvas実寸=camScaleを変えない) ---- */
+.village-stage {
+  box-shadow: inset 0 0 46px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.35);
+}
+
+/* ---- 近接対象 — 「押せる」ことをより明確に。位置/サイズは不変、色と入場演出のみ ---- */
+.village-focus {
+  background: linear-gradient(180deg, rgba(22, 16, 10, 0.92), rgba(10, 14, 29, 0.92));
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 168, 106, 0.14);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .village-focus {
+    animation: villageFocusIn 0.22s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  }
+}
+@keyframes villageFocusIn {
+  from { opacity: 0; transform: translate(-50%, 4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ---- 会話帯 — 奥行きを少し足す ---- */
+.village-talk {
+  background: linear-gradient(180deg, rgba(18, 13, 20, 0.96), rgba(10, 14, 29, 0.96));
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+.village-talk-name {
+  text-shadow: 0 0 8px rgba(232, 163, 61, 0.2);
+}
+
+/* ---- 見渡すボタン — 寸法(min-height:44px)は既存のまま、質感だけ底上げ ---- */
+.village-survey {
+  background: linear-gradient(180deg, rgba(24, 18, 12, 0.88), rgba(12, 9, 20, 0.82));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+.village-survey:active {
+  box-shadow: inset 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* ---- D-pad — グリッドサイズ(46px)は不変。ボタンの質感だけ足す ---- */
+.village-stage .dpad-btn {
+  background: linear-gradient(160deg, rgba(32, 25, 16, 0.85), rgba(10, 14, 29, 0.85));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.village-stage .dpad-btn:active {
+  background: rgba(232, 163, 61, 0.32);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* ---- 手引き文 ---- */
+.village-hint {
+  opacity: 0.85;
+}

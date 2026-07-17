@@ -8,6 +8,7 @@ import { ScreenShell, StatusCallout, Sheet, CompareRow } from './layout/shell'
 import { emitToast } from './toast'
 import './facilities.css'
 import './facilities_m26.css' // M26 §8.3: 普請の確認Sheet(facilities.cssより後 — 後勝ち)
+import './facilities_polish_m29.css' // M29+: 施設カードの視覚改善(現在Lv→次Lv/費用の可読化。後勝ち)
 
 type FacilityState = 'buildable' | 'insufficient' | 'maxed'
 
@@ -161,10 +162,23 @@ export function FacilitiesScreen() {
           <div key={v.id} className={`facility-card facility-card--${v.state}`}>
             <div className="facility-card-head">
               <span className="facility-name">{v.name}</span>
-              <span className="facility-lv">Lv{v.lv}/{FACILITY_MAX_LV}</span>
+              <StageMark lv={v.lv} nextLv={v.lv + 1} />
+            </div>
+            <div className="facility-lv-row">
+              <span className="facility-lv">Lv{v.lv}<span className="facility-lv-max">/{FACILITY_MAX_LV}</span></span>
+              {!v.maxed && (
+                <span className="facility-cost">
+                  <span className="facility-cost-label">費用</span>
+                  <b>{v.cost}</b>燈
+                </span>
+              )}
             </div>
             <p className="facility-desc">{v.desc}</p>
-            {v.nextEffect && <p className="facility-next">次Lv: {v.nextEffect}</p>}
+            {v.nextEffect && (
+              <p className="facility-next">
+                <span className="facility-next-tag">次Lv</span>{v.nextEffect}
+              </p>
+            )}
             <ul className="facility-effects">
               {v.effects.map((e, i) => (
                 <li key={i} className={i < v.lv ? 'is-achieved' : 'is-pending'}>
