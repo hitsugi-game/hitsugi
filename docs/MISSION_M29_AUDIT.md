@@ -40,11 +40,12 @@
 6. **[HIGH] 野遊び童子の弔い文が不表示**(`gods_low.ts`): MOURNINGキーを god id `tokorozawa` へ一致。
 7. **[CRITICAL robustness] isValidSave強化**(`save.ts`): ketsu有限数+family要素(id/hp)を検証。NaN経済汚染と空族crash-on-continueを塞ぐ。
 8. **[MEDIUM] ホーム図鑑バッジ**(`homeInsight.ts`): 凍結旧フラグ→codexSeenIds基準へ(常時全件新着の固着を解消)。
-9. **[低リスク] 回帰テスト硬化**(`regression_m29.test.ts` 新規5件): floorFracFromAtk/enemyPowerのピン留め(I6の「係数編集が緑のまま退行」対策)+老成ボス超えの禁止。fixtureをketsu/hp込みの実セーブ相当へ更新。
+9. **[低リスク] 回帰テスト硬化**(`regression_m29.test.ts`): floorFracFromAtk/enemyPowerのピン留め(I6の「係数編集が緑のまま退行」対策)+老成ボス超えの禁止。fixtureをketsu/hp込みの実セーブ相当へ更新。
+10. **[HIGH・ユーザー承認済で追加適用] 防御バフ反転の恒久修正**(`types.ts`/`battle.ts`/`skills.ts`/`toza.ts`/`jobs.ts`): `Skill.buffKind('atk'|'def')`を導入し battle.ts の id白判定を置換。タグ付け=skills.ts防御5件=def / toza の mk が説明文から導出(巌=全て守・澄は攻撃語で判別)/ jobs tank役=def・他役=atk。**灯座「巌」+家業「盾」の防御アーキタイプが説明通り defUp に**。回帰テスト6件で全バフを説明文と突合。commit `14c62fe`。**ユーザーが「反転させた後にデプロイ」を明示指示したため今回適用**。
 
-### 報告のみ(大規模/balance/設計判断=ユーザー判断へ・未着手)
-- **[最優先推奨] 防御バフ反転の恒久修正(I1+I5二重確認)**: `Skill`に`buffKind:'atk'|'def'`を追加し、skills.ts(himamori/g_iwakura/g_minomushi/gs_earth1/gs_earth3=def、kien/g_noroshi/gs_star2=atk)・toza.ts(巌gata=def・他=atk)・jobs.ts(tank=def・heal/sup=要確認)をタグ付け、battle.ts:339のid白判定を`skill.buffKind==='def'`へ置換。**23技=灯座「巌」+家業「盾」の防御アーキタイプ全体が説明と逆にatkUp。出荷済み挙動を変える(=balance)ため、gata/roleのdef/atk判定をユーザー確認の上で適用推奨**。
+### 報告のみ(大規模/設計判断=ユーザー判断へ・未着手)
 - bundle分割(1.78MB単一chunk)/複数タブ保存競合/季非消費操作の即保存/exhaustive-deps Lint有効化/デバフのターン管理/mdef術防御の被弾側未使用/regions配列順のunlockFame整合/記モーダルfocus trap/perf.spec閾値(flaky注意)/辞世dup gateの永続化/デッドコード(darknessPenalty/formatDeed/seasonOfMonth=削除より退避)。
+- ※heal/sup役の家業バフは士気・鼓舞寄りのため atkUp のままとした(盾/巌の防御アーキタイプのみ是正)。protective寄りのhealバフ(香の帳/毒消し等)の扱いは体感を見て別途調整可。
 
 ## ⑩ findings台帳(生・指揮側検証状態つき) — 揃い次第⑧へ昇格
 **検証凡例**: [確認済✓]=指揮側がコードで再現/裏取り / [要検証]=未再検 / [却下]=偽陽性。
