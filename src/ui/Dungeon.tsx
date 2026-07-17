@@ -258,6 +258,11 @@ function DungeonFloor() {
     engineRef.current?.setFrantic((run.frantic ?? 0) > 0)
   }, [run.frantic])
 
+  // M29修正: 主討伐後(bossDown)にボス床を封じる。以後ボス床を踏んでも戦闘演出が空発火しない。
+  useEffect(() => {
+    if (run.bossDown) engineRef.current?.sealBoss()
+  }, [run.bossDown])
+
   // 闇夜の目(v3.1 M16-4)+眷属「韋駄天」(風, v3.1 M16-5): 敵影に気取られにくく
   useEffect(() => {
     engineRef.current?.setStealth((run.boons ?? []).includes('yamiyo') || familiarElement === 'wind')

@@ -407,6 +407,10 @@ export class DungeonEngine {
           ),
         )
       }
+      // M29修正: スプライトのawait中にdestroy()が走ると、破棄済みapp/containerへ以降の
+      // addChild/ticker.add/stage参照が及びクラッシュ+テクスチャ孤児化する。village engineと
+      // 同じく2つ目のawaitギャップにもガードを置く(1つ目は init 側で既にガード済み)。
+      if (this.destroyed) return
       const sp = new Sprite(this.walkTex.down[1])
       sp.anchor.set(0.5, 0.78)
       sp.height = TILE * 1.6
@@ -852,7 +856,8 @@ export class DungeonEngine {
     }
     const kind = this.tileAt(x, y)
     if (kind === 'chest' || kind === 'camp' || kind === 'shrine' || kind === 'stairs' || kind === 'entrance' || kind === 'boss' || kind === 'monument') {
-      if ((kind === 'chest' || kind === 'camp' || kind === 'shrine' || kind === 'monument') && this.used.has(`${this.floorIndex}:${x}:${y}`)) return
+      // M29修正: bossも使用済み判定に含める(討伐後のsealBossで使用済み化され、再踏で演出が空発火しない)
+      if ((kind === 'chest' || kind === 'camp' || kind === 'shrine' || kind === 'monument' || kind === 'boss') && this.used.has(`${this.floorIndex}:${x}:${y}`)) return
       if (kind === 'boss') {
         // ボスは緋の閃光で威圧してから対峙
         this.startEncounterFx('boss', () => this.events.onSpecialTile(kind, x, y))
@@ -870,6 +875,18 @@ export class DungeonEngine {
     if (marker && tex) marker.texture = tex
     if (kind === 'camp') this.lighting?.dim(`camp:${x}:${y}`)
     if (kind === 'shrine') this.lighting?.dim(`shrine:${x}:${y}`)
+  }
+
+  /** M29修正: 主討伐後にボス床(6マス塊)を全て使用済み化し、据え置きだった主光源も消す。
+   *  これをしないと討伐後もボス床を踏む度に戦闘演出(閃光/振動/暗転+入力凍結)が空発火する。
+   *  Dungeon.tsxが run.bossDown の立ち上がりで一度だけ呼ぶ。冪等。 */
+  sealBoss(): void {
+    for (let y = 0; y < this.grid.length; y++) {
+      for (let x = 0; x < this.grid[y].length; x++) {
+        if (this.grid[y][x] === 'boss') this.used.add(`${this.floorIndex}:${x}:${y}`)
+      }
+    }
+    this.lighting?.dim('boss')
   }
 
   /** 下り階段が発見済みか(短期目的表示用 — M24 §4.5)。Dungeon.tsx側から500ms間隔でpollされる想定。 */
