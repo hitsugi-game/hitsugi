@@ -291,3 +291,53 @@
   .enemy-intent { animation: intent-in 220ms ease-out; }
   @keyframes intent-in { from { opacity: 0; transform: translate(-50%, 3px); } to { opacity: 1; transform: translate(-50%, 0); } }
 }
+
+/* ---- M-B(2026-07-17): 装飾レイヤがクリックを奪っていた修正 ----
+   .stage-ground(index.css: bottom固定/height46%/左右-10%はみ出し)がコマンド盤の上に重なり、
+   「技」「オート」の押下を横取りしていた(実測: 技の中心点の最前面要素 = DIV.stage-ground)。
+   地面・背景・勝利演出などの純装飾はクリック対象にしない。index.cssは非編集の規律のため後勝ちで無効化。 */
+.stage-ground,
+.battle-stage-bg,
+.battle-stage-bg::after {
+  pointer-events: none;
+}
+
+/* ---- M-C(2026-07-17): ultrawideで敵味方が離れすぎる構図の改善 ----
+   敵42%/中央16%/味方42%のgridは1900px級では左右へ散開しすぎ、対峙の緊張が消える。
+   戦場の有効幅へ上限を与えて中央へ寄せる(§4.2の占有規則は維持 — 割合は不変、母数を絞るだけ)。 */
+.stage-battlers {
+  /* flexアイテムのcross軸autoマージンはstretchを打ち消しfit-contentへ収縮する(CSS仕様)ため、
+     width:100%を明示して「上限まで満幅・超過分だけ中央寄せ」にする */
+  width: 100%;
+  max-width: 1480px;
+  margin-inline: auto;
+}
+
+/* ---- M-C(続き): 前後列が縦に分裂する構図の是正 ----
+   .enemy-grid/.ally-grid が flex:1で縦いっぱいに伸び、2×2の行間が画面高に引き伸ばされて
+   陣形が上下に分裂していた(ultrawide実測)。グリッドはコンテンツ寸法で中央に置き、
+   前後の奥行きは縮小(0.92)+わずかな沈み込みで示す — §4.2「上下差と小さな列印」の趣旨は維持。 */
+.enemy-grid, .ally-grid {
+  flex: 0 1 auto;
+  align-content: center;
+  row-gap: 4px;
+}
+.enemy-grid.slot-preset-34 > [data-row='back'],
+.ally-grid.slot-preset-34 > [data-row='back'] { transform: scale(0.92) translateY(8px); }
+
+/* ---- M-C(続き): オートをボタンとして視認できる形へ ----
+   素テキスト同然で「押せる」と分からなかった(ユーザー報告)。トグルの状態も色で明示する。 */
+.cmd-auto {
+  min-height: 40px;
+  padding: 4px 22px;
+  border: 1px solid rgba(201, 168, 106, 0.4);
+  border-radius: 9px;
+  background: rgba(16, 12, 28, 0.6);
+  letter-spacing: 0.14em;
+}
+.cmd-auto.cmd-on {
+  border-color: rgba(255, 157, 69, 0.9);
+  background: rgba(255, 157, 69, 0.16);
+  color: #ffd9a0;
+}
+.cmd-auto:focus-visible { outline: 2px solid #c9a86a; outline-offset: 2px; }
