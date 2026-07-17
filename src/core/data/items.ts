@@ -268,11 +268,16 @@ const SERIES: ItemSeries[] = [
   },
 ]
 
+// M33 ⑯: 価格成長を性能成長(growth)に少しの割増(プレミアム)を掛けた率にする。旧は全系列一律 1.52^i で、
+// 性能growth(1.17〜1.20)から乖離し tier14 で性能あたり27〜39倍という急峻なカーブだった(買値専用=売却なし)。
+// growth連動にすると価格/性能比は全系列で PREMIUM^i に収束し、tier14でも tier0 の約10倍に収まる
+// (item_price.test.ts が上限12倍を独立にpin)。既存セーブの個体価格(Item.price)は非遡及(新規購入から適用)。
+const PRICE_GROWTH_PREMIUM = 1.18
 // 系譜→ItemBase展開(数値は式が単一情報源)
 function seriesItems(s: ItemSeries): ItemBase[] {
   return s.names.map((name, i) => {
     const v = Math.round(s.base * Math.pow(s.growth, i))
-    const price = Math.round(s.basePrice * Math.pow(1.52, i))
+    const price = Math.round(s.basePrice * Math.pow(s.growth * PRICE_GROWTH_PREMIUM, i))
     const it: ItemBase = { baseId: `${s.prefix}${i}`, name, slot: s.slot, price, shopTier: i }
     if (s.kind === 'atk') it.atk = v
     else if (s.kind === 'def') it.def = v
