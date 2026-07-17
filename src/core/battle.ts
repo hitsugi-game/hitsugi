@@ -39,6 +39,9 @@ export function combatantFromChar(c: Character, row: 'front' | 'back'): Combatan
     chainCount: 0,
     personalityId: c.personalityId,
     weaponLegacy: c.equipment.weapon?.legacyOf,
+    // M28-B/F: 味方も敵と対称にダメージ下限を持つ。高防御の敵(高tier/ボス)に攻撃が1固定に
+    // なる「刺さらない」感を防ぐ。floorFracFromAtk は攻撃力に反比例し最低ダメージを一定化する。
+    dmgFloorFrac: floorFracFromAtk(stat('str') + wAtk),
   }
 }
 

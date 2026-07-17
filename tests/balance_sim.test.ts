@@ -3,7 +3,7 @@
 // enemy = 実 enemyAction。narrative易化(敵atk/hp×0.78)を再現。指標に「瀕死率」を含む。
 // ボス安全表(devil必須): 下限導入がボス戦を破綻(勝てない)させないことを確認する。
 import { describe, expect, it } from 'vitest'
-import { combatantFromEnemy, currentActor, enemyAction, performAction, startBattle } from '../src/core/battle'
+import { combatantFromEnemy, currentActor, enemyAction, floorFracFromAtk, performAction, startBattle } from '../src/core/battle'
 import { ENEMIES, enemyById } from '../src/core/data/enemies'
 import { Rng } from '../src/core/rng'
 import type { BattleState, Combatant, EnemyDef } from '../src/core/types'
@@ -14,7 +14,7 @@ function ally(name: string, atk: number, def: number, hp: number, agi: number, r
     key: name, isAlly: true, name, element: 'fire',
     hp, maxHp: hp, mp, maxMp: mp,
     atk, def, matk: Math.round(atk * 0.75), mdef: Math.round(def * 0.8), agi, luk: 14,
-    skills, row, guard: false, buffs: {}, chainCount: 0, dmgFloorFrac: 0.12,
+    skills, row, guard: false, buffs: {}, chainCount: 0, dmgFloorFrac: floorFracFromAtk(atk), // 実 combatantFromChar と同一
   }
 }
 // 代表party: 素手gen1(序盤) / 装備gen3(中盤) / 精鋭gen6(ボス到達時・devil worst def~120)
