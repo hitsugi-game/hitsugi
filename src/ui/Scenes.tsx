@@ -398,7 +398,15 @@ export function CeremonyScene({ charId }: { charId: string }) {
         {TOMOSHIGATA.map((t) => {
           const toza = tozaOf(t.id, char.element)
           return (
-            <div key={t.id} className={`god-card ${t.id === rec ? 'recommended' : ''}`} onClick={() => setChosen(t.id)}>
+            <div
+              key={t.id}
+              className={`god-card ${t.id === rec ? 'recommended' : ''}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`灯型「${t.label}」を選ぶ${t.id === rec ? '(血潮の勧め)' : ''}`}
+              onClick={() => setChosen(t.id)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setChosen(t.id) } }}
+            >
               <MaybeImg src={gameImg(`emb_${t.id}_${char.element}.png`)} className="card-emblem" />
               <div className="god-name">
                 {t.label}({t.kana}){t.id === rec ? ' ★血潮の勧め' : ''}
@@ -471,7 +479,15 @@ export function JobRiteScene({ charId }: { charId: string }) {
             </div>
             <div className="god-grid">
               {JOB_CLASSES.filter((j) => j.role === role).map((j) => (
-                <div key={j.id} className={`god-card ${role === rec ? 'recommended' : ''}`} onClick={() => setChosen(j.id)}>
+                <div
+                  key={j.id}
+                  className={`god-card ${role === rec ? 'recommended' : ''}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`家業「${j.name}」を選ぶ${role === rec ? '(血潮の勧め)' : ''}`}
+                  onClick={() => setChosen(j.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setChosen(j.id) } }}
+                >
                   <MaybeImg src={gameImg(`job_${j.id}.png`)} className="card-emblem" />
                   <div className="god-name">
                     {j.name}({j.kana}){role === rec ? ' ★' : ''}

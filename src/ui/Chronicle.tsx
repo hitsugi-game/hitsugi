@@ -218,6 +218,7 @@ export function ChronicleScreen() {
               <button
                 key={k}
                 className={`btn btn-ghost filter-tab ${kindFilter === k ? 'active' : ''}`}
+                aria-pressed={kindFilter === k}
                 onClick={() => changeKindFilter(k)}
               >
                 {k === 'all' ? '全て' : KIND_LABEL[k]}

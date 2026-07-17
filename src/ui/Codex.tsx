@@ -252,6 +252,7 @@ export function CodexScreen() {
             <div className="codex-fresh-row">
               <button
                 className={`btn btn-ghost filter-tab ${freshOnly ? 'active' : ''}`}
+                aria-pressed={freshOnly}
                 onClick={() => setFreshOnly(!freshOnly)}
               >
                 新着だけ見る{tab === 'enemies' ? `(${fresh.en.size})` : `(${fresh.gods.size})`}

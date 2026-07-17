@@ -163,6 +163,7 @@ export function PactScreen() {
               <button
                 key={r}
                 className={`btn btn-ghost filter-tab ${rankTab === r ? 'active' : ''}`}
+                aria-pressed={rankTab === r}
                 onClick={() => setRankTab(r)}
               >
                 {r === 0 ? '全て' : GOD_RANK_LABELS[r]}
@@ -184,12 +185,14 @@ export function PactScreen() {
           <div className="god-filter-row">
             <button
               className={`btn btn-ghost filter-tab ${onlyAffordable ? 'active' : ''}`}
+              aria-pressed={onlyAffordable}
               onClick={() => setOnlyAffordable((v) => !v)}
             >
               費用内
             </button>
             <button
               className={`btn btn-ghost filter-tab ${onlyUncontracted ? 'active' : ''}`}
+              aria-pressed={onlyUncontracted}
               onClick={() => setOnlyUncontracted((v) => !v)}
             >
               未契約
@@ -199,7 +202,10 @@ export function PactScreen() {
 
         <div className="pact-main">
           {/* 左: 神名リスト(奉納点昇順) */}
-          <div className="god-list" role="listbox">
+          {/* M32 a11y: role="listbox"は直下に生buttonを持ち option/roving-tabindex契約を満たさず違反だった。
+              完全なlistboxキーボード実装は大改修(報告)なので、誤roleを外しネイティブbutton(Tab到達可)に、
+              選択はaria-pressed・選べない星はaria-disabledで伝える最小修正に留める。 */}
+          <div className="god-list">
             {shownGods.length === 0 && (
               <p className="god-list-empty">その条件の星は、今夜は見えない。</p>
             )}
@@ -212,6 +218,8 @@ export function PactScreen() {
                 <button
                   key={g.id}
                   className={`god-row ${godId === g.id ? 'selected' : ''} ${!affordable ? 'locked' : ''}`}
+                  aria-pressed={godId === g.id}
+                  aria-disabled={!affordable}
                   onClick={() => affordable && setGodId(g.id)}
                 >
                   <span className={`element-badge el-${g.element} god-row-el`}>{ELEMENT_LABELS[g.element]}</span>
