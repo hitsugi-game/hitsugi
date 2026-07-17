@@ -116,8 +116,6 @@ export function BattleScreen() {
   const [shakeKey, setShakeKey] = useState(0) // ヒット時のstage-shake発火用
   const shakeTimerRef = useRef<number | null>(null)
   const [auto, setAutoRaw] = useState(initialAuto)
-  const autoRef = useRef(auto) // キー処理が最新autoを確実に読むため(クロージャ/dep churn回避)
-  autoRef.current = auto
   // オート状態は遠征越しに継続 — 変更したら遠征ランへも書き戻す
   const setAuto = (next: boolean) => { setAutoRaw(next); setAutoBattleFlag(next) }
   const [fx, setFx] = useState<Record<string, FxEvent[]>>({})
@@ -304,13 +302,12 @@ export function BattleScreen() {
   // CombatantNode側のtabIndex/onKeyDownで既に対応済み)
   useEffect(() => {
     if (!battle) return
-    if (menu.kind !== 'target' && menu.kind !== 'skill') return
+    if (menu.kind !== 'target' && menu.kind !== 'skill' && menu.kind !== 'item') return
     const pool = menu.kind === 'target'
       ? (menu.side === 'enemy' ? battle.enemies : battle.allies).filter((c) => c.hp > 0)
       : []
     const onKey = (ev: KeyboardEvent) => {
-      // A(M28): オート中はEscapeでまず停止(止め時が無い不具合の恒久対策)。autoRefで最新値を読む。
-      if (ev.key === 'Escape' && autoRef.current) { ev.preventDefault(); setAuto(false); return }
+      // 技/道具/対象メニュー中のEscはメニューを閉じる。オート停止は auto 依存の別effectが担当(M29修正)。
       if (ev.key === 'Escape') { ev.preventDefault(); setMenu({ kind: 'root' }); return }
       if (menu.kind !== 'target') return
       const n = Number(ev.key)
@@ -344,6 +341,18 @@ export function BattleScreen() {
   useEffect(() => {
     if (isPlayerTurn) setPendingActionLabel(null)
   }, [isPlayerTurn])
+
+  // M29修正: オート中はメニュー状態(root含む)に関わらずEscで停止できる。以前は対象/技メニュー中しか
+  // keydownを購読しておらず、通常のオート(menu='root')ではEscが効かなかった(auto_stop.spec回帰)。
+  useEffect(() => {
+    if (!auto) return
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') { ev.preventDefault(); setAuto(false) }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auto])
 
   // オート戦闘
   useEffect(() => {
