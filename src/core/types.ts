@@ -47,6 +47,9 @@ export interface Skill {
   mpCost: number
   inheritable: boolean // 継承の証にできるか
   desc: string
+  // M29修正: type==='buff' の効果種別。'def'=防御上昇 / 'atk'(既定)=攻撃上昇。
+  // 旧実装は id 2件のハードコード判定で、灯座「巌」・家業「盾」等の防御バフが説明と逆に攻撃上昇していた。
+  buffKind?: 'atk' | 'def'
 }
 
 // ---- 星神 ----

@@ -16,7 +16,7 @@ export const SKILLS: Skill[] = [
   { id: 'koyashi', name: '小癒しの灯', type: 'heal', target: 'ally', power: 130, mpCost: 5, inheritable: false, desc: '掌の灯で傷口を温める。' },
   { id: 'ooinori', name: '大灯の祈り', type: 'heal', target: 'allies', power: 85, mpCost: 12, inheritable: false, desc: '大燈籠へ祈り、一族全員の傷を癒す。' },
   { id: 'kien', name: '気焔', type: 'buff', target: 'allies', power: 30, mpCost: 8, inheritable: false, desc: '雄叫びで一族の闘志に火を点ける。攻撃上昇。' },
-  { id: 'himamori', name: '灯護り', type: 'buff', target: 'allies', power: 30, mpCost: 8, inheritable: false, desc: '灯の結界で身を包む。防御上昇。' },
+  { id: 'himamori', name: '灯護り', type: 'buff', buffKind: 'def', target: 'allies', power: 30, mpCost: 8, inheritable: false, desc: '灯の結界で身を包む。防御上昇。' },
   { id: 'kokorooshi', name: '心折りの囁き', type: 'debuff', target: 'enemies', power: 25, mpCost: 7, inheritable: false, desc: '夜の言葉で敵の戦意を挫く。攻撃低下。' },
 
   // ---- 星神奥義(継承の証) ----
@@ -25,7 +25,7 @@ export const SKILLS: Skill[] = [
   { id: 'g_miobiki', name: '千鳥の澪引き', type: 'heal', target: 'allies', power: 140, mpCost: 16, inheritable: true, desc: '澪標千鳥の奥義。癒しの潮が一族を包む。' },
   { id: 'g_ryougen', name: '篝火燎原', type: 'attack', target: 'enemies', element: 'fire', power: 150, mpCost: 15, inheritable: true, desc: '篝火乙女の奥義。恋心と同じで燃え広がる。' },
   { id: 'g_shibariito', name: '千糸絡繰', type: 'debuff', target: 'enemies', power: 40, mpCost: 12, inheritable: true, desc: '宵蜘蛛御前の奥義。見えぬ糸が敵の力を封じる。' },
-  { id: 'g_iwakura', name: '磐座の構え', type: 'buff', target: 'allies', power: 45, mpCost: 12, inheritable: true, desc: '石臼翁の奥義。山の如く動かぬ守り。' },
+  { id: 'g_iwakura', name: '磐座の構え', type: 'buff', buffKind: 'def', target: 'allies', power: 45, mpCost: 12, inheritable: true, desc: '石臼翁の奥義。山の如く動かぬ守り。' },
   { id: 'g_tsubame', name: '燕返し', type: 'attack', target: 'enemy', element: 'wind', power: 195, mpCost: 11, inheritable: true, desc: '燕颪の奥義。振り向いた時には終わっている。' },
   { id: 'g_yukiakatsuki', name: '雪暁の経', type: 'attack', target: 'enemies', element: 'water', power: 135, mpCost: 13, inheritable: true, desc: '雪安居の奥義。無音の吹雪が読経とともに降る。' },
   { id: 'g_yakumo', name: '八雲雷舞', type: 'attack', target: 'enemies', element: 'star', power: 150, mpCost: 15, inheritable: true, desc: '鳴神太鼓の奥義。雷鳴の乱れ打ちは祭囃子。' },
@@ -34,7 +34,7 @@ export const SKILLS: Skill[] = [
   { id: 'g_hokushin', name: '北辰一閃', type: 'attack', target: 'enemy', element: 'star', power: 320, mpCost: 20, inheritable: true, desc: '北辰老の奥義。北極星より真っ直ぐな究極の一太刀。' },
 
   // ---- 星神奥義(第二陣・13〜24柱) ----
-  { id: 'g_minomushi', name: '蓑籠り', type: 'buff', target: 'allies', power: 40, mpCost: 11, inheritable: true, desc: '蓑虫親父の奥義。蓑の中は嵐も届かぬ安全地帯。' },
+  { id: 'g_minomushi', name: '蓑籠り', type: 'buff', buffKind: 'def', target: 'allies', power: 40, mpCost: 11, inheritable: true, desc: '蓑虫親父の奥義。蓑の中は嵐も届かぬ安全地帯。' },
   { id: 'g_kaiyose', name: '貝寄せの唄', type: 'heal', target: 'allies', power: 95, mpCost: 13, inheritable: true, desc: '貝寄せ乙女の奥義。浜の貝が集まるように、散った気力が戻る。' },
   { id: 'g_kagebousi', name: '影法師写し', type: 'attack', target: 'enemy', element: 'moon', power: 200, mpCost: 12, inheritable: true, desc: '影法師の奥義。敵の影を斬れば本体も斬れている。' },
   { id: 'g_kazaguruma', name: '八ツ羽根回し', type: 'attack', target: 'enemies', element: 'wind', power: 130, mpCost: 13, inheritable: true, desc: '風車翁の奥義。八枚羽根の大風車が敵陣を巻き上げる。' },
@@ -62,9 +62,9 @@ export const SKILLS: Skill[] = [
   { id: 'gs_wind2', name: '颪の帳', type: 'debuff', target: 'enemies', power: 30, mpCost: 11, inheritable: true, desc: '中つ星の颪が敵の足並みを乱す。攻撃低下。' },
   { id: 'gs_wind3', name: '八風巡り', type: 'attack', target: 'enemies', element: 'wind', power: 135, mpCost: 15, inheritable: true, desc: '上つ星の八方の風が敵陣を薙ぐ。' },
   { id: 'gs_wind4', name: '天翔る野分', type: 'attack', target: 'enemy', element: 'wind', power: 290, mpCost: 19, inheritable: true, desc: '極ツ星の野分。天を翔けて一点に落ちる。' },
-  { id: 'gs_earth1', name: '土手向け', type: 'buff', target: 'allies', power: 32, mpCost: 9, inheritable: true, desc: '下つ星の土気が足元を固める。防御上昇。' },
+  { id: 'gs_earth1', name: '土手向け', type: 'buff', buffKind: 'def', target: 'allies', power: 32, mpCost: 9, inheritable: true, desc: '下つ星の土気が足元を固める。防御上昇。' },
   { id: 'gs_earth2', name: '地金打ち', type: 'attack', target: 'enemy', element: 'earth', power: 205, mpCost: 13, inheritable: true, desc: '中つ星の重み。地金ごと打ち据える。' },
-  { id: 'gs_earth3', name: '磐根の帳', type: 'buff', target: 'allies', power: 48, mpCost: 15, inheritable: true, desc: '上つ星の磐根が隊を囲う。大防御。' },
+  { id: 'gs_earth3', name: '磐根の帳', type: 'buff', buffKind: 'def', target: 'allies', power: 48, mpCost: 15, inheritable: true, desc: '上つ星の磐根が隊を囲う。大防御。' },
   { id: 'gs_earth4', name: '国土鳴動', type: 'attack', target: 'enemy', element: 'earth', power: 280, mpCost: 20, inheritable: true, desc: '極ツ星の一撃。国土が鳴動し、山がひとつ低くなる。' },
   { id: 'gs_moon1', name: '月翳し', type: 'debuff', target: 'enemies', power: 28, mpCost: 8, inheritable: true, desc: '下つ星の月影が敵の目を翳らせる。攻撃低下。' },
   { id: 'gs_moon2', name: '月光穿ち', type: 'attack', target: 'enemy', element: 'moon', power: 195, mpCost: 12, inheritable: true, desc: '中つ星の月光が針となって穿つ。' },

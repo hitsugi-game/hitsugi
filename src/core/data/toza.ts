@@ -64,7 +64,13 @@ function mk(
   id: string, name: string, type: Skill['type'], target: Skill['target'],
   power: number, mpCost: number, desc: string, element?: Element,
 ): Skill {
-  return { id, name, type, target, element, power, mpCost, inheritable: false, desc }
+  // M29修正: 灯座バフの効果種別を説明文から導く。灯座「巌(いわお=守)」は全て防御、「澄」は混在するが
+  // 攻撃バフは必ず「攻撃(上昇)」を明記し、防御バフは「防御/守/護」を含むか攻撃語を含まない。
+  const buffKind: Skill['buffKind'] =
+    type !== 'buff' ? undefined
+      : /攻撃/.test(desc) && !/防御|守|護/.test(desc) ? 'atk'
+      : 'def'
+  return { id, name, type, target, element, power, mpCost, inheritable: false, desc, buffKind }
 }
 
 // 各灯座: 固有技3(6月・生後10月・14月で習得)+奥義1(18月)

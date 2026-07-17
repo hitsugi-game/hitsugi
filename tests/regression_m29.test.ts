@@ -4,6 +4,9 @@
 import { describe, expect, it } from 'vitest'
 import { combatantFromEnemy, enemyPower, floorFracFromAtk } from '../src/core/battle'
 import { ENEMIES } from '../src/core/data/enemies'
+import { SKILLS, skillById } from '../src/core/data/skills'
+import { allTozaSkills } from '../src/core/data/toza'
+import { allJobSkills } from '../src/core/data/jobs'
 
 describe('M29回帰: M28バランス式のピン留め', () => {
   it('floorFracFromAtk は FLOOR_TARGET(13)/atk を [0.08, 0.55] にクランプ', () => {
@@ -51,5 +54,51 @@ describe('M29回帰: 老成(_o)がenemyPowerで二重強化されずボスを超
     const c = combatantFromEnemy(elder!, 0)
     // enemyPowerを適用していれば e.atk より大きくなるはず。適用しない=素のe.atkと一致。
     expect(c.atk).toBe(elder!.atk)
+  })
+})
+
+describe('M29回帰: 防御バフがdefUp・攻撃バフがatkUp(buffKind)', () => {
+  const allBuffs = [...SKILLS, ...allTozaSkills(), ...allJobSkills()].filter((s) => s.type === 'buff')
+  const kindOf = (s: { buffKind?: 'atk' | 'def' }) => s.buffKind ?? 'atk'
+
+  it('バフが1件以上あり、buffKindはatk/defのみ', () => {
+    expect(allBuffs.length).toBeGreaterThan(20)
+    for (const s of allBuffs) expect(['atk', 'def']).toContain(kindOf(s))
+  })
+
+  it('説明文に「防御/大防御」を含むバフは必ず defUp', () => {
+    for (const s of allBuffs) {
+      if (/防御|大防御/.test(s.desc)) expect(kindOf(s), `${s.id}「${s.name}」${s.desc}`).toBe('def')
+    }
+  })
+
+  it('説明文に「攻撃」を含み守勢語(防御/守/護)を含まないバフは atkUp のまま', () => {
+    for (const s of allBuffs) {
+      if (/攻撃/.test(s.desc) && !/防御|守|護/.test(s.desc)) {
+        expect(kindOf(s), `${s.id}「${s.name}」${s.desc}`).toBe('atk')
+      }
+    }
+  })
+
+  it('灯座「巌(いわお)」の全バフは防御バフ(tz_i*)', () => {
+    const iwao = allTozaSkills().filter((s) => s.type === 'buff' && /^tz_i/.test(s.id))
+    expect(iwao.length).toBeGreaterThan(10)
+    for (const s of iwao) expect(kindOf(s), s.id).toBe('def')
+  })
+
+  it('家業「盾(tank)」の全バフは防御バフ', () => {
+    const tankIds = ['touban', 'kabenuri', 'sekimori', 'kakiyui']
+    const tankBuffs = allJobSkills().filter((s) => s.type === 'buff' && tankIds.some((t) => s.id.startsWith(`sk_${t}`)))
+    expect(tankBuffs.length).toBeGreaterThan(10)
+    for (const s of tankBuffs) expect(kindOf(s), s.id).toBe('def')
+  })
+
+  it('代表: 神授の防御/攻撃バフが正しく分かれる', () => {
+    expect(skillById('himamori').buffKind).toBe('def')
+    expect(skillById('g_iwakura').buffKind).toBe('def')
+    expect(skillById('g_minomushi').buffKind).toBe('def')
+    expect(kindOf(skillById('kien'))).toBe('atk')
+    expect(kindOf(skillById('g_noroshi'))).toBe('atk')
+    expect(kindOf(skillById('gs_star2'))).toBe('atk')
   })
 })

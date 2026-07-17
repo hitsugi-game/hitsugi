@@ -339,7 +339,9 @@ export function performAction(st0: BattleState, actorKey: string, action: Battle
         })
       }
     } else if (skill.type === 'buff') {
-      const isDef = skill.id === 'himamori' || skill.id === 'g_iwakura'
+      // M29修正: id白判定を廃し、Skill.buffKind で防御/攻撃を決める(既定=攻撃)。
+      // 旧: himamori/g_iwakura の2idのみdefで、灯座「巌」・家業「盾」等の防御バフが攻撃上昇に化けていた。
+      const isDef = skill.buffKind === 'def'
       for (const t of friends.filter((c) => c.hp > 0)) {
         updateCombatant(t.key, (c) => ({
           ...c,

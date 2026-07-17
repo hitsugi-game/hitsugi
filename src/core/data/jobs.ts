@@ -517,6 +517,9 @@ function skillsOf(seed: JobSeed): Skill[] {
     mpCost: c.mpCost,
     inheritable: false,
     desc: seed.skills[i][1],
+    // M29修正: 盾(tank)役の家業バフは防御バフ(灯番/壁塗/堰守/垣結=守勢の生業・vit軸)。
+    // 他役(癒/支など)のバフは士気・鼓舞寄りのため既定=攻撃上昇のまま。
+    buffKind: c.type === 'buff' ? (seed.role === 'tank' ? 'def' : 'atk') : undefined,
   }))
 }
 
