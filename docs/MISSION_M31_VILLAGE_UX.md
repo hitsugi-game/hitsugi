@@ -12,11 +12,23 @@
 - **B 事件の目的明示** (commit): 事件モーダルにフレーム文(実り/災い・どちらでも進める)+選択肢に「賭け—吉凶あり/確かな道」タグ+必要奉燈。表示のみ(挙動不変)。
 - **C 見世レイアウト是正** (commit): 見世を装備用 `.item-grid`(多列)→ `.consum-list`(1列縦リスト)へ。縦1文字折返しを解消(M28-Cの回帰修正)。
 
-## ④保留/実行中
-- **D 郷デザイン**(村/ホーム/郷普請): sonnet委譲・実行中(agent a7dbafc51dd47a28c)。Home.tsx/Village.tsx/Facilities.tsx+新規CSS後勝ち。village.spec/menu_confirm.spec gate保持が条件。
+- **D 郷デザイン**(commit): ホーム/郷を歩く/郷普請をCSS後勝ちで情報階層+質感向上。村の3寸法契約・郷普請の確認フロー保持。tsc0/lint0/vitest552/village.spec+menu_confirm.spec 20緑を指揮側で再確認。
+- **D+ shell横スクロール是正**(commit): D報告の既存6px横スクロール(.shell-headの全幅margin)をmobileで解除。Facilities 360/390で横スク0を実測。
+
+## ④保留リスト
+(なし)
 
 ## ⑦次の一手
-D回収→検証(tsc/lint/vitest/village.spec/menu_confirm.spec/gate)→commit→統合verify→最終報告。push判断はユーザーへ。
+full playwright(bjvzolfax)緑確認→最終報告→pushはユーザー判断。
+
+## ⑧最終監査表(自己監査)
+| 項目 | 判定 | 証跡 |
+|---|---|---|
+| A 常設オート切替 | ✅ | `.cmd-auto-persist`。auto_stop/battle_input/gate 28緑。全戦闘状態で入切可。 |
+| B 事件の目的明示 | ✅ | フレーム文+吉凶タグ+必要奉燈。build/gate緑(表示のみ)。 |
+| C 見世崩れ是正 | ✅ | item-grid→consum-list。M28-C回帰の修正。 |
+| D 郷デザイン | ✅客観/⚠️主観 | village.spec+menu_confirm.spec 20緑。魅力の主観はユーザー実走で受入。既存6px横スクロールも是正。 |
+| G 統合 | ⏳ | build緑/lint0/vitest552/(full playwright確認中)/index.css非編集/push無し。 |
 
 ## ⑨terminal印
-(未達 — A/B/C適用済・D実行中・統合verify前)
+(full playwright緑の確認後に確定)
