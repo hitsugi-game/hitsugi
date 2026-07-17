@@ -1,13 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { useGame } from './core/store'
 import { audio } from './core/audio'
 import type { TrackName } from './core/audio'
 import { TitleScreen, IntroScreen } from './ui/Title'
 import { HomeScreen } from './ui/Home'
-import { VillageScreen } from './ui/Village'
 import { PactScreen } from './ui/Pact'
 import { DepartScreen, ExpeditionScreen } from './ui/Expedition'
-import { DungeonScreen } from './ui/Dungeon'
 import { BattleScreen } from './ui/Battle'
 import { ChronicleScreen } from './ui/Chronicle'
 import { CodexScreen } from './ui/Codex'
@@ -17,6 +15,11 @@ import { BirthScene, CeremonyScene, DeathScene, DreamScene, DreamEpScene, Ending
 import { SettingsModal } from './ui/Settings'
 import { setToastSink, emitToast, type ToastKind } from './ui/toast'
 import { setSaveTroubleSink, onExternalSaveChange } from './core/save'
+
+// M33: Village/Dungeon は PixiJS(+各engine/renderの重い依存)を引き込む2画面。遅延読込にして
+// Title起動時の初回ダウンロード(単一巨大chunk 約1.78MB)から外す。郷/夜藪へ入るまでpixiはロードされない。
+const VillageScreen = lazy(() => import('./ui/Village').then((m) => ({ default: m.VillageScreen })))
+const DungeonScreen = lazy(() => import('./ui/Dungeon').then((m) => ({ default: m.DungeonScreen })))
 
 // 全画面共通の設定ボタン(⚙)。音量/ミュート/演出軽減/オート既定へアクセス。
 function SettingsButton() {
@@ -206,7 +209,11 @@ function App() {
 
   return (
     <>
-      {view}
+      {/* M33: 遅延読込のVillage/Dungeonがchunkロード中のみfallback。他画面は即描画(suspendしない)。
+          暗い下地でロード状態のちらつきを最小化(playwrightはcanvas可視待ちなので撮影には映らない)。 */}
+      <Suspense fallback={<div style={{ position: 'fixed', inset: 0, background: '#0a0705' }} />}>
+        {view}
+      </Suspense>
       <SettingsButton />
       <Toaster />
       <ConflictBanner />
