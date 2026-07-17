@@ -21,3 +21,76 @@
   font-size: 19px;
   color: var(--el-star, #c9d8f0);
 }
+
+/* ================================================================
+   M26 §7.3: 鍛冶「購う/蔵と装い」master/detail化。
+   一覧札は選択のみ(購入/装備は行わない)。769px以上は右にsticky詳細ペインを常設し、
+   768px以下は選択時に詳細Sheetを開く(§4.3)。 */
+
+/* 一覧+詳細の2カラム。769px以上のみ2カラム、768px以下は一覧のみ(詳細はSheetへ) */
+.forge-md { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, 1fr); gap: 14px; align-items: start; }
+.forge-md-list { min-width: 0; }
+.forge-md-detail { position: sticky; top: 150px; min-width: 0; max-height: calc(100vh - 166px); overflow-y: auto; }
+@media (max-width: 768px) {
+  .forge-md { grid-template-columns: 1fr; }
+}
+
+.forge-detail-empty {
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
+  padding: 24px 8px;
+}
+
+/* 一覧札 — 選択のみ。選択中は選択枠で示す(実行はしない) */
+.forge-list-card.is-sel {
+  border-color: var(--sel);
+  border-width: 2px;
+  background: var(--sel-bg);
+}
+
+/* 一覧札の小さな状態バッジ(装備中/所持数/形見) — 短句+chip程度に抑え、文で積まない */
+.item-owned, .item-equipped-badge {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-left: 4px;
+  white-space: nowrap;
+}
+.item-equipped-badge { color: var(--gold); }
+.item-legacy-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  margin-left: 4px;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+}
+
+/* 比較対象に対する主な差分一つ(§7.3) */
+.item-maindiff { display: inline-block; margin-left: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.item-maindiff.up { color: var(--sel); }
+.item-maindiff.down { color: var(--ember-text); }
+
+/* 詳細面(Sheet/sticky共通) — 大きい絵+全軸+比較+CTA(§7.3「詳細面へ逃がす情報」) */
+.forge-detail { display: flex; flex-direction: column; gap: 6px; }
+.forge-detail-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  object-fit: cover;
+  align-self: center;
+  border: 1px solid var(--panel-border);
+}
+.forge-detail-name { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sub); color: var(--gold); margin: 0; }
+.forge-detail-source { font-size: 12px; color: var(--text-dim); margin: 0; }
+.forge-detail-stats { font-size: 13.5px; margin: 0; }
+.forge-detail-compare { display: flex; flex-direction: column; }
+.forge-detail-owned, .forge-detail-equipped, .forge-detail-target, .forge-detail-price {
+  font-size: 12.5px;
+  margin: 0;
+}
+.forge-detail-target b, .forge-detail-price b { color: var(--amber); font-variant-numeric: tabular-nums; }
