@@ -1112,3 +1112,12 @@
 - **正直申告**: 現実sim botは単純方策で実プレイ全ては代表せず、バランス値は最適解の証明でなく実測に基づく設計判断。手動プレイテスト未実施。
 - **git**: M33を9論理グループでcommit(自己監査区分=git可逆)。**push=公開デプロイはユーザー承認待ち**(未push)。
 - **デプロイ実行**(ユーザー承認「全て今すぐデプロイ」・バランス手動未検証を明示の上): build緑→全10コミットをpush。GitHub Actions run 29624778894 success、https://umine2025.github.io/hitsugi/ 公開反映済み。
+
+## 2026-07-18 (郷マップ Tier1「生きた郷」— 環境アニメ+密度)
+
+- **依頼**: 郷の歩行マップを「本物の街を歩くくらいリッチ」に。ユーザーが3段階のうち Tier1(新規アート不要・既存技術+手続き描画+環境アニメ+密度)を選択。
+- **設計**: 探索(村engine/アセット2並列)+devil無し・Plan agent で確定。plan=~/.claude/plans/elegant-plotting-otter.md。郷は「光の郷」で明るさ維持(暗くしない)、ハブなので軽さ維持。施設アート sc_* は室内/正面のメニュー背景で見下ろしマップ不可 → 手続き描画の詳細化で bg_sato の温かみへ寄せる。
+- **実装(全て `src/village/engine.ts`)**: 層をz順で再構成(ground→gDecal(平面・y-sort非参加)→gWater→mid→gSmoke(normal)→gGlow(add)→gParticles(add))。灯りを配列化し個別位相で呼吸(glowAtにbreathe引数・既存呼び出し無改変)。蛍/火の粉プール(≤24・tickでnew無し)、池の水面グリント+波紋(8Hz)、煙突の煙(normal・暖灰)。手置きプロップ~18個(石灯籠/提灯/井戸/木箱/縄柵/植栽/茅葺き小屋・非衝突)。建物に灯った窓+吊り提灯/門灯。env≤30Hz(モバイル20Hz)・reduceMotion 全対応。
+- **検証**: tsc0/lint0/build緑/playwright(village/perf/sprite_fallback)**35緑**(camScale 56-88px不変・pageerror0・fps liveness>1)。実機スクショで密度/灯り/水面/プロップ/ファサードを目視確認。
+- **スコープ外(Tier2/3)**: 生成facade art・普請Lv/季節反映・データ駆動配置API・前景オクルージョン・徘徊NPC・パララックス・マップ拡張。
+- **git**: ユーザー承認「push してください」で公開デプロイ。
