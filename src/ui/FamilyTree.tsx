@@ -112,6 +112,11 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
         ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* 常に見える固定の戻る導線 — topbar のwrap/端末のノッチ(safe-area)に隠れない位置に浮かせる。
+            全画面modalは backdrop クリックで閉じられない(画面全面を覆うため)ので、この釦とESCが唯一の出口。 */}
+        <button className="btn familytree-close-float" aria-label="家系図を閉じて郷へ戻る" onClick={onClose}>
+          ✕ 閉じる
+        </button>
         <div className="familytree-topbar">
           <h2 className="panel-title familytree-title">家系図</h2>
           <div className="familytree-toolbar">
@@ -140,9 +145,6 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
               📷 一枚絵にして残す
             </button>
           </div>
-          <button className="btn btn-ghost familytree-close" onClick={onClose}>
-            閉じる
-          </button>
         </div>
         <p className="familytree-legend-row" style={{ fontSize: 12, color: 'var(--text-dim)' }}>
           <span className="tree-legend"><i className="tree-legend-swatch human" />人の親</span>

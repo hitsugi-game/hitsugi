@@ -1121,3 +1121,9 @@
 - **検証**: tsc0/lint0/build緑/playwright(village/perf/sprite_fallback)**35緑**(camScale 56-88px不変・pageerror0・fps liveness>1)。実機スクショで密度/灯り/水面/プロップ/ファサードを目視確認。
 - **スコープ外(Tier2/3)**: 生成facade art・普請Lv/季節反映・データ駆動配置API・前景オクルージョン・徘徊NPC・パララックス・マップ拡張。
 - **git**: ユーザー承認「push してください」で公開デプロイ。
+
+## 2026-07-18 (家系図の「戻れない」是正)
+
+- **報告**: 家系図(全画面modal)から元のメニューへ戻る導線が見つからない。
+- **原因/是正**: 閉じるは topbar 内の「閉じる」+ESC+背景クリックだが、(1)全画面modalは背景全面を覆い背景クリック不可、(2)topbarのwrapや端末ノッチ(safe-area未考慮)で「閉じる」が埋もれ/隠れうる、(3)`.modal`の背景がfullscreen変種で効かず半透明に見えHomeが透けて「別画面」と認識されない。→ 常設の固定「✕ 閉じる」(topbar/ノッチに隠れない・44px・aria)を追加、safe-area padding、高詳細度規則で不透明背景を明示、topbarの旧「閉じる」は撤去。
+- **検証**: tsc0/lint0/build緑。回帰テスト `familytree_close.spec` を新設し全5幅で「固定閉じる釦が可視・44px・押下でHomeへ戻る」を固定(5緑)。実機スクショで不透明表示+釦視認を確認(初回の透け見えはscreenInフェード中の撮影アーティファクトと判明)。

@@ -17,11 +17,31 @@
   margin: 0;
   border-radius: 0;
   border-width: 0;
+  /* 全画面は不透明にする — 背後のHomeが透けると「別画面」と認識されず、閉じる導線を探せず
+     「戻れない」錯覚を生む(ユーザー報告の一因)。高詳細度のこの規則で確実に不透明化する。 */
+  background: var(--night);
   display: flex;
   flex-direction: column;
-  padding: 14px 20px 20px;
+  /* ノッチ/セーフエリアを避ける — 全画面fixed modalは safe-area を見ないと topbar と閉じる釦が
+     ステータスバー/ノッチ裏に潜り「戻れない」事故になる。 */
+  padding: max(14px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   overflow: hidden;
 }
+/* 常に見える固定の閉じる導線(topbarのwrapやノッチに隠れない)。ESCと並ぶ唯一確実な出口。 */
+.familytree-close-float {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 5;
+  min-height: 44px;
+  padding: 9px 16px;
+  font-weight: 700;
+  background: rgba(20, 16, 34, 0.94);
+  border: 1px solid var(--gold);
+  color: var(--text);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+.familytree-close-float:hover { background: rgba(40, 32, 60, 0.96); }
 
 /* ---- 上部バー: 画面題+検索+当主へ戻る+存命のみ / 右上に閉じる ---- */
 .familytree-topbar {
@@ -31,6 +51,7 @@
   flex-wrap: wrap;
   flex-shrink: 0;
   margin-bottom: 8px;
+  padding-right: 104px; /* 右上の固定「閉じる」釦と重ならないよう確保 */
 }
 .familytree-title {
   margin: 0;
@@ -57,7 +78,6 @@
 }
 .familytree-search::placeholder { color: var(--text-dim); }
 .familytree-search:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-.familytree-close { flex-shrink: 0; margin-left: auto; }
 
 .familytree-legend-row { flex-shrink: 0; margin: 0 0 10px; }
 
@@ -90,9 +110,10 @@
 
 /* ---- スマホ: バーを縦積みにして操作域を確保 ---- */
 @media (max-width: 560px) {
-  .familytree-modal.familytree-fullscreen { padding: 10px 12px 14px; }
-  .familytree-topbar { flex-direction: column; align-items: stretch; }
+  .familytree-modal.familytree-fullscreen {
+    padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+  .familytree-topbar { flex-direction: column; align-items: stretch; padding-right: 0; }
   .familytree-toolbar { order: 2; }
-  .familytree-close { order: 1; align-self: flex-end; margin-left: 0; }
   .familytree-search { flex: 1 1 100%; }
 }
