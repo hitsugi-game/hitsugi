@@ -1,16 +1,16 @@
-# 開発ステータス(2026-07-20 更新)
+# 開発ステータス(2026-07-21 更新)
 
 **v3.1目標にほぼ到達**: 神180柱・敵147基礎+変異(_w/_o)・装備810・辞世1370・事件270・地域40・画像2107枚。**キャラアニメ強化**(呼吸2重/lunge3段/victoryJump段階化/待機時歩行コマ循環)完了。**変異絵promptEn 147基礎種全カバー**(nova誤読対策の英語外見記述、変異は自動継承)。
 
 ## 🎉 リリース済み・稼働中
 
-- **公開URL**: https://hitsugi-game.github.io/hitsugi/ (2026-07-20 HTTP 200確認、GitHub Pages、`main`へpushで自動デプロイ)
+- **公開URL**: https://hitsugi-game.github.io/hitsugi/ (2026-07-21 M34配信をHTTP 200・実bundle・OGP・夢CGで確認)
 - **リポジトリ**: https://github.com/hitsugi-game/hitsugi (public、`UmiNe2025`からOrganizationへ移管済み)
 - **v0.1.0 タグ**: https://github.com/hitsugi-game/hitsugi/releases/tag/v0.1.0
-- **公開HEAD**: `478be96241124aa5c530acac2b768c8e1d9a7824`。ローカルHEAD/new origin HEAD一致。旧Pages URLは404。
-- **次の実装単位**: M34は独立監査完了。ユーザー承認後にcommit/pushし、その後`docs/CODEX_MASTERPLAN_DRAFT.md`のPhase 0へ進む。
+- **M34公開実装HEAD**: `f144505c5a70e784fb2e8a7980b3469e0fb2dd77`（実装`0bd19ec`＋設計/導線`f144505`）。GitHub Actions run `29777998428`成功。旧Pages URLは404。
+- **次の実装単位**: `docs/CODEX_MASTERPLAN_DRAFT.md`のUI Phase 0へ進む。
 - **UI v2基準画像（実装前）**: `docs/visuals/ui-v2/`にHome・戦闘・Dungeon・郷・鍛冶の5点とmanifestを追加。Phase 0のlayout合格後、画面別に採用・分解・性能検証する。配信コードへの組込みは未実施。
-- **M34物語・画像統合（ローカル実装・検証完了、未公開）**: 夢順序/永続scene queue/汐里名開示migration、Home「灯の余白」と章・夢の進行不変再読/7日一度通知、出立〜郷の短い残響、形見/家系図/Finale個人化、匿名体験集計、夢固有CG7点を実装。夢3は疑似文字を除去。Vitest 616、M34 E2E全5幅40＋最終影響範囲15、全既存spec PC/390px代表回帰91合格・1意図的skip。commit/pushは未実施。
+- **M34物語・画像統合（公開済み）**: 夢順序/永続scene queue/汐里名開示migration、Home「灯の余白」と章・夢の進行不変再読/7日一度通知、出立〜郷の短い残響、形見/家系図/Finale個人化、匿名体験集計、夢固有CG7点を実装。夢3は疑似文字を除去。Vitest 618、M34 E2E全5幅40＋最終影響範囲15、全既存spec PC/390px代表回帰91合格・1意図的skip。Ship Checkはblocking 0、run `29777998428`で公開済み。
 
 ## 直近のマイルストーン(v3.1 M13以降)
 
@@ -49,12 +49,11 @@
 
 ## ユーザー承認が必要な残作業
 
-1. **M34のcommit/push** — ローカル実装の独立監査後に判断。pushは公開デプロイのためユーザーの明示承認が必要。
-2. **UI再設計Phase 0の実装と検収** — 現在は計画・before証拠のみ。
-3. **X告知**: `docs/MARKETING.md` の文面をコピペ投稿。
-4. **itch.io登録**: 英語ストア文面も同ファイルに用意済み。
-5. **フリーゲームポータル登録**(ふりーむ!等)。
-6. アクセス解析の導入判断(GoatCounter等)。
+1. **UI再設計Phase 0の実装と検収** — 現在は計画・before証拠のみ。
+2. **X告知**: `docs/MARKETING.md` の文面をコピペ投稿。
+3. **itch.io登録**: 英語ストア文面も同ファイルに用意済み。
+4. **フリーゲームポータル登録**(ふりーむ!等)。
+5. アクセス解析の導入判断(GoatCounter等)。
 
 ## 既知の残タスク(次期候補)
 

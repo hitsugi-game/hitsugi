@@ -32,18 +32,15 @@ Claude Codeは次の順に読む。
 - 夢渡り弐〜終の固有CG7点を`public/img/cg_dream_02.jpg`〜`08.jpg`へ組み込み、16:9 `contain`、alt、fallback、次篇1枚preloadを実装した。
 - `nextDreamEpisode()`の順序抜け、同一月scene過密、ch4名開示、legacy/post-M34 save、途中reloadをN0で修正し、Home「灯の余白」の後で読む/再読/7日一度通知まで実装した。
 - M34 packは独立Forge Round 4でPASS（家族5/謎5/世代5/快適4/画像4、blocking 0）。ch4最終頁だけの汐里名開示、M34/legacy save判別sentinel、`cut`表示`送る`、mobile 16:9全景が実装必須。詳細台帳は`docs/CODEX_FORGE_STATE.md`。
-- M34のゲームコード、テスト、固有CG、正典同期をローカル実装し、独立監査PASS（blocking 0）。現役導線のhardcoded URLも`hitsugi-game`へ修正した。2026-07-21にユーザーがデプロイを明示承認し、Ship Check後のcommit/pushを進行中。
+- M34のゲームコード、テスト、固有CG、正典同期を実装し、独立監査PASS（blocking 0）。現役導線のhardcoded URLも`hitsugi-game`へ修正した。2026-07-21にShip Checkを通し、GitHub Actions run `29777998428`で公開、HTML/実bundle/OGP/夢CGのHTTP 200まで確認した。
 
 ### 2. 未完了と次アクション
 
-最初にM34をcommit/pushし、GitHub Actionsと公開URLを検証する。その後、`docs/CODEX_MASTERPLAN_DRAFT.md`のUI Phase 0へ進む。
+M34の公開は完了。次は`docs/CODEX_MASTERPLAN_DRAFT.md`のUI Phase 0へ進む。
 
-1. Ship Checkの全gateを通し、`tmp/`を除くM34/設計/URL同期の対象pathだけをstageする。
-2. `main`へpushし、`.github/workflows/deploy.yml`のbuild/deploy成功と新URLのHTTP/画面/OGPを実測する。
-3. 成功後にSTATUS/WORKLOG/MISSION/HANDOFFを公開済みへ閉じる。
-4. UI Phase 0として、Homeのモバイル横overflow、戦闘上端競合、郷のD-pad/「話す」競合を修正する。
-5. `docs/qa/ui-audit-baseline-20260720.md`と同一fixture/viewportでafter証拠を保存し、P0 smokeをblocking CIへ追加する。
-6. Phase 0のexit gateが全てPASSした後だけPhase 1へ進む。
+1. UI Phase 0として、Homeのモバイル横overflow、戦闘上端競合、郷のD-pad/「話す」競合を修正する。
+2. `docs/qa/ui-audit-baseline-20260720.md`と同一fixture/viewportでafter証拠を保存し、P0 smokeをblocking CIへ追加する。
+3. Phase 0のexit gateが全てPASSした後だけPhase 1へ進む。
 7. 画像は`docs/visuals/ui-v2/`から採用対象だけを配信用pathへcopyし、画面別lazy load、solid fallback、mobile crop、文字コントラスト、LCPを検証する。5枚を初期preloadしない。
 8. Home/戦闘/鍛冶は1画面ずつ統合する。Dungeon/郷は画像の直貼りではなく固有layerの設計参照として実装する。
 9. 物語laneは`N0順序/queue/開示/migration → N1夢CG → N2主要旅程の残響 → N3家譜/Finale`の順。N0で`m34_narrative_schema`、ch4最終頁の原子的開示、legacy一度導出、post-M34未完読reloadまで通し、合格前に画像だけを組み込まない。

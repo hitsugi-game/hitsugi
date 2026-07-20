@@ -1143,6 +1143,7 @@
 - **画像**: `cg_dream_02.jpg`〜`08.jpg`を配信素材へ採用。16:9 `contain`、60〜90字alt、fallback、次篇1枚だけのidle preload。夢3は人物・構図を保持して左端の疑似文字だけをbuilt-in image editで除去し、正典/hashを更新。
 - **N4匿名集計**: scene開封/完読/skip/後回し/滞在時間、未読最大数、月送り/直後中断をsave内へ集計。外部送信・本文保存はしない。
 - **快適性補完**: 独立監査の非阻害メモを受け、章・夢だけを進行/計測不変で再読するarchive、初期6件＋残件展開、未読が実時間7日残った時だけ一度出る非modal通知を追加。日常lifeがarchiveを埋めないunitも固定した。
-- **検証**: Vitest 616件。M34直接Playwright 40/40（全5幅）、最終補完の影響範囲15/15（全5幅）。全20 visual specのPC 1280px/390px代表回帰91合格・1件意図的skip。lint/build/diff-check成功。全230件/代表2幅の再一括は実行上限内に終わらなかったため、変更範囲を全5幅で完走し、既存の代表回帰証拠と組み合わせた。
+- **検証**: Vitest 618件。M34直接Playwright 40/40（全5幅）、最終補完の影響範囲15/15（全5幅）。全20 visual specのPC 1280px/390px代表回帰91合格・1件意図的skip。lint/build/diff-check成功。全230件/代表2幅の再一括は実行上限内に終わらなかったため、変更範囲を全5幅で完走し、既存の代表回帰証拠と組み合わせた。
 - **独立監査**: fresh agent最終**PASS / blocking 0**。初回の非阻害メモから再読/7日通知を補完し、再監査で見つかった日常lifeによるarchive圧迫を章・夢限定＋6件/残件展開へ修正。独立focused 55/55、mobile-360 E2E、diff-checkも再合格。
-- **公開境界**: commit、push、deployは未実施。`main` pushは公開デプロイなのでユーザー承認待ち。
+- **Ship Check / save硬化**: ユーザーのデプロイ承認後、機械gate、秘密情報、依存、セキュリティ、独立リリースレビューを実施。破損した手動importの`narrative`入れ子と`lastReturn/resonance/metrics`を境界検証し、main正規化失敗時もBAKへ退避する回帰を追加。最終判定は**SHIP-with-notes / blocking 0**。
+- **デプロイ実行**: 実装commit `0bd19ec`、設計/URL導線commit `f144505`を`origin/main`へpush。GitHub Actions `Deploy to GitHub Pages` run `29777998428`が成功（build 58s / deploy 15s）。`https://hitsugi-game.github.io/hitsugi/`のHTML/実bundle/OGP/夢3 CGをcache-bust付きHTTP 200で確認し、bundle内の「灯の余白」「家譜に綴じた物語」も確認した。

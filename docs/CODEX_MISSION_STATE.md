@@ -35,16 +35,17 @@
 - N2実装: Home「今月の物語」「灯の余白」、出立の問い、Dungeon入場、主の願い、勝利鎮魂、帰還三痕、郷の実NPC会話を接続。追加の操作停止sceneは0。
 - N3実装: 一代の問い、形見の最初の持ち主/戦果/辞世、家系図、Finaleの実save由来最大3件・非誘導resonance・同格三択・結末固有1文を接続。
 - N4実装: scene開封/完読/skip/後回し/時間、未読最大数、月送り/中断を外部送信なしでsaveへ匿名集計。旧saveは0初期値で移行する。
-- 最終直接検証: Vitest 23 files / 616 tests、lint、production build、diff-check成功。M34直接Playwrightは全5幅40/40、最終補完の影響範囲15/15。全20 visual specはPC 1280px/390px代表幅で91合格・1意図的skip。
+- 最終直接検証: Vitest 23 files / 618 tests、lint、production build、diff-check成功。M34直接Playwrightは全5幅40/40、最終補完の影響範囲15/15。全20 visual specはPC 1280px/390px代表幅で91合格・1意図的skip。
+- 出荷完了: ユーザーの2026-07-21明示承認後、Ship Checkで破損import/BAK経路を硬化。実装`0bd19ec`＋設計/導線`f144505`をpushし、GitHub Actions run `29777998428`成功。公開HTML、実bundle、OGP、夢3 CGをHTTP 200で確認。
 - 全230 visual testの一括実行は実行上限内に終わらなかったため、M34必須3specを全5幅、全20specを代表2幅へ分割して完走した。
 
 ## ④保留リスト
 
-- なし。push/公開は契約外として実施しない。
+- なし。実装・監査・公開まで完了。
 
 ## ⑤質問キュー
 
-- 非緊急: 実装完了後にcommit/pushするかは、最終結果を提示してから確認する。
+- 解決済み: ユーザーがデプロイを明示承認し、公開確認まで完了。
 
 ## ⑥マイルストーン履歴
 
@@ -58,7 +59,7 @@
 
 ## ⑦次の一手
 
-ユーザーがcommit/pushを明示するまで、検証済みのローカル状態を保持する。pushは公開デプロイなので自動実施しない。
+M34は完了。次は`docs/CODEX_MASTERPLAN_DRAFT.md`のUI Phase 0を別missionとして開始する。
 
 ## ⑧最終監査表
 
@@ -70,8 +71,9 @@
 | N1 固有CG/mobile/fallback | ✅ | JPEG 7点/hash一致、M34 Playwright全5幅35件の一部で全景/fallback/1枚preload合格 |
 | N2 主要旅程の残響 | ✅ | `narrative_journey_m34.test.ts`、代表幅全visual spec回帰91合格・1意図的skip |
 | N3 家族史/三結末 | ✅ | unit branch契約、Finale Playwright全5幅で同格三択/固有名/scroll到達合格 |
-| N4 A11y/性能/回帰 | ✅ | Vitest 616、lint/build/diff-check、M34全5幅40＋最終影響範囲15、全spec代表2幅91+1skip |
+| N4 A11y/性能/回帰 | ✅ | Vitest 618、lint/build/diff-check、M34全5幅40＋最終影響範囲15、全spec代表2幅91+1skip |
 | 独立監査 | ✅ | fresh agent最終PASS。再読archiveの限定修正後、focused 55/55、mobile-360 E2E、diff-checkを独立再確認。blocking 0 |
+| Ship Check / 公開 | ✅ | セキュリティ・リリース独立レビューblocking 0、run `29777998428`成功、公開資産HTTP 200 |
 
 ## ⑨terminal印
 

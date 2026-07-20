@@ -1,7 +1,7 @@
 # 灯継ぎ -HITSUGI- 物語・画像統合計画
 
 - 作成日: 2026-07-20
-- 状態: **N0〜N4ローカル実装・検証完了**。commit/push/公開は未実施
+- 状態: **N0〜N4実装・検証・公開完了**（2026-07-21、GitHub Actions run `29777998428`）
 - 正典: `docs/GDD_v3.md`、`src/core/data/story.ts`、`src/core/data/dreams.ts`、`src/core/data/gossip.ts`、`src/core/data/lore.ts`
 - 画像正本: `docs/visuals/story-v2/README.md`
 - 実装担当: Codex mission（Claude Code / Fable 5へ同じrepo状態で引継ぎ可能）
@@ -505,9 +505,10 @@ Exit:
 - N2: Home、出立、Dungeon入場、主戦、勝利、帰還、郷人へ同じ土地の問いを短文で接続。追加の操作停止sceneは増やしていない。
 - N3: 一代の問い、形見の最初の持ち主、帰還三痕、家族史最大3件、非誘導resonance、三結末固有の一文を実装。三択は常に同順・同class・全enabled。
 - N4: 外部送信しない匿名集計と、keyboard/alt/reduced-motion/1枚preload契約を実装・検証。
-- 証拠: Vitest 616件、M34直接Playwright 40件と最終影響範囲15件（1440/1280/768/390/360px）、全20 visual specのPC 1280px/390px代表回帰91件合格・1件意図的skip、`npm run lint`、`npm run build`、`git diff --check`成功。
+- 証拠: Vitest 618件、M34直接Playwright 40件と最終影響範囲15件（1440/1280/768/390/360px）、全20 visual specのPC 1280px/390px代表回帰91件合格・1件意図的skip、`npm run lint`、`npm run build`、`git diff --check`成功。
 - `NAR-GATE-09`の初見理解4/5と`NAR-GATE-10`の採用前後LCP p75比較は、コードで偽装せず、公開候補版を用いた実ユーザー/実機計測で閉じる運用gateとする。今回のローカル実装では意味保持task、preload上限、bundle/buildを直接検証した。
 - 最終独立監査: **PASS / blocking 0**。再読archiveを章・夢だけへ限定し、初期6件＋残件展開で全13件へ到達可能にした限定修正後、save互換、二重計上防止、7日一度通知を再確認した。
+- 出荷監査: **SHIP-with-notes / blocking 0**。破損`narrative` importの入れ子検証とmain正規化失敗時のBAK fallbackを追加後、セキュリティ/リリース独立レビューに合格。公開bundle、OGP、夢CGをHTTP 200で確認した。
 
 ## 12. 受入ルーブリック
 
