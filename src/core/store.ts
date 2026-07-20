@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type {
-  BattleLogEntry, BattleState, Character, Combatant, Element, GameData, Item, MottoId, Screen,
+  BattleLogEntry, BattleState, Character, Combatant, Element, GameData, Item, MottoId, NarrativeScene, Screen,
 } from './types'
 import type { BattleAction } from './battle'
 import { consumableById } from './data/consumables'
@@ -42,21 +42,18 @@ import { tozaOf } from './data/toza'
 import { jobById, JOB_SKILL_UNLOCK_AGES } from './data/jobs'
 import { hatsujinScene, kizunaScene, hosoriScene, dailyScene } from './lifeEvents'
 import { nextGossip } from './data/gossip'
-import { nextDreamEpisode } from './data/dreams'
+import { DREAM_EPISODES, nextDreamEpisode } from './data/dreams'
+import {
+  addResonance, generationQuestion, isReplayableNarrativeScene, legacyShioriRecap, migrateM34Narrative,
+  narrativeSceneId, partitionNarrativeScenes, recoverNarrativeOnLoad, uniqueScenes,
+} from './narrative'
 import {
   classifySpecialEncounter, createRareEncounter, rareVictoryFlag, rareVictoryLog,
   specialShadeUsedKey, type RareEncounter,
 } from './rare_encounters'
 
 // UIへ流す演出イベント(誕生・死亡は順に画面表示)
-type PendingScene =
-  | { kind: 'birth'; charId: string }
-  | { kind: 'death'; charId: string }
-  | { kind: 'ceremony'; charId: string }
-  | { kind: 'jobrite'; charId: string } // 生業の儀(月齢12)
-  | { kind: 'dream' }
-  | { kind: 'dreamEp'; epId: string } // 夢渡りの連作(data/dreams.ts) — 看取りが深めた夢
-  | { kind: 'life'; title: string; lines: { speaker: string; text: string }[]; bg?: string }
+type PendingScene = NarrativeScene
 
 interface GameStore {
   screen: Screen
@@ -88,6 +85,13 @@ interface GameStore {
   dungeonIntroSeen: () => void
   setScreen: (s: Screen) => void
   processNextScene: () => void
+  skipCurrentScene: () => void
+  deferCurrentScene: () => void
+  openDeferredScene: (sceneId: string) => void
+  replayNarrativeScene: (sceneId: string) => void
+  consumeDeferredReminder: () => NarrativeScene | null
+  revealShioriName: (skipped?: boolean) => void
+  consumeLegacyShioriRecap: () => string | null
 
   // 郷での行動(いずれも1季を消費)
   doPact: (parentId: string, godId: string) => void
@@ -176,12 +180,149 @@ export const useGame = create<GameStore>((set, get) => {
     chronicle: [...d.chronicle, { season: d.seasonIndex, kind, text, charId }],
   })
 
+  const withNarrative = (d: GameData): GameData => migrateM34Narrative(d)
+
+  const elapsedSceneMs = (startedAt: number | undefined): number =>
+    startedAt === undefined ? 0 : Math.min(30 * 60 * 1000, Math.max(0, Date.now() - startedAt))
+
+  const sceneToScreen = (scene: PendingScene): Screen =>
+    scene.kind === 'birth'
+      ? { id: 'birth', charId: scene.charId }
+      : scene.kind === 'death'
+        ? { id: 'death', charId: scene.charId }
+        : scene.kind === 'ceremony'
+          ? { id: 'ceremony', charId: scene.charId }
+          : scene.kind === 'jobrite'
+            ? { id: 'jobrite', charId: scene.charId }
+            : scene.kind === 'life'
+              ? { id: 'life', title: scene.title, lines: scene.lines, bg: scene.bg, narrativeId: scene.narrativeId }
+              : scene.kind === 'dreamEp'
+                ? { id: 'dreamEp', epId: scene.epId }
+                : { id: 'dream' }
+
+  const isResolvedScene = (d: GameData, scene: PendingScene): boolean => {
+    const nd = withNarrative(d)
+    const id = narrativeSceneId(scene)
+    return nd.narrative!.completed.includes(id)
+  }
+
+  // 同月の強制全画面は優先度順の1件だけ。残りは消さず「灯の余白」へ保存する。
+  const partitionScenes = (d0: GameData, candidates: PendingScene[]): { data: GameData; primary: PendingScene | null } => {
+    let d = withNarrative(d0)
+    const n = d.narrative!
+    const normalized = candidates.map((scene, index): PendingScene =>
+      scene.kind === 'life' && !scene.narrativeId
+        ? { ...scene, narrativeId: `life:${d.seasonIndex}:${index}:${scene.title}` }
+        : scene,
+    )
+    const partition = partitionNarrativeScenes(n, normalized)
+    const deferredAt = Date.now()
+    const deferredSince = Object.fromEntries(partition.deferred.map((scene) => {
+      const id = narrativeSceneId(scene)
+      return [id, n.deferredSince[id] ?? deferredAt]
+    }))
+    d = {
+      ...d,
+      narrative: {
+        ...n,
+        queued: partition.queued,
+        deferred: partition.deferred,
+        deferredSince,
+        monthTransitionPending: true,
+        metrics: {
+          ...n.metrics,
+          monthsAdvanced: n.metrics.monthsAdvanced + 1,
+          maxDeferred: Math.max(n.metrics.maxDeferred, partition.deferred.length),
+        },
+      },
+    }
+    return { data: d, primary: partition.primary }
+  }
+
+  const markSceneResolved = (d0: GameData, scene: PendingScene, skipped: boolean): GameData => {
+    let d = withNarrative(d0)
+    const id = narrativeSceneId(scene)
+    const n = d.narrative!
+    if (n.completed.includes(id)) {
+      // ch4は最終頁へ入るtransactionで完了flagも原子的に立つため、直後の「読み終える」は
+      // completed済みに見える。それでも同じsceneがactiveな閉じ処理だけは一度計測する。
+      const closingActive = !!n.active && narrativeSceneId(n.active) === id
+      const closingReplay = closingActive && !!n.activeReplay
+      const deferredSince = { ...n.deferredSince }
+      delete deferredSince[id]
+      return {
+        ...d,
+        narrative: {
+          ...n,
+          active: undefined,
+          activeOpenedAt: undefined,
+          activeReplay: undefined,
+          monthTransitionPending: false,
+          seen: [...new Set([...n.seen, id])],
+          queued: n.queued.filter((x) => x !== id),
+          deferred: n.deferred.filter((x) => narrativeSceneId(x) !== id),
+          deferredSince,
+          metrics: closingActive && !closingReplay
+            ? {
+                ...n.metrics,
+                totalSceneMs: n.metrics.totalSceneMs + elapsedSceneMs(n.activeOpenedAt),
+                scenesSkipped: n.metrics.scenesSkipped + (skipped ? 1 : 0),
+                scenesCompleted: n.metrics.scenesCompleted + (skipped ? 0 : 1),
+              }
+            : n.metrics,
+        },
+      }
+    }
+    const flags = { ...d.flags }
+    let recap: string | null = null
+    if (scene.kind === 'dream') {
+      flags.dreamSeen = true
+      recap = '名の擦れた家祖らしき楽士が夢に現れ、頂で待つと告げた。'
+    } else if (scene.kind === 'dreamEp') {
+      flags[`dreamEp_${scene.epId}`] = true
+      const ep = DREAM_EPISODES.find((x) => x.id === scene.epId)
+      recap = ep ? `夢渡り「${ep.title}」を${skipped ? '家譜の要約で受け取った' : '見届けた'}。` : null
+    } else if (scene.kind === 'life' && scene.narrativeId?.startsWith('ch')) {
+      flags[`${scene.narrativeId}_completed`] = true
+      recap = `【${scene.title}】を${skipped ? '要約で受け取り' : '読み終え'}、家譜へ綴じた。`
+    }
+    d = {
+      ...d,
+      flags,
+      narrative: {
+        ...n,
+        stage: n.stage,
+        active: undefined,
+        activeOpenedAt: undefined,
+        activeReplay: undefined,
+        monthTransitionPending: false,
+        seen: [...new Set([...n.seen, id])],
+        completed: [...new Set([...n.completed, id])],
+        archive: isReplayableNarrativeScene(scene) ? uniqueScenes([scene, ...n.archive]) : n.archive,
+        queued: n.queued.filter((x) => x !== id),
+        deferred: n.deferred.filter((x) => narrativeSceneId(x) !== id),
+        deferredSince: Object.fromEntries(Object.entries(n.deferredSince).filter(([sceneId]) => sceneId !== id)),
+        metrics: {
+          ...n.metrics,
+          totalSceneMs: n.metrics.totalSceneMs + elapsedSceneMs(n.activeOpenedAt),
+          scenesSkipped: n.metrics.scenesSkipped + (skipped ? 1 : 0),
+          scenesCompleted: n.metrics.scenesCompleted + (skipped ? 0 : 1),
+        },
+      },
+    }
+    d = { ...d, narrative: { ...d.narrative!, stage: migrateM34Narrative(d).narrative!.stage } }
+    if (skipped && recap) d = chronicle(d, 'event', recap)
+    return d
+  }
+
   // v3.1 M16-3: 郷の物語(会話キュー) — 死/代替わり/帰還のたび、一本だけ解禁を試みる
   const tryUnlockGossip = (d: GameData): GameData => {
     const gen = Math.max(0, ...d.family.map((c) => c.gen))
     const deaths = d.family.filter((c) => !c.alive).length
     const cleared = d.regionsCleared.length
-    const entry = nextGossip(d.gossipIndex, { gen, deaths, cleared })
+    const entry = nextGossip(d.gossipIndex, {
+      gen, deaths, cleared, revealShioriName: !!d.flags.reveal_shiori_name,
+    })
     if (!entry) return d
     let nd: GameData = { ...d, gossipIndex: (d.gossipIndex ?? 0) + 1 }
     nd = chronicle(nd, 'era', `郷の声 — ${entry.speaker}「${entry.text}」`)
@@ -235,8 +376,8 @@ export const useGame = create<GameStore>((set, get) => {
   // 季節を進める — 誕生と死(寿命)をここで処理
   const advanceSeason = (): void => {
     const rng = get().rng
-    const scenes: PendingScene[] = []
-    let d = get().data!
+    const scenes: PendingScene[] = [...get().pendingScenes]
+    let d = withNarrative(get().data!)
     d = { ...d, seasonIndex: d.seasonIndex + 1 }
 
     // 誕生 — v3.1 M12: 縁の加護(下振れ緩和)/隔世遺伝/稀に双子
@@ -311,11 +452,15 @@ export const useGame = create<GameStore>((set, get) => {
         .filter((c) => c.alive)
         .sort((a, b) => a.bornSeason - b.bornSeason)[0]
       if (successor) {
+        const question = generationQuestion(d)
         d = {
           ...d,
           family: d.family.map((x) => (x.id === successor.id ? { ...x, isHead: true, deeds: [...x.deeds, '当主を継いだ'] } : x)),
         }
+        d = addResonance(d, 'inherit')
+        d = { ...d, narrative: { ...d.narrative!, generationQuestion: question } }
         d = chronicle(d, 'era', `${successor.name}、第${successor.gen}代当主を継ぐ。`)
+        d = chronicle(d, 'era', `今代の問い — ${question}`)
         d = tryUnlockGossip(d)
         // M17: 継承を一場面として見せる(cg2_succession — 未生成なら文字だけで成立)
         scenes.push({
@@ -375,23 +520,21 @@ export const useGame = create<GameStore>((set, get) => {
     }
 
     // 本編の章(v3.1 M15-4) — 条件を満たした月に一度だけ語られる
-    if (scenes.length === 0) {
-      const chapterDue = CHAPTERS.find((ch) => {
-        if (d.flags[ch.id]) return false
-        switch (ch.id) {
-          case 'ch1': return d.seasonIndex >= 2
-          case 'ch2': return d.regionsCleared.length >= 1
-          case 'ch3': return d.regionsCleared.length >= 5
-          case 'ch4': return (d.loreFrags?.['akashi_miyama'] ?? 0) >= 3 || d.regionsCleared.length >= 10
-          case 'ch5': return d.fame >= FAME_SEAL_THRESHOLD
-          default: return false
-        }
-      })
-      if (chapterDue) {
-        d = { ...d, flags: { ...d.flags, [chapterDue.id]: true } }
-        d = chronicle(d, 'era', `【${chapterDue.title}】語り継がれる千年の真実が、一つ明らかになった。`)
-        scenes.push({ kind: 'life', title: chapterDue.title, lines: chapterDue.lines })
+    const chapterDue = CHAPTERS.find((ch) => {
+      if (d.flags[ch.id]) return false
+      switch (ch.id) {
+        case 'ch1': return d.seasonIndex >= 2
+        case 'ch2': return d.regionsCleared.length >= 1
+        case 'ch3': return d.regionsCleared.length >= 5
+        case 'ch4': return (d.loreFrags?.['akashi_miyama'] ?? 0) >= 3 || d.regionsCleared.length >= 10
+        case 'ch5': return d.fame >= FAME_SEAL_THRESHOLD
+        default: return false
       }
+    })
+    if (chapterDue) {
+      d = { ...d, flags: { ...d.flags, [chapterDue.id]: true } }
+      d = chronicle(d, 'era', `【${chapterDue.title}】語り継がれる千年の真実が、一つ明らかになった。`)
+      scenes.push({ kind: 'life', narrativeId: chapterDue.id, title: chapterDue.title, lines: chapterDue.lines })
     }
 
     // 灯座の深まり — 月齢で固有技が開く(10月・14月・18月=奥義)
@@ -450,29 +593,35 @@ export const useGame = create<GameStore>((set, get) => {
       }
     }
 
-    // 夢渡り — 星骸の谷を制した夜、当主の夢に家祖が現れる
-    if (d.regionsCleared.includes('hoshimukuro_tani') && !d.flags.dreamSeen) {
-      d = { ...d, flags: { ...d.flags, dreamSeen: true } }
-      d = chronicle(d, 'event', '当主、不思議な夢を見る。目覚めた頬に、涙の痕。')
-      scenes.push({ kind: 'dream' })
+    // 夢渡り — 最初の看取り、または星骸の谷を制した早い方で入口が開く。
+    // 既読flagはqueue時でなく完読/skip時に立てるため、途中離脱でも失わない。
+    const deaths = d.family.filter((c) => !c.alive).length
+    if ((deaths >= 1 || d.regionsCleared.includes('hoshimukuro_tani')) && !d.flags.dreamSeen) {
+      const intro: PendingScene = { kind: 'dream' }
+      if (!isResolvedScene(d, intro)) scenes.push(intro)
     } else {
       // 夢渡りの連作 — 看取りの数だけ、千年前の記憶へ深く招かれる(1季に一篇まで)
       const ep = nextDreamEpisode(d)
       if (ep) {
-        d = { ...d, flags: { ...d.flags, [`dreamEp_${ep.id}`]: true } }
-        d = chronicle(d, 'event', `当主、深い夢を見る。——「${ep.title}」が家譜の余白に記された。`)
         scenes.push({ kind: 'dreamEp', epId: ep.id })
       }
     }
 
     // 血脈断絶チェック
     const extinct = !d.family.some((c) => c.alive) && d.pendingBirths.length === 0
-    d = { ...d, seed: rng.state() }
+    const partitioned = partitionScenes({ ...d, seed: rng.state() }, scenes)
+    d = partitioned.data
     saveGame(d)
-    set({ data: d, pendingScenes: [...get().pendingScenes, ...scenes] })
+    set({ data: d, pendingScenes: partitioned.primary ? [partitioned.primary] : [] })
 
     if (extinct) {
-      set({ screen: { id: 'ending' }, data: { ...d, flags: { ...d.flags, extinct: true } } })
+      const ended: GameData = {
+        ...d,
+        flags: { ...d.flags, extinct: true },
+        narrative: { ...d.narrative!, monthTransitionPending: false },
+      }
+      set({ screen: { id: 'ending' }, data: ended, pendingScenes: [] })
+      saveGame(ended)
       return
     }
     get().processNextScene()
@@ -538,10 +687,11 @@ export const useGame = create<GameStore>((set, get) => {
         regionsCleared: [],
         chronicle: [],
         pendingBirths: [],
-        flags: {},
+        flags: { m34_narrative_schema: 1 },
         narrativeMode,
         seed: rng.state(),
       }
+      d = withNarrative(d)
       d = chronicle(d, 'era', `${seasonLabel(0)}。燈守家最後の血脈・燈吾、大燈籠の前に立つ。残る命、五季(十五月)。`)
       set({
         data: d, rng, screen: { id: 'intro' }, pendingScenes: [], battle: null, battleNodeId: null,
@@ -586,7 +736,7 @@ export const useGame = create<GameStore>((set, get) => {
       const d = loadGame()
       if (!d) return false
       // v3.1 M16-8: 留守番内職 — 離れていた実時間ぶん、家族が内職をしていた(1時間4燈・上限24時間)
-      let nd: GameData = { ...d, expedition: undefined }
+      let nd: GameData = recoverNarrativeOnLoad({ ...d, expedition: undefined })
       if (d.lastPlayedAt) {
         const hours = Math.min(24, (Date.now() - d.lastPlayedAt) / 3_600_000)
         if (hours >= 1) {
@@ -700,29 +850,186 @@ export const useGame = create<GameStore>((set, get) => {
     setScreen: (s) => set({ screen: s }),
 
     processNextScene: () => {
+      const currentData = get().data
+      const active = currentData?.narrative?.active
+      if (currentData && active) {
+        const nd = markSceneResolved(currentData, active, false)
+        set({ data: nd, pendingScenes: [], screen: { id: 'home' } })
+        saveGame(nd)
+        return
+      }
       const scenes = get().pendingScenes
       if (scenes.length === 0) {
-        set({ screen: { id: 'home' } })
+        const d = get().data
+        if (d?.narrative?.monthTransitionPending) {
+          const nd = { ...d, narrative: { ...d.narrative, monthTransitionPending: false } }
+          set({ data: nd, screen: { id: 'home' } })
+          saveGame(nd)
+        } else set({ screen: { id: 'home' } })
         return
       }
       const [next, ...rest] = scenes
-      set({
-        pendingScenes: rest,
-        screen:
-          next.kind === 'birth'
-            ? { id: 'birth', charId: next.charId }
-            : next.kind === 'death'
-              ? { id: 'death', charId: next.charId }
-              : next.kind === 'ceremony'
-                ? { id: 'ceremony', charId: next.charId }
-                : next.kind === 'jobrite'
-                  ? { id: 'jobrite', charId: next.charId }
-                  : next.kind === 'life'
-                    ? { id: 'life', title: next.title, lines: next.lines, bg: next.bg }
-                    : next.kind === 'dreamEp'
-                      ? { id: 'dreamEp', epId: next.epId }
-                      : { id: 'dream' },
+      const d = get().data
+      if (!d) return
+      const migrated = withNarrative(d)
+      const id = narrativeSceneId(next)
+      const n = migrated.narrative!
+      const nd: GameData = {
+        ...migrated,
+        narrative: {
+          ...n,
+          active: next,
+          activeOpenedAt: Date.now(),
+          activeReplay: false,
+          seen: [...new Set([...n.seen, id])],
+          queued: [...new Set([...n.queued, id])],
+          deferred: n.deferred.filter((scene) => narrativeSceneId(scene) !== id),
+          metrics: { ...n.metrics, scenesOpened: n.metrics.scenesOpened + 1 },
+        },
+      }
+      set({ data: nd, pendingScenes: rest, screen: sceneToScreen(next) })
+      saveGame(nd)
+    },
+
+    skipCurrentScene: () => {
+      const d = get().data
+      const active = d?.narrative?.active
+      if (!d || !active) return
+      let nd = d
+      if (active.kind === 'life' && active.narrativeId === 'ch4' && !d.flags.reveal_shiori_name) {
+        nd = {
+          ...d,
+          flags: { ...d.flags, ch4_completed: true, reveal_shiori_name: true },
+        }
+        nd = chronicle(nd, 'era', '擦れていた墨が、夜露のように滲む。——汐里。これが、初代の名だ。')
+      }
+      nd = markSceneResolved(nd, active, true)
+      set({ data: nd, pendingScenes: [], screen: { id: 'home' } })
+      saveGame(nd)
+    },
+
+    deferCurrentScene: () => {
+      const d = get().data
+      const active = d?.narrative?.active
+      if (!d || !active) return
+      const n = d.narrative!
+      if (n.activeReplay) {
+        const nd = { ...d, narrative: { ...n, active: undefined, activeOpenedAt: undefined, activeReplay: undefined } }
+        set({ data: nd, pendingScenes: [], screen: { id: 'home' } })
+        saveGame(nd)
+        return
+      }
+      const deferred = uniqueScenes([active, ...n.deferred])
+      const activeId = narrativeSceneId(active)
+      const nd: GameData = {
+        ...d,
+        narrative: {
+          ...n,
+          active: undefined,
+          activeOpenedAt: undefined,
+          activeReplay: undefined,
+          monthTransitionPending: false,
+          deferred,
+          deferredSince: { ...n.deferredSince, [activeId]: n.deferredSince[activeId] ?? Date.now() },
+          metrics: {
+            ...n.metrics,
+            scenesDeferred: n.metrics.scenesDeferred + 1,
+            totalSceneMs: n.metrics.totalSceneMs + elapsedSceneMs(n.activeOpenedAt),
+            maxDeferred: Math.max(n.metrics.maxDeferred, deferred.length),
+          },
+        },
+      }
+      set({ data: nd, pendingScenes: [], screen: { id: 'home' } })
+      saveGame(nd)
+    },
+
+    openDeferredScene: (sceneId) => {
+      const d = get().data
+      if (!d) return
+      const migrated = withNarrative(d)
+      const n = migrated.narrative!
+      const scene = n.deferred.find((candidate) => narrativeSceneId(candidate) === sceneId)
+      if (!scene) return
+      const nd: GameData = {
+        ...migrated,
+        narrative: {
+          ...n,
+          active: scene,
+          activeOpenedAt: Date.now(),
+          activeReplay: false,
+          seen: [...new Set([...n.seen, sceneId])],
+          deferred: n.deferred.filter((candidate) => narrativeSceneId(candidate) !== sceneId),
+          metrics: { ...n.metrics, scenesOpened: n.metrics.scenesOpened + 1 },
+        },
+      }
+      set({ data: nd, pendingScenes: [], screen: sceneToScreen(scene) })
+      saveGame(nd)
+    },
+
+    replayNarrativeScene: (sceneId) => {
+      const d = get().data
+      if (!d) return
+      const migrated = withNarrative(d)
+      const n = migrated.narrative!
+      const scene = n.archive.find((candidate) => narrativeSceneId(candidate) === sceneId)
+      if (!scene) return
+      const nd: GameData = {
+        ...migrated,
+        narrative: { ...n, active: scene, activeOpenedAt: undefined, activeReplay: true },
+      }
+      set({ data: nd, pendingScenes: [], screen: sceneToScreen(scene) })
+      saveGame(nd)
+    },
+
+    consumeDeferredReminder: () => {
+      const d = get().data
+      if (!d) return null
+      const migrated = withNarrative(d)
+      const n = migrated.narrative!
+      const now = Date.now()
+      const sevenDays = 7 * 24 * 60 * 60 * 1000
+      const scene = n.deferred.find((candidate) => {
+        const id = narrativeSceneId(candidate)
+        return !n.deferredReminderShown.includes(id) && now - (n.deferredSince[id] ?? now) >= sevenDays
       })
+      if (!scene) return null
+      const id = narrativeSceneId(scene)
+      const nd: GameData = {
+        ...migrated,
+        narrative: { ...n, deferredReminderShown: [...n.deferredReminderShown, id] },
+      }
+      set({ data: nd })
+      saveGame(nd)
+      return scene
+    },
+
+    revealShioriName: (skipped = false) => {
+      const d = get().data
+      if (!d || d.flags.reveal_shiori_name) return
+      let nd: GameData = {
+        ...d,
+        flags: { ...d.flags, ch4_completed: true, reveal_shiori_name: true },
+      }
+      nd = migrateM34Narrative(nd)
+      nd = chronicle(nd, 'era', '擦れていた墨が、夜露のように滲む。——汐里。これが、初代の名だ。')
+      if (skipped) nd = chronicle(nd, 'event', '第四章の残りは要約として家譜へ綴じられた。')
+      set({ data: nd })
+      saveGame(nd)
+    },
+
+    consumeLegacyShioriRecap: () => {
+      const d = get().data
+      if (!d) return null
+      const recap = legacyShioriRecap(d)
+      if (!recap) return null
+      let nd: GameData = {
+        ...d,
+        flags: { ...d.flags, legacy_shiori_recap_pending: false },
+      }
+      nd = chronicle(nd, 'era', recap)
+      set({ data: nd })
+      saveGame(nd)
+      return recap
     },
 
     doPact: (parentId, godId) => {
@@ -1167,6 +1474,13 @@ export const useGame = create<GameStore>((set, get) => {
       let loot = { ...exp.loot, items: [...exp.loot.items] }
 
       if (node.type === 'battle' || node.type === 'elite' || node.type === 'boss') {
+        if (node.type === 'boss' && region.id === 'akashi_miyama' && !d.flags.reveal_shiori_name) {
+          mutate((dd) => ({
+            ...dd,
+            expedition: { ...exp, log: [...exp.log, '面前の風が閉じる。家譜の最初の名を取り戻すまで、頂は答えない。'] },
+          }))
+          return
+        }
         const defs = (node.enemyIds ?? []).map((id) => enemyById(id))
         const party = enrichAllies(
           d.family
@@ -1251,6 +1565,10 @@ export const useGame = create<GameStore>((set, get) => {
       const exp = d.expedition
       if (!exp) return
       const gainedFame = Math.round(exp.loot.hoto / 10) + exp.loot.ketsu * 2
+      const injuredIds = d.family
+        .filter((c) => exp.partyIds.includes(c.id) && c.alive && c.hp < c.maxHp)
+        .map((c) => c.id)
+      const bossDown = Object.values(exp.nodes).some((node) => node.type === 'boss' && node.cleared)
       // 湯屋(M16-6): 帰還した隊のHP/MPを普請段階に応じて回復
       const yuyaBonus = yuyaRecoverBonus(facilityLevel(d.facilities, 'yuya'))
       let nd: GameData = {
@@ -1279,6 +1597,22 @@ export const useGame = create<GameStore>((set, get) => {
           text: `${regionById(exp.regionId).name}より帰還。奉燈${exp.loot.hoto}、血珠${exp.loot.ketsu}、武功${gainedFame}を得た。`,
         }],
       }
+      nd = migrateM34Narrative(nd)
+      nd = {
+        ...nd,
+        narrative: {
+          ...nd.narrative!,
+          lastReturn: {
+            id: `return:${nd.seasonIndex}:${exp.regionId}`,
+            season: nd.seasonIndex,
+            regionId: exp.regionId,
+            partyIds: [...exp.partyIds],
+            injuredIds,
+            bossDown,
+          },
+        },
+      }
+      if (injuredIds.length > 0) nd = addResonance(nd, 'save')
       set({ data: nd })
       advanceSeason()
     },
@@ -1587,6 +1921,10 @@ export const useGame = create<GameStore>((set, get) => {
         set({ pendingEvent: { eventId: ev.id, nodeId: `dg:${key}` } })
       } else if (kind === 'boss') {
         if (run.bossDown) return
+        if (run.regionId === 'akashi_miyama' && !d.flags.reveal_shiori_name) {
+          mark({ log: [...run.log, '面前の風が閉じる。家譜の最初の名を取り戻すまで、頂は答えない。'] })
+          return
+        }
         get().dungeonEncounter(true)
       }
       // stairs/entrance はUI側で確認ダイアログを出してから dungeonAdvanceFloor/dungeonReturn を呼ぶ
@@ -1637,6 +1975,9 @@ export const useGame = create<GameStore>((set, get) => {
             )
           : d.family,
       }
+      const injuredIds = d.family
+        .filter((c) => run.partyIds.includes(c.id) && c.alive && c.hp < c.maxHp)
+        .map((c) => c.id)
       if (run.regionId === 'tokoyo_tou') {
         const best = typeof d.flags.towerBest === 'number' ? d.flags.towerBest : 0
         if (run.floor + 1 > best) {
@@ -1645,6 +1986,22 @@ export const useGame = create<GameStore>((set, get) => {
         }
       }
       nd = chronicle(nd, 'triumph', `${regionById(run.regionId).name}より帰還。奉燈${run.loot.hoto}、血珠${run.loot.ketsu}、武功${gainedFame}を得た。`)
+      nd = migrateM34Narrative(nd)
+      nd = {
+        ...nd,
+        narrative: {
+          ...nd.narrative!,
+          lastReturn: {
+            id: `return:${nd.seasonIndex}:${run.regionId}`,
+            season: nd.seasonIndex,
+            regionId: run.regionId,
+            partyIds: [...run.partyIds],
+            injuredIds,
+            bossDown: run.bossDown,
+          },
+        },
+      }
+      if (injuredIds.length > 0) nd = addResonance(nd, 'save')
 
       // 初陣 — 初めての夜藪から帰った子の夜
       const head = nd.family.find((c) => c.alive && c.isHead) ?? null
@@ -1808,6 +2165,7 @@ export const useGame = create<GameStore>((set, get) => {
           )
           const isBoss = battleSource === 'dungeonBoss'
           let nd: GameData = { ...d, family }
+          let earnedCutResonance = false
           const rare = get().rareEncounter
           if (rare) {
             const flag = rareVictoryFlag(rare.markId)
@@ -1852,6 +2210,7 @@ export const useGame = create<GameStore>((set, get) => {
                 fame: nd.fame + 25 + nem.level * 10,
               }
               nd = chronicle(nd, 'era', `仇討ち成就 — ${nem.victim}の仇「${nem.name}」を討つ。形見「${memorial.name}」が一族に残った。`)
+              earnedCutResonance = true
             }
           }
           if (isBoss) {
@@ -1870,9 +2229,11 @@ export const useGame = create<GameStore>((set, get) => {
               if ((nd.loreFrags?.[run.regionId] ?? 0) >= 3) {
                 nd = { ...nd, hoto: nd.hoto + 40 }
                 nd = chronicle(nd, 'era', `${regionById(run.regionId).name}の「土地の記」、家譜に綴られる。(奉燈40)`)
+                earnedCutResonance = true
               }
             }
           }
+          if (earnedCutResonance) nd = addResonance(nd, 'cut')
           set({
             data: nd,
             battle: null,
@@ -2076,6 +2437,7 @@ export const useGame = create<GameStore>((set, get) => {
                 : c,
             ),
           }
+          if ((nd.loreFrags?.[region.id] ?? 0) >= 3) nd = addResonance(nd, 'cut')
           // 最終ボス撃破 → 千年の岐路(探索状態は畳む) — v3.1 M15-4
           if (region.id === 'akashi_miyama') {
             set({

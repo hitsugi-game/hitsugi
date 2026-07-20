@@ -416,3 +416,21 @@
   margin-top: 4px;
   font-variant-numeric: tabular-nums;
 }
+
+/* M34 N2: 攻略値と分けて置く、選択中の土地の問い。CTAや編成欄より強くしない。 */
+.region-question-line {
+  margin: 8px 0 5px;
+  padding: 6px 9px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text);
+  border-left: 2px solid rgba(201, 168, 106, 0.58);
+  background: rgba(10, 14, 29, 0.42);
+}
+.region-question-line > span {
+  display: block;
+  margin-bottom: 1px;
+  color: var(--gold);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+}

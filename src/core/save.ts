@@ -1,4 +1,5 @@
-import type { GameData, ChronicleEntry } from './types'
+import type { GameData, ChronicleEntry, NarrativeScene } from './types'
+import { recoverNarrativeOnLoad } from './narrative'
 
 const KEY_V1 = 'hitsugi_save_v1' // 季節単位(1ターン=1季)時代のセーブ
 const KEY_V3 = 'hitsugi_save_v3' // 月単位(1ターン=1月)
@@ -76,6 +77,78 @@ export function boundChronicle(entries: ChronicleEntry[], max = CHRON_MAX): Chro
   return entries.filter((e) => keep.has(e))
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string')
+}
+
+function isNarrativeScene(value: unknown): value is NarrativeScene {
+  if (!isRecord(value) || typeof value.kind !== 'string') return false
+  switch (value.kind) {
+    case 'birth':
+    case 'death':
+    case 'ceremony':
+    case 'jobrite':
+      return typeof value.charId === 'string'
+    case 'dream':
+      return true
+    case 'dreamEp':
+      return typeof value.epId === 'string'
+    case 'life':
+      return typeof value.title === 'string' && Array.isArray(value.lines) && value.lines.every((line) => (
+        isRecord(line) && typeof line.speaker === 'string' && typeof line.text === 'string'
+      )) && (value.bg === undefined || typeof value.bg === 'string') &&
+        (value.narrativeId === undefined || typeof value.narrativeId === 'string')
+    default:
+      return false
+  }
+}
+
+function isValidNarrative(value: unknown): boolean {
+  if (!isRecord(value)) return false
+  if (value.stage !== undefined && !['one_light', 'name', 'duet_hunger', 'fire_vow', 'summit'].includes(String(value.stage))) return false
+  for (const key of ['seen', 'queued', 'completed', 'deferredReminderShown']) {
+    if (value[key] !== undefined && !isStringArray(value[key])) return false
+  }
+  for (const key of ['deferred', 'archive']) {
+    if (value[key] !== undefined && (!Array.isArray(value[key]) || !value[key].every(isNarrativeScene))) return false
+  }
+  if (value.active !== undefined && !isNarrativeScene(value.active)) return false
+  if (value.activeReplay !== undefined && typeof value.activeReplay !== 'boolean') return false
+  if (value.activeOpenedAt !== undefined && (typeof value.activeOpenedAt !== 'number' || !Number.isFinite(value.activeOpenedAt) || value.activeOpenedAt < 0)) return false
+  if (value.monthTransitionPending !== undefined && typeof value.monthTransitionPending !== 'boolean') return false
+  if (value.generationQuestion !== undefined && typeof value.generationQuestion !== 'string') return false
+  if (value.deferredSince !== undefined) {
+    if (!isRecord(value.deferredSince)) return false
+    if (Object.values(value.deferredSince).some((stamp) => typeof stamp !== 'number' || !Number.isFinite(stamp) || stamp < 0)) return false
+  }
+  if (value.resonance !== undefined) {
+    const resonance = value.resonance
+    if (!isRecord(resonance)) return false
+    if (['cut', 'save', 'inherit'].some((key) => typeof resonance[key] !== 'number' || !Number.isFinite(resonance[key]) || (resonance[key] as number) < 0)) return false
+  }
+  if (value.metrics !== undefined) {
+    const metrics = value.metrics
+    if (!isRecord(metrics)) return false
+    const metricKeys = [
+      'scenesOpened', 'scenesCompleted', 'scenesSkipped', 'scenesDeferred',
+      'totalSceneMs', 'maxDeferred', 'monthsAdvanced', 'interruptedAfterMonth',
+    ]
+    if (metricKeys.some((key) => typeof metrics[key] !== 'number' || !Number.isFinite(metrics[key]) || (metrics[key] as number) < 0)) return false
+  }
+  if (value.lastReturn !== undefined) {
+    if (!isRecord(value.lastReturn)) return false
+    if (typeof value.lastReturn.id !== 'string' || typeof value.lastReturn.regionId !== 'string') return false
+    if (typeof value.lastReturn.season !== 'number' || !Number.isFinite(value.lastReturn.season) || value.lastReturn.season < 0) return false
+    if (!isStringArray(value.lastReturn.partyIds) || !isStringArray(value.lastReturn.injuredIds)) return false
+    if (typeof value.lastReturn.bossDown !== 'boolean') return false
+  }
+  return true
+}
+
 // 構造+意味の妥当性 — BAK復旧を機能させる下限不変条件(devil指摘: 構造検証だけでは意味的破損を素通しする)
 export function isValidSave(d: unknown): d is GameData & { saveSeq?: number } {
   if (!d || typeof d !== 'object') return false
@@ -100,6 +173,9 @@ export function isValidSave(d: unknown): d is GameData & { saveSeq?: number } {
   if (typeof g.hoto !== 'number' || !Number.isFinite(g.hoto)) return false
   if (typeof g.ketsu !== 'number' || !Number.isFinite(g.ketsu)) return false
   if (!Array.isArray(g.chronicle)) return false
+  // M34: optionalでも、存在する物語queueはload直後に展開/反復される。壊れた手動importを
+  // 保存して本体とBAKの両方を読めなくしないよう、入れ子のscene/配列/時刻まで境界で弾く。
+  if (g.narrative !== undefined && !isValidNarrative(g.narrative)) return false
   return true
 }
 
@@ -209,33 +285,55 @@ function migrateCodexSeen(d: GameData): GameData {
   }
 }
 
+function finalizeLoaded(d: GameData, forcePersist = false): GameData {
+  const migrated = recoverNarrativeOnLoad(migrateCodexSeen(d))
+  // 旧saveのsentinel付与、または表示中sceneの灯の余白への回収は一度で永続化する。
+  // JSON比較はload時だけで、schemaが小さく明瞭なことを優先する。
+  if (forcePersist || JSON.stringify(migrated) !== JSON.stringify(d)) saveGame(migrated)
+  return migrated
+}
+
 export function loadGame(): GameData | null {
   try {
     const main = readRaw(KEY)
     const bak = readRaw(KEY_BAK)
+    const safeFinalize = (candidate: Persisted): GameData | null => {
+      try {
+        return finalizeLoaded(candidate)
+      } catch {
+        return null
+      }
+    }
     // 両方有効: saveSeq(単調増分)が大きい方=より新しい正常セーブ。通常はmain。
     if (main && bak && (bak.data.saveSeq ?? 0) > (main.data.saveSeq ?? 0)) {
-      warnOnce('記に乱れがあった — 一つ前の正常な記から復した。')
-      return migrateCodexSeen(bak.data)
+      const restored = safeFinalize(bak.data)
+      if (restored) {
+        warnOnce('記に乱れがあった — 一つ前の正常な記から復した。')
+        return restored
+      }
     }
-    if (main) return migrateCodexSeen(main.data)
+    if (main) {
+      const loaded = safeFinalize(main.data)
+      if (loaded) return loaded
+    }
     if (bak) {
       // 本体が破損/欠落 — 検証済みの控えから復旧
-      warnOnce('記が壊れていた — 控えの記から復した。')
-      return migrateCodexSeen(bak.data)
+      const restored = safeFinalize(bak.data)
+      if (restored) {
+        warnOnce('記が壊れていた — 控えの記から復した。')
+        return restored
+      }
     }
     // v4が無い/破損 — 旧版からの移行を試す
     const rawV3 = localStorage.getItem(KEY_V3)
     if (rawV3) {
-      const migrated = migrateCodexSeen(migrateV3(JSON.parse(rawV3) as GameData))
-      saveGame(migrated)
+      const migrated = finalizeLoaded(migrateV3(JSON.parse(rawV3) as GameData), true)
       localStorage.removeItem(KEY_V3)
       return migrated
     }
     const rawV1 = localStorage.getItem(KEY_V1)
     if (rawV1) {
-      const migrated = migrateCodexSeen(migrateV3(migrateV1(JSON.parse(rawV1) as GameData)))
-      saveGame(migrated)
+      const migrated = finalizeLoaded(migrateV3(migrateV1(JSON.parse(rawV1) as GameData)), true)
       localStorage.removeItem(KEY_V1)
       return migrated
     }

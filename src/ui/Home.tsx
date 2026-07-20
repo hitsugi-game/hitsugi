@@ -10,6 +10,8 @@ import { GOSSIP } from '../core/data/gossip'
 import { FAMILIAR_KINDS } from '../core/data/familiars'
 import { todaysOdai } from '../core/data/dailyOdai'
 import type { GameData } from '../core/types'
+import type { NarrativeScene } from '../core/types'
+import { generationQuestion, narrativeSceneId, returnTraces } from '../core/narrative'
 import { census, recommendAction, nextMonthNotes, ledgerStats, type ActionKind } from './homeInsight'
 import { Sheet, StatusCallout, LiveBadge, LifeThread } from './layout/shell'
 import { CharCard, Ico, NightBackdrop, Panel, TsuzuriLine } from './components'
@@ -19,6 +21,25 @@ import './m17_home.css'
 import './home_m26.css'
 import './home_polish_m29.css' // M29+: 郷ホームの視覚改善(情報階層・カードの奥行き。後勝ち)
 
+function sceneLabel(scene: NarrativeScene): string {
+  switch (scene.kind) {
+    case 'birth': return '誕生 — 名を家譜へ'
+    case 'death': return '看取り — 八季の生涯'
+    case 'ceremony': return '成人の儀 — 灯座を選ぶ'
+    case 'jobrite': return '生業の儀 — 家業を選ぶ'
+    case 'dream': return '夢渡り — 名のない楽士'
+    case 'dreamEp': return '夢渡り — 千年前の記憶'
+    case 'life': return scene.title
+  }
+}
+
+function sceneHint(scene: NarrativeScene): string {
+  if (scene.kind === 'death') return '最期の言葉を、いつでも記せる。'
+  if (scene.kind === 'birth' || scene.kind === 'ceremony' || scene.kind === 'jobrite') return '一族の節目。選択は失われない。'
+  if (scene.kind === 'dream' || scene.kind === 'dreamEp') return '夢は逃げない。今読むか、また後で。'
+  return '家譜へ綴じる前の一場面。'
+}
+
 export function HomeScreen() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
@@ -27,13 +48,21 @@ export function HomeScreen() {
   const doRest = useGame((s) => s.doRest)
   const markGossipSeen = useGame((s) => s.markGossipSeen)
   const dailyVisit = useGame((s) => s.dailyVisit)
+  const consumeLegacyShioriRecap = useGame((s) => s.consumeLegacyShioriRecap)
+  const consumeDeferredReminder = useGame((s) => s.consumeDeferredReminder)
+  const openDeferredScene = useGame((s) => s.openDeferredScene)
+  const replayNarrativeScene = useGame((s) => s.replayNarrativeScene)
   const [visitGift, setVisitGift] = useState<{ text: string; hoto: number; ketsu: number } | null>(null)
+  const [legacyRecap, setLegacyRecap] = useState<string | null>(null)
+  const [deferredReminder, setDeferredReminder] = useState<NarrativeScene | null>(null)
   const [showHelp, setShowHelp] = useState(false)
   const [showMotto, setShowMotto] = useState(false)
   const [showTree, setShowTree] = useState(false)
   const [showGossip, setShowGossip] = useState(false)
   const [showFamiliars, setShowFamiliars] = useState(false)
   const [showObjectives, setShowObjectives] = useState(false)
+  const [showStoryMargin, setShowStoryMargin] = useState(false)
+  const [showAllArchive, setShowAllArchive] = useState(false)
 
   const alive = data.family.filter((c) => c.alive)
   const adults = alive.filter((c) => isAdult(c, data.seasonIndex))
@@ -64,11 +93,28 @@ export function HomeScreen() {
   // 日参り — 郷に戻った初回(実日付が変わっていれば)綴が控えめに迎える。streakなし・煽らない。
   // StrictModeの二重effectで2回目がnullを返しバナーを打ち消すのを、ref一度きりガードで防ぐ。
   const visitCheckedRef = useRef(false)
+  const legacyCheckedRef = useRef(false)
+  const reminderCheckedRef = useRef(false)
   useEffect(() => {
     if (visitCheckedRef.current) return
     visitCheckedRef.current = true
     setVisitGift(dailyVisit())
   }, [dailyVisit])
+  useEffect(() => {
+    if (legacyCheckedRef.current) return
+    legacyCheckedRef.current = true
+    setLegacyRecap(consumeLegacyShioriRecap())
+  }, [consumeLegacyShioriRecap])
+  useEffect(() => {
+    if (reminderCheckedRef.current) return
+    reminderCheckedRef.current = true
+    setDeferredReminder(consumeDeferredReminder())
+  }, [consumeDeferredReminder])
+
+  const deferredStories = data.narrative?.deferred ?? []
+  const archivedStories = data.narrative?.archive ?? []
+  const currentQuestion = data.narrative?.generationQuestion ?? generationQuestion(data)
+  const latestReturnTraces = returnTraces(data)
 
   return (
     <div className="screen home-screen">
@@ -103,6 +149,22 @@ export function HomeScreen() {
         </div>
       )}
 
+      {legacyRecap && (
+        <div className="daily-visit narrative-recap" role="status">
+          <span className="daily-visit-mark">記</span>
+          <span className="daily-visit-body"><b>家譜の補記</b><span className="daily-visit-reward">{legacyRecap}</span></span>
+          <button type="button" className="daily-visit-close" onClick={() => setLegacyRecap(null)}>閉じる</button>
+        </div>
+      )}
+
+      {deferredReminder && (
+        <div className="daily-visit narrative-recap" role="status" data-testid="narrative-overdue-reminder">
+          <span className="daily-visit-mark">灯</span>
+          <span className="daily-visit-body"><b>灯の余白</b><span className="daily-visit-reward">「{sceneLabel(deferredReminder)}」は、急がずここから続きを読める。</span></span>
+          <button type="button" className="daily-visit-close" onClick={() => setDeferredReminder(null)}>閉じる</button>
+        </div>
+      )}
+
       {crisis && (
         <StatusCallout
           kind="crisis"
@@ -121,6 +183,17 @@ export function HomeScreen() {
           </button>
         )}
       </div>
+
+      <section className="narrative-now" aria-labelledby="narrative-now-title">
+        <div>
+          <span className="narrative-kicker">今月の物語</span>
+          <h2 id="narrative-now-title">{deferredStories.length > 0 ? sceneLabel(deferredStories[0]) : latestReturnTraces[0]?.text ?? '灯は、歩いた先で物語になる'}</h2>
+          <p>{deferredStories.length > 0 ? `${deferredStories.length}件を後で読める。` : currentQuestion}</p>
+        </div>
+        <button className="btn btn-ghost" onClick={() => setShowStoryMargin(true)}>
+          灯の余白{deferredStories.length > 0 ? ` (${deferredStories.length})` : ''}
+        </button>
+      </section>
 
       <div ref={famRef}>
         <Panel title="燈守家の一族">
@@ -180,6 +253,58 @@ export function HomeScreen() {
       {confirm && (
         <MonthConfirmSheet kind={confirm} data={data} onClose={() => setConfirm(null)}
           onDo={() => { const k = confirm; setConfirm(null); if (k === 'festival') doFestival(); else doRest() }} />
+      )}
+
+
+      {showStoryMargin && (
+        <Sheet title="灯の余白 — 物語の記録" onClose={() => setShowStoryMargin(false)}>
+          <p className="story-question"><span>今代の問い</span>{currentQuestion}</p>
+          {latestReturnTraces.length > 0 && (
+            <div className="return-traces" aria-label="前回の帰還に残った三つの痕">
+              {latestReturnTraces.map((trace) => <p key={trace.kind}><span>{trace.kind === 'human' ? '人' : trace.kind === 'land' ? '土地' : '千年'}</span>{trace.text}</p>)}
+            </div>
+          )}
+          {deferredStories.length === 0 ? (
+            <p style={{ color: 'var(--text-dim)' }}>未読の場面はない。読み終えた記は、下からいつでも読み返せる。</p>
+          ) : (
+            <div className="story-margin-list">
+              {deferredStories.slice(0, 5).map((scene) => (
+                <button
+                  key={narrativeSceneId(scene)}
+                  className="btn story-margin-item"
+                  onClick={() => { setShowStoryMargin(false); openDeferredScene(narrativeSceneId(scene)) }}
+                >
+                  <b>{sceneLabel(scene)}</b>
+                  <span>{sceneHint(scene)}</span>
+                </button>
+              ))}
+              {deferredStories.length > 5 && <p className="story-margin-more">ほか {deferredStories.length - 5}件。読み終えると次の記が現れる。</p>}
+            </div>
+          )}
+          {archivedStories.length > 0 && (
+            <section className="story-archive" aria-labelledby="story-archive-title">
+              <h3 id="story-archive-title">家譜に綴じた物語</h3>
+              <p>選択や進行を変えず、章と夢を読み返す。</p>
+              <div className="story-margin-list">
+                {archivedStories.slice(0, showAllArchive ? archivedStories.length : 6).map((scene) => (
+                  <button
+                    key={`archive-${narrativeSceneId(scene)}`}
+                    className="btn story-margin-item"
+                    onClick={() => { setShowStoryMargin(false); replayNarrativeScene(narrativeSceneId(scene)) }}
+                  >
+                    <b>{sceneLabel(scene)}</b>
+                    <span>家譜から読み返す</span>
+                  </button>
+                ))}
+              </div>
+              {archivedStories.length > 6 && (
+                <button type="button" className="btn btn-ghost story-archive-more" onClick={() => setShowAllArchive((shown) => !shown)}>
+                  {showAllArchive ? '最初の6件に戻す' : `残り${archivedStories.length - 6}件を表示`}
+                </button>
+              )}
+            </section>
+          )}
+        </Sheet>
       )}
 
       <div ref={ledRef}>
@@ -618,7 +743,9 @@ function MottoModal({ onClose }: { onClose: () => void }) {
 // 郷の声(v3.1 M16-3) — 解禁済みの会話キューを読み返す。未解禁は「？？？」で伏せる
 function GossipModal({ onClose }: { onClose: () => void }) {
   const data = useGame((s) => s.data)!
-  const unlocked = data.gossipIndex ?? 0
+  const unlocked = data.flags.reveal_shiori_name
+    ? (data.gossipIndex ?? 0)
+    : Math.min(data.gossipIndex ?? 0, 11)
 
   return (
     <Sheet title="郷の声 — 聞こえてきた話" onClose={onClose}>

@@ -13,6 +13,10 @@ export interface DreamEpisode {
   id: string
   title: string
   unlock: { deaths?: number; gen?: number } // ORで判定
+  requiresPrevious: 'dream:intro' | string
+  visualId?: string
+  bg?: string
+  visualDescription?: string
   beats: string[]
 }
 
@@ -21,6 +25,10 @@ export const DREAM_EPISODES: DreamEpisode[] = [
     id: 'yume_tabibito',
     title: '夢渡り・弐 — 旅の楽士',
     unlock: { deaths: 1 },
+    requiresPrevious: 'dream:intro',
+    visualId: 'STORY-DREAM-02',
+    bg: 'cg_dream_02.jpg',
+    visualDescription: '千年前の薄暮、濃藍の旅装で琵琶を背負う若い楽士が、星の音に足を止め、まだ火のない大燈籠の基壇と燈ノ郷を静かに見下ろしている。',
     beats: [
       '灯を、ひとつ見送った夜。——どこかで、唄が聴こえる。',
       '夢の頂。家譜の最初の頁と同じ顔をした楽士が、琵琶の絃を締め直しながら、こちらを見ずに言う。',
@@ -40,6 +48,10 @@ export const DREAM_EPISODES: DreamEpisode[] = [
     id: 'yume_sora_no_ko',
     title: '夢渡り・参 — 空の子',
     unlock: { deaths: 3 },
+    requiresPrevious: 'yume_tabibito',
+    visualId: 'STORY-DREAM-03',
+    bg: 'cg_dream_03.jpg',
+    visualDescription: '星降る山頂で若い楽士が琵琶を奏で、名も面も持たない夜空の子が少し離れて聴く。二人の間の静かな空白に、最初の信頼が生まれる。',
     beats: [
       'また、ひとつ灯を見送った。……頂の夢が、近くなる。',
       '「来たわね。今夜は——あの子の話をしましょう」',
@@ -58,9 +70,14 @@ export const DREAM_EPISODES: DreamEpisode[] = [
     id: 'yume_futari',
     title: '夢渡り・肆 — ふたりの演目',
     unlock: { deaths: 5 },
+    requiresPrevious: 'yume_sora_no_ko',
+    visualId: 'STORY-DREAM-04',
+    bg: 'cg_dream_04.jpg',
+    visualDescription: '夢の中で季節を重ねて成長した玄冬が、楽士の琵琶へ星の明滅で拍子を返す。二人の手と金の星の弧が、秘密の二重奏を夜空へ広げる。',
     beats: [
       '灯がまた、ひとつ。……夢は、もう待っている。',
       '「今夜はいちばん、いい話。いちばん短くて、いちばん、いい話よ」',
+      '夢の中で季節が巡る。玄冬は一夜で姿を変えたのではなく、唄を聴きに通った長い時の中で、少しずつ成長していた。',
       '——玄冬は唄を覚えた。声ではなく、体の中の星屑を明滅させて、拍子をとることを。',
       '楽士が弾き、玄冬が瞬き、夜空の星々がそれに和す。',
       '頂だけの、誰も知らない演目。郷の人々は「近ごろ星がよく瞬く」と首をかしげるだけだった。',
@@ -76,6 +93,10 @@ export const DREAM_EPISODES: DreamEpisode[] = [
     id: 'yume_ue',
     title: '夢渡り・伍 — 飢え',
     unlock: { deaths: 8 },
+    requiresPrevious: 'yume_futari',
+    visualId: 'STORY-DREAM-05',
+    bg: 'cg_dream_05.jpg',
+    visualDescription: '胸の星が薄れた玄冬は、小さな星を両手で抱いて震える。遅れて頂へ着いた楽士が遠くからその姿を見つめ、言えなかった飢えに気づく。',
     beats: [
       '見送った灯の数だけ、夢は深くなる。',
       '「……今夜の話は、すこし、つらいわ。それでも聴く? ——聴くわよね。あなたは、私の子だもの」',
@@ -94,6 +115,10 @@ export const DREAM_EPISODES: DreamEpisode[] = [
     id: 'yume_taiyou',
     title: '夢渡り・陸 — 太陽の日',
     unlock: { deaths: 12 },
+    requiresPrevious: 'yume_ue',
+    visualId: 'STORY-DREAM-06',
+    bg: 'cg_dream_06.jpg',
+    visualDescription: '藍夜へ沈む真昼、涙を流す玄冬が欠けゆく太陽へ手を伸ばす。凍る郷を背に、稜線の楽士は琵琶を下ろし、自分の唄が招いた破局を悟る。',
     beats: [
       '灯の数が、夢の深さになる。……もう、底が近い。',
       '「今夜は——あの日の話。心して聴きなさい」',
@@ -113,6 +138,10 @@ export const DREAM_EPISODES: DreamEpisode[] = [
     id: 'yume_maki',
     title: '夢渡り・漆 — 薪の契り',
     unlock: { deaths: 16, gen: 5 },
+    requiresPrevious: 'yume_taiyou',
+    visualId: 'STORY-DREAM-07',
+    bg: 'cg_dream_07.jpg',
+    visualDescription: '面を着けた玄冬を楽士が環の内側から抱き止め、傍らに琵琶を置く。胸から流れた金の寿命の火が山を明るく下り、大燈籠へ初めて灯る。',
     beats: [
       'ここまで灯を見送って、ようやく届く夢がある。',
       '「……今夜で、昔語りはおしまい。最後は、私の罪と、あなたたちの呪いの話」',
@@ -131,13 +160,17 @@ export const DREAM_EPISODES: DreamEpisode[] = [
     id: 'yume_itadaki',
     title: '夢渡り・終 — 千年の頂で',
     unlock: { deaths: 22, gen: 8 },
+    requiresPrevious: 'yume_maki',
+    visualId: 'STORY-DREAM-08',
+    bg: 'cg_dream_08.jpg',
+    visualDescription: '千年後、疲れた楽士が初めて琵琶を石へ置き、見えない子孫へ手を伸ばす。背後の面を着けた玄冬と、歴代の灯が連なる登山路が頂へ続く。',
     beats: [
       'すべての昔語りが終わった夢の頂は、静かだった。',
       '楽士は琵琶を、そっと地面に置く。——はじめて見る仕草だった。',
       '「千年、弾き続けたの。あの子が眠っていられるように。……でもね。そろそろ、腕が疲れたわ」',
       '「面の下で、あの子はまだ飢えている。私の力が尽きれば、常夜は次の千年へ続く」',
       '「だから——頂へいらっしゃい。あなたたちの代で、終わらせるの」',
-      '「着いたら、好きに選びなさい。刃で終わらせるか、腕を貸すか、それとも——私の座を、継ぐか」',
+      '「着いたら、好きに選びなさい。二人を送るか、腕を貸すか、それとも——私の座を、継ぐか」',
       '「どれを選んでも、恨まないわ。千年ぶんの家譜が、あなたたちに、選ぶ資格をくれる」',
       '「ただ、ひとつだけ。どの道を選んでも——私たちを、看取って。憎んだままで、終わらせないで」',
       '楽士は立ち上がり、こちらへ歩いてきて——額に、そっと指を置いた。',
@@ -152,15 +185,18 @@ export function dreamEpisodeById(id: string): DreamEpisode | undefined {
 }
 
 // 未読かつ解禁済みの最初の一篇を返す(配列順=物語順に一篇ずつ)。
-// 夢1(既存DreamScene)を見る前でも解禁はする — 順序は unlock 閾値が実質保証する。
+// 夢1(既存DreamScene)の完読後だけ連作を解禁し、未読の先行篇を飛ばさない。
 export function nextDreamEpisode(data: GameData): DreamEpisode | null {
+  if (!data.flags.dreamSeen) return null
   const deaths = data.family.filter((c) => !c.alive).length
   const gen = data.family.length > 0 ? Math.max(...data.family.map((c) => c.gen)) : 0
-  for (const ep of DREAM_EPISODES) {
-    if (data.flags[`dreamEp_${ep.id}`]) continue
-    const byDeaths = ep.unlock.deaths !== undefined && deaths >= ep.unlock.deaths
-    const byGen = ep.unlock.gen !== undefined && gen >= ep.unlock.gen
-    if (byDeaths || byGen) return ep
-  }
-  return null
+  const ep = DREAM_EPISODES.find((candidate) => !data.flags[`dreamEp_${candidate.id}`])
+  if (!ep) return null
+  const previousDone = ep.requiresPrevious === 'dream:intro'
+    ? !!data.flags.dreamSeen
+    : !!data.flags[`dreamEp_${ep.requiresPrevious}`]
+  if (!previousDone) return null
+  const byDeaths = ep.unlock.deaths !== undefined && deaths >= ep.unlock.deaths
+  const byGen = ep.unlock.gen !== undefined && gen >= ep.unlock.gen
+  return byDeaths || byGen ? ep : null
 }

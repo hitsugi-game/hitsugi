@@ -10,6 +10,7 @@ import { boonById } from '../core/data/boons'
 import { Bar, MaybeImg } from './components'
 import { Sheet } from './layout/shell'
 import { regionSignOf } from '../core/data/region_visuals'
+import { loreFor } from '../core/data/lore'
 import { getReduceMotion } from '../core/settings'
 import { regionBgR, stageOf, uiIcon } from './img'
 import { ageOf } from '../core/inheritance'
@@ -31,6 +32,14 @@ const DPAD_ARIA_LABEL: Record<'up' | 'down' | 'left' | 'right', string> = {
 
 // UI視覚(2026-07-17): 隊員HP札の瀕死しきい値。表示専用の派生値であり、戦闘/探索の計算には使わない。
 const PARTY_HP_CRITICAL_RATIO = 0.25
+
+// M34 N2: 入場時は地域縁起の「土地の顔」を一文だけ返す。石碑を見た再訪では二文目へ短縮差分する。
+// oxlint-disable-next-line react/only-export-components -- 同画面の表示契約を単体検証するため公開する。
+export function dungeonEntryEcho(regionId: string, loreFragments: number): string | null {
+  const intro = loreFor(regionId)?.intro
+  if (!intro?.length) return null
+  return (loreFragments > 0 ? intro[1] : intro[0]) ?? intro[0]
+}
 
 // M24 §4.5: 短期目的の算出(石碑の残数はfloorDef.ascii+run.usedから導出、階段発見/灯不足はengine/runから)
 function monumentProgress(ascii: string[], floorIndex: number, used: string[]): { found: number; total: number } {
@@ -500,18 +509,19 @@ function DungeonFloor() {
 
 
 // M23(指示7 V3): 第一幕「閾」 — 入場時に地名と署名を一度だけ見せる導入。
-// 操作は止めない(pointer-events: none)。初入力または2秒の早い方で消える。
+// 操作は止めない(pointer-events: none)。初入力または2.5秒の早い方で消える。
 // run単位のintroSeenで戦闘往復・再マウントでの再表示を防ぐ。reduce-motion時はフェード無し。
 function FirstActIntro() {
   const run = useGame((s) => s.dungeonRun)!
+  const loreFragments = useGame((s) => s.data?.loreFrags?.[run.regionId] ?? 0)
   const dungeonIntroSeen = useGame((s) => s.dungeonIntroSeen)
   const [visible, setVisible] = useState(run.floor === 0 && !run.introSeen)
   useEffect(() => {
     if (!visible) return
-    // 見せた時点で即記録する — 解散(2秒/入力)前に敵影遭遇で戦闘へ落ちても再表示しない(レビュー反映)
+    // 見せた時点で即記録する — 解散(2.5秒/入力)前に敵影遭遇で戦闘へ落ちても再表示しない(レビュー反映)
     dungeonIntroSeen()
     const done = () => setVisible(false)
-    const timer = window.setTimeout(done, 2000)
+    const timer = window.setTimeout(done, 2500)
     const onInput = () => done()
     window.addEventListener('keydown', onInput)
     window.addEventListener('pointerdown', onInput)
@@ -525,6 +535,7 @@ function FirstActIntro() {
   if (!visible) return null
   const region = regionById(run.regionId)
   const sign = regionSignOf(run.regionId)
+  const echo = dungeonEntryEcho(run.regionId, loreFragments)
   return (
     <div className={`act-intro ${getReduceMotion() ? 'act-intro-static' : ''}`} role="status" aria-live="polite">
       <MaybeImg src={regionBgR(region.id)} className="act-intro-bg" />
@@ -532,6 +543,7 @@ function FirstActIntro() {
         <span className="act-intro-tier">{'★'.repeat(region.tier)}</span>
         <h2 className="act-intro-name">{region.name}</h2>
         {sign && <p className="act-intro-sign">{sign.landmark} ・ {sign.particle}</p>}
+        {echo && <p className="act-intro-echo">{echo}</p>}
       </div>
     </div>
   )

@@ -10,6 +10,7 @@ import { eventById } from '../core/expedition'
 import { facilityLevel } from '../core/data/facilities'
 import { dungeonByRegion } from '../dungeon/maps'
 import { isAdult } from '../core/inheritance'
+import { regionQuestion } from '../core/narrative'
 import { PARTY_SIZE } from '../core/constants'
 import { ActionDock } from './layout/shell'
 import { useForcedDialog } from './layout/dialogs'
@@ -297,6 +298,14 @@ export function DepartScreen() {
                       <span className="region-tier">{'★'.repeat(selectedRegion.tier)}</span>
                     </div>
                     <p className="region-desc">{selectedRegion.desc}</p>
+                    <p className="region-question-line">
+                      <span>この地の問い</span>
+                      {regionQuestion(
+                        selectedRegion.name,
+                        data.loreFrags?.[selectedRegion.id] ?? 0,
+                        isCleared,
+                      )}
+                    </p>
                     <p className="region-detail-sub">
                       深さ{selectedRegion.depth}
                       {isCleared ? ' ・ 主討伐済(鎮)' : selectedRegion.bossId ? ' ・ 主あり(未討伐)' : ''}

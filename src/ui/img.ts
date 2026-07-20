@@ -5,6 +5,40 @@ export function gameImg(file: string): string {
   return `${import.meta.env.BASE_URL}img/${file.replace(/\.png$/, '.jpg')}`
 }
 
+export const DREAM_VISUAL_FALLBACK = 'cg_kiro.jpg'
+
+export function dreamImg(file?: string): string {
+  return gameImg(file ?? DREAM_VISUAL_FALLBACK)
+}
+
+// 現在の夢を読み終える間に次篇1枚だけをidle読込する。呼出側のeffect cleanupで
+// 予約を解除できるようにし、Title/Homeから7枚をまとめて取得しない。
+export function prefetchGameImg(file: string): () => void {
+  if (typeof window === 'undefined' || typeof Image === 'undefined') return () => undefined
+
+  const idleWindow = window as Window & {
+    requestIdleCallback?: (callback: () => void) => number
+    cancelIdleCallback?: (handle: number) => void
+  }
+  let idleId: number | undefined
+  let timerId: number | undefined
+  let prefetched: HTMLImageElement | undefined
+  const load = () => {
+    prefetched = new Image()
+    prefetched.decoding = 'async'
+    prefetched.src = gameImg(file)
+  }
+
+  if (idleWindow.requestIdleCallback) idleId = idleWindow.requestIdleCallback(load)
+  else timerId = window.setTimeout(load, 250)
+
+  return () => {
+    if (idleId !== undefined) idleWindow.cancelIdleCallback?.(idleId)
+    if (timerId !== undefined) window.clearTimeout(timerId)
+    prefetched = undefined
+  }
+}
+
 // ---- 年齢段階(M17: 画像の描き分け単位) ----
 // 幼子(<6月齢)/全盛(6-17)/灯細り(18-23)。閾値はinheritance.tsのAGE_CURVEと同期
 export type AgeStage = 'child' | 'adult' | 'elder'

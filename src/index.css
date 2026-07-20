@@ -1217,6 +1217,173 @@ button {
 @keyframes sceneBgIn { to { opacity: 0.5; } }
 .scene-body { max-width: 560px; font-size: 17px; }
 .scene-body p { margin-bottom: 14px; }
+.scene-comfort-controls {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.scene-comfort-controls .btn { min-height: 44px; }
+.dream-episode-screen {
+  justify-content: flex-start;
+  max-width: none;
+  padding-top: clamp(18px, 4vh, 38px);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(91, 112, 171, 0.12), transparent 28%),
+    radial-gradient(circle at 82% 40%, rgba(201, 168, 106, 0.08), transparent 24%);
+  overflow-x: hidden;
+}
+.dream-episode-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
+.dream-episode-title {
+  margin-bottom: 14px;
+  font-size: clamp(22px, 3.2vw, 30px);
+  letter-spacing: 0.28em;
+}
+.dream-visual-block { width: 100%; }
+.dream-visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid rgba(201, 168, 106, 0.46);
+  border-radius: 5px;
+  background-color: #090d1b;
+  background-image:
+    radial-gradient(circle at 14% 25%, rgba(239, 230, 212, 0.32) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 72% 18%, rgba(201, 168, 106, 0.28) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 44% 78%, rgba(239, 230, 212, 0.2) 0 1px, transparent 1.5px),
+    linear-gradient(145deg, #111a34, #090d1b 72%);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.48), inset 0 0 0 3px rgba(10, 14, 29, 0.8);
+}
+.dream-visual-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 50%;
+}
+.dream-visual-description {
+  width: min(100%, 680px);
+  margin: 8px auto 12px;
+  color: #b7ad9b;
+  font-size: 12px;
+  line-height: 1.65;
+  text-align: left;
+}
+.dream-visual-description span {
+  margin-right: 0.7em;
+  color: var(--gold);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+.dream-episode-body {
+  width: min(100%, 640px);
+  min-height: 76px;
+}
+.dream-episode-body p { margin-bottom: 9px; }
+.dream-episode-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 2px;
+}
+.dream-episode-controls .scene-pager { margin-top: 4px; }
+.dream-episode-controls .scene-comfort-controls { margin-top: 2px; }
+.finale-screen {
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding-top: clamp(18px, 4vh, 42px);
+}
+.finale-intro { margin-bottom: 8px; }
+.finale-memory {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 620px);
+  margin: 0 auto 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(201, 168, 106, 0.34);
+  border-radius: 4px;
+  background: linear-gradient(145deg, rgba(12, 18, 38, 0.9), rgba(18, 22, 39, 0.78));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  text-align: left;
+}
+.finale-question {
+  margin: 0 0 10px;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+.finale-question > span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: 0.03em;
+}
+.finale-echoes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.finale-echoes p {
+  min-width: 0;
+  margin: 0;
+  padding: 8px;
+  border-left: 2px solid rgba(201, 168, 106, 0.58);
+  background: rgba(5, 9, 22, 0.42);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.finale-echoes span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--text-dim);
+  font-size: 10px;
+}
+.finale-resonance {
+  margin: 10px 0 0;
+  color: #c7bdad;
+  font-size: 12px;
+  line-height: 1.65;
+  text-align: center;
+}
+.finale-prompt {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 8px;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.finale-choices {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100%, 500px);
+  margin: 0 auto;
+}
+.finale-choice { min-height: 58px; text-align: left; }
+.finale-choice > span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.5;
+}
 .scene-epitaph {
   font-size: 20px; color: var(--amber); margin: 26px 0;
   border-top: 1px solid var(--panel-border); border-bottom: 1px solid var(--panel-border);
@@ -1552,6 +1719,52 @@ button {
 /* ---- スマホ ---- */
 @media (max-width: 560px) {
   .screen { padding: 12px 10px 40px; }
+  .dream-episode-screen { padding-top: 14px; }
+  .dream-episode-title {
+    margin-bottom: 10px;
+    font-size: 20px;
+    letter-spacing: 0.16em;
+  }
+  .dream-visual-description {
+    margin: 6px auto 8px;
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+  .dream-episode-body {
+    min-height: 62px;
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+  .dream-episode-body p { margin-bottom: 6px; }
+  .dream-episode-controls .scene-comfort-controls {
+    flex-wrap: wrap;
+    margin-top: 0;
+  }
+  .finale-screen { padding-top: 12px; }
+  .finale-screen .birth-flame { margin-bottom: 4px; }
+  .finale-screen .scene-title { margin-bottom: 8px; }
+  .finale-intro {
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  .finale-intro p { margin-bottom: 5px; }
+  .finale-memory {
+    margin-bottom: 8px;
+    padding: 10px;
+  }
+  .finale-question { margin-bottom: 7px; }
+  .finale-question > span { font-size: 13px; }
+  .finale-echoes {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .finale-echoes p {
+    padding: 5px 7px;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  .finale-resonance { margin-top: 7px; font-size: 11px; }
+  .finale-choice { min-height: 52px; padding-block: 7px; }
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
   .chron-season { width: 84px; }
   .node-btn { min-width: 104px; padding: 12px 14px; }

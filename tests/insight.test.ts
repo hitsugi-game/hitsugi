@@ -102,18 +102,37 @@ describe('todaysOdai(今日の御題)', () => {
 describe('nextDreamEpisode(夢渡りの連作の解禁)', () => {
   const dead = (n: number) => Array.from({ length: n }, () => ch({ alive: false }))
   it('死者数の閾値で配列順に一篇ずつ解禁される', () => {
-    const d = data({ family: [ch({ isHead: true }), ...dead(3)] })
+    const d = data({ family: [ch({ isHead: true }), ...dead(3)], flags: { dreamSeen: true } })
     expect(nextDreamEpisode(d)?.id).toBe(DREAM_EPISODES[0].id) // 未読の最初(弐)
   })
   it('既読はflagで飛ばされる', () => {
     const d = data({
       family: [ch({ isHead: true }), ...dead(3)],
-      flags: { [`dreamEp_${DREAM_EPISODES[0].id}`]: true },
+      flags: { dreamSeen: true, [`dreamEp_${DREAM_EPISODES[0].id}`]: true },
     })
     expect(nextDreamEpisode(d)?.id).toBe(DREAM_EPISODES[1].id) // 参へ進む
   })
   it('閾値未満ならnull', () => {
-    const d = data({ family: [ch({ isHead: true })] })
+    const d = data({ family: [ch({ isHead: true })], flags: { dreamSeen: true } })
     expect(nextDreamEpisode(d)).toBeNull()
+  })
+  it('初回夢を完了するまでは後篇を一切返さない', () => {
+    const d = data({ family: [ch({ isHead: true, gen: 9 }), ...dead(22)] })
+    expect(nextDreamEpisode(d)).toBeNull()
+  })
+  it('最初の未読篇が未解禁なら、世代条件を満たす後篇へ飛ばない', () => {
+    const d = data({ family: [ch({ isHead: true, gen: 9 })], flags: { dreamSeen: true } })
+    expect(nextDreamEpisode(d)).toBeNull()
+  })
+  it('各篇が直前篇を明示的に要求する', () => {
+    expect(DREAM_EPISODES.map((ep) => ep.requiresPrevious)).toEqual([
+      'dream:intro',
+      'yume_tabibito',
+      'yume_sora_no_ko',
+      'yume_futari',
+      'yume_ue',
+      'yume_taiyou',
+      'yume_maki',
+    ])
   })
 })

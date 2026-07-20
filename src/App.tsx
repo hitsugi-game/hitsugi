@@ -193,7 +193,7 @@ function App() {
       case 'jobrite':
         return <JobRiteScene charId={screen.charId} />
       case 'life':
-        return <LifeScene title={screen.title} lines={screen.lines} bg={screen.bg} />
+        return <LifeScene title={screen.title} lines={screen.lines} bg={screen.bg} narrativeId={screen.narrativeId} />
       case 'death':
         return <DeathScene charId={screen.charId} />
       case 'dream':

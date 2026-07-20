@@ -85,3 +85,38 @@
 .odai-card.met {
   box-shadow: 0 0 0 1px rgba(255, 157, 69, 0.16), 0 3px 12px rgba(0, 0, 0, 0.28);
 }
+/* M34: 操作を止めず、未読場面を一か所へ集める「灯の余白」 */
+.narrative-now {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 10px 0 16px;
+  padding: 13px 16px;
+  border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+  border-left: 3px solid var(--amber);
+  background: linear-gradient(100deg, rgba(17, 21, 39, .94), rgba(12, 15, 29, .76));
+}
+.narrative-kicker { display: block; color: var(--amber); font-size: 11px; letter-spacing: .18em; }
+.narrative-now h2 { margin: 2px 0; font-size: clamp(15px, 2vw, 18px); font-weight: 650; }
+.narrative-now p { margin: 0; color: var(--text-dim); font-size: 12px; }
+.story-question { padding: 12px 14px; border-left: 3px solid var(--amber); background: rgba(255,255,255,.035); }
+.story-question span { display: block; margin-bottom: 4px; color: var(--amber); font-size: 11px; letter-spacing: .16em; }
+.story-margin-list { display: grid; gap: 8px; }
+.story-margin-item { width: 100%; text-align: left; }
+.story-margin-item span { display: block; margin-top: 3px; color: var(--text-dim); font-size: 12px; }
+.story-margin-more { color: var(--text-dim); font-size: 12px; text-align: center; }
+.story-archive { margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(201, 168, 106, .22); }
+.story-archive h3 { margin: 0 0 3px; color: var(--amber); font-size: 14px; letter-spacing: .1em; }
+.story-archive > p { margin: 0 0 10px; color: var(--text-dim); font-size: 12px; }
+.story-archive-more { width: 100%; margin-top: 8px; }
+.return-traces { display: grid; gap: 6px; margin: 10px 0 14px; }
+.return-traces p { display: grid; grid-template-columns: 3.5em 1fr; gap: 8px; margin: 0; font-size: 12px; }
+.return-traces span { color: var(--amber); letter-spacing: .12em; }
+.narrative-recap { border-left-color: var(--amber); }
+@media (max-width: 560px) {
+  .narrative-now { align-items: flex-start; }
+  .narrative-now .btn { flex: 0 0 auto; padding-inline: 10px; }
+}

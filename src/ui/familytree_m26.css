@@ -17,3 +17,11 @@
   outline: 2px solid var(--amber);
   outline-offset: 2px;
 }
+.familytree-question {
+  display: block;
+  margin-top: 7px;
+  padding-left: 10px;
+  border-left: 2px solid var(--amber);
+  color: var(--text-dim);
+}
+.familytree-question b { margin-right: 8px; color: var(--amber); font-size: 11px; letter-spacing: .12em; }

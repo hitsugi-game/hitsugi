@@ -1,5 +1,5 @@
 /* M23(指示7 V3): 第一幕「閾」 — 入場導入。操作を止めない(pointer-events: none)。
-   消滅はDungeon.tsx側(初入力or2秒の早い方)。reduce-motionはフェード無しの静的表示 */
+   消滅はDungeon.tsx側(初入力or2.5秒の早い方)。reduce-motionはフェード無しの静的表示 */
 .act-intro {
   position: absolute;
   inset: 0;
@@ -10,7 +10,7 @@
   pointer-events: none;
   overflow: hidden;
   background: rgba(4, 6, 14, 0.55);
-  animation: actIntroFade 2s ease both;
+  animation: actIntroFade 2.5s ease both;
 }
 .act-intro-bg {
   position: absolute;
@@ -43,6 +43,21 @@
   color: var(--text-dim);
   letter-spacing: 0.2em;
   margin: 0;
+}
+.act-intro-echo {
+  max-width: min(84vw, 42rem);
+  margin: 9px auto 0;
+  padding-top: 7px;
+  border-top: 1px solid rgba(201, 168, 106, 0.28);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  text-wrap: balance;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 @keyframes actIntroFade {
   0% { opacity: 0; }

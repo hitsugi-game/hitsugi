@@ -73,7 +73,7 @@ const SERIES: ItemSeries[] = [
   },
   {
     prefix: 'sa_haori', slot: 'armor', kind: 'def', base: 6, growth: 1.2, basePrice: 40,
-    names: ['野良着', '刺し子の半纏', '厚織りの羽織', '夜露弾きの羽織', '火の粉除けの羽織', '魔性目くらまし', '灯映しの羽織', '常夜歩きの外套', '影紛れの羽織', '星紋の陣羽織', '月渡りの羽織', '銘・宵羽', '銘・夜風通さず', '銘・千夜羽織', '家宝・汐里の残り布'],
+    names: ['野良着', '刺し子の半纏', '厚織りの羽織', '夜露弾きの羽織', '火の粉除けの羽織', '魔性目くらまし', '灯映しの羽織', '常夜歩きの外套', '影紛れの羽織', '星紋の陣羽織', '月渡りの羽織', '銘・宵羽', '銘・夜風通さず', '銘・千夜羽織', '家宝・家祖の残り布'],
   },
   {
     prefix: 'sa_kote', slot: 'armor', kind: 'def', base: 8, growth: 1.19, basePrice: 50,
@@ -340,7 +340,10 @@ export function inheritItem(item: Item, prevOwnerName: string, ownerKills = 0): 
   const gen = item.generation + 1 + bonus
   const base = itemBaseById(item.baseId)
   const name = `${base.name}・${'代'.repeat(Math.min(gen, 3))}${gen > 3 ? `(${gen})` : ''}`
-  return applyGeneration(item, gen, name, prevOwnerName)
+  return {
+    ...applyGeneration(item, gen, name, prevOwnerName),
+    legacyFirstOwner: item.legacyFirstOwner ?? prevOwnerName,
+  }
 }
 
 // 打ち直し(v3.1 M12-1) — 鍛冶で能動的に鍛える。遺品は銘を保ったまま深まる

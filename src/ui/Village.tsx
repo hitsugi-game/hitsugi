@@ -3,8 +3,9 @@
 // 契約: docs/POLISH_FIX_INSTRUCTIONS_CLAUDE.md §5
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../core/store'
-import type { Character, Screen } from '../core/types'
+import type { Character, GameData, Screen } from '../core/types'
 import { VILLAGERS, villagerBandOf, villagerLine, villagerLineKey } from '../core/data/villagers'
+import { GOSSIP, type GossipEntry } from '../core/data/gossip'
 import { personalityById } from '../core/data/personalities'
 import { ageOf, seasonsLeft } from '../core/inheritance'
 import { getReduceMotion } from '../core/settings'
@@ -21,6 +22,70 @@ const NPC_SPOTS: Record<string, [number, number]> = {
   kosuzu: [12, 3],
   tane: [16, 4],
   matsukichi: [12, 8],
+}
+
+// M34 N2: 各郷の声を、歩行マップに実在する一人へ預ける。
+// 綴や名のない声も「伝え聞いた話」として郷人が運ぶため、画面外の架空話者を増やさない。
+const GOSSIP_VILLAGER_IDS = [
+  'matsukichi', 'tane', 'matsukichi', 'tetsuzo', 'kosuzu', 'tetsuzo',
+  'tane', 'kosuzu', 'tane', 'matsukichi', 'matsukichi', 'kosuzu',
+  'kosuzu', 'tetsuzo', 'kosuzu', 'kosuzu', 'kosuzu', 'kosuzu',
+] as const
+
+const JOURNEY_GOSSIP_FLAG_BASE = 1000
+
+export interface VillageGossipAssignment {
+  entry: GossipEntry
+  ordinal: number
+  villagerId: string
+}
+
+/** 解禁済みの最新一本だけを返す。唯一開示前はgsp11で止め、実名を先に出さない。 */
+// oxlint-disable-next-line react/only-export-components -- NPC割当と開示上限を単体検証するため公開する。
+export function latestVillageGossip(
+  data: Pick<GameData, 'gossipIndex' | 'flags'>,
+): VillageGossipAssignment | null {
+  const revealCap = data.flags.reveal_shiori_name ? GOSSIP.length : 11
+  const unlocked = Math.min(Math.max(0, data.gossipIndex ?? 0), revealCap, GOSSIP.length)
+  if (unlocked === 0) return null
+  const index = unlocked - 1
+  return { entry: GOSSIP[index], ordinal: unlocked, villagerId: GOSSIP_VILLAGER_IDS[index] }
+}
+
+function decodedTalkFlag(flag: boolean | number | undefined): { gossipOrdinal: number; lineKey: number | null } | null {
+  if (typeof flag !== 'number' || flag < JOURNEY_GOSSIP_FLAG_BASE) return null
+  const payload = flag - JOURNEY_GOSSIP_FLAG_BASE
+  const lineSlot = payload % 10
+  return { gossipOrdinal: Math.floor(payload / 10), lineKey: lineSlot > 0 ? lineSlot - 1 : null }
+}
+
+function encodeTalkFlag(gossipOrdinal: number, lineKey: number | null): number {
+  return JOURNEY_GOSSIP_FLAG_BASE + gossipOrdinal * 10 + (lineKey === null ? 0 : lineKey + 1)
+}
+
+function normalLineWasHeard(flag: boolean | number | undefined, lineKey: number): boolean {
+  if (flag === lineKey) return true
+  return decodedTalkFlag(flag)?.lineKey === lineKey
+}
+
+// oxlint-disable-next-line react/only-export-components -- 会話済みフラグの後方互換を単体検証するため公開する。
+export function villageGossipWasHeard(flag: boolean | number | undefined, gossipOrdinal: number): boolean {
+  return (decodedTalkFlag(flag)?.gossipOrdinal ?? 0) >= gossipOrdinal
+}
+
+/** 噂を聞いた印と、その月の通常会話を聞いた印を一つの既存フラグへ共存させる。 */
+// oxlint-disable-next-line react/only-export-components -- 一度だけ表示する永続値を単体検証するため公開する。
+export function markVillageGossipValue(
+  flag: boolean | number | undefined,
+  lineKey: number,
+  gossipOrdinal: number,
+): number {
+  return encodeTalkFlag(gossipOrdinal, normalLineWasHeard(flag, lineKey) ? lineKey : null)
+}
+
+function markNormalTalkValue(flag: boolean | number | undefined, lineKey: number): number {
+  const gossipOrdinal = decodedTalkFlag(flag)?.gossipOrdinal
+  return gossipOrdinal ? encodeTalkFlag(gossipOrdinal, lineKey) : lineKey
 }
 
 interface Talk {
@@ -43,19 +108,25 @@ export function VillageScreen() {
   const leader = alive.find((c) => c.isHead) ?? alive[0]
   const lineKey = villagerLineKey(data.seasonIndex)
   const band = villagerBandOf(data.seasonIndex)
+  const latestGossip = latestVillageGossip(data)
 
   useEffect(() => {
     const host = hostRef.current
     if (!host) return
-    const npcs: VillageNpc[] = VILLAGERS.map((v) => ({
-      id: v.id,
-      name: v.name,
-      role: v.role,
-      x: NPC_SPOTS[v.id]?.[0] ?? 8,
-      y: NPC_SPOTS[v.id]?.[1] ?? 6,
-      imgUrl: villagerImg(v.id, band),
-      news: data.flags[`vilTalk_${v.id}`] !== lineKey,
-    }))
+    const npcs: VillageNpc[] = VILLAGERS.map((v) => {
+      const flag = data.flags[`vilTalk_${v.id}`]
+      const hasLatestGossip = latestGossip?.villagerId === v.id
+      return {
+        id: v.id,
+        name: v.name,
+        role: v.role,
+        x: NPC_SPOTS[v.id]?.[0] ?? 8,
+        y: NPC_SPOTS[v.id]?.[1] ?? 6,
+        imgUrl: villagerImg(v.id, band),
+        news: !normalLineWasHeard(flag, lineKey)
+          || !!(hasLatestGossip && !villageGossipWasHeard(flag, latestGossip.ordinal)),
+      }
+    })
     const kin = alive
       .filter((c) => c.id !== leader?.id)
       .map((c) => ({
@@ -88,8 +159,19 @@ export function VillageScreen() {
   const openTalk = (id: string) => {
     const line = villagerLine(id, data)
     const v = VILLAGERS.find((x) => x.id === id)
-    setTalk({ name: line.name, role: v?.role, text: line.text, imgUrl: villagerImg(id, band) })
-    markVillagerTalked(id, lineKey)
+    const flag = data.flags[`vilTalk_${id}`]
+    if (latestGossip?.villagerId === id && !villageGossipWasHeard(flag, latestGossip.ordinal)) {
+      setTalk({
+        name: line.name,
+        role: `${v?.role ?? '郷人'}・${latestGossip.entry.speaker}からの郷の声`,
+        text: latestGossip.entry.text,
+        imgUrl: villagerImg(id, band),
+      })
+      markVillagerTalked(id, markVillageGossipValue(flag, lineKey, latestGossip.ordinal))
+    } else {
+      setTalk({ name: line.name, role: v?.role, text: line.text, imgUrl: villagerImg(id, band) })
+      markVillagerTalked(id, markNormalTalkValue(flag, lineKey))
+    }
     engineRef.current?.markNewsCleared(id) // 頭上の「話」印もその場で消す
   }
 

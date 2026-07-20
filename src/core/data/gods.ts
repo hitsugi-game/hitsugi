@@ -198,7 +198,7 @@ const FOUNDING_GODS: God[] = [
     id: 'hokushin', name: '北辰老', kana: 'ほくしんろう', rank: 4, element: 'star',
     statBias: { str: 18, vit: 18, dex: 18, agi: 18, mnd: 18, luk: 18 }, cost: 1200, skillId: 'g_hokushin',
     personality: '北極星の翁、動かざる者',
-    desc: '千年動かず夜空の軸であり続けた最古の星。汐里の楽を千年聴き続けた唯一の証人。「あの娘の唄を、終わらせてやってくれ」',
+    desc: '千年動かず夜空の軸であり続けた最古の星。家祖の楽を千年聴き続けた唯一の証人。「あの娘の唄を、終わらせてやってくれ」',
     pactLines: ['……千年、待った。お前たちの誰かが、ここへ届くのを。', 'わしの血は重いぞ。それでも継ぐか。……良い目じゃ。'],
     portrait: 'god_hokushin.png',
     unlock: { fame: FAME_SEAL_THRESHOLD },

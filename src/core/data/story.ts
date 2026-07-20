@@ -48,13 +48,14 @@ export const CHAPTERS: StoryChapter[] = [
     id: 'ch4',
     title: '第四章 楽士の秘密',
     lines: [
-      { speaker: '綴', text: '家譜の、いちばん最初の頁を開いた。初代の名は「汐里」。楽士だったと、そこに在る。' },
-      { speaker: '綴', text: '千年前、汐里は単身で御山に登った。そして——降りて、こなかった。' },
+      { speaker: '綴', text: '家譜の、いちばん最初の頁を開いた。名だけが擦れている。初代は、旅の楽士だったと、そこに在る。' },
+      { speaker: '綴', text: '千年前、その楽士は単身で御山に登った。そして——降りて、こなかった。' },
       { speaker: '綴', text: 'ずっと解せなんだ。誰も止められぬ星喰いを前に、この郷はなぜ千年も保ったのか。' },
       { speaker: '綴', text: '……答えは、単純で、むごい。面の下で誰かが、内側から星喰いを抱き止めている。千年、たった独りで。' },
       { speaker: '', text: '御山の風が運ぶあの楽の音は——その、独りの音だ。' },
       { speaker: '綴', text: 'あんたらの産声を、辞世を、俺はこの手で書き留めてきた。……だが、な。' },
       { speaker: '綴', text: 'それを俺の肩ごしに、千年ずっと聴いていた者がいたとしたら。どんな心地で、聴いていたと思う。' },
+      { speaker: '', text: '擦れていた墨が、夜露のように滲む。——汐里。これが、初代の名だ。' },
     ],
   },
   {
@@ -76,7 +77,7 @@ export const CHAPTERS: StoryChapter[] = [
 export type EndingType = 'cut' | 'save' | 'inherit'
 
 export const FINALE_CHOICES: { id: EndingType; label: string; desc: string }[] = [
-  { id: 'cut', label: '斬る — 千年を終わらせる', desc: '汐里を看取り、星喰いごと夜を断つ。夜は明ける。' },
+  { id: 'cut', label: '送る — 千年を終わらせる', desc: '一族の名を読み上げ、汐里と玄冬を看取り、常夜を終える。' },
   { id: 'save', label: '救う — 共に封じ直す', desc: '一族の灯を分かち、汐里と共に封印を編み直す。夜は残るが、独りにはさせない。' },
   { id: 'inherit', label: '継ぐ — 錠前を代わる', desc: '当主が汐里の座を継ぎ、汐里を千年ぶりに解放する。' },
 ]

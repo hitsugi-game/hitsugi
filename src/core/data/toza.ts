@@ -285,7 +285,7 @@ const T: TozaDef[] = [
     gata: 'sumi', vein: 'moon', name: '月渡澄', title: '月の薬師',
     skills: [
       mk('tz_sm1', '月光の雫', 'heal', 'ally', 160, 7, '月光を集めた雫は苦くない。', 'moon'),
-      mk('tz_sm2', '子守唄', 'debuff', 'enemies', 30, 10, '汐里の子守唄の一節。敵の戦意が緩む。', 'moon'),
+      mk('tz_sm2', '子守唄', 'debuff', 'enemies', 30, 10, '家祖の子守唄の一節。敵の戦意が緩む。', 'moon'),
       mk('tz_sm3', '月の沙汰', 'heal', 'allies', 100, 15, '月が満ちる力を隊に分け与える。', 'moon'),
     ],
     ougi: mk('tz_smo', '奥義・望月の癒し', 'heal', 'allies', 150, 22, '満月の夜の力を全て注ぐ。月裏兎も一目置く秘術。', 'moon'),

@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { ChronicleEntry, GameData } from '../src/core/types'
 import { boundChronicle, isValidSave, saveGame, loadGame, importSaveString, clearSave } from '../src/core/save'
+import { migrateM34Narrative, recoverNarrativeOnLoad } from '../src/core/narrative'
 
 // ---- localStorage スタブ(容量制限をシミュレートできる) ----
 class MemStorage {
@@ -90,6 +91,12 @@ describe('isValidSave', () => {
     expect(isValidSave({ ...makeData(), chronicle: 'broken' })).toBe(false)
     expect(isValidSave(null)).toBe(false)
   })
+  it('M34 narrativeの壊れた入れ子をimport境界で弾く', () => {
+    expect(isValidSave({ ...makeData(), narrative: { deferred: 42 } })).toBe(false)
+    expect(isValidSave({ ...makeData(), narrative: { deferred: [{ kind: 'life', title: '欠損', lines: 42 }] } })).toBe(false)
+    expect(isValidSave({ ...makeData(), narrative: { lastReturn: {} } })).toBe(false)
+    expect(isValidSave({ ...makeData(), narrative: { resonance: { cut: Number.NaN, save: 0, inherit: 0 } } })).toBe(false)
+  })
 })
 
 describe('saveGame / loadGame', () => {
@@ -114,6 +121,14 @@ describe('saveGame / loadGame', () => {
     saveGame(makeData({ seasonIndex: 6 }))
     const corrupted = JSON.parse(mem.getItem(KEY)!)
     corrupted.family = []
+    mem.store.set(KEY, JSON.stringify(corrupted))
+    expect(loadGame()!.seasonIndex).toBe(5)
+  })
+  it('本体のnarrativeが破損しても正常なBAKから復旧する', () => {
+    saveGame(makeData({ seasonIndex: 5 }))
+    saveGame(makeData({ seasonIndex: 6 }))
+    const corrupted = JSON.parse(mem.getItem(KEY)!)
+    corrupted.narrative = { deferred: 42 }
     mem.store.set(KEY, JSON.stringify(corrupted))
     expect(loadGame()!.seasonIndex).toBe(5)
   })
@@ -147,6 +162,8 @@ describe('importSaveString', () => {
   it('無効JSONと意味的破損を弾く', () => {
     expect(importSaveString('not json')).toBe(false)
     expect(importSaveString(JSON.stringify({ family: [], seasonIndex: 0 }))).toBe(false)
+    expect(importSaveString(JSON.stringify({ ...makeData(), narrative: { deferred: 42 } }))).toBe(false)
+    expect(importSaveString(JSON.stringify({ ...makeData(), narrative: { lastReturn: {} } }))).toBe(false)
   })
   it('有効ならsaveGame経路(bound+saveSeq)で書く(devil必須修正d)', () => {
     const chron: ChronicleEntry[] = []
@@ -166,5 +183,86 @@ describe('旧版移行', () => {
     expect(loaded.seasonIndex).toBe(12)
     expect(mem.getItem('hitsugi_save_v3')).toBeNull()
     expect(mem.getItem(KEY)).not.toBeNull()
+  })
+})
+
+describe('M34 物語schema移行', () => {
+  const revealingCases: { name: string; data: Partial<GameData> }[] = [
+    { name: 'ch4 only', data: { flags: { ch4: true } } },
+    { name: 'gossipIndex 12', data: { gossipIndex: 12 } },
+    { name: 'shioriPhase', data: { flags: { shioriPhase: true } } },
+    { name: 'endingType 0', data: { flags: { endingType: 0 } } },
+    { name: 'endingType 1', data: { flags: { endingType: 1 } } },
+    { name: 'endingType 2', data: { flags: { endingType: 2 } } },
+    { name: 'cleared', data: { flags: { cleared: true } } },
+  ]
+
+  for (const fixture of revealingCases) {
+    it(`sentinel欠落legacyの${fixture.name}は実名既知として一度だけ補記待ちにする`, () => {
+      const d = makeData(fixture.data)
+      const migrated = migrateM34Narrative(d)
+      expect(migrated.flags.m34_narrative_schema).toBe(1)
+      expect(migrated.flags.reveal_shiori_name).toBe(true)
+      expect(migrated.flags.legacy_shiori_recap_pending).toBe(true)
+      expect(migrateM34Narrative(migrated)).toEqual(migrated)
+    })
+  }
+
+  it('gossipIndex 11と全条件偽は匿名を維持する', () => {
+    for (const d of [makeData(), makeData({ gossipIndex: 11 })]) {
+      const migrated = migrateM34Narrative(d)
+      expect(migrated.flags.reveal_shiori_name).toBe(false)
+      expect(migrated.flags.legacy_shiori_recap_pending).toBe(false)
+    }
+  })
+
+  it('post-M34のch4途中saveへlegacy ORを再適用せず灯の余白へ回収する', () => {
+    const current = makeData({
+      flags: {
+        m34_narrative_schema: 1,
+        ch4: true,
+        ch4_completed: false,
+        reveal_shiori_name: false,
+      },
+    })
+    const loaded = recoverNarrativeOnLoad(current)
+    expect(loaded.flags.reveal_shiori_name).toBe(false)
+    expect(loaded.flags.legacy_shiori_recap_pending).not.toBe(true)
+    expect(loaded.narrative?.deferred.some((scene) => scene.kind === 'life' && scene.narrativeId === 'ch4')).toBe(true)
+  })
+
+  it('表示中sceneは完了扱いにせず灯の余白へ戻す', () => {
+    const active = { kind: 'dream' as const }
+    const d = migrateM34Narrative(makeData({ flags: { m34_narrative_schema: 1 } }))
+    const loaded = recoverNarrativeOnLoad({ ...d, narrative: { ...d.narrative!, active } })
+    expect(loaded.flags.dreamSeen).not.toBe(true)
+    expect(loaded.narrative?.active).toBeUndefined()
+    expect(loaded.narrative?.deferred).toContainEqual(active)
+  })
+
+  it('v1/v3/v4の全legacy境界fixtureを同じ規則で移行する', () => {
+    const versions = ['hitsugi_save_v1', 'hitsugi_save_v3', KEY]
+    const fixtures: { name: string; patch: Partial<GameData>; reveal: boolean }[] = [
+      { name: 'ch4 only', patch: { flags: { ch4: true } }, reveal: true },
+      { name: 'gossipIndex 11', patch: { gossipIndex: 11 }, reveal: false },
+      { name: 'gossipIndex 12', patch: { gossipIndex: 12 }, reveal: true },
+      { name: 'shioriPhase', patch: { flags: { shioriPhase: true } }, reveal: true },
+      { name: 'endingType 0', patch: { flags: { endingType: 0 } }, reveal: true },
+      { name: 'endingType 1', patch: { flags: { endingType: 1 } }, reveal: true },
+      { name: 'endingType 2', patch: { flags: { endingType: 2 } }, reveal: true },
+      { name: 'cleared', patch: { flags: { cleared: true } }, reveal: true },
+      { name: 'all false', patch: {}, reveal: false },
+    ]
+    for (const version of versions) {
+      for (const fixture of fixtures) {
+        mem.clear()
+        mem.store.set(version, JSON.stringify(makeData(fixture.patch)))
+        const loaded = loadGame()
+        expect(loaded, `${version} / ${fixture.name}`).not.toBeNull()
+        expect(loaded!.flags.reveal_shiori_name, `${version} / ${fixture.name}`).toBe(fixture.reveal)
+        expect(loaded!.flags.legacy_shiori_recap_pending, `${version} / ${fixture.name}`).toBe(fixture.reveal)
+        expect(loaded!.flags.m34_narrative_schema).toBe(1)
+      }
+    }
   })
 })

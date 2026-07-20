@@ -242,6 +242,7 @@ export function ForgeScreen() {
     <EquipDetail
       it={selectedInvItem}
       selChar={selChar}
+      family={data.family}
       ownedCount={ownedByBase.get(selectedInvItem.baseId) ?? 0}
       equippedBy={equippedByBase.get(selectedInvItem.baseId) ?? []}
       onEquip={() => confirmEquip(selectedInvItem)}
@@ -609,7 +610,7 @@ export function ForgeScreen() {
 // M26 §7.3: 詳細面の共通中身(大きい絵/名称/品質・希少度/入手由来/全軸の値/比較/所持・装備中)。
 // 購う・装備の両詳細(BuyDetail/EquipDetail)から使う — CTAは呼び出し側がこの下に足す。
 function ItemDetailCore({
-  baseId, name, slot, statSource, rarityIt, sourceText, curEquip, compareTarget, ownedCount, equippedBy, legacyOf,
+  baseId, name, slot, statSource, rarityIt, sourceText, curEquip, compareTarget, ownedCount, equippedBy, legacyOf, legacyStory,
 }: {
   baseId: string
   name: string
@@ -622,6 +623,7 @@ function ItemDetailCore({
   ownedCount: number
   equippedBy: Character[]
   legacyOf?: string
+  legacyStory?: string
 }) {
   return (
     <div className="forge-detail">
@@ -631,6 +633,7 @@ function ItemDetailCore({
       </h3>
       <AxisChips baseId={baseId} it={rarityIt} />
       <p className="forge-detail-source">{sourceText}{legacyOf && ` ・ ${legacyOf}の形見`}</p>
+      {legacyStory && <p className="forge-detail-legacy"><b>形見の記</b>{legacyStory}</p>}
       <p className="forge-detail-stats">{baseStatText(statSource) || '(付与なし)'}</p>
       {compareTarget && (
         <>
@@ -723,14 +726,20 @@ function BuyDetail({
 
 // M26 §7.3: 蔵(装備)の詳細面。交換前後をCompareRowで見せ、装備CTAは一押しで確定(奉燈/血珠を使わないため)。
 function EquipDetail({
-  it, selChar, ownedCount, equippedBy, onEquip,
+  it, selChar, family, ownedCount, equippedBy, onEquip,
 }: {
   it: Item
   selChar: Character
+  family: Character[]
   ownedCount: number
   equippedBy: Character[]
   onEquip: () => void
 }) {
+  const firstOwnerName = it.legacyFirstOwner ?? it.legacyOf
+  const firstOwner = firstOwnerName ? family.find((character) => character.name === firstOwnerName) : undefined
+  const legacyStory = firstOwnerName
+    ? `最初の持ち主は${firstOwnerName}。${firstOwner ? `討った魔性${firstOwner.kills}。${firstOwner.lastWords ? `最期の言葉「${firstOwner.lastWords}」` : firstOwner.epitaph ? `辞世「${firstOwner.epitaph}」` : ''}` : 'その手の記憶が、銘に残っている。'}`
+    : undefined
   return (
     <>
       <ItemDetailCore
@@ -742,6 +751,7 @@ function EquipDetail({
         ownedCount={ownedCount}
         equippedBy={equippedBy}
         legacyOf={it.legacyOf}
+        legacyStory={legacyStory}
       />
       <div className="confirm-actions">
         <button className="btn btn-main" data-testid="forge-equip-confirm" onClick={onEquip}>

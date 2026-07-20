@@ -79,7 +79,7 @@ export const GOSSIP: GossipEntry[] = [
   },
   {
     id: 'gsp_12', speaker: '綴',
-    text: '「汐里……。今、そう口にした。……誰だ、それは。儂の口が、覚えのない名を言った」',
+    text: '「汐里——初代の名だ。口にすると、擦れた家譜の墨が戻るようだ」',
     unlock: { gen: 7, deaths: 12, cleared: 11 },
   },
   {
@@ -119,9 +119,11 @@ export const GOSSIP: GossipEntry[] = [
 // 条件を満たしていなければnull(その月/そのトリガーでは何も起きない)。
 export function nextGossip(
   gossipIndex: number | undefined,
-  ctx: { gen: number; deaths: number; cleared: number },
+  ctx: { gen: number; deaths: number; cleared: number; revealShioriName?: boolean },
 ): GossipEntry | null {
   const idx = gossipIndex ?? 0
+  // gsp12〜18はch4の唯一開示後の余韻。壊れたcursorでも実名を先に出さない。
+  if (idx >= 11 && !ctx.revealShioriName) return null
   const entry = GOSSIP[idx]
   if (!entry) return null
   const u = entry.unlock

@@ -87,6 +87,7 @@ export interface Item {
   statBonus?: Partial<Stats>
   generation: number // 継承回数(形見強化)
   legacyOf?: string // 元の持ち主名(「祖母の簪」演出)
+  legacyFirstOwner?: string // M34: 再継承しても変わらない最初の持ち主(物語表示専用)
   price?: number
   source?: ItemSource // M22: optional追加(セーブ互換維持・戦闘計算に不使用)
   rareOrigin?: string // M27: 稀相遺物を残した魔性名。optionalで旧セーブ互換
@@ -298,7 +299,7 @@ export type Screen =
   | { id: 'birth'; charId: string }
   | { id: 'ceremony'; charId: string } // 成人の儀 — 灯型を授ける(月齢6)
   | { id: 'jobrite'; charId: string } // 生業の儀 — 家業を選ぶ(月齢12)
-  | { id: 'life'; title: string; lines: { speaker: string; text: string }[]; bg?: string } // ライフイベント
+  | { id: 'life'; title: string; lines: { speaker: string; text: string }[]; bg?: string; narrativeId?: string } // ライフイベント
   | { id: 'village' } // 燈ノ郷を歩く(M23: 月不消費の郷内マップ)
   | { id: 'depart' } // 出立準備
   | { id: 'expedition' }
@@ -313,6 +314,56 @@ export type Screen =
   | { id: 'dream' } // 夢渡り — 汐里との邂逅
   | { id: 'dreamEp'; epId: string } // 夢渡りの連作 — 千年前の記憶(data/dreams.ts)
   | { id: 'ending' }
+
+// M34: 全画面場面をセーブ可能な「灯の余白」へ退避するため、UI storeだけに閉じず
+// payloadをGameDataへ持つ。既存saveでは narrative 自体がoptionalなので後方互換。
+export type NarrativeScene =
+  | { kind: 'birth'; charId: string }
+  | { kind: 'death'; charId: string }
+  | { kind: 'ceremony'; charId: string }
+  | { kind: 'jobrite'; charId: string }
+  | { kind: 'dream' }
+  | { kind: 'dreamEp'; epId: string }
+  | { kind: 'life'; title: string; lines: { speaker: string; text: string }[]; bg?: string; narrativeId?: string }
+
+export type NarrativeStage = 'one_light' | 'name' | 'duet_hunger' | 'fire_vow' | 'summit'
+
+export interface NarrativeMetrics {
+  scenesOpened: number
+  scenesCompleted: number
+  scenesSkipped: number
+  scenesDeferred: number
+  totalSceneMs: number
+  maxDeferred: number
+  monthsAdvanced: number
+  interruptedAfterMonth: number
+}
+
+export interface NarrativeProgress {
+  stage: NarrativeStage
+  seen: string[]
+  queued: string[]
+  completed: string[]
+  deferred: NarrativeScene[]
+  archive: NarrativeScene[] // 完読/skip済みの章・夢。Homeから安全に再読するためのpayload
+  deferredSince: Record<string, number> // 未読が灯の余白へ入った実時刻(ms)
+  deferredReminderShown: string[] // 7日滞留の非modal通知を一場面一度に抑える
+  active?: NarrativeScene
+  activeOpenedAt?: number
+  activeReplay?: boolean // 再読中は既読/計測/queueを再度変更しない
+  monthTransitionPending?: boolean
+  resonance: { cut: number; save: number; inherit: number }
+  metrics: NarrativeMetrics
+  generationQuestion?: string
+  lastReturn?: {
+    id: string
+    season: number
+    regionId: string
+    partyIds: string[]
+    injuredIds: string[]
+    bossDown: boolean
+  }
+}
 
 // ---- ゲーム全体状態 ----
 export interface GameData {
@@ -345,6 +396,7 @@ export interface GameData {
   facilities?: Record<string, number> // v3.1 M16-6: 郷の普請(施設id→lv 0-3)。旧セーブ互換で全て未建設扱い
   familiars?: { enemyId: string; name: string; element: string }[] // v3.1 M16-5: 懐いた眷属(式神)の一覧
   activeFamiliar?: string // v3.1 M16-5: 随行させている眷属のenemyId
+  narrative?: NarrativeProgress // M34: 物語順序・後で読む・家の響き(optional=旧セーブ互換)
 }
 
 // 宿敵(名持ち) — 一族の誰かを殺した魔性が名を得て成長・再来する

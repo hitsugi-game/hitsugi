@@ -22,6 +22,7 @@ interface Line {
 export function FamilyTree({ onClose }: { onClose: () => void }) {
   const family: Character[] = useGame((s) => s.data?.family ?? [])
   const godAffinity = useGame((s) => s.data?.godAffinity ?? {})
+  const generationQuestion = useGame((s) => s.data?.narrative?.generationQuestion)
   const containerRef = useRef<HTMLDivElement>(null)
   const nodeRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
   const [lines, setLines] = useState<Line[]>([])
@@ -212,6 +213,9 @@ export function FamilyTree({ onClose }: { onClose: () => void }) {
               {' '}{godById(selected.godParentId).name}の子(縁{Math.floor(godAffinity[selected.godParentId] ?? 0)})。
               {selected.alive ? '存命。' : `享年八季。${selected.epitaph ? `辞世「${selected.epitaph}」` : ''}`}
               {' '}討った魔性{selected.kills}、夜藪行{selected.expeditions}度。
+              {generationQuestion && selected.isHead && (
+                <span className="familytree-question"><b>今代の問い</b>{generationQuestion}</span>
+              )}
             </span>
           </div>
         )}

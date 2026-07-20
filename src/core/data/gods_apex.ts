@@ -30,7 +30,7 @@ export const GODS_APEX: God[] = [
     id: 'amanogawa', name: '天の川母神', kana: 'あまのがわのははがみ', rank: 4, element: 'water',
     statBias: { vit: 24, mnd: 26, luk: 10 }, cost: 900, skillId: 'gs_water4',
     personality: '星々すべての母、大河の女神',
-    desc: '夜空を流れる大河にして、星々みなの母。星神たちは皆、彼女の川から掬い上げられた雫である。「汐里も、あなたたちも、みんな私の子ですよ」',
+    desc: '夜空を流れる大河にして、星々みなの母。星神たちは皆、彼女の川から掬い上げられた雫である。「あの楽士も、あなたたちも、みんな私の子ですよ」',
     pactLines: ['八代。よくぞ絶やさず繋ぎました。母として、これほど誇らしいことはない。', '私の川の水を一雫、その子に。……渇かない心を持つ子になるでしょう。'],
     portrait: 'god_amanogawa.png',
     unlock: { gen: 8 },

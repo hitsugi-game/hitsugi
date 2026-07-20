@@ -22,6 +22,8 @@ import { skillById } from '../core/data/skills'
 import { consumableById } from '../core/data/consumables'
 import { enemyById } from '../core/data/enemies'
 import { regionById } from '../core/data/regions'
+import { loreFor } from '../core/data/lore'
+import { bossEmotion } from '../core/narrative'
 import { Bar, MaybeImg } from './components'
 import { gameImg, spriteImg, poseImg, skillIcon, cutinImg, regionBgR, bossBgImg } from './img'
 import { BattleArtFrame, type CardTier } from './battle/BattleArtFrame'
@@ -80,6 +82,12 @@ const VEIN_TRAVEL_MS = 150
 const HITSTOP_MS = 65
 const ACTION_LAYER_MS = VEIN_TRAVEL_MS + HITSTOP_MS
 
+// M34 N2: 戦果欄は報酬を押し下げず、通常の勝鬨一行を地域固有の鎮魂へ差し替える。
+// oxlint-disable-next-line react/only-export-components -- 同画面の表示契約を単体検証するため公開する。
+export function bossVictoryRequiem(regionId: string): string | null {
+  return loreFor(regionId)?.requiem[0] ?? null
+}
+
 // M25§4.2 スロット配置 — 1体/2体/3〜4体を別presetにし、単純なtranslateXの連鎖で並べない。
 // 列/行そのものはCSS側(.slot-preset-*、断幅で差し替わるgrid-template-columns)に委ね、
 // JSXはCSSの`order`とz-indexだけを渡す(inlineでgrid-column/rowを固定すると768px境界の
@@ -109,6 +117,7 @@ export function BattleScreen() {
   const initialAuto = useGame((s) => s.dungeonRun?.autoBattle ?? getAutoBattleDefault())
   const setAutoBattleFlag = useGame((s) => s.setAutoBattle)
   const family = useGame((s) => s.data?.family) ?? []
+  const loreFrags = useGame((s) => s.data?.loreFrags)
   const consumables = useGame((s) => s.data?.consumables) // M28-C: 所持している回復薬など
 
   const [displayed, setDisplayed] = useState<BattleLogEntry[]>([])
@@ -148,6 +157,10 @@ export function BattleScreen() {
   const isBossBattle = !!bossCombatant
   const bossName = bossCombatant?.name
   const isBossVictory = isBossBattle && battle?.phase === 'won'
+  const bossMotive = isBossBattle && regionId
+    ? bossEmotion(regionById(regionId).name, loreFrags?.[regionId] ?? 0)
+    : null
+  const bossRequiem = isBossVictory && regionId ? bossVictoryRequiem(regionId) : null
 
   // M17: 地域別の戦場背景。主戦は専用主背景→地域別背景→従来のtier共有bg、の3層。
   // 手前の層が未生成(404)でも下の層がそのまま見えるので退避は自然に成立する。
@@ -555,6 +568,11 @@ export function BattleScreen() {
 
         {/* §3.7: 主専用HPゲージ — 通常敵の枠に混ぜず画面上部へ分離 */}
         {isBossBattle && bossCombatant && <BossHpBar boss={bossCombatant} />}
+        {bossMotive && !isBossVictory && (
+          <p className="boss-motive-line" role="status">
+            <span>主の願い</span>{bossMotive}
+          </p>
+        )}
 
         {/* 火脈 — 継足対象・連数・次撃倍率を戦場中央に示す(§5.4。実数値は行動順bar横が正 — §3.3で装飾化) */}
         {battle.chainTarget && battle.chain > 0 && (() => {
@@ -695,7 +713,13 @@ export function BattleScreen() {
         {over ? (
           <div className="victory-scroll">
             <p className="victory-line">
-              {battle.phase === 'won' ? '勝鬨を上げよ — 夜藪に僅かな静けさが戻った' : battle.phase === 'fled' ? '一族は闇に紛れて退いた' : '一族の灯が、闇に呑まれた……'}
+              {battle.phase === 'won'
+                ? bossRequiem
+                  ? `鎮魂 — ${bossRequiem}`
+                  : '勝鬨を上げよ — 夜藪に僅かな静けさが戻った'
+                : battle.phase === 'fled'
+                  ? '一族は闇に紛れて退いた'
+                  : '一族の灯が、闇に呑まれた……'}
             </p>
             {battle.phase === 'won' && runLoot && (runLoot.hoto > 0 || runLoot.ketsu > 0 || runLoot.items.length > 0) && (
               <p className="victory-loot">

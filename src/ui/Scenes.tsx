@@ -46,11 +46,13 @@ import type { JobRole } from '../core/data/jobs'
 import { skillById } from '../core/data/skills'
 import { MALE_NAMES, FEMALE_NAMES } from '../core/data/names'
 import { ENDINGS, FINALE_CHOICES } from '../core/data/story'
-import { dreamEpisodeById } from '../core/data/dreams'
+import { DREAM_EPISODES, dreamEpisodeById } from '../core/data/dreams'
+import type { DreamEpisode } from '../core/data/dreams'
+import { familyFinaleEchoes, generationQuestion, personalizedEndingBeat, resonanceLine } from '../core/narrative'
 import { clearSave } from '../core/save'
 import { downloadChronicleCard } from './shareCard'
 import { MaybeImg, SceneBg } from './components'
-import { gameImg } from './img'
+import { dreamImg, gameImg, prefetchGameImg } from './img'
 import './m17_scenes.css'
 
 // 章タイトル→cg_ch{n}.png の対応(CHAPTERSのtitleは固定文字列 — data/story.tsのid順と一致)
@@ -298,14 +300,23 @@ export function DeathScene({ charId }: { charId: string }) {
 // bgが payload から来ていれば最優先(初陣=cg_hatsujin/灯細り=cg_hosori)。
 // 章語りは bg 無しで来るため title(固定文字列)から cg_ch{n}.png を引く。
 // それ以外(絆・日常)は bg 無しなので、場面文からの安定ハッシュで life_daily_* を割り当てる。
-export function LifeScene({ title, lines, bg }: { title: string; lines: { speaker: string; text: string }[]; bg?: string }) {
+export function LifeScene({ title, lines, bg, narrativeId }: { title: string; lines: { speaker: string; text: string }[]; bg?: string; narrativeId?: string }) {
   const processNextScene = useGame((s) => s.processNextScene)
+  const skipCurrentScene = useGame((s) => s.skipCurrentScene)
+  const deferCurrentScene = useGame((s) => s.deferCurrentScene)
+  const revealShioriName = useGame((s) => s.revealShioriName)
+  const replaying = useGame((s) => !!s.data?.narrative?.activeReplay)
   const [beat, setBeat] = useState(0)
   const done = beat >= lines.length - 1
   // SceneBg はファイル名(拡張子付き)を受け取り内部でgameImg()解決するため、
   // dailyIndexは素のファイル名(life_daily_NN.png)として組み立てる(dailyImg()は使わない)。
   const resolvedBg = bg ?? CHAPTER_BG[title] ?? `life_daily_${String(stableDailyIndex(title, lines)).padStart(2, '0')}.png`
-  const { advance, onBgClick } = useSceneAdvance(!done, () => setBeat((b) => b + 1))
+  const advanceBeat = useCallback(() => {
+    const next = Math.min(lines.length - 1, beat + 1)
+    if (narrativeId === 'ch4' && next === lines.length - 1) revealShioriName(false)
+    setBeat(next)
+  }, [beat, lines.length, narrativeId, revealShioriName])
+  const { advance, onBgClick } = useSceneAdvance(!done, advanceBeat)
   return (
     <div className="scene-screen screen" onClick={onBgClick}>
       <SceneBg file={resolvedBg} />
@@ -331,6 +342,9 @@ export function LifeScene({ title, lines, bg }: { title: string; lines: { speake
         </button>
       ) : (
         <ScenePager page={beat + 1} total={lines.length} onNext={advance} />
+      )}
+      {narrativeId && !done && !replaying && (
+        <SceneComfortControls onDefer={deferCurrentScene} onSkip={skipCurrentScene} />
       )}
     </div>
   )
@@ -509,7 +523,7 @@ const DREAM_BEATS = [
   '……唄が、聴こえる。',
   '夢の中。見知らぬ山の頂に、楽士がひとり座っている。黒い月を背に、琵琶を抱いて。',
   '「あら。夢を渡って来たのね。……血は争えないわ」',
-  '彼女の顔は、家譜の最初の頁に描かれた似姿と同じだった。千年前の家祖——汐里。',
+  '彼女の顔は、名の擦れた家譜の最初の頁に描かれた似姿と同じだった。家祖らしき、名のない楽士。',
   '「名乗らなくていいの。あなたたちの名は、全部、風に聞いてる。産声も、辞世も、ぜんぶ」',
   '「山頂で待ってるわ。……ああ、でも、急がないで」',
   '「あなたたちの季節は短いのだから。道草も、お食べなさい。祭も、恋も、昼寝もね」',
@@ -529,12 +543,66 @@ function ScenePager({ page, total, onNext }: { page: number; total: number; onNe
   )
 }
 
+function SceneComfortControls({ onDefer, onSkip }: { onDefer: () => void; onSkip: () => void }) {
+  return (
+    <div className="scene-comfort-controls" data-zone="scene-comfort-controls">
+      <button className="btn btn-ghost" onClick={(e) => { e.stopPropagation(); onDefer() }}>後で読む</button>
+      <button className="btn btn-ghost" onClick={(e) => { e.stopPropagation(); onSkip() }}>要約してskip</button>
+    </div>
+  )
+}
+
+function DreamVisual({ episode }: { episode: DreamEpisode }) {
+  const primarySrc = dreamImg(episode.bg)
+  const fallbackSrc = dreamImg()
+  const [src, setSrc] = useState(primarySrc)
+  const [unavailable, setUnavailable] = useState(false)
+  const description = episode.visualDescription ?? '夢の頂で、名のない楽士が琵琶を抱き、子孫へ千年前の記憶を語っている。'
+
+  useEffect(() => {
+    setSrc(primarySrc)
+    setUnavailable(false)
+  }, [primarySrc])
+
+  return (
+    <div className="dream-visual-block">
+      <figure
+        className="dream-visual"
+        data-zone="dream-visual"
+        data-visual-id={episode.visualId ?? episode.id}
+      >
+        {!unavailable && (
+          <img
+            className="dream-visual-img"
+            src={src}
+            alt={description}
+            loading="lazy"
+            decoding="async"
+            data-fallback={src === fallbackSrc ? 'true' : 'false'}
+            onError={() => {
+              if (src !== fallbackSrc) setSrc(fallbackSrc)
+              else setUnavailable(true)
+            }}
+          />
+        )}
+      </figure>
+      <p className="dream-visual-description" aria-hidden="true">
+        <span>夢に映る景色</span>{description}
+      </p>
+    </div>
+  )
+}
+
 export function DreamScene() {
   const processNextScene = useGame((s) => s.processNextScene)
+  const skipCurrentScene = useGame((s) => s.skipCurrentScene)
+  const deferCurrentScene = useGame((s) => s.deferCurrentScene)
+  const replaying = useGame((s) => !!s.data?.narrative?.activeReplay)
   const [beat, setBeat] = useState(0)
   const done = beat >= DREAM_BEATS.length - 1
+  const { advance, onBgClick } = useSceneAdvance(!done, () => setBeat((b) => b + 1))
   return (
-    <div className="scene-screen screen" onClick={() => { if (!done) { audio.se('page'); setBeat(beat + 1) } }}>
+    <div className="scene-screen screen" onClick={onBgClick}>
       <SceneBg file="cg_kiro.png" />
       <h1 className="scene-title">夢渡り</h1>
       <div className="scene-body">
@@ -549,16 +617,20 @@ export function DreamScene() {
           目を覚ます
         </button>
       ) : (
-        <ScenePager page={beat + 1} total={DREAM_BEATS.length} onNext={() => { audio.se('page'); setBeat(beat + 1) }} />
+        <ScenePager page={beat + 1} total={DREAM_BEATS.length} onNext={advance} />
       )}
+      {!done && !replaying && <SceneComfortControls onDefer={deferCurrentScene} onSkip={skipCurrentScene} />}
     </div>
   )
 }
 
 // 夢渡りの連作(data/dreams.ts) — 看取りの数だけ深く見る、千年前の記憶。
-// 様式は初回DreamSceneと同一(cg_kiro背景・朗読形式)。epIdが変われば読み進みをリセット。
+// 横長CGは背景coverにせず前面の16:9全景として示し、台詞と操作を通常フローで分離する。
 export function DreamEpScene({ epId }: { epId: string }) {
   const processNextScene = useGame((s) => s.processNextScene)
+  const skipCurrentScene = useGame((s) => s.skipCurrentScene)
+  const deferCurrentScene = useGame((s) => s.deferCurrentScene)
+  const replaying = useGame((s) => !!s.data?.narrative?.activeReplay)
   const [beat, setBeat] = useState(0)
   const [lastEp, setLastEp] = useState(epId)
   if (epId !== lastEp) {
@@ -566,35 +638,49 @@ export function DreamEpScene({ epId }: { epId: string }) {
     setBeat(0)
   }
   const ep = dreamEpisodeById(epId)
+  const epIndex = ep ? DREAM_EPISODES.indexOf(ep) : -1
+  const nextVisual = epIndex >= 0 ? DREAM_EPISODES[epIndex + 1]?.bg : undefined
+  const done = !ep || beat >= ep.beats.length - 1
+  const { advance, onBgClick } = useSceneAdvance(!done, () => setBeat((b) => b + 1))
+  useEffect(() => {
+    if (!ep) processNextScene()
+  }, [ep, processNextScene])
+  useEffect(() => {
+    if (!nextVisual) return
+    return prefetchGameImg(nextVisual)
+  }, [nextVisual])
   if (!ep) {
     // 未知のepId(将来のセーブ互換等) — 詰まらせず静かに次へ
-    processNextScene()
     return null
   }
-  const done = beat >= ep.beats.length - 1
   return (
-    <div className="scene-screen screen" onClick={() => { if (!done) { audio.se('page'); setBeat(beat + 1) } }}>
-      <SceneBg file="cg_kiro.png" />
-      <h1 className="scene-title">{ep.title}</h1>
-      <div className="scene-body">
-        {ep.beats.slice(Math.max(0, beat - 2), beat + 1).map((t, i, arr) => (
-          <p key={beat - arr.length + i} className={i === arr.length - 1 ? 'intro-current' : 'intro-past'}>
-            {t}
-          </p>
-        ))}
+    <div className="scene-screen screen dream-episode-screen" onClick={onBgClick}>
+      <div className="dream-episode-shell">
+        <h1 className="scene-title dream-episode-title">{ep.title}</h1>
+        <DreamVisual episode={ep} />
+        <div className="scene-body dream-episode-body">
+          {ep.beats.slice(Math.max(0, beat - 2), beat + 1).map((t, i, arr) => (
+            <p key={beat - arr.length + i} className={i === arr.length - 1 ? 'intro-current' : 'intro-past'}>
+              {t}
+            </p>
+          ))}
+        </div>
+        <div className="dream-episode-controls" data-zone="dream-episode-controls">
+          {done ? (
+            <button className="btn btn-main" onClick={processNextScene}>
+              目を覚ます
+            </button>
+          ) : (
+            <ScenePager page={beat + 1} total={ep.beats.length} onNext={advance} />
+          )}
+          {!done && !replaying && <SceneComfortControls onDefer={deferCurrentScene} onSkip={skipCurrentScene} />}
+        </div>
       </div>
-      {done ? (
-        <button className="btn btn-main" onClick={processNextScene}>
-          目を覚ます
-        </button>
-      ) : (
-        <ScenePager page={beat + 1} total={ep.beats.length} onNext={() => { audio.se('page'); setBeat(beat + 1) }} />
-      )}
     </div>
   )
 }
 
-// cut(斬る=夜明け)の後日談。クライマックス(ENDINGS.cut.beats=看取り・面砕け)と重複させず、
+// cut(送る=夜明け)の後日談。クライマックス(ENDINGS.cut.beats=看取り・面砕け)と重複させず、
 // その「あと」だけを描く — 夜が明け、太陽が昇り、八季で死なぬ子が生まれ、家譜が閉じられる。
 const ENDING_CLEARED = [
   '夜が、明けてゆく。最初の朝日が大燈籠の天辺に触れ、郷中の灯が一斉に消えた——もう、要らないから。',
@@ -613,7 +699,7 @@ const ENDING_EXTINCT = [
   '綴「いつか誰かが、この記を読む。ならばこれは敗北ではない。……中断だ」',
 ]
 
-// v3.2 M18: 結末別エピローグ。cut(斬る=夜明け)は ENDING_CLEARED を流用。
+// v3.2 M18: 結末別エピローグ。cut(送る=夜明け)は ENDING_CLEARED を流用。
 // save(救う)/inherit(継ぐ)は「夜は残る」帰結のため、太陽・夜明けを断言しない専用の結びを用意する。
 const ENDING_SAVE = [
   '当主は家譜を開き、千年分の名を、汐里と二人で読み上げていく。',
@@ -635,22 +721,35 @@ const ENDING_INHERIT = [
 
 // 最終決戦後の選択(v3.1 M15-4) — 千年の結末を、一族が選ぶ
 export function FinaleScene() {
+  const data = useGame((s) => s.data)!
   const resolveFinale = useGame((s) => s.resolveFinale)
+  const memories = familyFinaleEchoes(data)
   return (
-    <div className="scene-screen screen">
+    <div className="scene-screen screen finale-screen">
       <SceneBg file="cg_kiro.png" />
       <div className="birth-flame">🔥</div>
       <h1 className="scene-title">千年の岐路</h1>
-      <div className="scene-body">
+      <div className="scene-body finale-intro">
         <p>汐里は楽を置き、静かにこちらを見ている。</p>
         <p>「……ここから先は、生きている者が決めることよ」</p>
-        <p style={{ color: 'var(--text-dim)', fontSize: 13, marginTop: 10 }}>この選択が、一族の千年の答えになる。</p>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 460, margin: '0 auto' }}>
+      <section className="finale-memory" aria-label="一族がここまで運んだもの">
+        <p className="finale-question">今代の問い<span>{data.narrative?.generationQuestion ?? generationQuestion(data)}</span></p>
+        <div className="finale-echoes">
+          {memories.map((memory) => (
+            <p key={`${memory.label}:${memory.text}`}>
+              <span>{memory.label}</span>{memory.text}
+            </p>
+          ))}
+        </div>
+        <p className="finale-resonance">{resonanceLine(data)}</p>
+      </section>
+      <p className="finale-prompt">この選択が、一族の千年の答えになる。</p>
+      <div className="finale-choices" data-zone="finale-choices">
         {FINALE_CHOICES.map((c, i) => (
-          <button key={c.id} className="btn" style={{ textAlign: 'left' }} onClick={() => resolveFinale(i)}>
+          <button key={c.id} className="btn finale-choice" onClick={() => resolveFinale(i)}>
             <b>{c.label}</b>
-            <span style={{ display: 'block', fontSize: 12, color: 'var(--text-dim)' }}>{c.desc}</span>
+            <span>{c.desc}</span>
           </button>
         ))}
       </div>
@@ -671,7 +770,8 @@ export function EndingScene() {
   const climaxBeats = ENDINGS[endType].beats
   // v3.2 M18: 結末別エピローグ。cut=夜明け(ENDING_CLEARED)、save/inherit=夜が残る帰結へ整合。
   const epilogue = endType === 'save' ? ENDING_SAVE : endType === 'inherit' ? ENDING_INHERIT : ENDING_CLEARED
-  const beats = cleared ? [...climaxBeats, ...epilogue] : ENDING_EXTINCT
+  // M34: 山場の直後に、このsaveの固有名・形見・土地から導いた一文だけを差し込む。
+  const beats = cleared ? [...climaxBeats, personalizedEndingBeat(data, endType), ...epilogue] : ENDING_EXTINCT
   const done = beat >= beats.length - 1
   // 山場(cut/save/inherit別)→_a、その後の共通エピローグ(ENDING_CLEARED)→_b。断絶(未clear)は画無し。
   const endingBg = cleared ? (beat < climaxBeats.length ? `cg_end_${endType}_a.png` : `cg_end_${endType}_b.png`) : null
