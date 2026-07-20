@@ -1,7 +1,7 @@
 # 『灯継ぎ -HITSUGI-』マーケティング設計書
 
-**公開URL**: https://umine2025.github.io/hitsugi/
-**リポジトリ**: https://github.com/UmiNe2025/hitsugi
+**公開URL**: https://hitsugi-game.github.io/hitsugi/
+**リポジトリ**: https://github.com/hitsugi-game/hitsugi
 **初回リリース**: 2026-07-02
 
 ---
@@ -56,7 +56,7 @@
 > 誰も届かなかった常夜の山の頂を目指す世代交代RPG。
 >
 > インストール不要・スマホOK・セーブあり
-> ▶ https://umine2025.github.io/hitsugi/
+> ▶ https://hitsugi-game.github.io/hitsugi/
 >
 > (2/4) このゲームには「辞世の句」があります。
 > 性根と生き様で変わる、その人だけの最期の言葉。

@@ -4,8 +4,8 @@
 
 `main` へ push すれば GitHub Actions が自動でビルド・デプロイする。手動作業は不要。
 
-- 公開URL: https://umine2025.github.io/hitsugi/
-- リポジトリ: https://github.com/UmiNe2025/hitsugi
+- 公開URL: https://hitsugi-game.github.io/hitsugi/
+- リポジトリ: https://github.com/hitsugi-game/hitsugi
 - ワークフロー: `.github/workflows/deploy.yml`(既存)
 
 ## アクセス解析(GoatCounter)
@@ -22,7 +22,7 @@
    - サブドメイン(サイトコード)を選ぶ。例: `umine2025` を選ぶと `https://umine2025.goatcounter.com` で管理画面
 2. **設定ページで hitsugi の設定**:
    - Site title: 灯継ぎ -HITSUGI-
-   - Site URL: `https://umine2025.github.io/hitsugi/`
+   - Site URL: `https://hitsugi-game.github.io/hitsugi/`
    - Public: OFF(推奨、他人にダッシュボードを見せないなら)
 3. **サイトコードを反映**: `index.html` の GoatCounter script タグの `data-goatcounter` URL を:
    ```html

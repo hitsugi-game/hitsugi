@@ -1,17 +1,20 @@
-# 開発ステータス(2026-07-15 更新)
+# 開発ステータス(2026-07-20 更新)
 
 **v3.1目標にほぼ到達**: 神180柱・敵147基礎+変異(_w/_o)・装備810・辞世1370・事件270・地域40・画像2107枚。**キャラアニメ強化**(呼吸2重/lunge3段/victoryJump段階化/待機時歩行コマ循環)完了。**変異絵promptEn 147基礎種全カバー**(nova誤読対策の英語外見記述、変異は自動継承)。
 
 ## 🎉 リリース済み・稼働中
 
-- **公開URL**: https://umine2025.github.io/hitsugi/ (GitHub Pages、`main`へpushで自動デプロイ)
-- **リポジトリ**: https://github.com/UmiNe2025/hitsugi (public)
-- **v0.1.0 タグ**: https://github.com/UmiNe2025/hitsugi/releases/tag/v0.1.0
-- **v0.2 相当のローカル状態**: M13物量1.5倍完了・UX改善(オート永続/攻撃ワンタップ化)完了・可視化強化(minimap facing/進度/石碑ダイヤ・灯パルス警告・敵影テレグラフ早期化)完了。**未push**。
+- **公開URL**: https://hitsugi-game.github.io/hitsugi/ (2026-07-20 HTTP 200確認、GitHub Pages、`main`へpushで自動デプロイ)
+- **リポジトリ**: https://github.com/hitsugi-game/hitsugi (public、`UmiNe2025`からOrganizationへ移管済み)
+- **v0.1.0 タグ**: https://github.com/hitsugi-game/hitsugi/releases/tag/v0.1.0
+- **公開HEAD**: `478be96241124aa5c530acac2b768c8e1d9a7824`。ローカルHEAD/new origin HEAD一致。旧Pages URLは404。
+- **次の実装単位**: M34は独立監査完了。ユーザー承認後にcommit/pushし、その後`docs/CODEX_MASTERPLAN_DRAFT.md`のPhase 0へ進む。
+- **UI v2基準画像（実装前）**: `docs/visuals/ui-v2/`にHome・戦闘・Dungeon・郷・鍛冶の5点とmanifestを追加。Phase 0のlayout合格後、画面別に採用・分解・性能検証する。配信コードへの組込みは未実施。
+- **M34物語・画像統合（ローカル実装・検証完了、未公開）**: 夢順序/永続scene queue/汐里名開示migration、Home「灯の余白」と章・夢の進行不変再読/7日一度通知、出立〜郷の短い残響、形見/家系図/Finale個人化、匿名体験集計、夢固有CG7点を実装。夢3は疑似文字を除去。Vitest 616、M34 E2E全5幅40＋最終影響範囲15、全既存spec PC/390px代表回帰91合格・1意図的skip。commit/pushは未実施。
 
 ## 直近のマイルストーン(v3.1 M13以降)
 
-- **M27 地域固有ダンジョン・稀相遺物(2026-07-15 ローカル実装・未push)**:
+- **M27 地域固有ダンジョン・稀相遺物(実装・公開済み)**:
   - 非塔39地域を全て歩行化し、静的マップ **171層**。常夜百層は別枠100層。
   - 全40地域へ固有の地相文・プロップ4軸を追加。既存の配色/材質/粒子/ランドマークと合成。
   - 特殊影18%を金影13%/稀相5%へ分割。稀相勝利時のみ産地付き「秘」装備を遠征戦利品へ確定追加。
@@ -46,11 +49,12 @@
 
 ## ユーザー承認が必要な残作業
 
-1. **push(GitHub Pages自動デプロイ)** — 現在ローカルmainのみ。反映は「push して」の一言で。
-2. **X告知**: `docs/MARKETING.md` の文面をコピペ投稿。
-3. **itch.io登録**: 英語ストア文面も同ファイルに用意済み。
-4. **フリーゲームポータル登録**(ふりーむ!等)。
-5. アクセス解析の導入判断(GoatCounter等)。
+1. **M34のcommit/push** — ローカル実装の独立監査後に判断。pushは公開デプロイのためユーザーの明示承認が必要。
+2. **UI再設計Phase 0の実装と検収** — 現在は計画・before証拠のみ。
+3. **X告知**: `docs/MARKETING.md` の文面をコピペ投稿。
+4. **itch.io登録**: 英語ストア文面も同ファイルに用意済み。
+5. **フリーゲームポータル登録**(ふりーむ!等)。
+6. アクセス解析の導入判断(GoatCounter等)。
 
 ## 既知の残タスク(次期候補)
 

@@ -1128,3 +1128,21 @@
 - **原因/是正**: 閉じるは topbar 内の「閉じる」+ESC+背景クリックだが、(1)全画面modalは背景全面を覆い背景クリック不可、(2)topbarのwrapや端末ノッチ(safe-area未考慮)で「閉じる」が埋もれ/隠れうる、(3)`.modal`の背景がfullscreen変種で効かず半透明に見えHomeが透けて「別画面」と認識されない。→ 常設の固定「✕ 閉じる」(topbar/ノッチに隠れない・44px・aria)を追加、safe-area padding、高詳細度規則で不透明背景を明示、topbarの旧「閉じる」は撤去。
 - **検証**: tsc0/lint0/build緑。回帰テスト `familytree_close.spec` を新設し全5幅で「固定閉じる釦が可視・44px・押下でHomeへ戻る」を固定(5緑)。実機スクショで不透明表示+釦視認を確認(初回の透け見えはscreenInフェード中の撮影アーティファクトと判明)。
 - **デプロイ実行**(ユーザー承認「デプロイしてください」): build緑→commit `8259404` を push。GitHub Actions run 29629866297 success(build 45s+deploy 15s)、https://umine2025.github.io/hitsugi/ 公開反映済み。
+- **2026-07-20 Organization移管/引継ぎ**: 外部公開用`hitsugi-game`を作成し`hitsugi`を移管。新repo/Pages/HEAD/old URL 404/local remote更新とClaude Codeの再開手順を `docs/CODEX_HANDOFF.md` に記録。
+- **2026-07-20 UI v2設計強化/主要画像5点**: Home・戦闘・Dungeon・郷・鍛冶の感情曲線、固有文法、画面状態、実装/人間受入gateを`docs/CODEX_MASTERPLAN_DRAFT.md`と`docs/qa/ui-audit-baseline-20260720.md`へ追記。built-in image generationで文字なし基準画像5点を`docs/visuals/ui-v2/`へ保存し、prompt・寸法・SHA-256・目視採否をmanifest化。ゲームコード、commit、pushは未実施。
+- **UI v2 Forge検収**: 独立評価を固定5軸（初期フック/世界固有性/快適な判断/報酬因果/実装具体性）で実施し、4/4/4/5/4、blocking 0で初回PASS。相対リンク、画像寸法/hash、正典URL、旧URL誤用を機械検査し全件PASS。
+- **2026-07-20 M34物語・画像統合計画**: 既存5章・夢渡り・郷の声・地域縁起・3結末を監査し、固定神話「汐里と玄冬の千年の二重奏」×可変主人公「各プレイヤーの燈守家」へ統合。夢の順序抜け、scene過密、gossipの一覧閉じ込め、Finaleの家族史不足をP0/P1化し、N0〜N4の実装/受入を`docs/NARRATIVE_VISUAL_INTEGRATION_PLAN.md`へ記録。
+- **2026-07-20 夢渡りCG候補7点**: built-in image generationで旅人/空の子/二重奏/飢え/太陽の日/薪の契り/千年の招待を生成し、`docs/visuals/story-v2/`へ保存。全点1672×941 JPEG、500KB未満。prompt、hash、人物同一性、目視採否、lazy-load/crop規則をmanifest化。ゲームコード、commit、pushは未実施。
+- **2026-07-20 M34物語・画像統合Forge**: 固定5軸/客観gateで独立評価を4round実施。R1は汐里名の開示、`cut`動詞、mobile cropの3 blocking、R2は早期実名露出/legacy、R3はch4冒頭と完了条件/new-old v4判別を指摘。欠陥限定修正後のR4で**PASS**（家族5/謎5/世代5/快適4/画像4、blocking 0）。最終仕様はch4最終頁/skipの原子的開示、`m34_narrative_schema` sentinel、sentinel欠落legacyだけ一度導出/recap、表示`送る`、360/390/768px 16:9 contain全景。`docs/CODEX_FORGE_STATE.md`を合格で閉鎖。ゲームコード、commit、pushは未実施。
+
+## 2026-07-20 (M34 物語・画像統合 N0〜N4 — /mission、ローカル実装)
+
+- **物語順序/永続化**: `NarrativeProgress`を追加し、初回夢→夢2〜8の順序、同月の強制scene最大1件、完読/skip/後回し、途中reload回収を実装。ch4最終頁/skipだけで`汐里`を原子的に開示し、M34 sentinel欠落legacyのみv1/v3/v4から一度導出・補記する。
+- **随所の残響**: Home「今月の物語」「灯の余白」、出立の問い、Dungeon入場、主の願い、勝利鎮魂、帰還三痕、郷の実NPC会話を接続。物語を読まなくても攻略操作を止めない短文表示とした。
+- **家族史/Finale**: 一代の問い、形見の最初の持ち主/戦果/辞世、家系図、実save由来の固有名最大3件、非誘導resonanceを接続。三択は`送る/救う/継ぐ`の同順・同格を維持し、山場後へ結末別の固有一文を追加。
+- **画像**: `cg_dream_02.jpg`〜`08.jpg`を配信素材へ採用。16:9 `contain`、60〜90字alt、fallback、次篇1枚だけのidle preload。夢3は人物・構図を保持して左端の疑似文字だけをbuilt-in image editで除去し、正典/hashを更新。
+- **N4匿名集計**: scene開封/完読/skip/後回し/滞在時間、未読最大数、月送り/直後中断をsave内へ集計。外部送信・本文保存はしない。
+- **快適性補完**: 独立監査の非阻害メモを受け、章・夢だけを進行/計測不変で再読するarchive、初期6件＋残件展開、未読が実時間7日残った時だけ一度出る非modal通知を追加。日常lifeがarchiveを埋めないunitも固定した。
+- **検証**: Vitest 616件。M34直接Playwright 40/40（全5幅）、最終補完の影響範囲15/15（全5幅）。全20 visual specのPC 1280px/390px代表回帰91合格・1件意図的skip。lint/build/diff-check成功。全230件/代表2幅の再一括は実行上限内に終わらなかったため、変更範囲を全5幅で完走し、既存の代表回帰証拠と組み合わせた。
+- **独立監査**: fresh agent最終**PASS / blocking 0**。初回の非阻害メモから再読/7日通知を補完し、再監査で見つかった日常lifeによるarchive圧迫を章・夢限定＋6件/残件展開へ修正。独立focused 55/55、mobile-360 E2E、diff-checkも再合格。
+- **公開境界**: commit、push、deployは未実施。`main` pushは公開デプロイなのでユーザー承認待ち。
