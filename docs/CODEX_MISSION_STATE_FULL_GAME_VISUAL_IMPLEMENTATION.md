@@ -70,7 +70,7 @@
 
 ## ⑦次の一手
 
-公開前Ship Check、正典、STATUS、WORKLOGと本表をterminal化する。外部8名と物理端末は別gateとしてHOLDを維持し、公開後も`regionVisualV2`既定OFFを変えない。
+default-OFF公開はHEAD `91d54ca78f554a866c3b0ef09adbed3cfb557eea`、Actions run `29802506479`で完了。次は外部8名blindと物理低性能端末を実施し、結果が基準を満たす場合だけ`regionVisualV2`のproduction cohort有効化とAR1 Phase Exitを別途判断する。
 
 ## ⑧最終監査表
 
