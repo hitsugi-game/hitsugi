@@ -3475,7 +3475,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/StarLottery.tsx",
-        "sourceSha256": "5192d1da95d075cc310e938b84bc6245b46f4c18dd241ec9538e997bf19d9dce",
+        "sourceSha256": "8b75e06b1c33ea5dcb95984eae53447a796c984fefebe15afb2c285c6ae89fbb",
         "runtimePath": "src/ui/star_lottery.css",
         "runtimeSha256": "66925c5c8b71aad98541f1b65a664f032581885490c7e9c087e86975e4dc68d4",
         "rightsStatus": "pending",
