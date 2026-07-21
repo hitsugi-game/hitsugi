@@ -2,18 +2,14 @@
 
 **2026-07-22 runtime実測**: 神180柱・敵579体（通常基礎180＋若/老変異＋主39）・装備810・辞世1370・事件282・地域40・配信画像2825点。**次の制約は物量でなく、初回30分・戦闘の対処差・初代継承・実利用計測・公開前検証**。M42監査の正本は`docs/PRODUCT_IMPROVEMENT_AUDIT_M42_20260722.md`。
 
-## ローカル実装完了・未公開
-
-- **M43 初回体験・継承・戦闘文法・星籤**: M42 P0 4件と即時修正を実装。Home最優先1件、初帰還後の日参り、星契り推奨3柱、唯一成人の初期編成、画面scroll/focus、mobile周辺5地点、宝具録検索、郷keyboard、recoverable export、年月/versionを整えた。後継指名＋3つの約束から実在事実2件を返す継承sceneを追加。序盤12敵は止/受/崩を各4種、全オートも兆しへ対応。save-local 9 milestoneと、全39主を武功解禁順の実探索・実戦闘で進み、寿命死、初継承、灯ノ御山まで走る100 seed campaign harnessを追加した。
-- **星籤の安全境界**: 初帰還1回＋武功50ごと、武功非消費、下60/中28/上10/極2、10回未所持、20回上以上、50回極、重複は縁+1。現金・有償通貨・日課・期間限定・限定必須戦力なし。既存神像のみで新規画像0。
-- **ローカルgate**: Vitest 43 files / 721 tests、oxlint、production build、visual closure 23 routes / 40 regions / 6 overlays / 69 entries、PC1280/mobile390の初回導線・後継/約束・星籤・戦闘兆しを合格。campaign simは全39地域を解禁順に通し、独立Round 3でPASS / blocking 0。commit/push/deployは未実施。
-
 ## 履歴（M38/M37は後続リリースへ統合済み）
 
 - **M38 郷ラスター環境画・出立国絵図**: 郷V2の地面・家・灯籠・井戸・池・植栽を一枚の高品質ラスター環境画へ統一し、簡易図形propを通常経路から撤去。collision/BFS/focusは既存`MAP`が所有し、画像取得失敗時は従来V2へ縮退する。郷人も既存歩行スプライトへ置換。出立は40地域サムネイル札の列から、燈ノ郷→4風土→玄冬の座を一筆で結ぶ縦長国絵図＋DOM道標へ変更。追加2素材は2026-07-21に公開・商用利用承認済みで、後続releaseへ統合済み。
 - **M37 画材境界の統一**: 世界絵をラスター、SVG/Pixi Graphicsを情報層へ限定。Title/NightBackdrop/出立地図/神・敵・地域fallbackから簡易風景・シルエットSVGを撤去。出立は40地域の実景道標へ変更し、Dungeonは地域画を常設。新規画像0・ゲームロジック変更0。後続releaseへ統合済み。
 
 ## 🎉 リリース済み・稼働中
+
+- **M43 初回体験・継承・戦闘文法・星籤（公開済み）**: M42 P0 4件と即時修正を実装。Home最優先1件、初帰還後の日参り、星契り推奨3柱、唯一成人の初期編成、画面scroll/focus、mobile周辺5地点、宝具録検索、郷keyboard、recoverable export、年月/versionを整えた。後継指名＋3つの約束、序盤12敵の止/受/崩、全オート兆し対応、save-local 9 milestone、全39地域100 seed campaignを追加。星籤は初帰還1回＋武功50ごと、武功非消費、下60/中28/上10/極2、10/20/50回保証、重複は縁+1、現金・日課・期間限定・限定必須戦力なし。721 tests、lint/build、closure 23/40/6/69、独立Round 3 PASS / blocking 0。実装`dbe2968`、closure hash修正`6ef7d4a`、Actions run `29875134003`でPages公開成功。公開JS `index-9Rbl6Hir.js`とCSS `index-Bg1TF1DE.css`をHTTP 200で確認した。
 
 - **M41 郷・一族小札レイアウト修正（公開済み）**: 小札の168px幅と氏名への`overflow-wrap:anywhere`が重なった縦割れを修正。286px基準（最小248px）の横送り家譜札へ変更し、PCは2札、mobileは1札を可読表示、3人以上はscroll-snap付き横送りとした。5幅回帰34 passed / 6 intended skip、Vitest 701、lint/build、closure 68/68合格。commit `ac903fa`、Actions run `29862456965`成功。公開`index-CxttKBp1.css` / `index-B0HgjgmB.js`はHTTP 200でローカルbuildと一致。
 

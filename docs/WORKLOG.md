@@ -1324,3 +1324,5 @@
 - **campaign最終監査**: Round 2は3地点だけの解禁無視をblockingとした。Round 3では宵の森の主代役を含む非塔39地域を武功順に実戦闘し、各`unlockFame`、第四章、汐里名開示を強制検査。最終一人probeの敗北→回復→全隊再挑戦、全主踏破率、平均進捗、通貨分位、seed 37完全一致を確認し、独立focused 2/2、diff-check合格、**PASS / blocking 0**。100 seedはQA policyの基準線であり、実ユーザー/低性能実機の代替ではない。
 - **最終回帰**: 最新差分でVitest **43 files / 721 tests**、oxlint、production buildを再合格。重い100 seedと並列になった既知M34 dynamic-import hookの10秒timeoutを30秒へ現実化し、その後のfull suiteを単独再実行して全緑を確認した。
 - **公開境界**: ローカル実装のみ。外部初見8名、一世代5名、物理低性能端末、analytics providerは別gate。既存baseline PNG 9点と`tmp/`は保護し、commit/push/deployなし。
+- **公開とCI自己修復**: ユーザーの明示依頼を受け、対象48ファイルだけを実装commit `dbe2968`へまとめてmainへpush。初回Actions run `29875031774`は、末尾空行整理後の`StarLottery.tsx`とclosure台帳SHA-256がずれたためVitestで停止し、deployは未実行。正規化promotion scriptで台帳1件を再生成し、focused 8/8とclosure 23/40/6/69を確認して`6ef7d4a`をpushした。
+- **公開完了**: Actions run `29875134003`でnpm ci、lint、data validation、Linux全Vitest、production build、artifact upload、Pages deployが成功。`https://hitsugi-game.github.io/hitsugi/`はHTTP 200、公開JS `assets/index-9Rbl6Hir.js`は星籤とcommit `6ef7d4a`を含み、CSS `assets/index-Bg1TF1DE.css`も星籤styleを含むことを直接確認した。基準画像9点、`tmp/`、既存未追跡M40/M42文書はcommit対象外のまま保護した。
