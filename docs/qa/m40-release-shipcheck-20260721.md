@@ -45,3 +45,11 @@ Round 2は **PASS / blocking 0**。オートと手動は同じ`battleCommand`/`f
 ## Rollback
 
 公開後に重大回帰が確認された場合は、M40実装commitを通常の`git revert <commit>`で打ち消してmainへpushする。saveはoptionalな`collectionV2`と`trainingMarks`を採用し、旧saveの読み込みを維持する。
+
+## Deployment evidence
+
+- Implementation commit: `2e86a9d2cbebb5c6f94c4b90e86293eed044d2d8`
+- GitHub Actions: `29840283003` — build/deploy success
+- Public URL: `https://hitsugi-game.github.io/hitsugi/` — HTTP 200
+- Public bundles: `assets/index-B_V4tnw1.js`, `assets/index-mEc4m8Cz.css` — HTTP 200 and local build names match
+- Runtime markers in public JS: `宝具系譜録`, `ここで止める`

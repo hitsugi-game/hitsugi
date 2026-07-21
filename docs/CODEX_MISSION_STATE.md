@@ -19,7 +19,7 @@
 | D. 全戦闘オート強化 | A | settings/store/Battle/tests | 全戦闘常時、3方針、任意停止、報酬差0、戦果最大4行 | completed |
 | E. 煤墨意匠統合 | B-D | scoped CSS/components | 一画面一主役、PC/390、keyboard/reduced-motion | completed |
 | F. 統合検証・監査 | B-E | test/lint/build/Playwright/independent review | blocking 0、SHIP以上 | completed |
-| G. 公開 | F | selective commit/push/Actions/public HTTP | Actions success、公開HTML/bundle HTTP 200 | pending |
+| G. 公開 | F | selective commit/push/Actions/public HTTP | Actions success、公開HTML/bundle HTTP 200 | completed |
 
 ## ③完了済み
 
@@ -47,10 +47,11 @@
 - M40-1: collection/save/training/auto/UI/CSS実装と自己修復を完了。実画面証拠を`tests/visual/.shots/m40-*`へ取得。
 - M40-2: ローカル機械gateとPC 1280/mobile 390の操作・目視gateを通過。独立監査とShip Checkへ移行。
 - M40-3: 独立監査Round 2 PASS / blocking 0。Ship CheckはSHIP-with-notes。既知noteはmain chunk 1.42MBと既存神位階分布warn 1件のみ。
+- M40-4: 実装commit `2e86a9d`をmainへpush。Actions run `29840283003`のbuild/deployが成功し、公開HTML、JS、CSSはHTTP 200。公開bundle名はローカルbuildと一致し、新機能文字列も配信bundle内で確認。
 
 ## ⑦次の一手
 
-- 対象ファイルだけを選択的commitし、main push後にActionsと公開HTML/bundleを確認する。
+- Mission完了。次工程は公開後の実利用観察と、M40計画Phase 0-3の初回30分改善。
 
 ## ⑧最終監査表
 
@@ -58,4 +59,4 @@
 
 ## ⑨terminal印
 
-稼働中 — 2026-07-21T22:40:00+09:00。
+完了 — 2026-07-21T23:43:00+09:00。実装`2e86a9d` / Actions `29840283003` / 公開確認済み。
