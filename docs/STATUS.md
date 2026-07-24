@@ -4,7 +4,7 @@
 
 ## 直近の公開修正
 
-- **M50 適応型音楽・一族人物表示（ローカル実装・公開検証中）**: 全23画面を11曲へ割り当て、通常/稀相/主戦、戦況tension、家祖ID由来の血脈三音、句構成、crossfade、重要SE duckを実装。music/effects/ambience bus、4音量、消音、起伏控えめ、gesture unlock、非表示停止/復帰を追加し、旧地域環境音は0.38秒fade後に切断する。一族小札は横送り不要のgridへ変更し、玄を含む灯形未決定の幼子は既存人物顔を仮肖像として表示する。新規音源/画像0、save/戦闘計算/報酬/全戦闘オート不変。focused Vitest 12、Playwright PC/mobile 14、全Vitest 765、lint/data/build/closure69/manifest9、npm audit 0、実ブラウザ設定幅820px/mobile390 overflow 0に合格。`face_*`の生成モデル系譜は既存未確認gateを継承し、M50では公開済みファイルの再利用に限定する。
+- **M50 適応型音楽・一族人物表示（公開済み）**: 全23画面を11曲へ割り当て、通常/稀相/主戦、戦況tension、家祖ID由来の血脈三音、句構成、crossfade、重要SE duckを実装。music/effects/ambience bus、4音量、消音、起伏控えめ、gesture unlock、非表示停止/復帰を追加し、旧地域環境音は0.38秒fade後に切断する。一族小札は横送り不要のgridへ変更し、玄を含む灯形未決定の幼子は既存人物顔を仮肖像として表示する。新規音源/画像0、save/戦闘計算/報酬/全戦闘オート不変。focused Vitest 12、Playwright PC/mobile 14、全Vitest 765、lint/data/build/closure69/manifest9、npm audit 0、独立/security監査blocking 0。実装`6c8d2a5`、Actions run `30128251561`でPages公開成功。公開HTML/JS/CSSと人物顔をHTTP 200で確認。`face_*`の生成モデル系譜は既存未確認gateを継承し、権利確認済みとは扱わない。
 
 - **M47 郷の薬種見世・戦支度盤（ローカル実装・未公開）**: 郷の「すぐ行く」と豆腐屋から、既存回復薬を月消費なしで直接購入できる薬種見世を追加。所持・効果・価格・武功解禁・不足を一画面に集約し、共通Sheetの外側click/Escape/focus復帰を維持。PC戦闘盤は最大1180pxで中央寄せし、手番者の顔、各行動の目的、敵勢/広域兆し/携行薬、薬切れ補充案内を追加した。戦闘計算・全戦闘オート・報酬・save schemaは不変。lint/data/build/visual closure/manifest/Vitest全750件と、実ブラウザPC1280/mobile390の購入・幅・overflow確認に合格。commit/push/deployなし。
 - **M48 戦果後の戦況ログと固定継続CTA（ローカル実装・未公開）**: 勝敗画面の左側に既存戦闘ログの直近8行を残し、右側を結果本文のスクロール領域と独立CTAへ分離。`夜藪に、僅かな静けさが戻った。`を含む戦況の記憶を結果確認中も保持し、`戦果を携えて進む`は本文をスクロールせず押せる構造にした。M47の戦闘計算・報酬精算・全戦闘オートは不変。lint/data/build/visual closure/manifest/Vitestと実ブラウザPC/mobile確認後にpush/deploy予定。

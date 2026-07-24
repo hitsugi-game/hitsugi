@@ -20,7 +20,7 @@
 | D. 設定UI・一族配置 | B | main | 4音量操作、互換、PC/mobile横スライド0 | completed |
 | E. 検証・自己修復 | B-D | main | unit/lint/data/build/visual/実ブラウザ | completed |
 | F. 独立監査・shipcheck | E | fresh reviewer + main | blocking 0、SHIP系判定 | completed |
-| G. 正典・公開 | F | main | GDD/STATUS/WORKLOG、対象限定commit、Actions success、公開実測 | in_progress |
+| G. 正典・公開 | F | main | GDD/STATUS/WORKLOG、対象限定commit、Actions success、公開実測 | completed |
 
 ## ③完了済み
 
@@ -48,6 +48,7 @@
 - M50-1: 純粋audio model、適応型音響、設定、一族grid、玄の仮肖像を実装。実画面で設定幅を自己修復。
 - M50-2: 全機械/実画面回帰、権利記述、closure追跡、dependency audit、環境音tail、visibility挙動を閉鎖。独立最終再監査待ち。
 - M50-3: independent/securityの両監査をblocking 0で閉鎖。正典同期とShip Checkを完了し、対象限定commit/pushへ移行。
+- M50-4: 実装`6c8d2a5`をmainへpush。Actions run `30128251561`成功。公開HTML/JS/CSS/人物顔HTTP 200、M50 marker 4件、production test hook 0を確認。
 
 ## ⑦次の一手
 
@@ -61,8 +62,8 @@
 - ✅ 設定/一族UI: 4音量、起伏控えめ、一族grid、灯形未決定人物の仮肖像を実装。
 - ✅ 回帰/実ブラウザ: Vitest 765、Playwright PC/mobile 14、設定実画面、visibility復帰まで合格。
 - ✅ 独立/安全監査: independent PASS、security PASS、blocking 0。Ship CheckはSHIP-with-notes。
-- ⚠️ ship/deploy: commit、push、Actions、公開版実測は未実施。
+- ✅ ship/deploy: commit `6c8d2a5`、Actions `30128251561`、Pages公開、cache回避実測まで完了。
 
 ## ⑨terminal印
 
-稼働中 — 2026-07-25T06:34+09:00。全検証・独立監査・Ship Checkを終え、commit/push/Pages公開へ進行中。
+完了 — 2026-07-25T06:38+09:00。実装・自己修復・全回帰・独立/security監査・Ship Check・main push・Pages公開実測を完了。残る実試聴/Safari/物理低性能端末/既存face系譜は外部gateとして分離。
