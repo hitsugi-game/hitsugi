@@ -1398,3 +1398,13 @@
 - **報告**: Home上部の「決断を見る」が反応しないように見えるとの指摘。ローカルDOMではクリックとscrollIntoView自体は動作していたが、移動後の選択カードへ視覚的なフォーカスが渡らないことが主因と判断した。
 - **修正**: `Home.tsx`へ`jumpToDecisions`を追加し、`monthly-decisions`へスクロール後、最初の有効な`.action-cards`ボタンへ`focus({ preventScroll: true })`を移す。`aria-controls`、`data-testid`、`scroll-margin-top:96px`を追加した。決断カードの処理は変更していない。
 - **受入**: M49 contract test 2件、lint、build、実ブラウザHomeで`scrollY:0→約47px`、`#monthly-decisions`の表示、最初の有効カード「出立 — 夜藪へ」へのfocus移動を確認した。公開は別途明示依頼後。
+
+## 2026-07-25（M50 適応型音楽・一族人物表示）
+
+- **依頼/契約**: 音楽で世界へ引き込み、専門家レビュー、実装、直接検証、独立監査、Pagesデプロイまで行う。同一missionへ、一族小札の横スライド解消と、玄が火の玉になる人物画像欠陥を統合。第三者音源/有償サービス、新規物語・戦闘計算・報酬・save変更は対象外。
+- **専門監査**: 音楽視点で短い固定loop、句の不在、場面回収不足を、Web Audio視点で単一bus、直切替、visibility/gesture/cleanup、重複click SEを課題化。平調子の6句、11場面曲、血脈音、通常/稀相/主戦、3bus、crossfade、duck、1 scheduler契約へ収束した。
+- **実装**: `audio_model.ts`を画面割当、戦況、句構成、mix migration、遷移長の純粋単一情報源として追加。`audio.ts`をcompressed master配下のmusic/effects/ambience、gesture unlock、非表示停止/復帰、希望状態再同期、crossfade、重要SE duckへ更新。Settingsへ4音量、現在曲、起伏控えめを追加し、PC幅820px/mobile一列へ修復した。
+- **人物/配置**: 一族小札をauto-fit gridへ変更。灯形未決定・元服前は属性別の既存顔絵を仮肖像として用い、玄を含む幼子を炎へ縮退させない。灯形決定時に候補連鎖を確実に初期化する。新規画像0。独立監査で`face_*`の生成モデル系譜が既存未確認と再確認されたため、権利確認済みとは扱わず、公開済み素材の同一ゲーム内再利用と既存gate継承を正典化した。
+- **中間検証**: audio model/UI contract 12/12、M50＋一族/星契りPlaywright PC1280/mobile390 14/14、lint、production build、diff-checkに合格。実ブラウザで設定PC `clientWidth=817=scrollWidth`、mobile `389=389`、4音量/現在曲/起伏控えめを確認。全回帰・独立監査・Ship Check・Actions/公開実測は後段に記録する。
+- **監査自己修復**: セキュリティ監査の旧環境音tail指摘を、地域専用gainの0.38秒fade/700ms disconnectで解消。独立監査のvisibility挙動証拠不足も、PC/mobileのhidden→suspend/timer 0→visible→希望曲/環境音復帰testで閉じた。Settingsのclosure evidenceへM50 E2Eを追加し、promotion scriptも複数evidenceを維持する形へ更新した。
+- **Ship Check結論**: 全Vitest 51 files/765、Playwright M50＋一族/星契りPC/mobile 14、lint、data、build、closure 69、manifest 9、diff-check、秘密scan、新規外部素材0に合格。dev依存postcss high 1件は互換範囲で8.5.23へ、nanoidを3.3.16へlock更新し、`npm audit`全依存0。fresh independentとsecurity再監査はいずれもPASS / blocking 0。判定は**SHIP-with-notes**。main chunk約1.48MB、実試聴/Safari/物理低性能端末、既存face系譜を外部noteとして残す。

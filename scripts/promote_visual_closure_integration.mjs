@@ -38,7 +38,7 @@ const routeBundles = {
 const overlayBundles = {
   'family-tree': ['src/ui/FamilyTree.tsx', 'src/ui/familytree_m18.css', 'tests/visual/vc6_records_overlays.spec.ts'],
   'storehouse-tab': ['src/ui/Forge.tsx', 'src/ui/forge_vc3.css', 'tests/visual/vc3_work_surfaces.spec.ts'],
-  'settings-help': ['src/ui/Settings.tsx', 'src/ui/settings_vc6.css', 'tests/visual/vc6_records_overlays.spec.ts'],
+  'settings-help': ['src/ui/Settings.tsx', 'src/ui/settings_vc6.css', ['tests/visual/vc6_records_overlays.spec.ts', 'tests/visual/m50_audio.spec.ts']],
   'save-import-export': ['src/ui/Settings.tsx', 'src/ui/settings_vc6.css', 'tests/visual/title_vc2.spec.ts'],
   'sheet-modal': ['src/ui/layout/dialogs.ts', 'src/ui/layout/dialogs.ts', 'tests/visual/vc6_records_overlays.spec.ts'],
   toast: ['src/App.tsx', 'src/index.css', 'tests/visual/vc6_records_overlays.spec.ts'],
@@ -55,6 +55,7 @@ function sha256(relativePath) {
 }
 
 function integrate(entry, sourcePath, runtimePath, evidence, owner) {
+  const evidencePaths = Array.isArray(evidence) ? evidence : [evidence]
   entry.runtimeBundle = { path: runtimePath, sha256: sha256(runtimePath) }
   entry.provenance = {
     sourcePath,
@@ -66,7 +67,7 @@ function integrate(entry, sourcePath, runtimePath, evidence, owner) {
   }
   entry.status = 'code-integrated'
   entry.owner = owner
-  entry.evidence = [...new Set([sourcePath, runtimePath, evidence])]
+  entry.evidence = [...new Set([sourcePath, runtimePath, ...evidencePaths])]
   entry.nAReason = null
   entry.verification = {
     rights: 'pending',

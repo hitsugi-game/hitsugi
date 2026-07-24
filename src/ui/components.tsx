@@ -8,7 +8,7 @@ import type { StatKey } from '../core/types'
 import { personalityById } from '../core/data/personalities'
 import { godById } from '../core/data/gods'
 import { tozaOf } from '../core/data/toza'
-import { charSprite, faceImg, gameImg, HOME_BG, stageOf, uiIcon } from './img'
+import { charSprite, faceImg, gameImg, HOME_BG, provisionalFaceImg, stageOf, uiIcon } from './img'
 
 // 命の灯 — 炎ひとつが一季(三月)。八つの炎が「八季の命」を表す(本作の象徴UI)
 export function LifeFlames({ char, seasonIndex }: { char: Character; seasonIndex: number }) {
@@ -52,28 +52,29 @@ export function StatGrid({ stats }: { stats: Character['stats'] }) {
   )
 }
 
-// 立ち絵 — 顔絵(性根で個人が見分く)→老い姿→成人姿→灯のシルエット、の順に静かに退避。
-// 幼子はまだ型を成さぬため常に灯のシルエット。
+// 立ち絵 — 顔絵(性根で個人が見分く)→老い姿→成人姿→星脈の稽古着姿、の順に静かに退避。
+// 灯型未定の幼子も人物として見える。成人の儀で選んだ型の顔絵へ移る。
 export function Portrait({
   char, seasonIndex, size,
 }: { char: Character; seasonIndex: number; size?: 'sm' }) {
   const age = ageOf(char, seasonIndex)
   const stage = stageOf(age)
   const isChild = age < 6 || !char.tomoshigata
-  // 退避連鎖: 候補srcを順に試し、全滅なら炎(charのidが変われば連鎖をやり直す)
+  const provisional = provisionalFaceImg(char)
+  // 退避連鎖: 候補srcを順に試し、全滅時だけ炎へ退避(charのidが変われば連鎖をやり直す)
   const candidates = isChild
-    ? []
+    ? [provisional]
     : ([faceImg(char), stage === 'elder' ? charSprite(char, 'elder') : null, charSprite(char)]
-        .filter(Boolean) as string[])
+        .filter(Boolean) as string[]).concat(provisional)
   const [idx, setIdx] = useState(0)
-  const key = `${char.id}:${stage}`
+  const key = `${char.id}:${stage}:${char.tomoshigata ?? 'unformed'}`
   const [lastKey, setLastKey] = useState(key)
   if (key !== lastKey) {
     setLastKey(key)
     setIdx(0)
   }
   const src = idx < candidates.length ? candidates[idx] : null
-  const isFace = src !== null && idx === 0 && !!faceImg(char)
+  const isFace = src !== null && (idx === 0 || src === provisional)
   return (
     <span
       className={`portrait ${size === 'sm' ? 'portrait-sm' : ''} ${isChild ? 'is-child' : ''} ${isFace ? 'is-face' : ''}`}

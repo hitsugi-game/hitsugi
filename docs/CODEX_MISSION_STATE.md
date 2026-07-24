@@ -1,68 +1,68 @@
-# CODEX MISSION STATE — M46 資質成長・戦果見立て実装公開
+# CODEX MISSION STATE — M50 適応型音楽・一族札収まり改善
 
 ## ①契約
 
-- Definition of done: `docs/CHARACTER_GROWTH_REWARD_FORGE_20260724.md`を既存save互換・全戦闘オート同値で実装し、全品質gate、独立監査、shipcheck、main push、GitHub Pages公開反映まで完了する。
-- Out of scope: 新規画像・通貨・ガチャ、敵能力・寿命・AGE_CURVEでの帳尻合わせ、M45/M45Aの別施策実装、無関係なリファクタ。
-- Constraints: Lv1現行能力互換、旧人物弱体化0、level熟達非遺伝、全戦闘オート維持、手動/オート全副作用一致、既存正本差分保全。
-- Permission boundary: ユーザーが本依頼で対象変更の実装・commit・main push・GitHub Pages deployを明示承認。破壊操作、費用、他repo、scope拡張は不可。
-- Escalation: 認証不能、秘密情報、既存save破損、正本変更が必要なblockingだけを即時確認する。
-- Audit class: independent audit。公開、save migration、経済報酬、RNGを含むため。
-- Subjective acceptance: PC1280/mobile390の実画面で戦果の確定/可能性/携行を説明でき、成長札が全幅化せず、戦闘操作とオートを阻害しない。
+- Definition of done: 灯継ぎ固有の音楽文法を既存Web Audioへ実装し、画面・戦況で滑らかに変化させ、音楽/効果音/環境音を個別調整可能にする。一族小札は横スライドなしで全員を見られる配置へ直す。権利・性能・既存save・全戦闘オート・回帰を検証し、独立監査とshipcheck後にmainへpushしてGitHub Pages反映まで確認する。
+- Out of scope: 第三者/有償音源、外部作曲サービス、敵・地域・装備・物語の追加、戦闘計算や報酬、save schema変更。
+- Constraints: 外部音源ファイル0、初回ユーザー操作までAudioContextを強制再生しない、既存マスター音量キー互換、音がなくても情報欠落0、低性能端末で無制限node/timerを残さない。
+- Permission boundary: ユーザーが実装・commit・main push・deployを明示承認。費用、外部サービス登録、他repo、破壊操作は不可。
+- Escalation: 認証不能、秘密情報、公開gate失敗、既存save破損だけをcritical blockerとして扱う。
+- Audit class: independent audit。公開・常時音響・全画面横断・ブラウザ lifecycle を含み、主実装者と別視点の確認が必要なため。
+- Subjective acceptance: 音楽ディレクター監査の「世界観固有性・反復疲労・意味ある変化・台詞可聴性」をrubric化し、コード上の構成と実ブラウザ操作を確認する。最終的な聴感効果は実ユーザー試聴を外部gateとして明記する。
 
 ## ②作業分解
 
 | Item | Dependency | Execution path | Acceptance check | Status |
 |---|---|---|---|---|
-| A. 契約・dirty・state固定 | git/GDD/正本 | main | Goal/plan/state一致、既存差分保全 | completed |
-| B. progression/save | A | main | formula、migration、validation、unit green | completed |
-| C. reward settlement | B | main | plan=result、exactly once、二経路、auto同値 | completed |
-| D. UI | C | main | PC/mobile、a11y、全幅札0、戦果理解 | completed |
-| E. 統合検証 | D | main | lint/data/Vitest/build/Playwright/100-seed | completed |
-| F. 独立監査/shipcheck | E | fresh reviewer＋main | blocking 0、SHIP系判定 | completed |
-| G. 正典/commit/deploy | F | main | 対象限定commit、Actions success、公開実測 | completed |
+| A. 現行監査・専門家設計 | repo/GDD/M45A | main + music/technical reviewers | 行根拠、画面対応、音楽rubric、技術risk | completed |
+| B. 音楽基盤 | A | main | bus分離、unlock、crossfade、visibility、timer/node cleanup | completed |
+| C. 音楽内容・画面連携 | B | main | 画面曲、戦況tension、家祖motif、無音画面0 | completed |
+| D. 設定UI・一族配置 | B | main | 4音量操作、互換、PC/mobile横スライド0 | completed |
+| E. 検証・自己修復 | B-D | main | unit/lint/data/build/visual/実ブラウザ | completed |
+| F. 独立監査・shipcheck | E | fresh reviewer + main | blocking 0、SHIP系判定 | completed |
+| G. 正典・公開 | F | main | GDD/STATUS/WORKLOG、対象限定commit、Actions success、公開実測 | in_progress |
 
 ## ③完了済み
 
-- 2026-07-24T09:00+09:00: ユーザーがM46正本の実装とdeployを明示承認。
-- Forge正本はRound 2独立評価5/4/5/5/5、blocking 0。設計、GDD、STATUS、WORKLOG、Forge stateの未commit差分を本mission対象として保全。
-- 資質score、上限8〜12、Lv1加算熟達、XP、複数level上昇、旧save冪等移行、死亡hp0をruntimeと保存境界へ実装。
-- 全戦闘開始経路へ同一`BattleRewardPlan`を接続し、`planned → settled → continued`、一回精算、候補ごと4%眷属、稀相・宿敵・土地の記、玄冬/汐里報酬0を統合。
-- Homeの主札/小札へ成長情報を密度別表示し、架空slotを確定値・可能性・行き先が読める戦果見立てへ置換。全戦闘オートは維持。
-- lint、data、closure 23/40/6/69、manifest 9/9、Vitest 47 files/746 tests、build、M46 PC/mobile 4/4、既存戦闘/稀相 PC/mobile 4/4に合格。
-- 独立監査でUI説明不足、旧expedition汐里のgeneric副作用、経路test不足、100-seed level分布未達を検出。すべて限定修正し、tier XP係数だけ3→5へ調整。独立再監査はPASS / blocking 0。
-- Ship Checkは**SHIP-with-notes**。秘密pattern 0、依存脆弱性0、必須gate green。既存rank分布warn、1.46MB main chunk、旧expeditionの累計携行表示差を非阻害noteとして保持。
-- 実装commit `d9f9ac8`をmainへpush。GitHub Actions run `30058466579`はbuild/deploy成功。公開HTML HTTP 200、新bundle `assets/index-CEUkgKbm.js`に`戦果見立て`と確定CTAを確認。
+- 2026-07-24T18:32+09:00: ユーザーが音楽の方法検討・専門家参加・実装・deployを承認。
+- 2026-07-25T00:00+09:00: 追加依頼としてHome一族小札の横スライド依存解消を同一公開へ統合。
+- 2026-07-25T05:30+09:00: 追加依頼として玄の炎画像を人物仮肖像へ直す要件を統合。新規生成でなく既存配信中の顔絵を再利用。
+- 現行はWeb Audio平調子6曲、単一master bus、同一16/8拍loop、画面直切替、単一音量、地域ambience4種。codex/finaleはtrack map漏れ、Appとglobal delegateでbutton SEが重複し得る状態を直接確認。
+- 2026-07-25T06:02+09:00: 11曲、3bus、crossfade/duck/lifecycle、4音量、血脈音、一族grid、仮肖像を実装。focused Vitest 12/12、Playwright PC/mobile 14/14、lint/build合格。
+- 2026-07-25T06:04+09:00: 実ブラウザで設定Sheetの旧440px幅による重なりを発見し、PC820px/mobile一列へ限定修復。PC client/scroll 817/817、mobile 389/389を目視確認。
+- 2026-07-25T06:31+09:00: 全Vitest 51 files/765、Playwright PC/mobile 14、lint/data/build/closure69/manifest9、npm audit 0へ合格。環境音tailとvisibility挙動証拠を自己修復。securityはPASS / blocking 0 / non-blocking 0。
+- 2026-07-25T06:34+09:00: fresh independent再監査はvisibility 8/8を独立再実行しPASS / blocking 0。件数記録も14/14へ同期。Ship CheckはSHIP-with-notes（実試聴、Safari/物理低性能端末、既存face系譜、main chunk約1.48MB）。
 
 ## ④保留リスト
 
-- なし。
+- 実ユーザーによる聴感評価は公開後の外部gate。ローカル完了を妨げないが、魅力度向上の効果主張には使わない。
+- `face_*`は既存公開版で配信済みだが、生成モデルまで遡るライセンス系譜は既存未確認。M50は新規画像0・同一ゲーム内再利用に限定し、権利確認済みへ昇格しない。
 
 ## ⑤質問キュー
 
-- なし。正本と公開承認が明確なため自律進行する。
+- なし。権利安全のため外部素材を避け、既存の手続き音響を作品固有の構成へ深化する。
 
 ## ⑥マイルストーン履歴
 
-- M46-0: Mission契約、Goal、7段階plan、既存dirty境界を固定。
-- M46-1: progression/save、reward plan/settlement、Home/Battle UIを統合。
-- M46-2: 全機械gateとPC1280/mobile390実ブラウザ受入を完了。
+- M50-0: Goal、7段階plan、契約、専門家2系統の読み取り監査を開始。
+- M50-1: 純粋audio model、適応型音響、設定、一族grid、玄の仮肖像を実装。実画面で設定幅を自己修復。
+- M50-2: 全機械/実画面回帰、権利記述、closure追跡、dependency audit、環境音tail、visibility挙動を閉鎖。独立最終再監査待ち。
+- M50-3: independent/securityの両監査をblocking 0で閉鎖。正典同期とShip Checkを完了し、対象限定commit/pushへ移行。
 
 ## ⑦次の一手
 
-- 公開版の初見導線と実利用指標を次の改善判断へ使う。M46の実装・公開作業は完了。
+- 全回帰とデータ/visual台帳を検証し、fresh independent auditとShip Checkへ進む。
 
 ## ⑧最終監査表
 
-- **監査種別**: independent audit。最終PASS / blocking 0。
-- ✅ runtime実装: progression/save/reward/UIを正本通り接続。
-- ✅ save互換: legacy/invalid/overcap/threshold/死亡hp0を集中testで固定。
-- ✅ reward exactly-once/auto同値: settle/continue/finish互換とdouble callを統合testで固定。
-- ✅ PC/mobile UX: M46 4/4、既存戦闘/稀相4/4。横overflow 0、Esc/focus return、全幅札0。
-- ✅ 全機械gate: lint/data/closure/manifest/Vitest 746/build、100-seedを合格。
-- ✅ Ship Check: SHIP-with-notes。秘密0、脆弱性0、blocking 0。
-- ✅ commit/push/Pages: `d9f9ac8`、Actions `30058466579`成功、公開HTTP 200・M46 bundle marker確認。
+- **監査種別**: independent audit（予定）。
+- ✅ 音楽内容: 11曲、句構成、戦況、血脈音を実装。
+- ✅ 音響基盤: 3bus、compressor、crossfade、duck、gesture/visibility/cleanupを実装。
+- ✅ 設定/一族UI: 4音量、起伏控えめ、一族grid、灯形未決定人物の仮肖像を実装。
+- ✅ 回帰/実ブラウザ: Vitest 765、Playwright PC/mobile 14、設定実画面、visibility復帰まで合格。
+- ✅ 独立/安全監査: independent PASS、security PASS、blocking 0。Ship CheckはSHIP-with-notes。
+- ⚠️ ship/deploy: commit、push、Actions、公開版実測は未実施。
 
 ## ⑨terminal印
 
-達成 — 2026-07-24T10:17+09:00。M46正本実装、save互換、一回精算、全戦闘オート、PC/mobile、100-seed level分布、独立監査PASS、Ship Check、main push、Pages公開反映を完了。
+稼働中 — 2026-07-25T06:34+09:00。全検証・独立監査・Ship Checkを終え、commit/push/Pages公開へ進行中。

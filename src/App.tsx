@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useGame } from './core/store'
 import { audio } from './core/audio'
-import type { TrackName } from './core/audio'
+import { computeBattleTension, resolveTrack } from './core/audio_model'
 import { TitleScreen, IntroScreen } from './ui/Title'
 import { HomeScreen } from './ui/Home'
 import { PactScreen } from './ui/Pact'
@@ -27,7 +27,7 @@ function SettingsButton() {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <button className="mute-btn" title="設定" onClick={() => setOpen(true)}>⚙</button>
+      <button className="mute-btn" title="設定" aria-label="設定" onClick={() => setOpen(true)}>⚙</button>
       {open && <SettingsModal onClose={() => setOpen(false)} />}
     </>
   )
@@ -120,6 +120,8 @@ function useCollectionToasts(data: ReturnType<typeof useGame.getState>['data']) 
 function App() {
   const screen = useGame((s) => s.screen)
   const battleNodeId = useGame((s) => s.battleNodeId)
+  const battle = useGame((s) => s.battle)
+  const battleAutoContext = useGame((s) => s.battleAutoContext)
   const data = useGame((s) => s.data)
 
   useCollectionToasts(data)
@@ -137,55 +139,34 @@ function App() {
     return () => window.cancelAnimationFrame(frame)
   }, [screen.id])
 
-  // ボタン操作音(委譲リスナー1本)
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      const el = e.target as HTMLElement
-      if (el.closest('.btn, .node-btn, .god-card, .region-card, .char-card.clickable')) {
-        audio.se('click')
-      }
-    }
-    document.addEventListener('click', onClick)
-    return () => document.removeEventListener('click', onClick)
-  }, [])
-
-  useEffect(() => {
-    const track = ((): TrackName => {
-      switch (screen.id) {
-        case 'title':
-        case 'intro':
-          return 'title'
-        case 'home':
-        case 'village': // M23: 郷歩行マップは郷の音を継ぐ
-        case 'pact':
-        case 'starLottery':
-        case 'depart':
-        case 'chronicle':
-        case 'forge': // M18: 新Screen idは必ずtrack mapへ追加(defaultは'none'=無音事故)
-        case 'facilities':
-          return 'home'
-        case 'expedition':
-        case 'dungeon':
-          return 'expedition'
-        case 'battle': {
-          const node = battleNodeId ? data?.expedition?.nodes[battleNodeId] : undefined
-          return node?.type === 'boss' ? 'boss' : 'battle'
-        }
-        case 'birth':
-        case 'death':
-        case 'dream':
-        case 'dreamEp':
-        case 'ceremony':
-        case 'jobrite':
-        case 'life':
-        case 'ending':
-          return 'scene'
-        default:
-          return 'none'
-      }
-    })()
+    const node = battleNodeId ? data?.expedition?.nodes[battleNodeId] : undefined
+    const track = resolveTrack(screen.id, {
+      boss: battleAutoContext?.boss ?? node?.type === 'boss',
+      rare: battleAutoContext?.rare,
+    })
+    audio.setLineage(data?.family[0]?.id)
     audio.play(track)
-  }, [screen, battleNodeId, data])
+  }, [screen.id, battleNodeId, battleAutoContext?.boss, battleAutoContext?.rare, data?.expedition?.nodes, data?.family])
+
+  // 戦況の意味を音へ返す。全戦闘オート・戦闘計算・RNGには触れない表示層の一方向接続。
+  useEffect(() => {
+    if (screen.id !== 'battle' || !battle) {
+      audio.setTension(screen.id === 'dungeon' || screen.id === 'expedition' ? 0.18 : 0)
+      return
+    }
+    const ratio = (members: typeof battle.allies): number => {
+      const max = members.reduce((sum, member) => sum + Math.max(1, member.maxHp), 0)
+      return max > 0 ? members.reduce((sum, member) => sum + Math.max(0, member.hp), 0) / max : 0
+    }
+    audio.setTension(computeBattleTension({
+      partyHpRatio: ratio(battle.allies),
+      enemyHpRatio: ratio(battle.enemies),
+      boss: battleAutoContext?.boss,
+      rare: battleAutoContext?.rare,
+      phase: battle.phase,
+    }))
+  }, [screen.id, battle, battleAutoContext?.boss, battleAutoContext?.rare])
 
   const view = (() => {
     switch (screen.id) {

@@ -80,6 +80,14 @@ export function faceImg(char: Pick<Character, 'tomoshigata' | 'sex' | 'personali
   if (!char.tomoshigata) return null
   return gameImg(`face_${char.tomoshigata}_${char.sex}_${char.personalityId}.png`)
 }
+// 灯型を授かる前も人物を炎記号へ縮退させない。星脈に沿う稽古着の顔絵を仮姿として使い、
+// 成人の儀の後は選んだ灯型の顔絵へ移る。既存64顔だけを再利用するため権利台帳も増えない。
+export function provisionalFaceImg(char: Pick<Character, 'element' | 'sex' | 'personalityId'>): string {
+  const trainingGata: Record<Character['element'], Tomoshigata> = {
+    fire: 'homura', water: 'nagi', wind: 'nagi', earth: 'iwao', moon: 'sumi', star: 'sumi',
+  }
+  return gameImg(`face_${trainingGata[char.element]}_${char.sex}_${char.personalityId}.png`)
+}
 // 戦闘立ち姿(横向き) — pose_{gata}_{sex}_{stage}
 export function poseImg(gata: Tomoshigata | string, sex: 'm' | 'f' | string, stage: AgeStage = 'adult'): string {
   return gameImg(`pose_${gata}_${sex}_${stage}.png`)

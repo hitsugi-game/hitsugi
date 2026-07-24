@@ -7,7 +7,8 @@ import { attachUiClickSfx } from './core/audio'
 import { applyReduceMotion } from './core/settings'
 import { installTestHooks } from './dev/testhooks'
 
-attachUiClickSfx()
+const detachUiClickSfx = attachUiClickSfx()
+if (import.meta.hot) import.meta.hot.dispose(detachUiClickSfx)
 applyReduceMotion()
 installTestHooks() // dev限定 — 実ブラウザ受入テスト(npm run test:visual)の状態投入口
 

@@ -86,7 +86,7 @@ test('郷: 一族小札はPC/mobileで氏名を縦割れさせず、札内に情
     const child = {
       ...head,
       id: `${String(head.id)}__child`,
-      name: '星待ちの灯',
+      name: '玄',
       isHead: false,
       bornSeason: current.seasonIndex,
       tomoshigata: undefined,
@@ -98,6 +98,8 @@ test('郷: 一族小札はPC/mobileで氏名を縦割れさせず、札内に情
   const cards = rail.locator('button.char-card.clickable')
   await expect(cards).toHaveCount(3)
   await expect(rail).toBeVisible()
+  const railOverflow = await rail.evaluate((node) => node.scrollWidth - node.clientWidth)
+  expect(railOverflow, `${info.project.name}: 一族札を横送りにしない`).toBeLessThanOrEqual(1)
 
   const metrics = await cards.evaluateAll((nodes) => nodes.map((node) => {
     const card = node as HTMLElement
@@ -125,6 +127,8 @@ test('郷: 一族小札はPC/mobileで氏名を縦割れさせず、札内に情
     expect(metric.wordBreak, `${info.project.name}: 氏名を一文字ずつ割らない`).toBe('keep-all')
     expect(metric.overflowWrap, `${info.project.name}: 氏名にanywhereを使わない`).toBe('normal')
   }
+  await expect(cards.nth(2)).toContainText('玄')
+  await expect(cards.nth(2).locator('.portrait img')).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true)
 })
 
@@ -185,6 +189,7 @@ test('星契り: 確認SheetをEscapeで閉じると契りCTAへfocusが戻る',
 
 test('星契り: 封印中の星は選択して詳細を開けない', async ({ page }) => {
   await boot(page, 'pact')
+  await page.getByRole('button', { name: '全ての星を見る' }).click()
   const sealed = page.locator('.god-row.locked').first()
   await expect(sealed).toBeVisible()
   await expect(sealed).toHaveAttribute('aria-disabled', 'true')

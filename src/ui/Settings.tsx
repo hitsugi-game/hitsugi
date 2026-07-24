@@ -11,7 +11,11 @@ import './settings_vc6.css'
 // localStorage永続なので開くたびに現在値を読む。M22 §4: 共通Sheet契約(ESC/外側/フォーカス復帰/scroll lock)。
 export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [vol, setVol] = useState(Math.round(audio.volume * 100))
+  const [musicVol, setMusicVol] = useState(Math.round(audio.musicVolume * 100))
+  const [effectsVol, setEffectsVol] = useState(Math.round(audio.effectsVolume * 100))
+  const [ambienceVol, setAmbienceVol] = useState(Math.round(audio.ambienceVolume * 100))
   const [muted, setMuted] = useState(audio.muted)
+  const [calm, setCalm] = useState(audio.calm)
   const [reduceMotion, setRM] = useState(getReduceMotion())
   const [autoDefault, setAutoDef] = useState(getAutoBattleDefault())
   const [autoPolicy, setAutoPolicy] = useState(getAutoPolicySettings())
@@ -51,20 +55,58 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         <div className="settings-tool-grid">
           <fieldset className="settings-tool-group">
             <legend>音の加減</legend>
+            <div className="settings-sound-now" aria-label={`今の調べ ${audio.currentTrackLabel}`}>
+              <span>今の調べ</span><strong>{audio.currentTrackLabel}</strong>
+            </div>
             <div className="setting-row">
-              <label className="setting-label" htmlFor="setting-volume">音量</label>
+              <label className="setting-label" htmlFor="setting-volume">全体</label>
               <input
-                id="setting-volume" aria-label="音量"
+                id="setting-volume" aria-label="全体音量"
                 className="setting-slider" type="range" min={0} max={100} value={vol}
                 onChange={(e) => { const v = Number(e.target.value); setVol(v); audio.setVolume(v / 100) }}
               />
               <output className="setting-val" htmlFor="setting-volume" aria-live="polite">{vol}</output>
             </div>
 
+            <div className="settings-mix-grid">
+              <div className="setting-row">
+                <label className="setting-label" htmlFor="setting-music-volume">音楽</label>
+                <input
+                  id="setting-music-volume" aria-label="音楽の音量"
+                  className="setting-slider" type="range" min={0} max={100} value={musicVol}
+                  onChange={(e) => { const v = Number(e.target.value); setMusicVol(v); audio.setMusicVolume(v / 100) }}
+                />
+                <output className="setting-val" htmlFor="setting-music-volume" aria-live="polite">{musicVol}</output>
+              </div>
+              <div className="setting-row">
+                <label className="setting-label" htmlFor="setting-effects-volume">効果音</label>
+                <input
+                  id="setting-effects-volume" aria-label="効果音の音量"
+                  className="setting-slider" type="range" min={0} max={100} value={effectsVol}
+                  onChange={(e) => { const v = Number(e.target.value); setEffectsVol(v); audio.setEffectsVolume(v / 100) }}
+                />
+                <output className="setting-val" htmlFor="setting-effects-volume" aria-live="polite">{effectsVol}</output>
+              </div>
+              <div className="setting-row">
+                <label className="setting-label" htmlFor="setting-ambience-volume">環境音</label>
+                <input
+                  id="setting-ambience-volume" aria-label="環境音の音量"
+                  className="setting-slider" type="range" min={0} max={100} value={ambienceVol}
+                  onChange={(e) => { const v = Number(e.target.value); setAmbienceVol(v); audio.setAmbienceVolume(v / 100) }}
+                />
+                <output className="setting-val" htmlFor="setting-ambience-volume" aria-live="polite">{ambienceVol}</output>
+              </div>
+            </div>
+
             <button className={`setting-toggle ${muted ? 'on' : ''}`} aria-pressed={muted} onClick={() => setMuted(audio.toggleMute())}>
               <span className="setting-label">音を消す</span>
               <span className="toggle-state">{muted ? '消音中' : '鳴らす'}</span>
             </button>
+            <button className={`setting-toggle ${calm ? 'on' : ''}`} aria-pressed={calm} onClick={() => setCalm(audio.toggleCalm())}>
+              <span className="setting-label">音楽の起伏を控えめに</span>
+              <span className="toggle-state">{calm ? '穏やか' : '物語的'}</span>
+            </button>
+            <p className="setting-hint">太鼓・高音・急な盛り上がりを抑える。危険や戦況は画面にも表示される。</p>
           </fieldset>
 
           <fieldset className="settings-tool-group">

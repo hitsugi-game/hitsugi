@@ -16,6 +16,7 @@ import type { Character } from '../core/types'
 import { createRareEncounter } from '../core/rare_encounters'
 import { Rng } from '../core/rng'
 import { createBattleRewardPlan } from '../core/battle_rewards'
+import { audio } from '../core/audio'
 
 const isBoss = (id: string) => id.startsWith('boss_')
 const NORMAL_ENEMIES = () => ENEMIES.filter((e) => !isBoss(e.id))
@@ -59,6 +60,7 @@ function ensureFamily(n: number): Character[] {
 
 export interface TestHooks {
   store: typeof useGame
+  audio: typeof audio
   reset: (narrative?: boolean) => void
   /** ダンジョン画面へ。x/y=-1 は「未配置」= engine が入口へ置く。introSeen で第一幕を飛ばす。 */
   dungeon: (opts?: { regionId?: string; floor?: number; party?: number }) => void
@@ -75,6 +77,7 @@ export function installTestHooks(): void {
   if (!import.meta.env.DEV) return
   const hooks: TestHooks = {
     store: useGame,
+    audio,
     reset,
     dungeon: ({ regionId = 'yoi_forest', floor = 0, party = 1 } = {}) => {
       reset()
@@ -106,6 +109,7 @@ export function installTestHooks(): void {
       useGame.setState({
         battle: startBattle(party, foes),
         battleSource: boss ? 'dungeonBoss' : 'dungeon',
+        battleAutoContext: { firstEncounter: false, rare: false, boss, enemyNames: defs.map((enemy) => enemy.name) },
         ...plannedRewards(`dev:${boss ? 'boss' : 'battle'}`, defs, { boss }),
         screen: { id: 'battle' },
       })
@@ -123,6 +127,7 @@ export function installTestHooks(): void {
         ...plannedRewards('dev:rare', [rolled.enemy], { rareDrop: rolled.encounter.drop }),
         battleLogQueue: [...battle.log],
         battleSource: 'dungeon',
+        battleAutoContext: { firstEncounter: true, rare: true, boss: false, enemyNames: [rolled.enemy.name] },
         goldenBattle: true,
         rareEncounter: rolled.encounter,
         dungeonRun: {
