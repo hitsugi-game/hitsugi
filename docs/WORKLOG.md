@@ -1409,3 +1409,16 @@
 - **監査自己修復**: セキュリティ監査の旧環境音tail指摘を、地域専用gainの0.38秒fade/700ms disconnectで解消。独立監査のvisibility挙動証拠不足も、PC/mobileのhidden→suspend/timer 0→visible→希望曲/環境音復帰testで閉じた。Settingsのclosure evidenceへM50 E2Eを追加し、promotion scriptも複数evidenceを維持する形へ更新した。
 - **Ship Check結論**: 全Vitest 51 files/765、Playwright M50＋一族/星契りPC/mobile 14、lint、data、build、closure 69、manifest 9、diff-check、秘密scan、新規外部素材0に合格。dev依存postcss high 1件は互換範囲で8.5.23へ、nanoidを3.3.16へlock更新し、`npm audit`全依存0。fresh independentとsecurity再監査はいずれもPASS / blocking 0。判定は**SHIP-with-notes**。main chunk約1.48MB、実試聴/Safari/物理低性能端末、既存face系譜を外部noteとして残す。
 - **公開**: 実装commit `6c8d2a5`をmainへpush。GitHub Actions run `30128251561`はnpm ci、lint、data、Vitest、build、Pages deployを完走。公開URLはHTTP 200、JS `assets/index-DzIoDd8a.js`で家の座・稀相曲・4音量・環境音gainを、CSS `assets/index-B-TPA33E.css`で設定幅と一族gridを確認。production `__game`は0、仮肖像`face_homura_m_brave.jpg`もHTTP 200。
+
+## 2026-07-25（M46 楽しさの再検討 — Claude × gpt-5.6-sol 議論 /mission）
+
+- **依頼**: 改めてユーザーに楽しんでもらうための改良点を検討し、gpt5.6solとも議論する。
+- **方法**: Codex CLI(`codex exec -m gpt-5.6-sol -s read-only`)で**3ラウンドの実往復**。Claude見解はCodex応答受領前に固定(順序保証)。並行してsonnet 2体で戦闘・探索を定量調査。
+- **最重要の発見(両者合意で最優先)**: 遠征の**契約不整合**。帰り火は無条件に1ヶ月消費(`store.ts:2256`)だが探索中の状態は`mutate`のみで保存されず(`:221-229`)、`continueGame`は`dungeonRun`を破棄する(`:859`)。よって途中で閉じると**戦利品も被ダメージも月も巻き戻る**。さらに全滅の保存は`finishBattle`内(`:2773`)にしかなく、自動進行は`lost`を除外する(`Battle.tsx:603`)ため到達経路は敗北画面の手動クリック(`:1047`)のみ=**敗北画面で閉じれば一族の死が無かったことになる**(オートONでも同じ)。世代交代RPGの根幹である永久死がopt-out可能。
+- **他の確度の高い指摘**: 非署名敵の兆しは実rng非消費の一発サンプルで**的中を保証しない**(`battle.ts:503-512`)/署名パターンは36/579定義=6.2%・**ボス39体は専用AI皆無**/灯15%警告は機構的効果ゼロ(実害は40%と0%、熱狂は30%超)/前後列が`d.family`配列順=**出生順**で確定し制御不能(`store.ts:1976`、後列0.8倍・敵70%前列狙い)/敵影は実時間駆動で**立ち止まると罰される**(`engine.ts:840,846`)/オートに`flee`なし・敵MP999で無限。
+- **議論の結果(双方が撤回)**: Codexは「オートAIが賢い判断をしている=判断は存在する、問題は入力粒度」を撤回(戦術3分岐は`priorityBehaviorEnemy`依存で543定義に到達不能)。Claudeは①型を持つ敵の割合(2%→6.2%、変異正規化の見落とし)②「戦闘の98%」は定義数比で遭遇件数比は未測定 ③`EnemyBehavior`はturn固定列で「反応」でなく「可読性」の実装、を訂正。
+- **独立監査(Mode O規律・opus)**: blocking 9件。うち中核2件が**測定設計の欠陥**——balance_simは全ボスを終盤精鋭PTで測定し中盤PTは未定義、かつ単戦・全快で持ち越し/灯枯れを含まない。よって**「難易度曲線は最後まで平坦」「99%は負けようがない」を撤回**(中盤難易度は未測定)。さらに私が「全滅は保存される」と訂正した箇所が誤りと差し戻され、当初主張(永久死opt-out可能)へ復元。全件反映後**PASS / blocking 0**。
+- **残した対立**: ①予告の信頼性(#2)を難易度(#3)より先行させるか同時か——Codexは先行必須、Claudeは同時(勝率100%では虚偽予告に実害が出ず単独先行では測れない)。**未交換の留保**と正直にラベル。②pilot観察の扱い(Codexの最終リストから脱落、Claudeが復活)。
+- **副作用の報告**: Codexがround1で公開版を開いた際、既存セーブで日参りが自動受領・保存され**奉燈18・血珠1が加算**(`store.ts:865-886`、本人申告)。read-onlyサンドボックスはブラウザのlocalStorageに及ばない。round2以降は実プレイを禁止。ユーザーへ報告済み。
+- **限界**: **実プレイ未実施**(Browserツールが分類器障害で全期間起動不可)。中盤難易度・遭遇件数比・強制終了率は未測定。外部gateも未実施のため、本書の提案もM45/M45A同様に検証されていない設計判断である。
+- **git**: 新規2ファイル(成果物+MISSION_STATE)のみcommit。push無し(公開ゲートは別途)。
