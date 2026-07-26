@@ -25,6 +25,8 @@ import type { RegionVisualVersion } from '../core/feature_flags'
 import type { RegionExperienceProfile } from '../core/data/region_experience'
 import { buildAr1HotarubiStage, loadAr1HotarubiAssets, type Ar1HotarubiStage } from './render/ar1_hotarubi'
 import { buildRegionExperienceStage, type RegionExperienceStage } from './render/region_experience_layer'
+import { isDarkLight, isPursuitLight } from './light_pressure'
+import { activeShadeCount } from './shade_population'
 
 const TILE = 36 // px(44→36 に縮小: 同画面内タイル数を約1.22倍に広げつつ、プロップ/スプライトの視認性を維持)
 const MOVE_MS = 130
@@ -492,8 +494,7 @@ export class DungeonEngine {
     // UX調整: フロア定義よりも実生成数を2減、下限2で快適な密度に(データは不変・要再バランス時のみ調整)
     this.archetypes = shadeArchetypes(this.opts.tier ?? 1)
     // 討伐後(鎮)の再訪は魔性が薄れる(M23 指示7 V3 — 光と密度の変化。採取物は未実装)
-    const shadeBase = Math.max(2, this.floor.shades - 2)
-    const shadeCount = this.opts.cleared ? Math.max(1, shadeBase - 2) : shadeBase
+    const shadeCount = activeShadeCount(this.floor.shades, this.opts.cleared)
     // 敵影の初期配置はfloor seedで決定論化する。戦闘往復の再mountで特殊影を再抽選できない。
     const shadeRng = new Rng(((this.opts.seed ?? this.floor.seed ?? this.floorIndex + 1) ^ 0x51ad3e7b) >>> 0)
     const specialSpent = this.used.has(specialShadeUsedKey(this.floorIndex))
@@ -805,7 +806,7 @@ export class DungeonEngine {
     // 敵影AI(判断はタイル単位のまま、描画は200msトゥイーン+浮遊ボブ)
     // 熱狂の赤い火(frantic)中は凶暴化(M12でstore側から発火)
     const franticK = this.frantic ? 0.75 : 1
-    const speedMult = (this.lightPct <= 0 ? 0.45 : this.lightPct < 40 ? 0.7 : 1) * franticK
+    const speedMult = (isDarkLight(this.lightPct) ? 0.45 : isPursuitLight(this.lightPct) ? 0.7 : 1) * franticK
     let nearestDanger: { x: number; y: number; distance: number; rare: boolean } | null = null
     for (const s of this.shades) {
       // 滑らか移動
@@ -824,7 +825,7 @@ export class DungeonEngine {
       const near = dist(s.x, s.y, this.px, this.py)
       // Keep the visual warning continuous between AI decisions. This read-only
       // derivation does not change chase range, movement cadence, or encounters.
-      const chaseRange = Math.max(2, (this.lightPct < 40 ? 6 : 4) + (this.frantic ? 2 : 0) - (this.stealth ? 2 : 0))
+      const chaseRange = Math.max(2, (isPursuitLight(this.lightPct) ? 6 : 4) + (this.frantic ? 2 : 0) - (this.stealth ? 2 : 0))
       const alerted = !s.visual.golden && near <= chaseRange + 1
       if (s.visual.golden || alerted) {
         if (!nearestDanger || near < nearestDanger.distance) {

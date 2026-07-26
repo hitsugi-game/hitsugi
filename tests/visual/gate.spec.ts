@@ -106,14 +106,23 @@ test('ダンジョン: 探索案内はengineの発見状態・短期目的・帰
   await expect(guide.locator('[data-guide="pois"]')).not.toContainText('石碑')
 })
 
-test('ダンジョン: 灯10%では帰還判断を促し、帰り火は全幅常設→確認→確定の2操作', async ({ page }) => {
+test('ダンジョン: 灯39%/0%で実機構に沿う警告を出し、帰り火は全幅常設→確認→確定の2操作', async ({ page }) => {
   await gotoDungeon(page)
   await page.evaluate(() => {
     const game = (window as never as { __game: { store: { getState: () => { dungeonRun: ({ light: number } & Record<string, unknown>) | null }; setState: (v: unknown) => void } } }).__game
     const run = game.store.getState().dungeonRun
-    if (run) game.store.setState({ dungeonRun: { ...run, light: 10 } })
+    if (run) game.store.setState({ dungeonRun: { ...run, light: 39 } })
   })
-  await expect(page.locator('[data-guide="objective"]')).toHaveText('帰り火を考えよ')
+  await expect(page.locator('[data-guide="objective"]')).toContainText('敵影が迫る')
+  await expect(page.locator('.lantern-ring')).toHaveAttribute('aria-label', /敵影が速まり/)
+
+  await page.evaluate(() => {
+    const game = (window as never as { __game: { store: { getState: () => { dungeonRun: ({ light: number } & Record<string, unknown>) | null }; setState: (v: unknown) => void } } }).__game
+    const run = game.store.getState().dungeonRun
+    if (run) game.store.setState({ dungeonRun: { ...run, light: 0 } })
+  })
+  await expect(page.locator('[data-guide="objective"]')).toContainText('灯は尽きた')
+  await expect(page.locator('.lantern-ring')).toHaveAttribute('aria-label', /戦闘の魔性も強化/)
 
   const returnButton = page.locator('.dungeon-return-dock [data-zone="return-fire"]')
   await expect(returnButton).toBeVisible()

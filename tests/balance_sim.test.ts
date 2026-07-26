@@ -3,11 +3,23 @@
 // enemy = 実 enemyAction。narrative易化(敵atk/hp×0.78)を再現。指標に「瀕死率」を含む。
 // ボス安全表(devil必須): 下限導入がボス戦を破綻(勝てない)させないことを確認する。
 import { describe, expect, it } from 'vitest'
-import { combatantFromEnemy, currentActor, enemyAction, floorFracFromAtk, performAction, startBattle } from '../src/core/battle'
+import { combatantFromChar, combatantFromEnemy, currentActor, enemyAction, floorFracFromAtk, performAction, startBattle } from '../src/core/battle'
 import { skillById } from '../src/core/data/skills'
 import { ENEMIES, enemyById } from '../src/core/data/enemies'
+import { itemBaseById } from '../src/core/data/items'
+import { REGIONS, regionById } from '../src/core/data/regions'
+import { pickEnemies } from '../src/core/expedition'
+import { recalcStats } from '../src/core/inheritance'
+import { scaleEncounterEnemy } from '../src/core/encounter_difficulty'
 import { Rng } from '../src/core/rng'
-import type { BattleAction, BattleState, Combatant, EnemyDef } from '../src/core/types'
+import {
+  DUNGEON_STEP_LIGHT_COST,
+  DUNGEON_VICTORY_LIGHT_COST,
+  isDarkLight,
+} from '../src/dungeon/light_pressure'
+import { dungeonByRegion } from '../src/dungeon/maps'
+import { activeShadeCount } from '../src/dungeon/shade_population'
+import type { BattleAction, BattleState, Character, Combatant, Element, EnemyDef, Item, Stats } from '../src/core/types'
 
 type Row = 'front' | 'back'
 function ally(name: string, atk: number, def: number, hp: number, agi: number, row: Row, mp = 45, skills: string[] = []): Combatant {
@@ -28,6 +40,83 @@ const bossParty = (): Combatant[] => [
   ally('三人目', 60, 70, 180, 26, 'back', 90, ['koyashi', 'homura_giri']),    // 回復(130) + 攻撃
   ally('四人目', 58, 66, 175, 32, 'back', 80, ['homura_giri']),
 ]
+
+// M47 Work3: 「装備gen3相当」を曖昧な手打ちCombatantでなく、実Character→combatantFromChar経路で固定する。
+// 店初期装備を三度継いだ形見(+36%)、人物3代目・月齢15・熟達Lv6を中盤基準とする。
+const MID_SEASON = 15
+const MID_ITEM_GENERATION = 3
+const MID_LEVEL = 6
+
+function inheritedMidItem(baseId: string, owner: string): Item {
+  const base = itemBaseById(baseId)
+  const mult = 1 + MID_ITEM_GENERATION * 0.12
+  return {
+    id: `mid_${owner}_${baseId}`,
+    baseId,
+    name: `${base.name}・三代`,
+    slot: base.slot,
+    atk: base.atk ? Math.round(base.atk * mult) : undefined,
+    def: base.def ? Math.round(base.def * mult) : undefined,
+    statBonus: base.statBonus
+      ? Object.fromEntries(Object.entries(base.statBonus).map(([key, value]) => [key, Math.round(value * mult)])) as Partial<Stats>
+      : undefined,
+    generation: MID_ITEM_GENERATION,
+    legacyOf: '先代',
+    source: 'shop',
+  }
+}
+
+function midCharacter(
+  id: string,
+  name: string,
+  element: Element,
+  personalityId: string,
+  potential: Stats,
+  skills: string[],
+  isHead = false,
+): Character {
+  const base: Character = {
+    id,
+    name,
+    gen: 3,
+    sex: id === 'mid_2' ? 'm' : 'f',
+    bornSeason: 0,
+    potential,
+    level: MID_LEVEL,
+    exp: 0,
+    stats: potential,
+    hp: 1,
+    maxHp: 1,
+    mp: 1,
+    maxMp: 1,
+    element,
+    personalityId,
+    skills,
+    equipment: {
+      weapon: inheritedMidItem('w_katana', id),
+      armor: inheritedMidItem('a_kawado', id),
+    },
+    godParentId: 'mid_fixture',
+    isHead,
+    alive: true,
+    kills: 30,
+    expeditions: 8,
+    deeds: [],
+    fatigue: 0,
+  }
+  return recalcStats(base, MID_SEASON)
+}
+
+function midCharacters(): Character[] {
+  return [
+    midCharacter('mid_1', '三代当主', 'fire', 'brave', { str: 55, vit: 52, dex: 48, agi: 46, mnd: 44, luk: 42 }, ['kien', 'homura_giri'], true),
+    midCharacter('mid_2', '三代守手', 'earth', 'easy', { str: 48, vit: 58, dex: 44, agi: 40, mnd: 46, luk: 40 }, ['himamori', 'iwatoshi']),
+    midCharacter('mid_3', '三代癒手', 'water', 'kind', { str: 42, vit: 48, dex: 50, agi: 44, mnd: 60, luk: 46 }, ['ooinori', 'koyashi', 'mikagami']),
+    midCharacter('mid_4', '三代星手', 'star', 'rival', { str: 50, vit: 46, dex: 58, agi: 55, mnd: 48, luk: 45 }, ['gs_star2', 'hoshiugachi']),
+  ]
+}
+
+const midParty = (): Combatant[] => midCharacters().map((character, index) => combatantFromChar(character, index < 2 ? 'front' : 'back'))
 
 // M33: 現実的な味方policy — 「瀕死なら回復 / 未バフならバフ / それ以外は最強攻撃技 or 素手」。
 // これで ⑬(バフ効果量のpower反映)が sim の勝敗・被HP・瀕死率へ反映される(旧attack固定では不可視)。
@@ -56,7 +145,14 @@ function eased(e: EnemyDef, ease: number): EnemyDef {
   return { ...e, atk: Math.round(e.atk * ease * ATK_MUL), hp: Math.round(e.hp * ease * HP_MUL) }
 }
 
-interface SimResult { won: boolean; rounds: number; allyHpLossPct: number; nearDeath: boolean }
+interface SimResult {
+  won: boolean
+  phase: BattleState['phase']
+  rounds: number
+  allyHpLossPct: number
+  nearDeath: boolean
+  allies: Combatant[]
+}
 function simBattle(party: Combatant[], enemies: Combatant[], rng: Rng, smart = false): SimResult {
   let st: BattleState = startBattle(party.map((c) => ({ ...c })), enemies.map((c) => ({ ...c })))
   const initHp = st.allies.reduce((s, a) => s + a.maxHp, 0)
@@ -77,7 +173,14 @@ function simBattle(party: Combatant[], enemies: Combatant[], rng: Rng, smart = f
     guard++
   }
   const finalHp = st.allies.reduce((s, a) => s + a.hp, 0)
-  return { won: st.phase === 'won' || st.phase === 'fled', rounds: guard, allyHpLossPct: ((initHp - finalHp) / initHp) * 100, nearDeath }
+  return {
+    won: st.phase === 'won',
+    phase: st.phase,
+    rounds: guard,
+    allyHpLossPct: ((initHp - finalHp) / initHp) * 100,
+    nearDeath,
+    allies: st.allies,
+  }
 }
 
 function agg(n: number, make: (rng: Rng) => { party: Combatant[]; enemies: Combatant[] }, smart = false) {
@@ -94,6 +197,154 @@ function agg(n: number, make: (rng: Rng) => { party: Combatant[]; enemies: Comba
 const report = (label: string, a: ReturnType<typeof agg>) =>
   console.log(`[balance] ${label}: 勝率${(a.winRate * 100).toFixed(0)}% 行動${a.avgRounds.toFixed(1)} 被HP${a.avgHpLossPct.toFixed(1)}% 瀕死${(a.nearDeathRate * 100).toFixed(0)}%`)
 
+// 実歩行floorの敵影数は maps.gen.ts → activeShadeCount のproduction経路から導出する。
+// 戦闘間には平均12歩を置き、歩行0.45/歩と勝利6をproduction定数から差し引く。
+const MID_REGION_ID = 'hoshimukuro_tani'
+const STEPS_BETWEEN_ENCOUNTERS = 12
+
+interface FloorScenario {
+  floorIndex: number
+  startLight: number
+}
+
+interface FloorRunResult {
+  completed: boolean
+  wiped: boolean
+  nearDeath: boolean
+  hpRatio: number
+  mpRatio: number
+  actions: number
+  darkBattles: number
+  mpExhausted: boolean
+  fightsWon: number
+  endLight: number
+}
+
+function encounterCountForFloor(floorIndex: number): number {
+  const floor = dungeonByRegion(MID_REGION_ID)?.floors[floorIndex]
+  if (!floor) throw new Error(`missing ${MID_REGION_ID} floor ${floorIndex}`)
+  return activeShadeCount(floor.shades)
+}
+
+function routeForFloor(seed: number, floorIndex: number): EnemyDef[][] {
+  const rng = new Rng(seed ^ 0x47c0de)
+  const region = regionById(MID_REGION_ID)
+  const encounterDepth = floorIndex + 2
+  return Array.from({ length: encounterCountForFloor(floorIndex) }, () =>
+    pickEnemies(region, 'battle', encounterDepth, rng).map(enemyById),
+  )
+}
+
+function resetForNextBattle(base: Combatant[], result: Combatant[]): Combatant[] {
+  const vitals = new Map(result.map((ally) => [ally.key, { hp: ally.hp, mp: ally.mp }]))
+  return base.map((ally) => ({
+    ...ally,
+    hp: vitals.get(ally.key)?.hp ?? 0,
+    mp: vitals.get(ally.key)?.mp ?? 0,
+    guard: false,
+    buffs: {},
+    chainCount: 0,
+  }))
+}
+
+function simFloor(seed: number, options: { smart: boolean; narrativeMode: boolean } & FloorScenario): FloorRunResult {
+  const base = midParty()
+  let party = base.map((ally) => ({ ...ally }))
+  let light = options.startLight
+  let nearDeath = false
+  let actions = 0
+  let darkBattles = 0
+  let fightsWon = 0
+  const rng = new Rng(seed ^ 0x9e3779b9)
+
+  const encounterCount = encounterCountForFloor(options.floorIndex)
+  for (const defs of routeForFloor(seed, options.floorIndex)) {
+    const dark = isDarkLight(light)
+    if (dark) darkBattles += 1
+    const enemies = defs.map((def, index) => combatantFromEnemy(scaleEncounterEnemy(def, {
+      narrativeMode: options.narrativeMode,
+      dark,
+    }), index))
+    const result = simBattle(party, enemies, rng, options.smart)
+    actions += result.rounds
+    nearDeath ||= result.nearDeath
+    party = resetForNextBattle(base, result.allies)
+    if (!result.won) break
+    fightsWon += 1
+    light = Math.max(0, light - DUNGEON_VICTORY_LIGHT_COST - DUNGEON_STEP_LIGHT_COST * STEPS_BETWEEN_ENCOUNTERS)
+  }
+
+  const hpNow = party.reduce((sum, ally) => sum + Math.max(0, ally.hp), 0)
+  const hpMax = base.reduce((sum, ally) => sum + ally.maxHp, 0)
+  const mpNow = party.reduce((sum, ally) => sum + Math.max(0, ally.mp), 0)
+  const mpMax = base.reduce((sum, ally) => sum + ally.maxMp, 0)
+  return {
+    completed: fightsWon === encounterCount,
+    wiped: party.every((ally) => ally.hp <= 0),
+    nearDeath,
+    hpRatio: hpNow / hpMax,
+    mpRatio: mpNow / mpMax,
+    actions,
+    darkBattles,
+    mpExhausted: party.some((ally) => ally.hp > 0 && ally.mp <= 0),
+    fightsWon,
+    endLight: light,
+  }
+}
+
+function quantile(values: number[], q: number): number {
+  const sorted = [...values].sort((a, b) => a - b)
+  const index = Math.min(sorted.length - 1, Math.max(0, Math.floor((sorted.length - 1) * q)))
+  return sorted[index] ?? 0
+}
+
+function wilson95(successes: number, n: number): [number, number] {
+  if (n === 0) return [0, 0]
+  const z = 1.959963984540054
+  const p = successes / n
+  const denominator = 1 + (z * z) / n
+  const center = (p + (z * z) / (2 * n)) / denominator
+  const half = (z * Math.sqrt((p * (1 - p) + (z * z) / (4 * n)) / n)) / denominator
+  return [Math.max(0, center - half), Math.min(1, center + half)]
+}
+
+function aggregateFloor(n: number, options: { smart: boolean; narrativeMode: boolean } & FloorScenario) {
+  const rows = Array.from({ length: n }, (_, index) => simFloor((index + 1) * 40503, options))
+  const completed = rows.filter((row) => row.completed).length
+  const near = rows.filter((row) => row.nearDeath).length
+  const wiped = rows.filter((row) => row.wiped).length
+  return {
+    n,
+    completionRate: completed / n,
+    completionCi95: wilson95(completed, n),
+    wipeRate: wiped / n,
+    nearDeathRate: near / n,
+    nearDeathCi95: wilson95(near, n),
+    hpP10: quantile(rows.map((row) => row.hpRatio), 0.1),
+    hpP50: quantile(rows.map((row) => row.hpRatio), 0.5),
+    hpP90: quantile(rows.map((row) => row.hpRatio), 0.9),
+    mpP10: quantile(rows.map((row) => row.mpRatio), 0.1),
+    mpP50: quantile(rows.map((row) => row.mpRatio), 0.5),
+    mpP90: quantile(rows.map((row) => row.mpRatio), 0.9),
+    mpExhaustionRate: rows.filter((row) => row.mpExhausted).length / n,
+    avgActions: rows.reduce((sum, row) => sum + row.actions, 0) / n,
+    avgDarkBattles: rows.reduce((sum, row) => sum + row.darkBattles, 0) / n,
+    avgFightsWon: rows.reduce((sum, row) => sum + row.fightsWon, 0) / n,
+    endLightP50: quantile(rows.map((row) => row.endLight), 0.5),
+  }
+}
+
+function reportFloor(label: string, row: ReturnType<typeof aggregateFloor>): void {
+  console.log(
+    `[balance-m47] ${label} n=${row.n} 完遂${(row.completionRate * 100).toFixed(1)}%`
+    + ` CI[${(row.completionCi95[0] * 100).toFixed(1)},${(row.completionCi95[1] * 100).toFixed(1)}]`
+    + ` 全滅${(row.wipeRate * 100).toFixed(1)}% 瀕死${(row.nearDeathRate * 100).toFixed(1)}%`
+    + ` HPp10/50/90=${(row.hpP10 * 100).toFixed(0)}/${(row.hpP50 * 100).toFixed(0)}/${(row.hpP90 * 100).toFixed(0)}%`
+    + ` MPp10/50/90=${(row.mpP10 * 100).toFixed(0)}/${(row.mpP50 * 100).toFixed(0)}/${(row.mpP90 * 100).toFixed(0)}%`
+    + ` MP枯渇${(row.mpExhaustionRate * 100).toFixed(1)}% 行動${row.avgActions.toFixed(1)} 闇戦${row.avgDarkBattles.toFixed(1)}`,
+  )
+}
+
 // M33 ⑭: 玄冬は実 boss_gentou(実skillIds e_hoshikui/e_hisui/e_yamiuta)を使う。
 // 旧は骸星のkitをspreadした非忠実な代役だった(devil指摘)。実kitで測ることで玄冬の本当の難度を評価する。
 const BOSSES: [string, EnemyDef][] = [
@@ -102,7 +353,121 @@ const BOSSES: [string, EnemyDef][] = [
   ['玄冬(実kit)', enemyById('boss_gentou')],
 ]
 
+const TIER3_REGIONS = REGIONS.filter((region) => region.tier === 3 && region.bossId)
+
+function aggregateMidBoss(regionId: string, n: number, smart: boolean, narrativeMode = false, dark = false) {
+  const region = regionById(regionId)
+  const boss = enemyById(region.bossId!)
+  return agg(n, () => ({
+    party: midParty(),
+    enemies: [combatantFromEnemy(scaleEncounterEnemy(boss, { narrativeMode, dark }), 0)],
+  }), smart)
+}
+
 describe('M28-B 戦闘バランス実測(忠実harness)', () => {
+  it('M47中盤fixture: 人物3代目・熟達Lv6・三代形見を実変換経路で固定する', () => {
+    const characters = midCharacters()
+    const party = midParty()
+    expect(characters).toHaveLength(4)
+    expect(characters.every((character) => character.gen === 3 && character.level === MID_LEVEL)).toBe(true)
+    expect(characters.every((character) => character.equipment.weapon?.generation === MID_ITEM_GENERATION)).toBe(true)
+    expect(characters.every((character) => character.equipment.armor?.generation === MID_ITEM_GENERATION)).toBe(true)
+    expect(itemBaseById('w_katana').shopTier).toBe(0)
+    expect(itemBaseById('a_kawado').shopTier).toBe(0)
+    // earlyPartyと終盤bossPartyの間にあることを実効Combatant値で固定する。
+    expect(Math.min(...party.map((ally) => ally.atk))).toBeGreaterThan(Math.min(...earlyParty().map((ally) => ally.atk)))
+    expect(Math.max(...party.map((ally) => ally.def))).toBeLessThan(Math.max(...bossParty().map((ally) => ally.def)))
+  })
+
+  it('M47中盤1floor: 実マップ敵影数でHP/MP・灯を持ち越し、入口/帰還線/灯枯れを400seed計測する', () => {
+    const matrix: Record<string, ReturnType<typeof aggregateFloor>> = {}
+    for (const [scenario, startLight, floorIndex] of [
+      ['入口', 100, 0],       // shades 7 → 実配置5体、depth 2
+      ['帰還線', 43, 3],     // shades 10 → 実配置8体、depth 5
+      ['灯枯れ', 0, 4],      // shades 4 → 実配置2体、depth 6
+    ] as const) {
+      for (const narrativeMode of [false, true]) {
+        for (const smart of [false, true]) {
+          const key = `${scenario}_${narrativeMode ? 'narrative' : 'fate'}_${smart ? 'smart' : 'dumb'}`
+          matrix[key] = aggregateFloor(400, { startLight, floorIndex, narrativeMode, smart })
+          reportFloor(key, matrix[key])
+        }
+      }
+    }
+
+    // 同じseed・条件は完全一致する。UIやPixiのMath.randomには依存しない決定論境界。
+    expect(simFloor(40503, { startLight: 0, floorIndex: 4, narrativeMode: false, smart: true }))
+      .toEqual(simFloor(40503, { startLight: 0, floorIndex: 4, narrativeMode: false, smart: true }))
+
+    // 固定5戦へ戻らないよう、実マップ密度と探索実配置の契約を番人にする。
+    expect([0, 1, 2, 3, 4].map(encounterCountForFloor)).toEqual([5, 6, 7, 8, 2])
+
+    const brightSmart = matrix['入口_fate_smart']
+    const brightDumb = matrix['入口_fate_dumb']
+    const returnDumb = matrix['帰還線_fate_dumb']
+    const returnSmart = matrix['帰還線_fate_smart']
+    const darkSmart = matrix['灯枯れ_fate_smart']
+    expect(brightSmart.completionRate).toBeGreaterThanOrEqual(0.95)
+    expect(brightSmart.completionRate).toBeGreaterThanOrEqual(brightDumb.completionRate)
+    expect(darkSmart.completionRate).toBeGreaterThanOrEqual(0.95)
+    // 実floor再測定後にX=60%を採用。明灯入口ではなく、帰還判断が生じる深層1floorを中盤圧力gateとする。
+    expect(returnDumb.nearDeathRate, '素手policyは深層の帰還線で60%以上が一度は瀕死').toBeGreaterThanOrEqual(0.60)
+    expect(returnSmart.completionRate, '戦術policyは深層の帰還線でも95%以上完遂').toBeGreaterThanOrEqual(0.95)
+    expect(returnSmart.nearDeathRate).toBeLessThanOrEqual(returnDumb.nearDeathRate)
+    expect(returnSmart.hpP10).toBeGreaterThan(returnDumb.hpP10)
+    expect(matrix['入口_narrative_smart'].completionRate).toBeGreaterThanOrEqual(brightSmart.completionRate)
+    expect(matrix['灯枯れ_narrative_smart'].completionRate).toBeGreaterThanOrEqual(darkSmart.completionRate)
+  }, 120_000)
+
+  it('M47旧elite互換: 現歩行経路には無いelite poolを中盤本表から分離して測る', () => {
+    const region = regionById(MID_REGION_ID)
+    const dumb = agg(400, (rng) => ({
+      party: midParty(),
+      enemies: pickEnemies(region, 'elite', 6, rng).map((id, index) => combatantFromEnemy(enemyById(id), index)),
+    }))
+    const smart = agg(400, (rng) => ({
+      party: midParty(),
+      enemies: pickEnemies(region, 'elite', 6, rng).map((id, index) => combatantFromEnemy(enemyById(id), index)),
+    }), true)
+    report('旧elite互換 素手', dumb)
+    report('旧elite互換 戦術', smart)
+    expect(smart.winRate).toBeGreaterThanOrEqual(dumb.winRate)
+  })
+
+  it('M47中盤主: tier3全11地域を中盤PTの素手/戦術で測り、単一主を中盤全体の代表にしない', () => {
+    expect(TIER3_REGIONS).toHaveLength(11)
+    for (const region of TIER3_REGIONS) {
+      const dumb = aggregateMidBoss(region.id, 200, false)
+      const smart = aggregateMidBoss(region.id, 200, true)
+      report(`中盤主 ${region.name} 素手`, dumb)
+      report(`中盤主 ${region.name} 戦術`, smart)
+      expect(smart.winRate, `${region.name}: 戦術が素手より不利にならない`).toBeGreaterThanOrEqual(dumb.winRate)
+    }
+  }, 120_000)
+
+  it('M47補正契約: 語り部・灯枯れ・主代わりを同じ単一情報源から構成する', () => {
+    const base = enemyById('kubinashi_andon')
+    expect(scaleEncounterEnemy(base, { narrativeMode: true, dark: false }).atk).toBe(Math.round(base.atk * 0.78))
+    expect(scaleEncounterEnemy(base, { narrativeMode: false, dark: true }).atk).toBe(Math.round(base.atk * 1.4))
+    expect(scaleEncounterEnemy(base, { narrativeMode: false, dark: true }).hp).toBe(Math.round(base.hp * 1.2))
+    expect(scaleEncounterEnemy(base, { narrativeMode: false, dark: false, standInBoss: true }).atk).toBe(Math.round(base.atk * 1.5))
+    expect(scaleEncounterEnemy(base, { narrativeMode: false, dark: false, standInBoss: true }).hp).toBe(Math.round(base.hp * 2.2))
+
+    const rows: Record<string, ReturnType<typeof agg>> = {}
+    for (const narrativeMode of [false, true]) {
+      for (const dark of [false, true]) {
+        const key = `${narrativeMode ? 'narrative' : 'fate'}_${dark ? 'dark' : 'light'}`
+        rows[key] = agg(200, () => ({
+          party: midParty(),
+          enemies: [combatantFromEnemy(scaleEncounterEnemy(base, { narrativeMode, dark, standInBoss: true }), 0)],
+        }), true)
+        report(`主代わり ${key}`, rows[key])
+      }
+    }
+    expect(rows.narrative_light.winRate).toBeGreaterThanOrEqual(rows.fate_light.winRate)
+    expect(rows.narrative_dark.winRate).toBeGreaterThanOrEqual(rows.fate_dark.winRate)
+  })
+
   it('序盤tier1: 手応え導入(被HP有意)かつ勝てる', () => {
     HP_MUL = 1; ATK_MUL = 1 // enemyPowerはcombatantFromEnemyへ焼いたので harness側は素通し
     const results: Record<string, ReturnType<typeof agg>> = {}

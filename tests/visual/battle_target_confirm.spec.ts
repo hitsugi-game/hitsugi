@@ -49,7 +49,8 @@ test('戦闘上端: 行動順・設定・報酬予告・敵兆し・敵札が競
 test('通常攻撃: 対象選択と予告だけでは発火せず明示実行だけが戦闘を進める', async ({ page }) => {
   await gotoBattle(page, { allies: 1, enemies: 2 })
 
-  const attack = page.getByRole('button', { name: '攻撃', exact: true })
+  // PC戦支度盤は目的の補足文をaccessible nameへ含み、mobileは短名のまま。両方の先頭語を固定する。
+  const attack = page.getByRole('button', { name: /^攻撃/ }).first()
   const firstEnemy = page.locator('.combatant.is-enemy').filter({ has: page.locator('[data-zone="enemy-card"]') }).first()
   const hpOf = async () => (await firstEnemy.getAttribute('aria-label'))?.match(/体力(\d+\/\d+)/)?.[1]
   const hpBefore = await hpOf()

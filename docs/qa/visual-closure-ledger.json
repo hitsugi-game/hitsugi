@@ -724,7 +724,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Dungeon.tsx",
-        "sourceSha256": "7119b977c8bc7a06669ecf69a3b5100584b3e8eea1e55c2eb8e4dfc813d828bf",
+        "sourceSha256": "a0882c453fa3f5742d2b066508df4a38cc605901ca1424995fcc5e8604a5575c",
         "runtimePath": "src/dungeon/render/region_experience_layer.ts",
         "runtimeSha256": "9b779a9edb7086fd7a0d1f3cb6b2e8e8f6bf9b17f9d709750a6cd14372339b46",
         "rightsStatus": "pending",
@@ -773,7 +773,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Battle.tsx",
-        "sourceSha256": "efae3a4aa22f035025146b00b4f84f1768f7b0b51d9cea2ad800fd0f336260a4",
+        "sourceSha256": "bbae798a6f37d358181c9b8e9ad40d702f86093b5ac94705fab8e05fa20eef7d",
         "runtimePath": "src/ui/battle_ar1.css",
         "runtimeSha256": "5a6e83aedf7df4c1a5a27ac3b67abe982b740d2c85771279cc7f015b596756b6",
         "rightsStatus": "pending",

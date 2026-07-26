@@ -40,6 +40,8 @@ import { captureRegionVisualVersion } from './feature_flags'
 import { captureRegionStageSession } from './data/region_stage_contracts'
 import { dungeonByRegion } from '../dungeon/maps'
 import { traceIntelOf, bossMikiriLine } from './trace'
+import { DUNGEON_STEP_LIGHT_COST, DUNGEON_VICTORY_LIGHT_COST, isDarkLight } from '../dungeon/light_pressure'
+import { scaleEncounterEnemy } from './encounter_difficulty'
 import { regionIdentityOf, regionSignOf } from './data/region_visuals'
 import type { Tomoshigata, JobClassId } from './types'
 import { tozaOf } from './data/toza'
@@ -1690,18 +1692,11 @@ export const useGame = create<GameStore>((set, get) => {
           d.motto,
         )
         // 灯が尽きていると敵が強化される(常夜の重圧)/ 語り部モードは敵が穏やか
-        const dark = light <= 0
-        const ease = d.narrativeMode ? 0.78 : 1
-        const enemies = defs.map((e, i) =>
-          combatantFromEnemy(
-            {
-              ...e,
-              atk: Math.round(e.atk * (dark ? 1.4 : 1) * ease),
-              hp: Math.round(e.hp * (dark ? 1.2 : 1) * ease),
-            },
-            i,
-          ),
-        )
+        const dark = isDarkLight(light)
+        const enemies = defs.map((e, i) => combatantFromEnemy(scaleEncounterEnemy(e, {
+          narrativeMode: d.narrativeMode,
+          dark,
+        }), i))
         const battle = startBattle(party, enemies)
         if (node.type === 'boss' || node.type === 'elite') {
           battle.log.unshift({ text: defs[0].desc, kind: 'info' })
@@ -1918,7 +1913,7 @@ export const useGame = create<GameStore>((set, get) => {
       // 加護(M16-4): 大灯=灯費約2/3、湯治=一歩ごと微回復。眷属「灯強め」(火, M16-5): 灯消費-10%
       const boons = run.boons ?? []
       const familiarFire = activeFamiliarElement(get().data!) === 'fire'
-      const lightCost = 0.45 * (boons.includes('oohi') ? 0.65 : 1) * (familiarFire ? 0.9 : 1)
+      const lightCost = DUNGEON_STEP_LIGHT_COST * (boons.includes('oohi') ? 0.65 : 1) * (familiarFire ? 0.9 : 1)
       if (boons.includes('touji')) {
         mutate((d) => ({
           ...d,
@@ -1940,7 +1935,7 @@ export const useGame = create<GameStore>((set, get) => {
       if (!run || !d) return
       const region = regionById(run.regionId)
       const ease = d.narrativeMode ? 0.78 : 1
-      const dark = run.light <= 0
+      const dark = isDarkLight(run.light)
       // 特殊影は1floorにつき一度だけ。接触時点で消費し、戦闘往復での再抽選・無限稼ぎを防ぐ。
       const specialKey = specialShadeUsedKey(run.floor)
       const specialBattle = !boss && golden && !run.used.includes(specialKey)
@@ -2023,14 +2018,11 @@ export const useGame = create<GameStore>((set, get) => {
       const standInBoss = boss && !region.bossId
       const enemies = enemyIds.map((id, i) => {
         const def = rareRoll?.enemy.id === id ? rareRoll.enemy : enemyById(id)
-        return combatantFromEnemy(
-          {
-            ...def,
-            atk: Math.round(def.atk * ease * (dark ? 1.4 : 1) * (standInBoss ? 1.5 : 1)),
-            hp: Math.round(def.hp * ease * (dark ? 1.2 : 1) * (standInBoss ? 2.2 : 1)),
-          },
-          i,
-        )
+        return combatantFromEnemy(scaleEncounterEnemy(def, {
+          narrativeMode: d.narrativeMode,
+          dark,
+          standInBoss,
+        }), i)
       })
       const battle = startBattle(party, enemies)
       if (boss) {
@@ -2764,7 +2756,7 @@ export const useGame = create<GameStore>((set, get) => {
             dungeonRun: {
               ...run,
               bossDown: run.bossDown || isBoss,
-              light: Math.max(0, run.light - 6),
+              light: Math.max(0, run.light - DUNGEON_VICTORY_LIGHT_COST),
               loot: {
                 ...run.loot,
                 hoto: run.loot.hoto + hoto,

@@ -1432,3 +1432,13 @@
 - **受入fixture**: 正規帰還とcheckpoint中断再開後の帰還で暦・HP/MP・通貨・itemを完全一致させ、item複製0を固定。敗北CTA経路と、敗北画面のCTA未押下でプロセス消失→continueする経路で暦・HP/MP・戦利品・死亡を一致させる。明示放棄UIは新設していないため対象外。
 - **検証**: `npx tsc -b --pretty false`、`npm run lint`、data 0 errors/既存rank warn 1、visual closure 23 routes/40 regions/6 overlays/69 entries、manifest 9/9、全Vitest 52 files/769 tests、production buildに合格。M47B専用PlaywrightはPC1280/mobile390 4/4で、中断再開と敗北画面離脱後の不可逆性を実ブラウザ＋localStorage再読込で確認した。既存AR1 Dungeon/Battle matrixは最終状態で実行済み9件が合格、mobileの1600px専用1件は意図的skip。
 - **Playwright自己修復**: 初回matrixで、M47戦支度盤がPCでは補足文をaccessible nameへ含めるのに旧testが完全一致`攻撃`を探す偽失敗と、Pixi画面撮影が30秒枠を超える時間依存timeoutを検出。実DOMではボタンも画面も存在したため、locatorをPC/mobile両方に合う先頭一致へ、撮影を含む2testだけ60秒へ是正して再合格した。製品挙動・baseline画像は変更していない。
+
+## 2026-07-26（M47C 戦闘予告信頼性・中盤難易度計測）
+
+- **依頼/順序**: ユーザーがA案「戦闘予告の信頼性を先に修正し、その後に中盤難易度を計測」を選択し、実装からmain push・GitHub Pages公開まで承認。M47Bローカルcommit上で開始し、既存dirtyの`src/ui/layout/shell.tsx`、`src/ui/layout/shell_fix_m29.css`、`tests/visual/narrative_m34.spec.ts`は対象外として保持する。
+- **予告の修復**: `computeIntents`のクローンRNGは味方行動と先行敵の乱数消費後の実行を拘束しないため、通常・固有の全兆しを可視文言、title、ariaで「行動候補」「確定ではない」とした。士気崩壊中は22%逃走判定が固有手筋より先に走るため固有cueを抑止し、`EnemyIntent`へ`flee`と可視「逃」候補を追加した。戦闘式、実RNG消費、全戦闘オート、報酬は不変。
+- **灯の修復**: UIだけにあった15%境界を廃止し、productionの40%未満（敵影速度0.7、追跡4→6）と0%（敵影速度0.45、戦闘敵攻撃1.4/HP1.2）へ警告、目的、ring、警告音、小休止文言を揃えた。歩行0.45、勝利6、語り部/灯枯れ/主代わり補正を純関数と定数へ抽出し、store/engine/simが同じ値を参照する。
+- **中盤計測器**: 人物3代目・月齢15・熟達Lv6・4人、初期店装備を三度継いだ形見を`recalcStats → combatantFromChar`で構成。初回監査で「深度6×固定5戦」が実在floorでないと判明したため撤回し、`maps.gen.ts → activeShadeCount`をengine/simの単一情報源にした。星骸の谷の実配置5/6/7/8/2から、入口floor 0、帰還線floor 3、灯枯れfloor 4のHP/MPと灯を持ち越す。各400 seed、旧eliteを分離400 seed、tier3全11地域主を素手/戦術各200 seed、主代わり4条件を各200 seedで測った。
+- **計測後判断**: 実帰還線（floor 3・8戦・灯43・depth5）で素手完遂94.5%・全滅5.5%・瀕死70.5%・HP p10 14%、戦術完遂100%・全滅0%・瀕死44.0%・HP p10 67%。計測後の`X=60%`、戦術完遂95%以上に合格したため敵HP/攻撃は変更しない。戦術終了MP p10/50/90は2/7/12%で、勝敗だけでなくHP/MP/灯/帰還判断に差が出る。tier3主は全て勝率100%だが、素手瀕死は星骸19%、他10主0〜3%で不均一。後続は一律強化でなく予告可能な主固有手筋を個別設計する。
+- **独立監査の自己修復**: checkpointが未知region、範囲外floor/座標、不在party、壊れたloot itemを正常扱いしBAKへ戻れないblockingを検出。`isValidSave`を実ダンジョン・家族・Item定義へ接続し、不正main→正常BAK復旧を回帰化した。公開文書のローカル絶対パスも公開URLへ直し、未push履歴を組み直して履歴から除去する。
+- **修復後の全検証**: 型検査、lint、data 0 errors/既存rank warn 1、visual closure 23 routes/40 regions/6 overlays/69 entries、manifest 9/9、全Vitest 53 files/783、production buildに合格。Playwrightは戦闘候補・対象確認を5幅15/15、灯警告・帰り火を5幅5/5、checkpoint PC/mobile 4/4、AR1 PC/mobile 9 pass/1 intended skip。110件を一括実行した初回は製品失敗でなく実行枠超過だったため、契約単位へ分割して完走した。独立再監査、Ship Check、履歴整理、commit/push/公開確認は後続で記録する。詳細表は`docs/qa/m47c-battle-trust-midgame-baseline-20260726.md`。

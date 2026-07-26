@@ -299,6 +299,16 @@
 .enemy-intent.intent-atk { color: #ff9d76; }   /* 攻 = 単体攻撃 */
 .enemy-intent.intent-tech { color: #9bb5ff; }  /* 術 = 状態・属性 */
 .enemy-intent.intent-aoe { color: #ffcf6b; }   /* 群 = 全体・複数 */
+.enemy-intent.intent-flee { color: #b9d7b0; }  /* 逃 = 士気崩壊による逃走 */
+.enemy-intent > em,
+.enemy-intent .intent-tell > em {
+  color: rgba(244, 234, 214, 0.68);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.enemy-intent > b { font-size: 11px; }
 
 @media (prefers-reduced-motion: no-preference) {
   .enemy-intent { animation: intent-in 220ms ease-out; }

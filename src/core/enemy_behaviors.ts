@@ -90,6 +90,8 @@ export function enemyBehaviorCue(enemy: Combatant, turn: number): EnemyBehaviorC
  * st.turnだけで予告すると、行動済みの敵について同じ手をもう一度予告するため、orderIndexも見る。
  */
 export function upcomingEnemyBehaviorCue(battle: BattleState, enemy: Combatant): EnemyBehaviorCue | undefined {
+  // 長を失った群れは、固有手筋より先に逃走判定を行う。固有手を確定的に見せない。
+  if (battle.morale) return undefined
   const enemyOrder = battle.order.indexOf(enemy.key)
   const upcomingTurn = enemyOrder >= 0 && enemyOrder <= battle.orderIndex ? battle.turn + 1 : battle.turn
   return enemyBehaviorCue(enemy, upcomingTurn)

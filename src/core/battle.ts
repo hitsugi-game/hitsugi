@@ -486,19 +486,21 @@ export function enemyAction(st: BattleState, actor: Combatant, rng: Rng): Battle
   return { type: 'attack', targetKey: target.key }
 }
 
-// ---- M25 §5: 敵の兆し ----
-// 実rngをクローンして先読みし、実戦闘の乱数消費・対象選択・威力を変えない。
+// ---- M47 Work2: 敵の兆し ----
+// 実rngをクローンして候補を作り、実戦闘の乱数消費・対象選択・威力を変えない。
+// 味方行動や先行する敵が実rngを進めるため、これは行動予約ではない。
 
-/** BattleAction を兆しカテゴリへ写像。guard/flee は兆しを出さない(null)。 */
+/** BattleAction を候補カテゴリへ写像。guardだけは候補を出さない(null)。 */
 export function intentOf(action: BattleAction): EnemyIntent | null {
   if (action.type === 'attack') return 'atk'
   if (action.type === 'skill') {
     return action.skillId && skillById(action.skillId).target === 'enemies' ? 'aoe' : 'tech'
   }
+  if (action.type === 'flee') return 'flee'
   return null
 }
 
-/** 各生存敵の次行動カテゴリを先読みする。
+/** 各生存敵の次行動候補を作る。
  *  rng は new Rng(rng.state()) でクローンし、実rngを一切消費しない(挙動を変えない)。 */
 export function computeIntents(st: BattleState, rng: Rng): Record<string, EnemyIntent> {
   const out: Record<string, EnemyIntent> = {}

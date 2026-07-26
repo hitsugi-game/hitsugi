@@ -105,7 +105,13 @@ describe('isValidSave', () => {
     }
     expect(isValidSave(makeData({ dungeonRun }))).toBe(true)
     expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, partyIds: [] } }))).toBe(false)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, partyIds: ['missing'] } }))).toBe(false)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, regionId: 'unknown_region' } }))).toBe(false)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, floor: 999 } }))).toBe(false)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, x: 999 } }))).toBe(false)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, x: -1, y: 4 } }))).toBe(false)
     expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, loot: { ...dungeonRun.loot, hoto: Number.NaN } } }))).toBe(false)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, loot: { ...dungeonRun.loot, items: [{}] } } as unknown as GameData['dungeonRun'] }))).toBe(false)
     expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, used: [42] } as unknown as GameData['dungeonRun'] }))).toBe(false)
   })
 })
@@ -140,6 +146,17 @@ describe('saveGame / loadGame', () => {
     saveGame(makeData({ seasonIndex: 6 }))
     const corrupted = JSON.parse(mem.getItem(KEY)!)
     corrupted.narrative = { deferred: 42 }
+    mem.store.set(KEY, JSON.stringify(corrupted))
+    expect(loadGame()!.seasonIndex).toBe(5)
+  })
+  it('本体checkpointの参照が破損しても正常なBAKから復旧する', () => {
+    saveGame(makeData({ seasonIndex: 5 }))
+    saveGame(makeData({ seasonIndex: 6 }))
+    const corrupted = JSON.parse(mem.getItem(KEY)!)
+    corrupted.dungeonRun = {
+      regionId: 'missing', floor: 0, x: -1, y: -1, light: 100,
+      loot: { hoto: 0, ketsu: 0, items: [] }, partyIds: ['c1'], log: [], used: [], bossDown: false,
+    }
     mem.store.set(KEY, JSON.stringify(corrupted))
     expect(loadGame()!.seasonIndex).toBe(5)
   })

@@ -5,6 +5,8 @@ import { migrateJourneyMetrics } from './journey_metrics'
 import { migrateStarLottery } from './star_lottery'
 import { migrateCharacterProgression } from './character_progression'
 import { recalcStats } from './inheritance'
+import { ITEM_BASES } from './data/items'
+import { dungeonByRegion } from '../dungeon/maps'
 
 const KEY_V1 = 'hitsugi_save_v1' // 季節単位(1ターン=1季)時代のセーブ
 const KEY_V3 = 'hitsugi_save_v3' // 月単位(1ターン=1月)
@@ -94,17 +96,51 @@ function isFiniteNumber(value: unknown, min = Number.NEGATIVE_INFINITY): value i
   return typeof value === 'number' && Number.isFinite(value) && value >= min
 }
 
+const ITEM_SOURCES = new Set(['shop', 'chest', 'boss', 'rare', 'divine'])
+const STAT_KEYS = new Set(['str', 'vit', 'dex', 'agi', 'mnd', 'luk'])
+
+function isValidItem(value: unknown): boolean {
+  if (!isRecord(value) || typeof value.id !== 'string' || value.id.length === 0) return false
+  if (typeof value.baseId !== 'string' || typeof value.name !== 'string' || value.name.length === 0) return false
+  const base = ITEM_BASES.find((candidate) => candidate.baseId === value.baseId)
+  if (!base || value.slot !== base.slot) return false
+  if (!Number.isInteger(value.generation) || !isFiniteNumber(value.generation, 0)) return false
+  for (const key of ['atk', 'def', 'price']) {
+    if (value[key] !== undefined && !isFiniteNumber(value[key], 0)) return false
+  }
+  if (value.statBonus !== undefined) {
+    if (!isRecord(value.statBonus)) return false
+    if (Object.entries(value.statBonus).some(([key, amount]) => !STAT_KEYS.has(key) || !isFiniteNumber(amount, 0))) return false
+  }
+  for (const key of ['legacyOf', 'legacyFirstOwner', 'rareOrigin']) {
+    if (value[key] !== undefined && typeof value[key] !== 'string') return false
+  }
+  if (value.source !== undefined && (typeof value.source !== 'string' || !ITEM_SOURCES.has(value.source))) return false
+  return true
+}
+
 /** M47: optionalな遠征checkpointもBAK選択前に入れ子まで検証する。 */
-function isValidDungeonRun(value: unknown): boolean {
+function isValidDungeonRun(value: unknown, familyIds: ReadonlySet<string>): boolean {
   if (!isRecord(value) || typeof value.regionId !== 'string' || value.regionId.length === 0) return false
+  const dungeon = dungeonByRegion(value.regionId)
+  if (!dungeon) return false
   if (!Number.isInteger(value.floor) || !isFiniteNumber(value.floor, 0)) return false
+  const floor = dungeon.floors[value.floor as number]
+  if (!floor) return false
   if (!Number.isInteger(value.x) || !isFiniteNumber(value.x, -1)) return false
   if (!Number.isInteger(value.y) || !isFiniteNumber(value.y, -1)) return false
+  const x = value.x as number
+  const y = value.y as number
+  const atEntranceSentinel = x === -1 && y === -1
+  const insideFloor = y >= 0 && y < floor.ascii.length && x >= 0 && x < (floor.ascii[y]?.length ?? 0)
+  if (!atEntranceSentinel && !insideFloor) return false
   if (!isFiniteNumber(value.light, 0) || value.light > 100) return false
-  if (!isStringArray(value.partyIds) || value.partyIds.length === 0) return false
+  if (!isStringArray(value.partyIds) || value.partyIds.length === 0 || value.partyIds.length > 4) return false
+  if (new Set(value.partyIds).size !== value.partyIds.length || value.partyIds.some((id) => !familyIds.has(id))) return false
   if (!isStringArray(value.log) || !isStringArray(value.used)) return false
   if (typeof value.bossDown !== 'boolean') return false
-  if (!isRecord(value.loot) || !isFiniteNumber(value.loot.hoto, 0) || !isFiniteNumber(value.loot.ketsu, 0) || !Array.isArray(value.loot.items)) return false
+  if (!isRecord(value.loot) || !isFiniteNumber(value.loot.hoto, 0) || !isFiniteNumber(value.loot.ketsu, 0) ||
+    !Array.isArray(value.loot.items) || !value.loot.items.every(isValidItem)) return false
   if (value.visualVersion !== undefined && value.visualVersion !== 'v1' && value.visualVersion !== 'v2') return false
   if (value.stageContractId !== undefined && typeof value.stageContractId !== 'string') return false
   if (value.frantic !== undefined && (!Number.isInteger(value.frantic) || !isFiniteNumber(value.frantic, 0))) return false
@@ -255,7 +291,7 @@ export function isValidSave(d: unknown): d is GameData & { saveSeq?: number } {
         typeof entry.affinityGained !== 'number' || typeof entry.atSeason !== 'number') return false
     }
   }
-  if (g.dungeonRun !== undefined && !isValidDungeonRun(g.dungeonRun)) return false
+  if (g.dungeonRun !== undefined && !isValidDungeonRun(g.dungeonRun, new Set(g.family.map((character) => character.id)))) return false
   return true
 }
 

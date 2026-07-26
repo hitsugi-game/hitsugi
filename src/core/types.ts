@@ -254,7 +254,7 @@ export interface Combatant {
 
 // M25 §5: 敵の兆し(次行動のカテゴリ)。攻=単体攻撃 / 術=状態・属性技 / 群=全体・複数攻撃。
 // 表示専用 — 戦闘計算・対象選択・AIには一切使わない(enemyActionは不変)。
-export type EnemyIntent = 'atk' | 'tech' | 'aoe'
+export type EnemyIntent = 'atk' | 'tech' | 'aoe' | 'flee'
 
 export interface BattleState {
   allies: Combatant[]
@@ -268,7 +268,7 @@ export interface BattleState {
   chain: number // 現在の継足数
   leaderKey?: string // v3.1 M12-4: 敵の「長」。斃すと雑兵が浮き足立つ
   morale?: boolean // 長が斃れた後true(敵弱体+逃走判定)
-  intents?: Record<string, EnemyIntent> // M25 §5: 敵key→次行動カテゴリ(表示専用・先読み)
+  intents?: Record<string, EnemyIntent> // M47: 敵key→次行動候補(表示専用・非拘束)
 }
 export interface BattleLogEntry {
   text: string

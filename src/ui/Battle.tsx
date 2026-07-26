@@ -1403,15 +1403,19 @@ function SkillDetailPanel({ skillId }: { skillId: string | null | undefined }) {
 }
 
 // 配置スロット+演出クラスを与える共通ラッパ
-// M25 §5: 敵の兆しカテゴリの表示ラベル(最大2字)。攻=単体 / 術=状態・属性 / 群=全体・複数。
-const INTENT_LABEL: Record<EnemyIntent, string> = { atk: '攻', tech: '術', aoe: '群' }
+// M47 Work2: 敵の「行動候補」。実行を予約しないため、可視文言・ariaとも確定表現にしない。
+const INTENT_LABEL: Record<EnemyIntent, string> = { atk: '攻', tech: '術', aoe: '群', flee: '逃' }
 const INTENT_TITLE: Record<EnemyIntent, string> = {
-  atk: '次は単体攻撃の構え', tech: '次は術(状態・属性)の構え', aoe: '次は全体・複数攻撃の構え',
+  atk: '行動候補: 単体攻撃。確定ではない',
+  tech: '行動候補: 術(状態・属性)。確定ではない',
+  aoe: '行動候補: 全体・複数攻撃。確定ではない',
+  flee: '行動候補: 逃走。長を失った群れは逃げることがある',
 }
 
 function BattleTacticalBrief({ battle, itemCount }: { battle: BattleState; itemCount: number }) {
   const livingEnemies = battle.enemies.filter((enemy) => enemy.hp > 0)
   const wideThreats = livingEnemies.filter((enemy) => battle.intents?.[enemy.key] === 'aoe').length
+  const fleeCandidates = livingEnemies.filter((enemy) => battle.intents?.[enemy.key] === 'flee').length
   const chainName = battle.chainTarget
     ? livingEnemies.find((enemy) => enemy.key === battle.chainTarget)?.name
     : undefined
@@ -1420,15 +1424,17 @@ function BattleTacticalBrief({ battle, itemCount }: { battle: BattleState; itemC
       <p className="battle-tactical-kicker">戦況の見立て</p>
       <dl>
         <div><dt>敵勢</dt><dd>{livingEnemies.length}体</dd></div>
-        <div><dt>広域の兆し</dt><dd>{wideThreats > 0 ? `${wideThreats}体` : 'なし'}</dd></div>
+        <div><dt>広域候補</dt><dd>{wideThreats > 0 ? `${wideThreats}体` : 'なし'}</dd></div>
         <div><dt>携行薬</dt><dd>{itemCount}個</dd></div>
       </dl>
       <p className="battle-tactical-note">
-        {chainName
+        {fleeCandidates > 0
+          ? `「逃」が${fleeCandidates}体。長を失った群れは逃げることがある。`
+          : chainName
           ? `${chainName}へ火脈が通っている。同じ敵を狙えば次撃が伸びる。`
           : itemCount === 0
             ? '薬が尽きている。帰還後、郷の薬種見世で補充できる。'
-            : '敵札の「攻・術・群」を見て、攻めるか守るかを選べ。'}
+            : '敵札の「攻・術・群」は次の行動候補。確定ではない兆しから、攻めるか守るかを選べ。'}
       </p>
     </div>
   )
@@ -1461,8 +1467,8 @@ function CombatantNode({
   dimmed: boolean // M25§4.3手順1: 行動者/対象以外の暗転
   targetNumber?: number // 対象選択中の1始まり番号(0以下=非表示)
   elementBadge?: { el: Element; adv: Matchup }
-  intent?: EnemyIntent // M25 §5: 敵の次行動カテゴリ(生存敵・入力番のみ)
-  behaviorCue?: EnemyBehaviorCue // M43: 固有予告と短い対処。戦闘計算と同じturnから導出
+  intent?: EnemyIntent // M47: 敵の次行動候補(生存敵・入力番のみ)
+  behaviorCue?: EnemyBehaviorCue // M47: 固有手筋の候補と短い対処。行動予約ではない
   onClick: () => void
   onBodyRef?: (key: string, el: HTMLDivElement | null) => void
   onCombatantRef?: (key: string, el: HTMLDivElement | null) => void
@@ -1504,27 +1510,28 @@ function CombatantNode({
       }}
     >
       {!!targetNumber && targetNumber > 0 && <span className="target-num-badge" aria-hidden>{targetNumber}</span>}
-      {/* M25 §5: 敵の兆し — 名札の上に2字+印。色だけに頼らず文字で示す。 */}
+      {/* M47: 敵の行動候補 — 名札の上で「候補」と明記し、色だけに頼らない。 */}
       {intent && c.hp > 0 && (
         <span
           className={`enemy-intent intent-${intent}${behaviorCue ? ' has-behavior' : ''}`}
+          data-certainty="candidate"
           title={behaviorCue
-            ? `${behaviorCue.step.tell}。${behaviorCue.step.target}。${behaviorCue.hint}`
+            ? `行動候補: ${behaviorCue.step.tell}。${behaviorCue.step.target}。${behaviorCue.hint}。確定ではない`
             : INTENT_TITLE[intent]}
           aria-label={behaviorCue
-            ? `次の手、${behaviorCue.step.tell}。危険度${behaviorCue.step.danger === 'danger' ? '高い' : '警戒'}。対象${behaviorCue.step.target}。対処、${behaviorCue.hint}`
+            ? `行動候補、${behaviorCue.step.tell}。確定ではない。危険度${behaviorCue.step.danger === 'danger' ? '高い' : '警戒'}。対象${behaviorCue.step.target}。対処、${behaviorCue.hint}`
             : INTENT_TITLE[intent]}
         >
           <span className="intent-dot" aria-hidden />
           {behaviorCue ? (
             <>
-              <span className="intent-tell"><b>{INTENT_LABEL[intent]}</b> {behaviorCue.step.tell}</span>
+              <span className="intent-tell"><em>候補</em><b>{INTENT_LABEL[intent]}</b> {behaviorCue.step.tell}</span>
               <small className="intent-response">
                 {behaviorCue.step.danger === 'danger' ? '危' : '警'}・{TARGET_SHORT[behaviorCue.step.target]}
                 <i>{COUNTER_LABEL[behaviorCue.counter]}</i>{COUNTER_SHORT[behaviorCue.counter]}
               </small>
             </>
-          ) : INTENT_LABEL[intent]}
+          ) : <><em>候補</em><b>{INTENT_LABEL[intent]}</b></>}
         </span>
       )}
       {voice && <div className="voice-bubble">{voice.voice}</div>}

@@ -29,6 +29,10 @@
   white-space: nowrap;
 }
 
+.enemy-intent.has-behavior .intent-tell > em {
+  margin-right: 4px;
+}
+
 .enemy-intent.has-behavior .intent-tell b {
   color: currentColor;
   font-size: 11px;

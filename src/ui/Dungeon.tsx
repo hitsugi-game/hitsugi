@@ -18,6 +18,7 @@ import { regionBgR, stageOf, uiIcon } from './img'
 import { ageOf } from '../core/inheritance'
 import { EventModal } from './Expedition'
 import { audio } from '../core/audio'
+import { LIGHT_PURSUIT_THRESHOLD, lightPressureCopy, lightPressureLevel } from '../dungeon/light_pressure'
 import './dungeon_m23.css'
 import './dungeon_m24.css'
 import './dungeon_m25.css'
@@ -58,7 +59,7 @@ const POI_LABELS: Record<DungeonPoiKind, string> = {
 const POI_ORDER: DungeonPoiKind[] = ['entrance', 'stairs', 'monument', 'camp', 'shrine', 'chest', 'boss']
 
 function shortTermGoal(light: number, discovery: DungeonDiscoverySnapshot): string {
-  if (light < 15) return '帰り火を考えよ'
+  if (lightPressureLevel(light) !== 'safe') return lightPressureCopy(light).objective
   if (discovery.pois.some((poi) => poi.kind === 'stairs')) return '下り階段を見つけた'
   const totalMonuments = discovery.totals.monument ?? 0
   const foundMonuments = discovery.pois.filter((poi) => poi.kind === 'monument').length
@@ -97,7 +98,7 @@ function ExplorationGuide({
     return [`${POI_LABELS[kind]}${count > 1 && kind !== 'boss' ? `×${count}` : ''}`]
   })
   return (
-    <aside className={`exploration-guide${light < 15 ? ' is-danger' : ''}`} data-zone="exploration-guide" aria-label="探索案内">
+    <aside className={`exploration-guide${lightPressureLevel(light) !== 'safe' ? ' is-danger' : ''}`} data-zone="exploration-guide" aria-label="探索案内">
       <p><span>目的</span><b data-guide="objective">{shortTermGoal(light, discovery)}</b></p>
       <p><span>発見</span><b data-guide="pois">{labels.length > 0 ? labels.join('・') : 'まだなし'}</b></p>
       <p>
@@ -134,14 +135,15 @@ function RecentLog({ log }: { log: string[] }) {
 function LanternRing({ pct }: { pct: number }) {
   const R = 24
   const C = 2 * Math.PI * R
-  const level = pct < 15 ? 'crit' : pct < 40 ? 'low' : 'ok'
+  const pressure = lightPressureLevel(pct)
+  const level = pressure === 'dark' ? 'crit' : pressure === 'pursuit' ? 'low' : 'ok'
+  const copy = lightPressureCopy(pct)
   return (
     <div
       className={`lantern-ring lantern-${level}`}
       data-zone="hud-top"
-      /* M32修正: 歩行ダンジョン化で失われた「灯が尽きると何が起きるか」の説明を復活(旧: 尽きれば常夜が牙を剥く) */
-      title={`灯 ${Math.round(pct)}/100 — 尽きれば常夜の魔性が狂暴化する。帰り火を絶やすな。`}
-      aria-label={`灯 ${Math.round(pct)}パーセント。尽きれば魔性が狂暴化する`}
+      title={`灯 ${Math.max(0, Math.round(pct))}/100 — ${copy.detail}`}
+      aria-label={copy.aria}
     >
       <svg viewBox="0 0 64 64" width="64" height="64">
         <circle cx="32" cy="32" r={R} fill="rgba(11,15,30,0.7)" stroke="rgba(201,168,106,0.25)" strokeWidth="3" />
@@ -310,8 +312,12 @@ function DungeonFloor() {
   const lastLightRef = useRef(run.light)
   useEffect(() => {
     engineRef.current?.setLight(run.light)
-    // 灯が危険域(15%)を跨いで降下した瞬間だけ error 警告音(連打を避ける)
-    if (lastLightRef.current >= 15 && run.light < 15 && run.light > 0) {
+    // 実機構の境界(40%追跡強化 / 0%戦闘強化)を跨いだ瞬間だけ警告する。
+    const crossedPursuit = lastLightRef.current >= LIGHT_PURSUIT_THRESHOLD
+      && run.light < LIGHT_PURSUIT_THRESHOLD
+      && run.light > 0
+    const reachedDark = lastLightRef.current > 0 && run.light <= 0
+    if (crossedPursuit || reachedDark) {
       audio.se('error')
     }
     lastLightRef.current = run.light
@@ -490,7 +496,8 @@ function DungeonFloor() {
           <p style={{ fontSize: 12.5, color: 'var(--text-dim)', lineHeight: 1.8, marginBottom: 12 }}>
             移動: 矢印キー / 画面をタップ。<br />
             設定(音量・演出): 画面右上の ⚙。<br />
-            灯が細るほど魔性は狂暴になる。深追いは禁物。
+            灯が40未満になると敵影が速まり、遠くから追う。<br />
+            灯が尽きると、戦闘の魔性も攻撃と命を増す。深追いは禁物。
           </p>
           <div className="confirm-actions">
             <button className="btn btn-main" onClick={() => setConfirm(null)}>探索に戻る</button>
