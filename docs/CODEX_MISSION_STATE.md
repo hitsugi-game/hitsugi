@@ -19,8 +19,8 @@
 | C. Work3 計測器 | B | main | 中盤PT、HP/MP持越し連戦、灯枯れ/主代わり/語り部を測定 | completed |
 | D. 計測後調整 | C | main | 測定証拠が必要性を示す場合だけ限定変更、既存回帰維持 | completed |
 | E. 正典・全検証 | B-D | main | GDD/STATUS/WORKLOG、tsc/lint/data/Vitest/build/Playwright | completed |
-| F. 独立監査・Ship Check | E | fresh reviewer + main | 契約全項目blocking 0、SHIP系判定 | in_progress |
-| G. 公開 | F | main | 対象限定commit、main push、Actions success、公開HTTP/marker確認 | pending |
+| F. 独立監査・Ship Check | E | fresh reviewer + main | 契約全項目blocking 0、SHIP系判定 | completed |
+| G. 公開 | F | main | 対象限定commit、main push、Actions success、公開HTTP/marker確認 | completed |
 
 ## ③完了済み
 
@@ -44,21 +44,22 @@
 - M47C-3: 中盤実Character fixtureと持越しsimを追加。初回監査で固定5戦と深度6を合成した非実在fixtureを撤回し、実マップの敵影数5/6/7/8/2をengine/simで共通化。400 seedの実帰還線floor 3で素手瀕死70.5%、戦術完遂100%を観測し、計測後X=60%を採用。敵数値変更なしでgate合格。
 - M47C-4: 初回全gateはVitest 53 files/782、build、lint、data 0 errors、closure 69、manifest 9、Playwright戦闘15/15、灯5/5、M47B/AR1 13 pass/1 intended skip。初回独立監査のNO-SHIPを受け、実floor計測とcheckpoint参照検証を自己修復。修復後focused 4 files/47 testsは合格し、全gate再実行中。
 - M47C-5: 修復後の型検査、lint、data 0 errors/既存warn 1、closure 69、manifest 9、全Vitest 53 files/783、production buildに合格。Playwrightは戦闘15/15、灯5/5、checkpoint 4/4、AR1 PC/mobile 9 pass/1 intended skip。
+- M47C-6: 独立2系統がSHIP-with-notes/blocking 0。ローカル絶対パス入り未push履歴をautosquashし、指定dirty 3件をdiff hash一致で復元。M47B `10c5b35`、M47C `c6e06f6`をmainへpushし、Actions run `30188332927`のbuild/deployが成功。公開HTML/JS/CSSはHTTP 200、bundle `index-B_r6ojIm.js`で「行動候補」「確定ではない」「敵影が速まり」を確認した。
 
 ## ⑦次の一手
 
-- fresh独立再監査とsecurity再監査のblocking 0を確認してShip Checkを確定する。
+- 公開後の外部gateとして、初見8名・一世代5名・30分pilotを別途実施する。今回の実装・公開missionは完了。
 
 ## ⑧最終監査表
 
-- **監査種別**: independent audit。初回は実floor不一致・save参照不整合・文書不一致でNO-SHIP、現在は修復後再検査待ち。
+- **監査種別**: independent audit。初回NO-SHIPの3件を自己修復し、最終はSHIP-with-notes / blocking 0。
 - ✅ Work2: 固定seed 200、候補DOM、灯境界、5幅に合格。
 - ✅ Work3: 実floor由来の中盤連戦400 seed、tier3全11主、旧elite分離、主代わり4条件を測定。
 - ✅ 調整判断: X=60%、戦術完遂100%。現行敵数値で合格したため一律調整を見送り。
 - ✅ 回帰/実ブラウザ: 修復後53 files/783と影響範囲33 pass/1 intended skip。
-- ⚠️ 独立監査/Ship Check: 初回blockingを修復後、fresh再監査待ち。
-- ⚠️ commit/push/deploy: 未実施。
+- ✅ 独立監査/Ship Check: fresh 2系統でblocking 0。npm audit 0、公開差分/履歴の絶対パス・秘密・PII候補0。
+- ✅ commit/push/deploy: M47B `10c5b35`、M47C `c6e06f6`、Actions `30188332927`、公開HTML/JS/CSSと3 markerを確認。
 
 ## ⑨terminal印
 
-稼働中 — 2026-07-26T13:35+09:00。修復後の独立再監査とShip Check中。
+完了 — 2026-07-26T13:50+09:00。実装・検証・独立監査・main公開・HTTP確認済み。
