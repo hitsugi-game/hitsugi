@@ -1422,3 +1422,13 @@
 - **副作用の報告**: Codexがround1で公開版を開いた際、既存セーブで日参りが自動受領・保存され**奉燈18・血珠1が加算**(`store.ts:865-886`、本人申告)。read-onlyサンドボックスはブラウザのlocalStorageに及ばない。round2以降は実プレイを禁止。ユーザーへ報告済み。
 - **限界**: **実プレイ未実施**(Browserツールが分類器障害で全期間起動不可)。中盤難易度・遭遇件数比・強制終了率は未測定。外部gateも未実施のため、本書の提案もM45/M45A同様に検証されていない設計判断である。
 - **git**: 新規2ファイル(成果物+MISSION_STATE)のみcommit。push無し(公開ゲートは別途)。
+
+## 2026-07-26（M47B 遠征・暦・保存契約の修復）
+
+- **依頼/境界**: `docs/CODEX_BRIEF_M47_20260725.md`に従って作業開始。最優先の作業1だけを実装し、戦闘情報の信頼性（作業2）と中盤難易度計測（作業3）は順序についてユーザー判断が必要なため未着手。月コスト、敵数値、全戦闘オート、報酬内容は変更しない。
+- **checkpoint**: `GameData.dungeonRun`をoptionalとして追加し、出立、加護決定、事件解決、石碑/宝箱/焚火、階層移動、戦闘勝利/逃走後にsafe snapshotを保存する。`continueGame`は同じ地域・階層・座標・灯・加護候補・戦利品・隊へ復帰し、帰還/全滅/最終勝利ではcheckpointを先に除去する。入れ子の型・有限値・範囲は`isValidSave`で検証し、旧save欠損は郷、破損saveは既存BAK復旧の対象とする。
+- **敗北の不可逆化**: ダンジョン戦の`lost`確定と同じ同期処理内で既存`finishBattle`の死亡・形見・戦利品半減・月送り・saveを一度だけ実行し、結果画面は一時状態として残す。結果CTAは保存済み遷移を閉じるだけなので、敗北画面でアプリを閉じても死が巻き戻らず、二重精算もしない。
+- **M33判断の撤回**: M33では`continueGame`が遠征を破棄することを意図的設計として維持した。しかしM46で「敗北結果画面を閉じれば永久死まで取消せる」と判明し、世代交代RPGの中核契約を壊すため、この判断を明示的に撤回した。AR1の旧「save payloadはDungeonRunを含まない」oracleも誤りとなり、再開時の描画契約を保存するoracleへ更新した。
+- **受入fixture**: 正規帰還とcheckpoint中断再開後の帰還で暦・HP/MP・通貨・itemを完全一致させ、item複製0を固定。敗北CTA経路と、敗北画面のCTA未押下でプロセス消失→continueする経路で暦・HP/MP・戦利品・死亡を一致させる。明示放棄UIは新設していないため対象外。
+- **検証**: `npx tsc -b --pretty false`、`npm run lint`、data 0 errors/既存rank warn 1、visual closure 23 routes/40 regions/6 overlays/69 entries、manifest 9/9、全Vitest 52 files/769 tests、production buildに合格。M47B専用PlaywrightはPC1280/mobile390 4/4で、中断再開と敗北画面離脱後の不可逆性を実ブラウザ＋localStorage再読込で確認した。既存AR1 Dungeon/Battle matrixは最終状態で実行済み9件が合格、mobileの1600px専用1件は意図的skip。
+- **Playwright自己修復**: 初回matrixで、M47戦支度盤がPCでは補足文をaccessible nameへ含めるのに旧testが完全一致`攻撃`を探す偽失敗と、Pixi画面撮影が30秒枠を超える時間依存timeoutを検出。実DOMではボタンも画面も存在したため、locatorをPC/mobile両方に合う先頭一致へ、撮影を含む2testだけ60秒へ是正して再合格した。製品挙動・baseline画像は変更していない。

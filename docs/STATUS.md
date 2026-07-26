@@ -1,8 +1,10 @@
-# 開発ステータス(2026-07-24 更新)
+# 開発ステータス(2026-07-26 更新)
 
 **2026-07-22 runtime実測**: 神180柱・敵579体（通常基礎180＋若/老変異＋主39）・装備810・辞世1370・事件282・地域40・配信画像2825点。**次の制約は物量でなく、初回30分・戦闘の対処差・初代継承・実利用計測・公開前検証**。M42監査の正本は`docs/PRODUCT_IMPROVEMENT_AUDIT_M42_20260722.md`。
 
 ## 直近の公開修正
+
+- **M47B 遠征・暦・保存契約（ローカル実装・未公開）**: 遠征をoptional checkpointとして保存し、出立・加護/事件/特殊地点・階層移動・戦闘解決の安全地点から同じ状態で再開できるようにした。帰還時はcheckpointを消して従来どおり一度だけ戦利品反映＋1ヶ月送り。ダンジョン敗北は結果画面のCTAを待たず、永久死・形見・戦利品半減・月送りを同期保存するため、画面を閉じても死亡を取り消せない。M33の非永続判断はM46で判明した永久死回避を理由に撤回。型検査、lint、data、visual closure 69、manifest 9、全Vitest 52 files/769、build、M47B Playwright PC/mobile 4/4、既存Dungeon/Battle matrixの実行済み9件に合格。commit後もpush/deployは別の明示承認を待つ。
 
 - **M50 適応型音楽・一族人物表示（公開済み）**: 全23画面を11曲へ割り当て、通常/稀相/主戦、戦況tension、家祖ID由来の血脈三音、句構成、crossfade、重要SE duckを実装。music/effects/ambience bus、4音量、消音、起伏控えめ、gesture unlock、非表示停止/復帰を追加し、旧地域環境音は0.38秒fade後に切断する。一族小札は横送り不要のgridへ変更し、玄を含む灯形未決定の幼子は既存人物顔を仮肖像として表示する。新規音源/画像0、save/戦闘計算/報酬/全戦闘オート不変。focused Vitest 12、Playwright PC/mobile 14、全Vitest 765、lint/data/build/closure69/manifest9、npm audit 0、独立/security監査blocking 0。実装`6c8d2a5`、Actions run `30128251561`でPages公開成功。公開HTML/JS/CSSと人物顔をHTTP 200で確認。`face_*`の生成モデル系譜は既存未確認gateを継承し、権利確認済みとは扱わない。
 
@@ -94,7 +96,7 @@
 ## 既知の残タスク(次期候補)
 
 - **M43外部gate**: 初見8名、一世代5名、低性能物理端末で初回30分・初継承・魅力を検証する。local milestoneの外部送信は未実装。
-- **公開品質**: Dungeon checkpoint、root Error Boundary、PR preview/main保護/browser smoke、実機performance gate。
+- **公開品質**: Dungeon checkpointの公開反映（ローカル実装済み）、root Error Boundary、PR preview/main保護/browser smoke、実機performance gate。
 - **量産境界**: promptEn・画像工場・神/敵/地域追加は完了履歴として保持し、M42の実ユーザーgateを閉じるまで再開しない。
 
 ## 開発メモ

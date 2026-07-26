@@ -1,5 +1,7 @@
 // 『灯継ぎ』コア型定義
 
+import type { DungeonRun } from '../dungeon/types'
+
 // ---- 血潮(ステータス) ----
 export interface Stats {
   str: number // 力 — 物理攻撃
@@ -474,6 +476,9 @@ export interface GameData {
   successionPending?: { predecessorId: string; heirloomIds: string[] } // M43: 戦死後も次の月送りで因果を失わない
   journeyMetrics?: JourneyMetrics // M43: 端末内だけのone-shot到達記録
   starLottery?: StarLotteryState // M43: 無課金収集「星籤」
+  // M47: 遠征の安全checkpoint。欠損は郷にいる旧saveとして扱う。
+  // runtimeのdungeonRunと同じ形を保存し、終了時は必ずundefinedへ戻す。
+  dungeonRun?: DungeonRun
 }
 
 // 宿敵(名持ち) — 一族の誰かを殺した魔性が名を得て成長・再来する

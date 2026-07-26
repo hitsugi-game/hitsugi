@@ -105,8 +105,8 @@ describe('AR1 region stage resolver', () => {
   })
 })
 
-describe('AR1 session-only capture', () => {
-  it('captures version/contract on DungeonRun while GameData and its serialized save payload stay clean', () => {
+describe('AR1 expedition checkpoint capture', () => {
+  it('persists the captured version/contract so a resumed run never switches presentation', () => {
     vi.stubEnv('VITE_REGION_VISUAL_V2', '1')
     useGame.getState().departDungeon('hotarubi_no_kubochi', ['c1'])
 
@@ -117,10 +117,12 @@ describe('AR1 session-only capture', () => {
       regionId: 'hotarubi_no_kubochi',
       floor: 0,
     })
-    const persistedPayload = JSON.stringify(state.data)
-    expect(persistedPayload).not.toContain('visualVersion')
-    expect(persistedPayload).not.toContain('stageContractId')
-    expect(persistedPayload).not.toContain('dungeonRun')
+    expect(state.data?.dungeonRun).toMatchObject({
+      visualVersion: 'v2',
+      stageContractId: HOTARUBI_FLOOR_0_AR1.id,
+      regionId: 'hotarubi_no_kubochi',
+      floor: 0,
+    })
   })
 
   it('captures the default M36 V2 presentation for non-AR1 regions without forcing a special image contract', () => {

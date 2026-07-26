@@ -104,6 +104,8 @@ interface GameStore {
   battle: BattleState | null
   battleSequence: number
   battleRewardSettlement: BattleRewardSettlement | null
+  /** M47: 敗北を即時精算した後、結果画面を閉じた時だけ開く遷移先。 */
+  battleDefeatContinuation: Screen | null
   battleNodeId: string | null
   battleLogQueue: BattleLogEntry[]
   pendingScenes: PendingScene[]
@@ -194,6 +196,7 @@ interface GameStore {
   drainBattleLog: () => BattleLogEntry[]
   finishBattle: () => void
   settleBattleVictory: () => void
+  settleBattleDefeat: () => void
   continueAfterBattle: () => void
   refreshBattleIntents: () => void // M25 §5: 敵の兆しを先読み設定(表示専用)
 }
@@ -226,6 +229,29 @@ export const useGame = create<GameStore>((set, get) => {
     const nd: GameData = { ...withJourney, starLottery: migrateStarLottery(withJourney) }
     set({ data: nd })
     return nd
+  }
+
+  const checkpointDungeon = (run = get().dungeonRun, data = get().data): DungeonRun | null => {
+    if (!run || !data) return null
+    const snapshot: DungeonRun = {
+      ...run,
+      loot: { ...run.loot, items: [...run.loot.items] },
+      partyIds: [...run.partyIds],
+      log: [...run.log],
+      used: [...run.used],
+      boons: run.boons ? [...run.boons] : undefined,
+      boonDraft: run.boonDraft ? [...run.boonDraft] : undefined,
+    }
+    const nd: GameData = { ...data, dungeonRun: snapshot }
+    set({ data: nd, dungeonRun: snapshot })
+    saveGame(nd)
+    return snapshot
+  }
+
+  const withoutDungeonCheckpoint = (data: GameData): GameData => {
+    const next = { ...data }
+    delete next.dungeonRun
+    return next
   }
 
   const chronicle = (d: GameData, kind: 'birth' | 'death' | 'pact' | 'triumph' | 'event' | 'era', text: string, charId?: string): GameData => ({
@@ -723,6 +749,7 @@ export const useGame = create<GameStore>((set, get) => {
     battle: null,
     battleSequence: 0,
     battleRewardSettlement: null,
+    battleDefeatContinuation: null,
     battleNodeId: null,
     battleLogQueue: [],
     pendingScenes: [],
@@ -745,16 +772,21 @@ export const useGame = create<GameStore>((set, get) => {
       }
       if (id && (run.boons?.length ?? 0) < 3 && !(run.boons ?? []).includes(id)) {
         const boon = boonById(id)
+        const nextRun: DungeonRun = {
+          ...run,
+          boons: [...(run.boons ?? []), id],
+          boonDraft: undefined,
+          log: [...run.log, `灯の加護「${boon?.name ?? id}」を授かった。`],
+        }
         set({
           boonDraft: null,
-          dungeonRun: {
-            ...run,
-            boons: [...(run.boons ?? []), id],
-            log: [...run.log, `灯の加護「${boon?.name ?? id}」を授かった。`],
-          },
+          dungeonRun: nextRun,
         })
+        checkpointDungeon(nextRun)
       } else {
-        set({ boonDraft: null })
+        const nextRun = { ...run, boonDraft: undefined }
+        set({ boonDraft: null, dungeonRun: nextRun })
+        checkpointDungeon(nextRun)
       }
     },
 
@@ -791,7 +823,7 @@ export const useGame = create<GameStore>((set, get) => {
       d = chronicle(d, 'era', `${seasonLabel(0)}。燈守家最後の血脈・燈吾、大燈籠の前に立つ。残る命、五季(十五月)。`)
       set({
         data: d, rng, screen: { id: 'intro' }, pendingScenes: [], battle: null, battleNodeId: null,
-        battleSequence: 0, battleRewardSettlement: null,
+        battleSequence: 0, battleRewardSettlement: null, battleDefeatContinuation: null,
         pendingEvent: null, battleLogQueue: [], dungeonRun: null, battleSource: 'node',
         goldenBattle: false, rareEncounter: null, nemesisBattleId: null, boonDraft: null,
       })
@@ -833,6 +865,7 @@ export const useGame = create<GameStore>((set, get) => {
     continueGame: () => {
       const d = loadGame()
       if (!d) return false
+      const restoredRun = d.dungeonRun ?? null
       // v3.1 M16-8: 留守番内職 — 離れていた実時間ぶん、家族が内職をしていた(1時間4燈・上限24時間)
       let nd: GameData = recoverNarrativeOnLoad({ ...d, expedition: undefined })
       if (d.lastPlayedAt) {
@@ -853,11 +886,11 @@ export const useGame = create<GameStore>((set, get) => {
       set({
         data: nd,
         rng: new Rng(d.seed ^ (Date.now() >>> 0)),
-        screen: { id: 'home' },
+        screen: restoredRun ? { id: 'dungeon' } : { id: 'home' },
         pendingScenes: [], battle: null, battleNodeId: null, pendingEvent: null, battleLogQueue: [],
-        battleSequence: 0, battleRewardSettlement: null,
-        dungeonRun: null, battleSource: 'node', goldenBattle: false, rareEncounter: null,
-        nemesisBattleId: null, boonDraft: null,
+        battleSequence: 0, battleRewardSettlement: null, battleDefeatContinuation: null,
+        dungeonRun: restoredRun, battleSource: 'node', goldenBattle: false, rareEncounter: null,
+        nemesisBattleId: null, boonDraft: restoredRun?.boonDraft ?? null,
       })
       return true
     },
@@ -932,7 +965,9 @@ export const useGame = create<GameStore>((set, get) => {
     dungeonIntroSeen: () => {
       const run = get().dungeonRun
       if (!run || run.introSeen) return
-      set({ dungeonRun: { ...run, introSeen: true } })
+      const nextRun = { ...run, introSeen: true }
+      set({ dungeonRun: nextRun })
+      checkpointDungeon(nextRun)
     },
 
     markGossipSeen: () => {
@@ -1444,7 +1479,9 @@ export const useGame = create<GameStore>((set, get) => {
           log = [...log, `「${item.name}」を手に入れた。`]
         }
         nd = { ...nd, collectionV2: migrateCollectionV2(nd) }
-        set({ data: nd, dungeonRun: { ...run, light, log }, pendingEvent: null })
+        const nextRun = { ...run, light, log }
+        set({ data: nd, dungeonRun: nextRun, pendingEvent: null })
+        checkpointDungeon(nextRun, nd)
         if (effect.battle) get().dungeonEncounter(false)
         return
       }
@@ -1846,7 +1883,9 @@ export const useGame = create<GameStore>((set, get) => {
         }, 'first_depart'))
       // v3.1 M16-4: 出立の加護 — 三択を提示
       const draft = draftBoons([], () => get().rng.next()).map((b) => b.id)
-      set({ dungeonRun: run, screen: { id: 'dungeon' }, boonDraft: draft.length > 0 ? draft : null })
+      const checkpointRun: DungeonRun = { ...run, boonDraft: draft.length > 0 ? draft : undefined }
+      set({ dungeonRun: checkpointRun, screen: { id: 'dungeon' }, boonDraft: draft.length > 0 ? draft : null })
+      checkpointDungeon(checkpointRun)
     },
 
     dungeonSetPos: (x, y) => {
@@ -1859,7 +1898,8 @@ export const useGame = create<GameStore>((set, get) => {
     setAutoBattle: (on) => {
       const run = get().dungeonRun
       if (!run) return
-      set({ dungeonRun: { ...run, autoBattle: on } })
+      const nextRun = { ...run, autoBattle: on }
+      set({ dungeonRun: nextRun })
     },
 
     dungeonStep: () => {
@@ -2079,8 +2119,12 @@ export const useGame = create<GameStore>((set, get) => {
       if (!run || !d) return
       const region = regionById(run.regionId)
       const key = `${run.floor}:${x}:${y}`
-      const mark = (extra: Partial<DungeonRun>) =>
-        set({ dungeonRun: { ...get().dungeonRun!, used: [...run.used, key], ...extra } })
+      const mark = (extra: Partial<DungeonRun>, persist = true): DungeonRun => {
+        const nextRun = { ...get().dungeonRun!, used: [...run.used, key], ...extra }
+        set({ dungeonRun: nextRun })
+        if (persist) checkpointDungeon(nextRun)
+        return nextRun
+      }
 
       if (kind === 'monument') {
         // v3.1 M14: 石碑 — 縁起の欠片を拾う(地域ごと3片で核心が開く)
@@ -2147,11 +2191,16 @@ export const useGame = create<GameStore>((set, get) => {
         // 焚火の加護(M16-4): まだ3つ未満なら新たな三択
         if ((run.boons?.length ?? 0) < 3) {
           const draft = draftBoons(run.boons ?? [], () => rng.next()).map((b) => b.id)
-          if (draft.length > 0) set({ boonDraft: draft })
+          if (draft.length > 0) {
+            const nextRun = { ...get().dungeonRun!, boonDraft: draft }
+            set({ boonDraft: draft, dungeonRun: nextRun })
+            checkpointDungeon(nextRun)
+          }
         }
       } else if (kind === 'shrine') {
         const ev = pickEvent(rng, run.regionId) // 地域固有事件を優先(M14)
-        mark({})
+        // 結果選択前は保存しない。閉じた場合は祠へ入り直せる安全地点へ戻す。
+        mark({}, false)
         set({ pendingEvent: { eventId: ev.id, nodeId: `dg:${key}` } })
       } else if (kind === 'boss') {
         if (run.bossDown) return
@@ -2169,15 +2218,17 @@ export const useGame = create<GameStore>((set, get) => {
       if (!run) return
       const dungeon = dungeonByRegion(run.regionId)
       if (!dungeon || run.floor + 1 >= dungeon.floors.length) return
+      const nextRun: DungeonRun = {
+        ...run,
+        floor: run.floor + 1,
+        x: -1,
+        y: -1,
+        log: [...run.log, `さらに深く——地下${run.floor + 2}層へ。`],
+      }
       set({
-        dungeonRun: {
-          ...run,
-          floor: run.floor + 1,
-          x: -1,
-          y: -1,
-          log: [...run.log, `さらに深く——地下${run.floor + 2}層へ。`],
-        },
+        dungeonRun: nextRun,
       })
+      checkpointDungeon(nextRun)
     },
 
     dungeonReturn: () => {
@@ -2192,7 +2243,7 @@ export const useGame = create<GameStore>((set, get) => {
       // 湯屋(M16-6): 帰還した隊のHP/MPを普請段階に応じて回復
       const yuyaBonus = yuyaRecoverBonus(facilityLevel(d.facilities, 'yuya'))
       let nd: GameData = {
-        ...d,
+        ...withoutDungeonCheckpoint(d),
         hoto: d.hoto + run.loot.hoto,
         ketsu: d.ketsu + run.loot.ketsu,
         inventory: [...d.inventory, ...run.loot.items],
@@ -2304,6 +2355,11 @@ export const useGame = create<GameStore>((set, get) => {
         battleLogQueue: [...get().battleLogQueue, ...entries],
         ...(dataUpdate ? { data: dataUpdate } : {}),
       })
+      // M47: lost確定と同じ同期処理内で永久死・月送りまで保存する。
+      // React effectや敗北CTAを待たないため、結果画面で即座に閉じても巻き戻らない。
+      if (stWithIntents.phase === 'lost' && (get().battleSource === 'dungeon' || get().battleSource === 'dungeonBoss')) {
+        get().settleBattleDefeat()
+      }
     },
 
     // M25 §5: 戦闘開始直後など、入力番の兆しを設定する(Battle.tsx がマウント時に呼ぶ)
@@ -2455,6 +2511,41 @@ export const useGame = create<GameStore>((set, get) => {
           },
         }
       })
+
+      if (original.battleSource === 'dungeon' || original.battleSource === 'dungeonBoss') {
+        checkpointDungeon()
+      }
+    },
+
+    settleBattleDefeat: () => {
+      const original = get()
+      if (!original.battle || original.battle.phase !== 'lost') return
+      if (original.battleSource !== 'dungeon' && original.battleSource !== 'dungeonBoss') return
+      if (original.battleDefeatContinuation) return
+
+      internalFinishBattle = true
+      try {
+        get().finishBattle()
+      } finally {
+        internalFinishBattle = false
+      }
+
+      const continuation = get().screen
+      set({
+        battle: original.battle,
+        screen: original.screen,
+        battleNodeId: original.battleNodeId,
+        battleSource: original.battleSource,
+        battleAutoContext: original.battleAutoContext,
+        battleRewardSettlement: original.battleRewardSettlement
+          ? { ...original.battleRewardSettlement, status: 'continued' }
+          : null,
+        battleDefeatContinuation: continuation,
+        dungeonRun: original.dungeonRun,
+        goldenBattle: original.goldenBattle,
+        rareEncounter: original.rareEncounter,
+        nemesisBattleId: original.nemesisBattleId,
+      })
     },
 
     continueAfterBattle: () => {
@@ -2495,6 +2586,23 @@ export const useGame = create<GameStore>((set, get) => {
     },
 
     finishBattle: () => {
+      const defeatContinuation = get().battleDefeatContinuation
+      if (get().battle?.phase === 'lost' && defeatContinuation) {
+        set({
+          battle: null,
+          battleNodeId: null,
+          battleSource: 'node',
+          battleAutoContext: null,
+          battleRewardSettlement: null,
+          battleDefeatContinuation: null,
+          dungeonRun: null,
+          goldenBattle: false,
+          rareEncounter: null,
+          nemesisBattleId: null,
+          screen: defeatContinuation,
+        })
+        return
+      }
       if (!internalFinishBattle) {
         const current = get()
         if (current.battle?.phase === 'won') {
@@ -2553,7 +2661,7 @@ export const useGame = create<GameStore>((set, get) => {
           // 汐里を看取った — 千年の夜が明ける
           if (battle.enemies.some((e) => e.enemyId === 'boss_shiori')) {
             let nd: GameData = {
-              ...d,
+              ...withoutDungeonCheckpoint(d),
               family,
               regionsCleared: [...new Set([...d.regionsCleared, run.regionId])],
               flags: { ...d.flags, cleared: true },
@@ -2685,6 +2793,11 @@ export const useGame = create<GameStore>((set, get) => {
                 ),
               }
             : { ...d, family }
+          const nextRun: DungeonRun = {
+            ...run,
+            light: Math.max(0, run.light - 3),
+            log: [...run.log, fledNem ? '命からがら逃げ延びた。……奴は、また強くなる。' : '命からがら逃げ延びた。'],
+          }
           set({
             data: familyData,
             battle: null,
@@ -2692,17 +2805,14 @@ export const useGame = create<GameStore>((set, get) => {
             goldenBattle: false,
             rareEncounter: null,
             nemesisBattleId: null,
-            dungeonRun: {
-              ...run,
-              light: Math.max(0, run.light - 3),
-              log: [...run.log, fledNem ? '命からがら逃げ延びた。……奴は、また強くなる。' : '命からがら逃げ延びた。'],
-            },
+            dungeonRun: nextRun,
             screen: { id: 'dungeon' },
           })
+          checkpointDungeon(nextRun, familyData)
           return
         }
         // 全滅 — 一人生還
-        let nd: GameData = { ...d, family }
+        let nd: GameData = { ...withoutDungeonCheckpoint(d), family }
         const partyAlive = nd.family.filter((c) => run.partyIds.includes(c.id) && c.alive)
         const survivor = [...partyAlive].sort((a, b) => b.potential.luk - a.potential.luk)[0]
         const lostNames: string[] = []

@@ -52,7 +52,7 @@ export interface DungeonDef {
 // 進行中のダンジョン行(storeに保持)
 export interface DungeonRun {
   regionId: string
-  /** Session-only AR1 renderer snapshot. DungeonRun is never part of GameData/save. */
+  /** 出立時に固定する描画契約。checkpoint復帰でも同じ画角を保つ。 */
   visualVersion?: RegionVisualVersion
   stageContractId?: string
   floor: number
@@ -68,4 +68,5 @@ export interface DungeonRun {
   boons?: string[] // v3.1 M16-4: この遠征で授かった灯の加護(最大3)
   autoBattle?: boolean // オート戦闘を戦闘越しに継続(遠征単位)
   introSeen?: boolean // M23: 第一幕(入場導入)をこのrunで見たか(戦闘往復での再表示を防ぐ)
+  boonDraft?: string[] // M47: 出立直後の加護選択をcheckpoint復帰でも失わない
 }

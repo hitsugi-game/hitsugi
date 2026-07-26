@@ -90,6 +90,31 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'string')
 }
 
+function isFiniteNumber(value: unknown, min = Number.NEGATIVE_INFINITY): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= min
+}
+
+/** M47: optionalな遠征checkpointもBAK選択前に入れ子まで検証する。 */
+function isValidDungeonRun(value: unknown): boolean {
+  if (!isRecord(value) || typeof value.regionId !== 'string' || value.regionId.length === 0) return false
+  if (!Number.isInteger(value.floor) || !isFiniteNumber(value.floor, 0)) return false
+  if (!Number.isInteger(value.x) || !isFiniteNumber(value.x, -1)) return false
+  if (!Number.isInteger(value.y) || !isFiniteNumber(value.y, -1)) return false
+  if (!isFiniteNumber(value.light, 0) || value.light > 100) return false
+  if (!isStringArray(value.partyIds) || value.partyIds.length === 0) return false
+  if (!isStringArray(value.log) || !isStringArray(value.used)) return false
+  if (typeof value.bossDown !== 'boolean') return false
+  if (!isRecord(value.loot) || !isFiniteNumber(value.loot.hoto, 0) || !isFiniteNumber(value.loot.ketsu, 0) || !Array.isArray(value.loot.items)) return false
+  if (value.visualVersion !== undefined && value.visualVersion !== 'v1' && value.visualVersion !== 'v2') return false
+  if (value.stageContractId !== undefined && typeof value.stageContractId !== 'string') return false
+  if (value.frantic !== undefined && (!Number.isInteger(value.frantic) || !isFiniteNumber(value.frantic, 0))) return false
+  if (value.boons !== undefined && !isStringArray(value.boons)) return false
+  if (value.boonDraft !== undefined && !isStringArray(value.boonDraft)) return false
+  if (value.autoBattle !== undefined && typeof value.autoBattle !== 'boolean') return false
+  if (value.introSeen !== undefined && typeof value.introSeen !== 'boolean') return false
+  return true
+}
+
 function isNarrativeScene(value: unknown): value is NarrativeScene {
   if (!isRecord(value) || typeof value.kind !== 'string') return false
   switch (value.kind) {
@@ -230,6 +255,7 @@ export function isValidSave(d: unknown): d is GameData & { saveSeq?: number } {
         typeof entry.affinityGained !== 'number' || typeof entry.atSeason !== 'number') return false
     }
   }
+  if (g.dungeonRun !== undefined && !isValidDungeonRun(g.dungeonRun)) return false
   return true
 }
 

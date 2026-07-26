@@ -204,6 +204,7 @@ export function BattleScreen() {
   const finishBattle = useGame((s) => s.finishBattle)
   const rewardSettlement = useGame((s) => s.battleRewardSettlement)
   const settleBattleVictory = useGame((s) => s.settleBattleVictory)
+  const settleBattleDefeat = useGame((s) => s.settleBattleDefeat)
   const continueAfterBattle = useGame((s) => s.continueAfterBattle)
   const dungeonRun = useGame((s) => s.dungeonRun)
   const goldenBattle = useGame((s) => s.goldenBattle)
@@ -596,6 +597,13 @@ export function BattleScreen() {
     if (!battle || battle.phase !== 'won' || pending.length > 0) return
     if (rewardSettlement?.status === 'planned') settleBattleVictory()
   }, [battle, pending.length, rewardSettlement?.status, settleBattleVictory])
+
+  // M47: debug hook等でlostへ直接遷移した場合も、敗北画面を残したまま同期精算する。
+  // 通常経路はbattleCommand内で先に精算されるため、この呼出しは冪等な保険である。
+  useEffect(() => {
+    if (!battle || battle.phase !== 'lost' || pending.length > 0) return
+    settleBattleDefeat()
+  }, [battle, pending.length, settleBattleDefeat])
 
   // 全戦闘でオートを維持する。確定した戦果を読める時間を置き、手動CTAなら即座に進める。
   useEffect(() => {

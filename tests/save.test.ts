@@ -97,6 +97,17 @@ describe('isValidSave', () => {
     expect(isValidSave({ ...makeData(), narrative: { lastReturn: {} } })).toBe(false)
     expect(isValidSave({ ...makeData(), narrative: { resonance: { cut: Number.NaN, save: 0, inherit: 0 } } })).toBe(false)
   })
+  it('M47 Dungeon checkpointは正常形だけを受理し、破損時はBAK復旧へ回す', () => {
+    const dungeonRun = {
+      regionId: 'yoi_forest', floor: 0, x: 3, y: 4, light: 72.5,
+      loot: { hoto: 18, ketsu: 2, items: [] }, partyIds: ['c1'], log: ['進んだ。'], used: ['0:3:4'],
+      bossDown: false, visualVersion: 'v2' as const, boons: ['oohi'], boonDraft: ['touji'],
+    }
+    expect(isValidSave(makeData({ dungeonRun }))).toBe(true)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, partyIds: [] } }))).toBe(false)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, loot: { ...dungeonRun.loot, hoto: Number.NaN } } }))).toBe(false)
+    expect(isValidSave(makeData({ dungeonRun: { ...dungeonRun, used: [42] } as unknown as GameData['dungeonRun'] }))).toBe(false)
+  })
 })
 
 describe('saveGame / loadGame', () => {

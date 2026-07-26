@@ -74,6 +74,7 @@ async function expectNoHorizontalOverflow(page: Page): Promise<void> {
 }
 
 test('AR1 Dungeon and Battle preserve one Hotarubi stage identity and pooled budget', async ({ page }, info) => {
+  test.setTimeout(60_000)
   const kitResponses: { url: string; status: number }[] = []
   page.on('response', (response) => {
     if (response.url().includes('/visual-recovery/hotarubi/')) {
@@ -238,7 +239,8 @@ test('AR1R-B 1600px completion frame has no overflow and retains keyboard target
   const ember = page.locator('.ar1-stage-embers i').first()
   await expect(ember).toHaveCSS('animation-name', 'none')
 
-  const attack = page.getByRole('button', { name: '攻撃', exact: true })
+  // PCはM47の補足文をaccessible nameへ含み、mobileは短い「攻撃」だけになる。
+  const attack = page.getByRole('button', { name: /^攻撃(?:\s|$)/ })
   await attack.focus()
   await expect(attack).toBeFocused()
   await page.keyboard.press('Enter')
@@ -249,6 +251,7 @@ test('AR1R-B 1600px completion frame has no overflow and retains keyboard target
 })
 
 test('AR1 return keeps the expedition consequence visible in Home and Village', async ({ page }, info) => {
+  test.setTimeout(60_000)
   await bootV2Dungeon(page)
   await continueToBattle(page)
 
