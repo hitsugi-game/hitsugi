@@ -4,7 +4,7 @@
 
 ## 直近の公開修正
 
-- **M51 出立seedによる夜藪変奏（Forge合格・ローカル未公開）**: 出立ごとに地図の向き、宝箱の位置と個数、祠・焚火・石碑の位置、敵影/地表prop、宝箱報酬、祠事件、事件結果、焚火加護候補が変わる。runSeedを遠征checkpointへ保存するため、同じ遠征の中断再開では内容が変わらず引き直せない。通常171層＋常夜百層の全271層で到達性を検査し、専用stageは背景ずれ防止のため地形固定・内容のみ変奏。Forge Round 1のseedなし旧checkpoint引き直しを安定内容seedで閉鎖し、Round 2独立評価A/B/C/D/E=`4/4/5/5/4`、blocking 0。全Vitest 54 files/789、型/lint/data/closure69/manifest9/build、PC1280/mobile390 2/2に合格。旧地形、報酬率、敵数値、月コスト、全戦闘オートは不変。push/deployは明示依頼待ち。
+- **M51 出立seedによる夜藪変奏（公開済み）**: 出立ごとに地図の向き、宝箱の位置と個数、祠・焚火・石碑の位置、敵影/地表prop、宝箱報酬、祠事件、事件結果、焚火加護候補が変わる。runSeedを遠征checkpointへ保存するため、同じ遠征の中断再開では内容が変わらず引き直せない。通常171層＋常夜百層の全271層で到達性を検査し、専用stageは背景ずれ防止のため地形固定・内容のみ変奏。Forge Round 1のseedなし旧checkpoint引き直しを安定内容seedで閉鎖し、Round 2独立評価A/B/C/D/E=`4/4/5/5/4`、blocking 0。全Vitest 54 files/789、型/lint/data/closure69/manifest9/build、PC1280/mobile390 2/2に合格。旧地形、報酬率、敵数値、月コスト、全戦闘オートは不変。実装`545cf79`、Actions `30204635730`でPages公開成功し、公開bundleの4 markerとHTTP 200を確認済み。
 
 - **M47C 戦闘予告信頼性・中盤難易度計測（公開済み）**: 実行を予約しない全兆しを「行動候補」へ統一し、士気崩壊中の逃走候補を追加。灯警告を実機構の40%/0%境界へ揃えた。中盤fixtureを実Character変換で固定し、実マップ敵影数（星骸の谷5/6/7/8/2）から入口/帰還線/灯枯れのHP/MP・灯持越し連戦を各400 seed、tier3全11主を各200 seed計測。計測後`X=60%`とし、実帰還線floor 3は素手瀕死70.5%・全滅5.5%、戦術完遂100%・全滅0%で合格したため敵数値は変更していない。checkpointのregion/floor/座標/隊/item参照検証も追加。型/lint/data/closure69/manifest9、全Vitest 53 files/783、build、Playwright 33 pass/1 intended skip、独立監査blocking 0。実装`c6e06f6`、Actions `30188332927`でPages公開成功。公開HTML/JS/CSSと3 markerをHTTP 200で確認。正本は`docs/qa/m47c-battle-trust-midgame-baseline-20260726.md`。
 
