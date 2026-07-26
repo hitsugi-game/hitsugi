@@ -724,7 +724,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Dungeon.tsx",
-        "sourceSha256": "a0882c453fa3f5742d2b066508df4a38cc605901ca1424995fcc5e8604a5575c",
+        "sourceSha256": "2a5d6d22f661663d01d44f19967060da004cf42002ecb35057a6e19ca9cf1578",
         "runtimePath": "src/dungeon/render/region_experience_layer.ts",
         "runtimeSha256": "9b779a9edb7086fd7a0d1f3cb6b2e8e8f6bf9b17f9d709750a6cd14372339b46",
         "rightsStatus": "pending",

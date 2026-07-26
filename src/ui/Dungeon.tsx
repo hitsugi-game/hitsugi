@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useGame } from '../core/store'
 import { regionById } from '../core/data/regions'
 import { MONTH_NAMES } from '../core/types'
@@ -19,6 +19,7 @@ import { ageOf } from '../core/inheritance'
 import { EventModal } from './Expedition'
 import { audio } from '../core/audio'
 import { LIGHT_PURSUIT_THRESHOLD, lightPressureCopy, lightPressureLevel } from '../dungeon/light_pressure'
+import { varyDungeonFloor } from '../dungeon/run_variation'
 import './dungeon_m23.css'
 import './dungeon_m24.css'
 import './dungeon_m25.css'
@@ -174,7 +175,7 @@ type Confirm = { kind: 'stairs' } | { kind: 'return' } | { kind: 'pause' } | nul
 export function DungeonScreen() {
   const run = useGame((s) => s.dungeonRun)
   if (!run) return null
-  return <DungeonFloor key={run.floor} />
+  return <DungeonFloor key={`${run.runSeed ?? 'legacy'}:${run.floor}`} />
 }
 
 function DungeonFloor() {
@@ -200,13 +201,17 @@ function DungeonFloor() {
 
   const region = regionById(run.regionId)
   const dungeon = dungeonByRegion(run.regionId)!
-  const floorDef = dungeon.floors[run.floor]
+  const baseFloorDef = dungeon.floors[run.floor]
   const stageContract = resolveRegionStageContract({
     regionId: run.regionId,
     floor: run.floor,
     visualVersion: run.visualVersion ?? 'v1',
     stageContractId: run.stageContractId,
   })
+  const floorDef = useMemo(
+    () => varyDungeonFloor(baseFloorDef, run.runSeed, run.floor, { preserveLayout: stageContract !== null }),
+    [baseFloorDef, run.runSeed, run.floor, stageContract],
+  )
   const regionExperience = run.visualVersion === 'v2' ? regionExperienceOf(run.regionId) : null
   const regionAudio = run.visualVersion === 'v2' ? resolveRegionAudioContract(run.regionId) : null
   const party = data.family.filter((c) => run.partyIds.includes(c.id) && c.alive)
@@ -287,7 +292,7 @@ function DungeonFloor() {
       engineRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run.floor, stageContract?.id])
+  }, [run.floor, run.runSeed, stageContract?.id])
 
   // Canvas内の霧開けを、DOMの探索案内へ同期する。発見状態はengineのread APIが唯一の情報源。
   useEffect(() => {
@@ -378,6 +383,7 @@ function DungeonFloor() {
     <div
       className={`dungeon-screen${run.visualVersion === 'v2' ? ' dungeon-visual-v2' : ''}`}
       data-visual-version={run.visualVersion ?? 'v1'}
+      data-run-seed={run.runSeed ?? 'legacy'}
       data-stage-contract-id={stageContract?.id}
       data-stage-ground-materials={stageContract?.groundMaterials.join(',') ?? regionExperience?.groundMaterials.join(',')}
       data-stage-navigation-cue={stageContract?.navigationCue.id ?? regionExperience?.navigationCue.id}
@@ -498,6 +504,7 @@ function DungeonFloor() {
             設定(音量・演出): 画面右上の ⚙。<br />
             灯が40未満になると敵影が速まり、遠くから追う。<br />
             灯が尽きると、戦闘の魔性も攻撃と命を増す。深追いは禁物。
+            <br />道・宝箱・祠の内容は出立時に定まり、中断再開しても変わらない。
           </p>
           <div className="confirm-actions">
             <button className="btn btn-main" onClick={() => setConfirm(null)}>探索に戻る</button>

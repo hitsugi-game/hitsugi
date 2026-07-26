@@ -7,6 +7,7 @@ import { migrateCharacterProgression } from './character_progression'
 import { recalcStats } from './inheritance'
 import { ITEM_BASES } from './data/items'
 import { dungeonByRegion } from '../dungeon/maps'
+import { isDungeonRunSeed } from '../dungeon/run_variation'
 
 const KEY_V1 = 'hitsugi_save_v1' // 季節単位(1ターン=1季)時代のセーブ
 const KEY_V3 = 'hitsugi_save_v3' // 月単位(1ターン=1月)
@@ -122,6 +123,7 @@ function isValidItem(value: unknown): boolean {
 /** M47: optionalな遠征checkpointもBAK選択前に入れ子まで検証する。 */
 function isValidDungeonRun(value: unknown, familyIds: ReadonlySet<string>): boolean {
   if (!isRecord(value) || typeof value.regionId !== 'string' || value.regionId.length === 0) return false
+  if (value.runSeed !== undefined && !isDungeonRunSeed(value.runSeed)) return false
   const dungeon = dungeonByRegion(value.regionId)
   if (!dungeon) return false
   if (!Number.isInteger(value.floor) || !isFiniteNumber(value.floor, 0)) return false

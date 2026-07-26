@@ -39,6 +39,7 @@ import type { DungeonRun } from '../dungeon/types'
 import { captureRegionVisualVersion } from './feature_flags'
 import { captureRegionStageSession } from './data/region_stage_contracts'
 import { dungeonByRegion } from '../dungeon/maps'
+import { dungeonRunContentSeed, dungeonTileRng } from '../dungeon/run_variation'
 import { traceIntelOf, bossMikiriLine } from './trace'
 import { DUNGEON_STEP_LIGHT_COST, DUNGEON_VICTORY_LIGHT_COST, isDarkLight } from '../dungeon/light_pressure'
 import { scaleEncounterEnemy } from './encounter_difficulty'
@@ -1454,7 +1455,15 @@ export const useGame = create<GameStore>((set, get) => {
         const choice = ev.choices[choiceIdx]
         if (!choice) return
         if (choice.requireHoto !== undefined && d.hoto < choice.requireHoto) return
-        const success = choice.successRate === undefined || rng.chance(choice.successRate)
+        const [, floorText, xText, yText] = pendingEvent.nodeId.split(':')
+        const eventRng = dungeonTileRng(
+          dungeonRunContentSeed(run),
+          Number(floorText),
+          Number(xText),
+          Number(yText),
+          `event:${pendingEvent.eventId}:${choiceIdx}`,
+        ) ?? rng
+        const success = choice.successRate === undefined || eventRng.chance(choice.successRate)
         const effect = success ? choice.outcomes[0] : (choice.outcomes[1] ?? choice.outcomes[0])
         const region = regionById(run.regionId)
         let nd: GameData = { ...d }
@@ -1476,7 +1485,7 @@ export const useGame = create<GameStore>((set, get) => {
         }
         if (effect.itemTier) {
           const pool = ITEM_BASES.filter((b) => b.shopTier <= region.tier)
-          const item = makeItem(rng.pick(pool).baseId, 'chest')
+          const item = makeItem(eventRng.pick(pool).baseId, 'chest')
           nd = { ...nd, inventory: [...nd.inventory, item] }
           log = [...log, `「${item.name}」を手に入れた。`]
         }
@@ -1844,6 +1853,7 @@ export const useGame = create<GameStore>((set, get) => {
 
     // ---- 歩行ダンジョン(v2) ----
     departDungeon: (regionId, partyIds) => {
+      const runSeed = get().rng.int(1, 0x7fff_ffff)
       // v3.1 M14: 初到達なら縁起の導入が語られる
       const firstVisit = !(get().data?.regionsVisited ?? []).includes(regionId)
       const lore = loreFor(regionId)
@@ -1854,6 +1864,7 @@ export const useGame = create<GameStore>((set, get) => {
       const visualSession = captureRegionStageSession(regionId, captureRegionVisualVersion())
       const run: DungeonRun = {
         regionId,
+        runSeed,
         ...visualSession,
         floor: 0,
         x: -1,
@@ -1864,6 +1875,7 @@ export const useGame = create<GameStore>((set, get) => {
         log: [
           `${regionById(regionId).name}に足を踏み入れた。灯を絶やすな。`,
           ...introLines,
+          '夜藪の道筋が揺らいだ。宝と祠の在処は、この出立の間だけ定まる。',
           ...(identityLine ? [identityLine] : []),
         ],
         used: [],
@@ -2155,7 +2167,8 @@ export const useGame = create<GameStore>((set, get) => {
       }
 
       if (kind === 'chest') {
-        const t = rollTreasure(region, rng)
+        const treasureRng = dungeonTileRng(dungeonRunContentSeed(run), run.floor, x, y, 'chest') ?? rng
+        const t = rollTreasure(region, treasureRng)
         // 目利きの心得(M16-4): 宝箱の実り+50%
         const mekiki = (run.boons ?? []).includes('mekiki') ? 1.5 : 1
         mark({
@@ -2182,7 +2195,8 @@ export const useGame = create<GameStore>((set, get) => {
         })
         // 焚火の加護(M16-4): まだ3つ未満なら新たな三択
         if ((run.boons?.length ?? 0) < 3) {
-          const draft = draftBoons(run.boons ?? [], () => rng.next()).map((b) => b.id)
+          const campRng = dungeonTileRng(dungeonRunContentSeed(run), run.floor, x, y, 'camp-boon') ?? rng
+          const draft = draftBoons(run.boons ?? [], () => campRng.next()).map((b) => b.id)
           if (draft.length > 0) {
             const nextRun = { ...get().dungeonRun!, boonDraft: draft }
             set({ boonDraft: draft, dungeonRun: nextRun })
@@ -2190,7 +2204,8 @@ export const useGame = create<GameStore>((set, get) => {
           }
         }
       } else if (kind === 'shrine') {
-        const ev = pickEvent(rng, run.regionId) // 地域固有事件を優先(M14)
+        const shrineRng = dungeonTileRng(dungeonRunContentSeed(run), run.floor, x, y, 'shrine') ?? rng
+        const ev = pickEvent(shrineRng, run.regionId) // 地域固有事件を優先(M14)
         // 結果選択前は保存しない。閉じた場合は祠へ入り直せる安全地点へ戻す。
         mark({}, false)
         set({ pendingEvent: { eventId: ev.id, nodeId: `dg:${key}` } })

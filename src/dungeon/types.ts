@@ -52,6 +52,8 @@ export interface DungeonDef {
 // 進行中のダンジョン行(storeに保持)
 export interface DungeonRun {
   regionId: string
+  /** 出立時に一度だけ決まり、地形・敵影・宝・事件を中断再開後も同じに保つ。 */
+  runSeed?: number
   /** 出立時に固定する描画契約。checkpoint復帰でも同じ画角を保つ。 */
   visualVersion?: RegionVisualVersion
   stageContractId?: string
