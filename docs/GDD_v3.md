@@ -468,6 +468,7 @@ M18後の継続改善として、強制的な日課ではなく、家族・神�
 - **画材**: 濡土と浅水の色面、連続する岸境界を基礎とし、seed固定の濡れた轍、泥溜まり、水紋、小さな岸葦を地形内部へだけ加える。セルごとの枠線やcheckerboardは作らず、装飾はcollision・経路を跨がない。
 - **戦闘契約**: M53の`battle-first`を維持し、地域背景1枚＋暗幕＋戦闘札を使う。探索を画像0枚へ戻す判断を、戦闘背景の撤去へ波及させない。
 - **不変条件/受入**: 地形、当たり判定、runSeed、敵影、報酬、戦闘計算、全戦闘オートは不変。探索の`data-scene-layering=map-native`、texture budget 0、地形内patina件数、探索用画像network request 0、横overflow 0をPC1280、mobile390、1782×695で検証する。push/deployは別の明示依頼を要する。
+- **公開状態**: M52を`a30b794`、M53〜M54を`b23eda0`、M55〜M56の設計正本を`842faf0`としてmainへpush。GitHub Actions run `30291730297`でlint/data/Vitest/build/Pages deployが成功し、公開HTML、entry、CSS、Dungeon chunkのHTTP 200と`100dvh`、`battle-first`、`map-native`、`terrainMarks` markerを確認した。M55〜M56は設計文書のみの公開で、runtimeは未実装。
 
 ### 8.38 M55 探索体験強化「灯跡の夜藪」（2026-07-28 Forge設計）
 

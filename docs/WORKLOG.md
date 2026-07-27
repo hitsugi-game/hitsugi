@@ -1499,3 +1499,9 @@
 - **主戦再測定**: M47Cのtier3主testだけを再実行し、11体全て素手/戦術勝率100%。骸星以外10体の戦術被HPは2.1〜7.0%、瀕死0で、通常中盤連戦より主戦が軽いことを再確認した。
 - **設計**: 位階率・獲得頻度・保証を変えず、一籤を同位階三柱からの択一へ変更。open時にpendingを即saveし、claim一度だけで確定する。次回実確率、10回添え札、縁極の星返り、全所持表示を正確化する。tier3主は「止・受・崩」を単体主向けにし、三体pilot→11体の順で400 seed測定する。全戦闘オートは維持する。
 - **検証**: focused現行星籤simulation 1 pass、現行tier3主balance 1 pass。新規正本の必須pathと数値、正典同期、`git diff --check`を後段で確認する。runtime未変更のため全回帰は実装missionで行う。
+
+## 2026-07-28（M52〜M56 公開）
+
+- **公開対象**: M52の共通Sheet中央固定を`a30b794`、M53〜M54の探索`map-native`・戦闘`battle-first`分離を`b23eda0`、M55探索強化案とM56星籤・主戦精密化案の設計正本を`842faf0`としてmainへpushした。M55〜M56は文書のみで、runtime/save/UIには未実装。
+- **ローカル最終gate**: 単独再実行の全Vitest 54 files/789 tests、lint、data 0 errors/既存rank warn 1、visual closure 23 routes/40 regions/6 overlays/69 entries、manifest 9/9、production buildに合格。M52 focused 3/3、出立PC/mobile 2/2、AR1 M54 PC/mobile 10 pass/2 intended skip。初回の並列Vitestは資源競合でworker 2件が終了し、大型Playwright一括実行は時間枠超過したため、契約単位へ分割して再実行し全件合格した。生成baseline PNG 5件は追跡対象の元内容へ復元し、公開差分から除外した。
+- **CI/公開確認**: GitHub Actions run `30291730297`はbuild・deployとも成功。`https://hitsugi-game.github.io/hitsugi/`、entry `index-xfQC8Kyi.js`、CSS `index-BF5_P4fd.css`、Dungeon `Dungeon-Mi4eywdc.js`をHTTP 200で取得し、entryの`battle-first`/`ar1-stage-region-art`、CSSの`100dvh`/`ar1-stage-region-art`、Dungeonの`map-native`/`terrainMarks`を確認した。GitHub Actions各actionのNode 20非推奨警告は公開を妨げない後続保守項目。

@@ -4,11 +4,11 @@
 
 ## 直近の公開修正
 
-- **M54 探索地図のmap-native化（ローカル修正・未公開）**: M53の探索側を再修正し、右上の水没施設画と根のラスター前景を表示だけでなく読込経路から撤去。元のTileKind地図を主役に戻し、地形内だけへ決定論的な濡れた轍、泥溜まり、水紋、小さな岸葦を追加した。探索ラスター要求0、`map-native`、texture budget 0を回帰固定。戦闘の地域背景1枚構成は維持。添付相当1782×695、PC1280/mobile390でAR1 10 pass/2 intended skip、全Vitest 789、lint/data/closure69/manifest9/buildに合格。M52〜M54はcommit/push/deployなし。
+- **M54 探索地図のmap-native化（公開済み）**: M53の探索側を再修正し、右上の水没施設画と根のラスター前景を表示だけでなく読込経路から撤去。元のTileKind地図を主役に戻し、地形内だけへ決定論的な濡れた轍、泥溜まり、水紋、小さな岸葦を追加した。探索ラスター要求0、`map-native`、texture budget 0を回帰固定。戦闘の地域背景1枚構成は維持。添付相当1782×695、PC1280/mobile390でAR1 10 pass/2 intended skip、全Vitest 789、lint/data/closure69/manifest9/buildに合格。M52は`a30b794`、M53〜M54は`b23eda0`としてmainへ公開し、Actions run `30291730297`と公開bundleのHTTP 200・`map-native`/`battle-first` markerを確認済み。
 
-- **M53 探索地図・戦闘舞台の視覚役割分離（ローカル修正・未公開）**: 螢火の窪地の探索では地図形状を主役とし、巨大な根のラスター前景を幅58%・不透明度22%の端景へ後退。戦闘では探索用の根、祠cutout、CSS地形を重ねず、地域背景1枚＋暗幕＋戦闘札だけへ整理した。`map-first` / `battle-first`契約と添付相当1782×695の専用回帰を追加。AR1 PC/mobile 10 pass/2 intended skip、勤め・出立位置5/5、全Vitest 789、lint/data/closure69/manifest9/buildに合格。M52とともにcommit/push/deployなし。
+- **M53 探索地図・戦闘舞台の視覚役割分離（公開済み・探索側はM54へ更新）**: 戦闘では探索用の根、祠cutout、CSS地形を重ねず、地域背景1枚＋暗幕＋戦闘札だけへ整理した。M53時点の探索用ラスター端景は実画面検収で撤回し、公開版ではM54の`map-native`へ更新済み。`battle-first`、地域背景1枚、旧collage要素0、横overflow 0をPC/mobile回帰で固定した。実装`b23eda0`、Actions run `30291730297`でPages公開成功。
 
-- **M52 勤め・出立Sheetの表示位置（ローカル修正・未公開）**: 共通Sheetを呼び出し元`.screen`のtransform/scroll座標系から`document.body`へ分離し、PCでは実表示領域`100dvh`の中央へ固定。長い「務め」は上下余白を残して本文だけをスクロールし、短い「出立の確かめ」も同じ視線位置に揃えた。添付相当996×904で2/2、低画面562×375で1/1、既存出立PC/mobileで2/2、全Vitest 789、lint/data/buildに合格。commit/push/deployなし。
+- **M52 勤め・出立Sheetの表示位置（公開済み）**: 共通Sheetを呼び出し元`.screen`のtransform/scroll座標系から`document.body`へ分離し、PCでは実表示領域`100dvh`の中央へ固定。長い「務め」は上下余白を残して本文だけをスクロールし、短い「出立の確かめ」も同じ視線位置に揃えた。添付相当996×904で2/2、低画面562×375で1/1、既存出立PC/mobileで2/2、全Vitest 789、lint/data/buildに合格。実装`a30b794`、Actions run `30291730297`でPages公開成功し、公開CSSの`100dvh`を確認済み。
 
 - **M51 出立seedによる夜藪変奏（公開済み）**: 出立ごとに地図の向き、宝箱の位置と個数、祠・焚火・石碑の位置、敵影/地表prop、宝箱報酬、祠事件、事件結果、焚火加護候補が変わる。runSeedを遠征checkpointへ保存するため、同じ遠征の中断再開では内容が変わらず引き直せない。通常171層＋常夜百層の全271層で到達性を検査し、専用stageは背景ずれ防止のため地形固定・内容のみ変奏。Forge Round 1のseedなし旧checkpoint引き直しを安定内容seedで閉鎖し、Round 2独立評価A/B/C/D/E=`4/4/5/5/4`、blocking 0。全Vitest 54 files/789、型/lint/data/closure69/manifest9/build、PC1280/mobile390 2/2に合格。旧地形、報酬率、敵数値、月コスト、全戦闘オートは不変。実装`545cf79`、Actions `30204635730`でPages公開成功し、公開bundleの4 markerとHTTP 200を確認済み。
 
@@ -28,9 +28,9 @@
 
 ## ローカル計画・未実装
 
-- **M56 星籤「三星択一」・主戦精密化（設計・未実装）**: 現行1,000 seedで星籤50回の星札中央値43/180・重複7・極2、500回の実効上限後重複14を確認。位階率と10/20/50保証を変えず、同位階三柱から一柱を選ぶpending保存式へ設計し、次回実確率、未所持添え札、縁極の星返り、全所持表示を正確化する。M47Cの通常中盤は維持し、勝率100%・10体の戦術被HP2.1〜7.0%に留まるtier3主11体へ主戦用「止・受・崩」を三体pilotから導入する。全戦闘オート、有償なし、限定なし、必須戦力なし。正本は`docs/GACHA_BALANCE_PRECISION_PLAN_20260728.md`。runtime/save/UI/公開版は未変更。
+- **M56 星籤「三星択一」・主戦精密化（設計公開・runtime未実装）**: 現行1,000 seedで星籤50回の星札中央値43/180・重複7・極2、500回の実効上限後重複14を確認。位階率と10/20/50保証を変えず、同位階三柱から一柱を選ぶpending保存式へ設計し、次回実確率、未所持添え札、縁極の星返り、全所持表示を正確化する。M47Cの通常中盤は維持し、勝率100%・10体の戦術被HP2.1〜7.0%に留まるtier3主11体へ主戦用「止・受・崩」を三体pilotから導入する。全戦闘オート、有償なし、限定なし、必須戦力なし。正本`docs/GACHA_BALANCE_PRECISION_PLAN_20260728.md`は`842faf0`で公開済みだが、runtime/save/UIは未変更。
 
-- **M55 探索体験強化「灯跡の夜藪」（Forge設計合格・未実装）**: M54の画像0枚・map-nativeを維持し、地図5状態、時間尺度別loop、歩行反応、距離別POI、宝/稀相/主の非漏洩兆し、4地域pilot、発見checkpoint、固定性能profile、13名の観察oracleを正本化。Round 1の4 blockingを限定修正し、別評価者のRound 2でA/B/C/D/E=`4/5/5/5/4`、4 ID CLOSED、blocking 0。runtime・素材・save・公開版は未変更。正本は`docs/DUNGEON_EXPLORATION_APPEAL_FORGE_20260728.md`、実装開始時はPhase Aだけを先行する。
+- **M55 探索体験強化「灯跡の夜藪」（設計公開・runtime未実装）**: M54の画像0枚・map-nativeを維持し、地図5状態、時間尺度別loop、歩行反応、距離別POI、宝/稀相/主の非漏洩兆し、4地域pilot、発見checkpoint、固定性能profile、13名の観察oracleを正本化。Round 1の4 blockingを限定修正し、別評価者のRound 2でA/B/C/D/E=`4/5/5/5/4`、4 ID CLOSED、blocking 0。正本`docs/DUNGEON_EXPLORATION_APPEAL_FORGE_20260728.md`は`842faf0`で公開済みだが、runtime・素材・saveは未変更。実装開始時はPhase Aだけを先行する。
 
 - **M45 没入・継続コンテンツ追加監査**: M43後の次候補を8件へ整理。追加量産ではなく、今代の約束の決算、一組の記憶の糸、冒頭の意思表示、神縁12柱、四地域怪異三幕、宿敵の狩り札、前回の灯、家宝三品へ限定した。Phase 0は現行外部baseline、local計測、Dungeon中断安全性。既存scene/地域進行との重複を除き、測定表と見送り条件を付与。独立再監査PASS / blocking 0。正本は`docs/PRODUCT_ENGAGEMENT_ADDITIONS_M45_20260723.md`。runtime、素材、公開版は未変更。
 
