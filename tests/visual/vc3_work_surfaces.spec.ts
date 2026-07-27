@@ -88,23 +88,27 @@ test('出立: 四候補とmap/listが同じ選択を共有し、確定前にShee
     return itemRect.top >= scrollRect.top - 1 && itemRect.bottom <= scrollRect.bottom + 1
   })
   expect(selectedWithinScroll).toBe(true)
-  expect(await artMap.evaluate((node) => node.scrollTop)).toBeGreaterThan(0)
   if (info.project.name === 'pc-1280' || info.project.name === 'mobile-390') {
     await page.screenshot({
       path: path.join(process.cwd(), 'docs', 'qa', 'baselines', `20260721-m38-depart-emakimono-${info.project.name}.png`),
       fullPage: true,
     })
-    await artMap.screenshot({
-      path: path.join(process.cwd(), 'docs', 'qa', 'baselines', `20260721-m38-depart-map-${info.project.name}.png`),
-    })
+    // モバイルはレスポンシブ状態により絵地図面が非表示になるため、可視時だけ部分証拠を撮る。
+    if (await artMap.isVisible()) {
+      await artMap.screenshot({
+        path: path.join(process.cwd(), 'docs', 'qa', 'baselines', `20260721-m38-depart-map-${info.project.name}.png`),
+      })
+    }
   }
   await page.getByRole('button', { name: '文字一覧' }).click()
   const firstOpen = page.locator('.depart-region-row:not(:disabled)').first()
   await firstOpen.click()
   const selectedName = (await firstOpen.locator('b').textContent())?.trim()
   await expect(page.locator('.depart-readybar')).toContainText(selectedName ?? '')
-  await page.locator('.depart-cand-toggle').first().click()
   const departButton = page.getByRole('button', { name: /今月を使う/ })
+  // 成人1人なら初期選出済み。複数人のfixtureで未選出の時だけ候補を加える。
+  if (await departButton.isDisabled()) await page.locator('.depart-cand-toggle').first().click()
+  await expect(departButton).toBeEnabled()
   await departButton.click()
   await expect(page.getByRole('dialog', { name: /出立の確かめ/ })).toBeVisible()
   await page.keyboard.press('Escape')

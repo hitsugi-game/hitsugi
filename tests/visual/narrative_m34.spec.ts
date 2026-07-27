@@ -139,3 +139,61 @@ test('灯の余白は7日通知を一度出し、完読済みの章を進行不�
   })
   expect(result).toEqual({ completedCount: 1, reminderCount: 1 })
 })
+
+test('灯の余白は低い画面でもSheet内に収まり、本文だけがスクロールする', async ({ page }) => {
+  await page.setViewportSize({ width: 562, height: 375 })
+  await page.goto('/')
+  await page.waitForFunction(() => '__game' in window, null, { timeout: 15_000 })
+  await page.evaluate(() => {
+    const game = (window as never as GameWindow).__game
+    game.reset()
+    const data = game.store.getState().data as { narrative?: Record<string, unknown> }
+    const archive = Array.from({ length: 10 }, (_, index) => ({
+      kind: 'life',
+      narrativeId: `short-height-${index}`,
+      title: `読み返す灯 ${index + 1}`,
+      lines: [{ speaker: '綴', text: '読み返しても、選んだ道は変わらない。' }],
+    }))
+    game.store.setState({
+      data: {
+        ...data,
+        narrative: {
+          ...(data.narrative ?? {}),
+          completed: archive.map((scene) => scene.narrativeId),
+          deferred: [],
+          archive,
+        },
+      },
+      screen: { id: 'home' },
+    })
+  })
+
+  await page.getByRole('button', { name: /^灯の余白/ }).click()
+  await expect(page.getByRole('dialog', { name: '灯の余白 — 物語の記録' })).toBeVisible()
+
+  const geometry = await page.evaluate(() => {
+    const sheet = document.querySelector<HTMLElement>('.sheet')!
+    const head = document.querySelector<HTMLElement>('.sheet-head')!
+    const body = document.querySelector<HTMLElement>('.sheet-body')!
+    const close = document.querySelector<HTMLElement>('.sheet-close')!
+    const viewportBottom = Math.min(window.innerHeight, window.visualViewport?.height ?? window.innerHeight)
+    const sheetRect = sheet.getBoundingClientRect()
+    const headRect = head.getBoundingClientRect()
+    const bodyRect = body.getBoundingClientRect()
+    const closeRect = close.getBoundingClientRect()
+    return {
+      viewportBottom,
+      sheetTop: sheetRect.top,
+      sheetBottom: sheetRect.bottom,
+      sheetInsideViewport: sheetRect.top >= 0 && sheetRect.bottom <= viewportBottom,
+      bodyInsideSheet: bodyRect.top >= headRect.bottom - 1 && bodyRect.bottom <= sheetRect.bottom + 1,
+      bodyOwnsScroll: body.scrollHeight > body.clientHeight && getComputedStyle(body).overflowY === 'auto',
+      closeVisible: closeRect.top >= 0 && closeRect.bottom <= viewportBottom,
+    }
+  })
+
+  expect(geometry.sheetInsideViewport, JSON.stringify(geometry)).toBe(true)
+  expect(geometry.bodyInsideSheet).toBe(true)
+  expect(geometry.bodyOwnsScroll).toBe(true)
+  expect(geometry.closeVisible).toBe(true)
+})

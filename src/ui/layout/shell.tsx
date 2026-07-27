@@ -4,6 +4,7 @@
 //  - 文言: 独立画面=「郷へ戻る」/ モーダル=「閉じる」/ 選択取消=「やめる」。
 //  - フォーカス: Sheetは開時に保存→閉時に復帰。Tabは内部循環。ESCで閉じる。背景スクロールはロック。
 import { useId, type KeyboardEvent, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 // ---- フォーカス管理(useSheetBehavior/useForcedDialog)はdialogs.tsへ分離(M22) ----
 // hookはコンポーネントファイルからexportしない(Fast Refresh対象を保つ)。利用側は './layout/dialogs' から直接importする。
@@ -68,7 +69,9 @@ export function Sheet({
 }) {
   const ref = useSheetBehavior(onClose)
   const titleId = useId()
-  return (
+  // `.screen` の入場アニメーションは transform を含むため、その子に fixed レイヤを置くと
+  // ビューポートでなくスクロール済みの画面が配置基準になる。body へ逃がし、常に画面内へ固定する。
+  return createPortal(
     <div className="sheet-back" data-testid="sheet-backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-labelledby={titleId} ref={ref} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head">
@@ -77,7 +80,8 @@ export function Sheet({
         </div>
         <div className="sheet-body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

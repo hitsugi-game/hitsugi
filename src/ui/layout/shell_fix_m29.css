@@ -36,8 +36,36 @@
   pointer-events: none;
 }
 .sheet-head, .sheet-body { position: relative; z-index: 1; }
+.sheet-body {
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  scrollbar-color: rgba(201, 168, 106, 0.58) rgba(7, 9, 18, 0.38);
+}
+.sheet-body::-webkit-scrollbar { width: 10px; }
+.sheet-body::-webkit-scrollbar-track { background: rgba(7, 9, 18, 0.38); }
+.sheet-body::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 106, 0.58);
+  border: 2px solid rgba(7, 9, 18, 0.82);
+  border-radius: 999px;
+}
 .sheet .btn, .sheet button, .sheet input, .sheet select { min-height: 44px; }
 .sheet-close { padding-inline: 12px; }
+
+/* M52: PCのSheetは、呼び出し元画面のスクロール位置ではなく「いま見えているブラウザ領域」を
+   基準に中央配置する。dvhでアドレスバー等を除いた実表示高へ追従し、長い務めも上下16pxを残して
+   本文だけをスクロールさせる。短い出立確認も同じ視線位置に揃う。 */
+@media (min-width: 561px) {
+  .sheet-back {
+    min-height: 100dvh;
+    align-items: center;
+    padding-block: 16px;
+  }
+
+  .sheet {
+    max-height: min(80dvh, calc(100dvh - 32px));
+  }
+}
 
 @media (max-width: 560px) {
   .sheet-back { padding: 0; backdrop-filter: none; }
