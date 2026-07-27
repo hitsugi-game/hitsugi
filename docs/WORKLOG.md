@@ -1456,3 +1456,46 @@
 - **Forge Round 2**: Round 1とは別の評価者がblocking IDを`CLOSED`と認定。旧fallbackなら結果が分かれるglobal RNGの組でも4内容が一致し、新規seed、save guard、legacy固定地形の軽回帰も合格。A/B/C/D/E=`4/4/5/5/4`、blocking 0でForge PASS。
 - **最終gate**: 全Vitest 54 files/789、型、lint、data 0 errors/既存rank warn 1、closure 69、manifest 9、production build、専用stageのPC1280/mobile390 Playwright 2/2、`git diff --check`に合格。main chunk約1.49MBの既存warn、完全新規迷路生成、実プレイヤー比較はnon-blocking/別ゴール。M46の旧完了Forge stateは`docs/CODEX_FORGE_STATE_M46_20260724.md`へ退避し、現状態は`docs/CODEX_FORGE_STATE.md`を正とする。push/deployは未実施。
 - **公開**: 既存dirty 3ファイルをSHA-256記録後に限定stashし、公開対象13ファイルだけの状態で全gateを再実行。commit `545cf79`をmainへpushし、復元した3ファイルは全て退避前hashと一致。GitHub Actions run `30204635730`はbuild/test/deploy全job成功。公開HTML、entry `index-DTGGa-K6.js`、Dungeon `Dungeon-Cdwwl3Ev.js`をHTTP 200で取得し、commit marker、`data-run-seed`、変奏説明、legacy内容seedを確認した。ActionsのNode 20非推奨警告はjob成功を妨げない既存workflowの後続保守項目。
+
+## 2026-07-27（M52 勤め・出立Sheetの縦位置修正）
+
+- **原因**: 共通Sheetが`.screen`の入場animationに含まれる`transform`配下へ描画されていたため、`position: fixed`の基準がviewportでなく画面要素になっていた。Homeは帳まで下へスクロール後に「務め」を開くので下へずれ、出立確認は別の画面座標から上へ偏っていた。
+- **修正**: Sheetを`createPortal`で`document.body`直下へ描画し、PCでは`100dvh`と上下16pxを基準に中央配置。長い本文は既存の`.sheet-body`だけをスクロールさせる。配色、幅、モバイル下辺Sheet、外側click、Escape、focus復帰、ゲーム処理は変更しない。
+- **回帰保守**: 添付相当996×904で、帳へスクロール後の「務め」と「出立の確かめ」のbackdrop上下端・dialog中央・上下余白を測る2テストを追加。既存出立テストは、成人1人が自動選出済みなら再クリックで外さないよう現行仕様へ合わせ、モバイルで非表示の絵地図部分撮影を可視時だけにした。
+- **検証**: 新規位置2/2、既存低画面Sheet 1/1、既存出立PC1280/mobile390 2/2、lint、data 0 errors/既存rank warn 1、全Vitest 54 files/789、production buildに合格。baseline PNGはテスト前の内容へ復元した。
+- **公開境界**: ローカル修正のみ。commit/push/deployは行っていない。
+
+## 2026-07-27（M53 探索地図・戦闘舞台の視覚役割分離）
+
+- **原因**: 螢火の窪地で、探索用タイル地図、巨大な根のラスター前景、戦闘用の地域画・祠cutout・CSS地形・戦闘札が同じ強さで重なり、探索と戦闘の画面目的を判別しにくかった。
+- **探索修正**: 地図画面へ`map-first`契約を付与。根前景を世界幅78%・不透明度78%から幅58%・不透明度22%へ退け、低彩度化して床境界・人物・敵影を先に読めるようにした。既存landmark、地形、collision、seed、報酬は不変。
+- **戦闘修正**: `battle-first`契約を付与し、探索用root、祠cutout、CSS土壌・水面・葦をDOM/CSSから撤去。地域背景1枚を低彩度・低輝度の舞台画として敷き、暗幕、霧、灯、接地影、敵味方札、行動盤だけを重ねる構成へ変更した。
+- **回帰**: PC1280/mobile390で通常・稀相・主戦・帰還・reduced motionを含むAR1 10 pass/2 intended skip。添付相当1782×695の専用test 1/1、勤め・出立位置はPC4/4＋mobile1/1。横overflow 0、旧collage selector 0、地域背景1枚、探索budgetを検証した。
+- **全検証**: 全Vitest 54 files/789 tests、lint、data 0 errors/既存rank warn 1、visual closure 23 routes/40 regions/6 overlays/69 entries、manifest 9/9、production build、`git diff --check`に合格。main chunk約1.49MBの既存warnは継続。
+- **公開境界**: M52とM53はいずれもローカル修正のみ。commit/push/deployは行っていない。
+
+## 2026-07-27（M54 探索地図のmap-native化）
+
+- **再検収**: M53後の探索サンプルに対し、右上の施設画と根画面は不要で、元の地図形状をリッチにする方が良いとの実画面判断を受領。M53の探索側だけを撤回し、戦闘側は維持した。
+- **撤去**: `DungeonEngine`から探索専用の水没施設・根画像のeager loadを削除。AR1 stageから大型landmark、foreground、代替大型vectorを撤去した。既存素材ファイルと台帳上の来歴は削除せず、探索runtimeから要求しない。
+- **地図強化**: 元の連続床、水、岸境界、灯杭、POIを保ち、歩行可能床と水面の内部だけへseed固定の濡れた轍、泥溜まり、薄い継承金の反射、水紋、小さな岸葦を追加。火の粉は画像landmarkでなく階層の目的tileへ流れる。
+- **回帰**: `map-native`、texture budget 0、terrain mark 12超、岸葦1以上、探索用`/visual-recovery/hotarubi/` request 0を固定。PC1280/mobile390で通常・稀相・主戦・帰還・reduced motionを含む10 pass/2 intended skip、添付相当1782×695は1/1。戦闘の`battle-first`と地域背景1枚も同じtestで維持確認した。
+- **全検証**: 全Vitest 54 files/789 tests、lint、data 0 errors/既存rank warn 1、visual closure 23 routes/40 regions/6 overlays/69 entries、manifest 9/9、production buildに合格。main chunk約1.49MBの既存warnは継続。
+- **公開境界**: M52〜M54はローカル修正のみ。commit/push/deployは行っていない。
+
+## 2026-07-28（M55 探索体験強化「灯跡の夜藪」Forge）
+
+- **依頼/境界**: 元のTileKind地図を維持したまま、探索画面をさらに魅力的にする設計をForgeで強化。runtime実装、画像生成、commit、push、deployは対象外とした。M54の探索ラスター0枚、M53の戦闘背景1枚、M51のrunSeed/checkpoint、全戦闘オート、既存数値を固定前提とした。
+- **正本**: `docs/DUNGEON_EXPLORATION_APPEAL_FORGE_20260728.md`へ、5つの地図状態、時間尺度別loop、camera、足元反応、距離別POI、宝/稀相/主の兆し、4地域pilot、物語接続、HUD、a11y、性能、phase gate、受入を実装直前仕様として記録した。
+- **Round 1**: 独立評価はA/B/C/D/E=`4/5/5/5/3`、blocking 4。未開封宝cueが報酬tierを漏らす、発見状態の永続所有がない、性能端末・scenarioが再現不能、40地域展開の観察oracleが評価者依存、を検出した。
+- **欠陥限定修正**: 宝cueをreward情報非依存の純関数へ限定。`DungeonRun.discoveryV1`、safe checkpoint前flush、rollback、旧save migration、BAK検証を追加。Playwright Chromium、2 profile、固定10秒scenario、warm-up＋3回、fps/p95/M54同job比較を固定。初見8名・経験者5名の5課題、人数閾値、重大摩擦、未達時pilot差戻しを定義した。
+- **Round 2**: 初回と別の独立評価者が4 IDを全てCLOSEDと認定。A/B/C/D/E=`4/5/5/5/4`、blocking 0でPASS。客観checkでは必須節欠落0、参照path 10/10実在、`git diff --check`はエラー0。runtime testは設計文書だけの変更なので再実行していない。
+- **後続gate**: 実装時はreward cue/tier統計相関、全safe checkpoint event matrix、M54性能baseline artifactとrunner失効、Phase D回答者数と採点規則を固定する。次は明示依頼後にPhase A「読める構図」だけをmission化する。公開操作は行っていない。
+
+## 2026-07-28（M56 星籤・主戦バランス精密化設計）
+
+- **依頼/境界**: ガチャとゲームバランスを、より魅力的かつ精密にする。既存dirtyのM52〜M55を保全し、今回は計測と設計正本まで。runtime実装、commit、push、deployは行わない。
+- **星籤実測**: productionの`drawStarLottery`を1,000 seedで20/50/100/200/500回連続実行。位階68/51/43/18、50回は星札p10/50/90=`41/43/46`・重複中央値7・極主札2、500回は`172/177/180`・重複327・縁実効上限後14。temporary testは計測後に削除し、製品testへ混入させていない。
+- **主戦再測定**: M47Cのtier3主testだけを再実行し、11体全て素手/戦術勝率100%。骸星以外10体の戦術被HPは2.1〜7.0%、瀕死0で、通常中盤連戦より主戦が軽いことを再確認した。
+- **設計**: 位階率・獲得頻度・保証を変えず、一籤を同位階三柱からの択一へ変更。open時にpendingを即saveし、claim一度だけで確定する。次回実確率、10回添え札、縁極の星返り、全所持表示を正確化する。tier3主は「止・受・崩」を単体主向けにし、三体pilot→11体の順で400 seed測定する。全戦闘オートは維持する。
+- **検証**: focused現行星籤simulation 1 pass、現行tier3主balance 1 pass。新規正本の必須pathと数値、正典同期、`git diff --check`を後段で確認する。runtime未変更のため全回帰は実装missionで行う。

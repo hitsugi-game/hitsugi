@@ -1,42 +1,47 @@
-# Codex Forge State — M51 出立seedによる夜藪変奏
+# Codex Forge State — M55 探索体験強化「灯跡の夜藪」設計正本
 
 ## ①対象
 
-- M51のダンジョン変奏runtime、save、UI、test、GDD
-- 目的: 繰り返し遠征で内容が変わり、同じ遠征の再開では変わらない、安全で体感可能なダンジョンへ収束させる
+- 成果物: `docs/DUNGEON_EXPLORATION_APPEAL_FORGE_20260728.md`
+- 目的: M54のmap-native探索を、実装可能・測定可能で本作固有の魅力設計へ収束させる
 
 ## ②固定合格ライン
 
-- 客観条件: 型、全271層到達性、同seed決定性、別seed差、save guard、全Vitest、lint、data、closure、manifest、production build、PC1280/mobile390実動がgreen。
-- 主観条件は各4/5以上: A 地図差の体感、B 報酬/内容差と理解、C 決定論/引き直し防止/save、D 世界観/専用stage整合、E 操作快適性/進行安全。
-- blocking: 進行不能、再読込引き直し、報酬/進行破壊、専用背景ずれ、反復しても実質固定。最大5round。
+- 客観条件: 必須節（命題、状態、loop、camera、操作、POI、地域、物語、HUD、a11y、性能、phase、受入、見送り）を全て持ち、参照pathが実在し、GDD v3 §8.37、M51、M47Cと矛盾しない。
+- 主観5軸は各4/5以上: A 世界観固有性、B 探索動機、C 操作明瞭性、D 地域展開性、E 実装可能性。
+- blocking: 大型探索画像再導入、未踏/報酬漏洩、決定論・進行・既存数値破壊、音/色だけの必須情報、pilot前の40地域量産、検証不能。最大3round。
 
 ## ③ラウンド履歴
 
 | Round | 判定 | 得点 A/B/C/D/E | Blocking | 要約 |
 |---:|---|---|---:|---|
-| 1 | FAIL | 4/4/3/5/4 | 1 | 新規seed遠征は合格圏。seed欠損を許すlegacy checkpointだけ内容RNGが再開時刻へ戻り、引き直せる |
-| 2 | PASS | 4/4/5/5/4 | 0 | legacy固定地形を維持したまま安定内容seedへ接続し、異なるglobal RNGで4種の内容一致を独立確認 |
+| 1 | FAIL | 4/5/5/5/3 | 4 | 報酬tier side-channel、発見状態の所有、性能計測環境、観察oracleが未定義 |
+| 2 | PASS | 4/5/5/5/4 | 0 | 別の独立評価者が4 IDを全てCLOSEDと認定。runtime実装完了ではなく設計正本の合格 |
 
 ## ④blocking台帳
 
 | ID | State | Consecutive unresolved | Closure evidence | Certifier |
 |---|---|---:|---|---|
-| `src/dungeon/run_variation.ts#dungeonTileRng/legacy-seedless-reload-reroll` | closed | 0 | 同じlegacy checkpointを異なるglobal RNGでcontinueし、宝箱・祠・確率事件・焚火候補が一致。focused 38件 | independent Round 2 |
+| confirmed-reward-tier-side-channel | closed | 1 | §9.1で未開封cueをtier非依存化し、reward情報を持たない純関数とtier差同一testを固定 | Round 2 independent |
+| discovery-state-ownership-missing | closed | 1 | §4.1で`discoveryV1`を正本化し、delta、safe checkpoint、rollback、migration、BAK testを固定 | Round 2 independent |
+| benchmark-environment-undefined | closed | 1 | §15でbrowser/profile/10秒scenario/反復/fps・p95/M54同job比較を固定 | Round 2 independent |
+| observation-oracle-undefined | closed | 1 | Phase Eで対象13名、5課題、分母、合否値、重大摩擦、未達差戻しを固定 | Round 2 independent |
 
 ## ⑤settled list
 
-- `topology-four-reflections`: A=4のnon-blocking。128 seed×全271層の独立sweepで各階120以上のASCII差があり、POI/敵影差を含め合格圏。blocking閉鎖中は拡張しない。
-- `single-seed-test-depth`: committed testは各階1seedだが、独立128seed sweep計34,688件で寸法・必須tile・全POI到達・宝箱1〜3の失敗0。回帰fixture追加はblockingのreload経路へ集中する。
+- M54の探索ラスター0枚、M53の戦闘一枚背景、M51のrunSeed/checkpoint、全戦闘オートは固定前提であり、Forge中に再審議しない。
+- room archetypeと地形生成変更は別mission。M55は現行地形上の構図・反応・発見・地域文法に限定する。
+- 血脈・世代差の探索中作用、canvasのscreen reader同等経路、帰還記録3件の優先・重複規則はRound 1のnon-blocking。M55 Phase Aの開始条件へは昇格させず、該当phaseの実装前に個別設計する。
+- Round 2 caveatとして、reward cueとtierの統計相関test、全safe checkpointのevent matrix、M54性能baseline artifactとrunner失効条件、Phase Dの回答者数・採点規則を実装時に固定する。
 
 ## ⑥次の一手
 
-- Forge合格。ローカル差分の公開は、ユーザーが明示的にデプロイを依頼した場合だけ行う。
+- Forgeは合格。runtimeへ変更は入れていない。ユーザーが実装を依頼した場合のみ、正本§21どおりPhase A「読める構図」を単独missionとして開始する。
 
 ## ⑦次ゴール候補
 
-- Forge合格後、実プレイヤー比較で地形変化が弱い場合のみ、接続検証付き枝道生成を別ゴールとして検討する。
+- M55 Phase A: camera clamp、地図占有率、未踏輪郭、暗部率、HUD交差を3幅・map四隅・灯3状態で実装検証する。
 
 ## ⑧terminal印
 
-合格 — 2026-07-26T22:36:16+09:00。Round 2独立閉鎖でA/B/C/D/E=`4/4/5/5/4`、blocking 0。全54 files/789 tests、型、lint、data、closure 69、manifest 9、build、PC1280/mobile390 2/2に合格。
+合格 — 2026-07-28T02:11:50+09:00 — Round 2 independent closure、A/B/C/D/E=4/5/5/5/4、blocking 0
