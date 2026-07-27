@@ -1513,3 +1513,4 @@
 - **欠陥限定修正**: 既存13/[新規]3 pathを分離し、11主数を統一。一籤一救済・10回保証優先、candidate reward/rescueのopen snapshot、expected draw/lastReceipt/save-first openを追加。M56主だけを確定兆しとし、11 enemyIdへ周期・予告・強手・対処値を設定。4 policy、同seed、分母、相対差、percentileを定義した。
 - **Round 2/停止**: 独立Closureで元6 ID中5件CLOSED、A/B/C/D/E=`5/4/3/3/3`。`measurement-oracle-undefined`はauto三方針と危険手集約が残り2ラウンド連続未解消となった。さらにstop閾値競合、claim原子性、rescue validatorの3 IDを検出。Forge停止規則により同runで修正を反復せず、terminalを停滞とした。
 - **代替経路**: 次回は残り4 IDだけのprotocol/oracle appendixを別成果物として固定し、独立合格後にM56正本へ統合する。現行確率、runtime/save/UI、公開版は変更していない。M55完了stateは`docs/CODEX_FORGE_STATE_M55_20260728.md`へ退避した。
+- **公開**: 対象6文書を`32c1389`としてmainへpush。ローカルはlint、data 0 errors/既存rank warn 1、全Vitest 54 files/789 tests、production build、機密候補0、対象限定stageに合格。Actions run `30311235233`はbuild/deploy成功。公開HTML、entry `index-CbwLRBqH.js`、CSS `index-BF5_P4fd.css`、Dungeon `Dungeon-DE6z9YI-.js`をHTTP 200で取得し、commit marker、`battle-first`、`100dvh`、`map-native`を確認した。runtime差分は0で、ゲーム挙動は変更していない。
