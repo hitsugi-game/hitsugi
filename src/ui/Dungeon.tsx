@@ -389,6 +389,7 @@ function DungeonFloor() {
       data-stage-navigation-cue={stageContract?.navigationCue.id ?? regionExperience?.navigationCue.id}
       data-stage-danger-cue={stageContract?.dangerCue.id ?? regionExperience?.danger.cueId}
       data-stage-sound-cue={regionAudio?.soundCueId}
+      data-scene-layering={stageContract ? 'map-native' : undefined}
     >
       {run.visualVersion === 'v2' && (
         <div

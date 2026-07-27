@@ -1,4 +1,4 @@
-import { Assets, Container, Graphics, Sprite, Texture } from 'pixi.js'
+import { Container, Graphics } from 'pixi.js'
 import type { RegionStageContract } from '../../core/data/region_stage_contracts'
 import type { TileKind } from '../types'
 import { isWalkable } from '../types'
@@ -26,36 +26,9 @@ export interface Ar1HotarubiStage {
     embers: number
     rings: number
     mist: number
+    terrainMarks: number
+    edgeReeds: number
   }>
-}
-
-export interface Ar1HotarubiAssets {
-  landmark: Texture | null
-  foreground: Texture | null
-}
-
-function assetUrl(baseUrl: string, path: string): string {
-  return `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
-}
-
-/** V2-only eager load. Every failure degrades to the authored Graphics fallback. */
-export async function loadAr1HotarubiAssets(
-  contract: RegionStageContract,
-  baseUrl: string,
-): Promise<Ar1HotarubiAssets> {
-  const load = async (path: string): Promise<Texture | null> => {
-    try {
-      const texture = await Assets.load<Texture>(assetUrl(baseUrl, path))
-      return texture === Texture.EMPTY ? null : texture
-    } catch {
-      return null
-    }
-  }
-  const [landmark, foreground] = await Promise.all([
-    load(contract.landmark.assetPath),
-    load(contract.foreground.assetPath),
-  ])
-  return { landmark, foreground }
 }
 
 function seeded(seed: number): () => number {
@@ -156,101 +129,14 @@ function drawPoiMarkers(graphic: Graphics, grid: TileKind[][], tile: number, con
   return count
 }
 
-function findLandmarkSpot(grid: TileKind[][]): { x: number; y: number } {
-  let entrance = { x: 2, y: Math.max(2, Math.floor(grid.length / 2)) }
-  for (let y = 0; y < grid.length; y++) {
-    const x = grid[y].indexOf('entrance')
-    if (x >= 0) entrance = { x, y }
-  }
-  for (let radius = 2; radius <= 5; radius++) {
-    for (let dy = -radius; dy <= radius; dy++) {
-      for (let dx = -radius; dx <= radius; dx++) {
-        const x = entrance.x + dx
-        const y = entrance.y + dy
-        if (grid[y]?.[x] !== 'wall') continue
-        const open = [[0, 1], [0, -1], [1, 0], [-1, 0]].filter(
-          ([ox, oy]) => isWalkable(grid[y + oy]?.[x + ox] ?? 'wall'),
-        ).length
-        if (open >= 2) return { x, y }
-      }
+function findEmberFocus(grid: TileKind[][], tile: number): { x: number; y: number } {
+  for (const preferred of ['boss', 'stairs', 'shrine', 'monument', 'entrance'] satisfies TileKind[]) {
+    for (let y = 0; y < grid.length; y++) {
+      const x = grid[y].indexOf(preferred)
+      if (x >= 0) return { x: (x + 0.5) * tile, y: (y + 0.5) * tile }
     }
   }
-  return entrance
-}
-
-function loadedSprite(texture: Texture | null, width: number, height: number): Sprite | null {
-  if (!texture) return null
-  const sprite = new Sprite(texture)
-  sprite.anchor.set(0.5, 1)
-  sprite.width = width
-  sprite.height = height
-  return sprite
-}
-
-function drownedShrine(contract: RegionStageContract, tile: number, texture: Texture | null): Container {
-  const node = new Container()
-  const contact = new Graphics()
-    .ellipse(tile * 0.08, 3, tile * 1.42, tile * 0.24)
-    .fill({ color: 0x05090d, alpha: 0.34 })
-    .ellipse(0, 1, tile * 1.08, tile * 0.16)
-    .stroke({ color: 0x78949b, width: 1.2, alpha: 0.32 })
-    .moveTo(-tile * 0.82, 5)
-    .quadraticCurveTo(0, tile * 0.19, tile * 0.9, 4)
-    .stroke({ color: contract.palette.livingFocus, width: 1, alpha: 0.2 })
-  node.addChild(contact)
-  // 遠景landmarkは経路より大きく見せるが、盤面から浮くほど拡大しない。
-  const asset = loadedSprite(texture, tile * 4.35, tile * 3.26)
-  if (asset) {
-    // The reviewed source keeps a narrow transparent safety margin below the debris.
-    // Lower the sprite inside the shared contact plane so its timber actually meets water.
-    asset.y = tile * 0.3
-    node.addChild(asset)
-    return node
-  }
-
-  const shrine = new Graphics()
-  shrine
-    .moveTo(-tile * 1.05, -tile * 1.42)
-    .quadraticCurveTo(0, -tile * 1.92, tile * 1.05, -tile * 1.42)
-    .lineTo(tile * 0.72, -tile * 1.18)
-    .quadraticCurveTo(0, -tile * 1.48, -tile * 0.72, -tile * 1.18)
-    .closePath()
-    .fill({ color: 0x131923, alpha: 0.98 })
-  shrine
-    .moveTo(-tile * 0.72, -tile * 1.2)
-    .lineTo(-tile * 0.58, -tile * 0.12)
-    .moveTo(tile * 0.72, -tile * 1.2)
-    .lineTo(tile * 0.52, -tile * 0.12)
-    .stroke({ color: 0x30383c, width: 5, alpha: 0.9 })
-  shrine
-    .moveTo(-tile * 0.95, -tile * 0.85)
-    .quadraticCurveTo(0, -tile * 0.66, tile * 0.88, -tile * 0.9)
-    .stroke({ color: contract.palette.inheritable, width: 1.4, alpha: 0.48 })
-  shrine
-    .ellipse(0, -tile * 0.05, tile * 1.2, tile * 0.24)
-    .fill({ color: contract.palette.shallowWater, alpha: 0.94 })
-    .ellipse(0, -tile * 0.05, tile * 0.86, tile * 0.13)
-    .stroke({ color: 0x6d8790, width: 1, alpha: 0.38 })
-  node.addChild(shrine)
-  return node
-}
-
-function reedCluster(tile: number, scale: number, flip: number): Container {
-  const node = new Container()
-  const g = new Graphics()
-  for (let i = 0; i < 9; i++) {
-    const x = (i - 4) * tile * 0.14 * scale
-    const lean = ((i % 3) - 1) * tile * 0.11 * flip
-    const h = tile * (0.75 + (i % 4) * 0.14) * scale
-    g.moveTo(x, 0).quadraticCurveTo(x + lean * 0.35, -h * 0.55, x + lean, -h)
-      .stroke({ color: i % 3 === 0 ? 0x365044 : 0x263a36, width: 2.2 * scale, alpha: 0.9 })
-    if (i % 2 === 0) {
-      g.ellipse(x + lean, -h, tile * 0.055 * scale, tile * 0.12 * scale)
-        .fill({ color: 0x1c302b, alpha: 0.96 })
-    }
-  }
-  node.addChild(g)
-  return node
+  return { x: Math.max(...grid.map((row) => row.length)) * tile * 0.5, y: grid.length * tile * 0.5 }
 }
 
 /** One batched AR1 kit; navigation/collision remain owned by the unchanged TileKind grid. */
@@ -259,7 +145,6 @@ export function buildAr1HotarubiStage(
   tile: number,
   contract: RegionStageContract,
   seed: number,
-  assets: Ar1HotarubiAssets = { landmark: null, foreground: null },
 ): Ar1HotarubiStage {
   const width = Math.max(...grid.map((row) => row.length)) * tile
   const height = grid.length * tile
@@ -308,6 +193,56 @@ export function buildAr1HotarubiStage(
         tile * (0.5 + rand() * 0.18),
         tile * (0.19 + rand() * 0.1),
       ).fill({ color: 0x1a2828, alpha: 0.3 })
+    }
+  }
+
+  // M54: 大型画像の代わりに、歩ける床の内側へ濡れた轍・泥溜まり・岸葦を刻む。
+  // 形はTileKindを跨がず、mapの輪郭と当たり判定をそのまま読ませる。
+  const patina = new Graphics()
+  let terrainMarks = 0
+  let edgeReeds = 0
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      const kind = grid[y][x]
+      const cx = (x + 0.5) * tile
+      const cy = (y + 0.58) * tile
+      const signature = (Math.imul(x + 3, 73) ^ Math.imul(y + 5, 151) ^ seed) >>> 0
+
+      if (isWalkable(kind) && signature % 4 === 0) {
+        const lean = signature % 2 === 0 ? 1 : -1
+        patina.ellipse(cx - tile * 0.04, cy + tile * 0.13, tile * 0.31, tile * 0.11)
+          .fill({ color: 0x111a1c, alpha: 0.16 })
+        patina.moveTo(cx - tile * 0.28, cy + tile * 0.08)
+          .quadraticCurveTo(cx, cy - tile * 0.01 * lean, cx + tile * 0.27, cy + tile * 0.04)
+          .stroke({ color: 0x566767, width: 0.8, alpha: 0.2 })
+        if (signature % 8 === 0) {
+          patina.moveTo(cx - tile * 0.2, cy + tile * 0.16)
+            .quadraticCurveTo(cx, cy + tile * 0.08, cx + tile * 0.2, cy + tile * 0.12)
+            .stroke({ color: contract.palette.inheritable, width: 0.65, alpha: 0.13 })
+        }
+        terrainMarks++
+      }
+
+      if (kind === 'water' && signature % 3 === 0) {
+        patina.ellipse(cx, cy, tile * 0.28, tile * 0.085)
+          .stroke({ color: 0x8aa7ad, width: 0.85, alpha: 0.21 })
+        terrainMarks++
+      }
+
+      if (!isWalkable(kind) || signature % 5 !== 0 || edgeReeds >= 32) continue
+      const touchesWater = EDGE_OFFSETS.some(({ dx, dy }) => grid[y + dy]?.[x + dx] === 'water')
+      const touchesWall = EDGE_OFFSETS.some(({ dx, dy }) => grid[y + dy]?.[x + dx] === 'wall')
+      if (!touchesWater && !touchesWall) continue
+      const footX = cx + ((signature % 7) - 3) * tile * 0.035
+      const footY = (y + 0.91) * tile
+      for (let blade = -1; blade <= 1; blade++) {
+        const tipX = footX + blade * tile * 0.1 + (signature % 2 ? 2 : -2)
+        const tipY = footY - tile * (0.22 + (blade + 1) * 0.055)
+        patina.moveTo(footX + blade * 2.2, footY)
+          .quadraticCurveTo(tipX - blade * 2, footY - tile * 0.12, tipX, tipY)
+          .stroke({ color: blade === 0 ? 0x365044 : 0x263a36, width: 1.15, alpha: 0.68 })
+      }
+      edgeReeds++
     }
   }
 
@@ -371,37 +306,8 @@ export function buildAr1HotarubiStage(
     }
   }
   const poiMarkers = drawPoiMarkers(nav, grid, tile, contract)
-  ground.addChild(base, material, water, nav)
-
-  const landmarkSpot = findLandmarkSpot(grid)
-  const landmark = drownedShrine(contract, tile, assets.landmark)
-  landmark.position.set((landmarkSpot.x + 0.5) * tile, (landmarkSpot.y + 1) * tile)
-  landmark.zIndex = landmark.y
-  mid.addChild(landmark)
-  mid.zIndex = landmark.y
-
-  if (assets.foreground) {
-    // camera追従中も中央経路を覆い尽くさないよう、世界幅より一段小さく置く。
-    const foregroundWidth = width * 0.78
-    const reeds = loadedSprite(assets.foreground, foregroundWidth, foregroundWidth / 2)!
-    reeds.alpha = 0.78
-    reeds.position.set(width / 2, height + tile * 0.2)
-    foreground.addChild(reeds)
-  } else {
-    const reedPositions = [
-      { x: width * 0.08, y: height * 0.73, scale: 1.25, flip: 1 },
-      { x: width * 0.92, y: height * 0.69, scale: 1.1, flip: -1 },
-      { x: width * 0.2, y: height * 0.96, scale: 1.45, flip: -1 },
-      { x: width * 0.78, y: height * 0.97, scale: 1.5, flip: 1 },
-    ]
-    for (const p of reedPositions) {
-      const reeds = reedCluster(tile, p.scale, p.flip)
-      reeds.position.set(p.x, p.y)
-      reeds.zIndex = p.y + tile * 3
-      foreground.addChild(reeds)
-    }
-  }
-  foreground.zIndex = height + tile * 4
+  ground.addChild(base, material, water, patina, nav)
+  const emberFocus = findEmberFocus(grid, tile)
 
   const emberPool: PooledGraphic[] = []
   for (let i = 0; i < contract.ambientMotion.emberPool; i++) {
@@ -460,8 +366,8 @@ export function buildAr1HotarubiStage(
     for (let i = 0; i < emberPool.length; i++) {
       const mote = emberPool[i]
       const flow = reducedMotion ? 0 : ((elapsedMs * 0.014 + i * 37) % (tile * 4))
-      // Reverse flow: all embers draw toward the drowned shrine rather than with the mist.
-      const toward = landmark.position.x > mote.x ? 1 : -1
+      // Reverse flow: embers draw toward the floor objective, without requiring a decorative landmark.
+      const toward = emberFocus.x > mote.x ? 1 : -1
       mote.graphic.position.set(
         mote.x + toward * flow + Math.sin(elapsedMs / 950 + mote.phase) * 4,
         mote.y - flow * 0.28,
@@ -504,13 +410,15 @@ export function buildAr1HotarubiStage(
     },
     update,
     budget: {
-      staticGraphics: 6,
-      textures: Number(!!assets.landmark) + Number(!!assets.foreground),
+      staticGraphics: 5,
+      textures: 0,
       poiMarkers,
       telegraphs: 1,
       embers: emberPool.length,
       rings: ringPool.length,
       mist: mistPool.length,
+      terrainMarks,
+      edgeReeds,
     },
   }
 }

@@ -42,7 +42,6 @@ import './battle_m46.css'
 import './battle_m47.css'
 
 function Ar1BattleStage({ contract }: { contract: RegionStageContract }) {
-  const publicAsset = (path: string) => `${import.meta.env.BASE_URL}${path}`
   return (
     <div
       className="ar1-battle-stage"
@@ -50,24 +49,14 @@ function Ar1BattleStage({ contract }: { contract: RegionStageContract }) {
       data-ground-materials={contract.groundMaterials.join(',')}
       data-navigation-cue={contract.navigationCue.id}
       data-danger-cue={contract.dangerCue.id}
+      data-scene-layering="battle-first"
     >
       <div className="ar1-stage-environment" aria-hidden="true">
-        <div className="ar1-stage-night" />
-        <div className="ar1-stage-soil" />
-        <div className="ar1-stage-water" />
-        <div className="ar1-stage-shrine">
-          <i /><i /><b />
-          <div
-            className="ar1-stage-kit-shrine"
-            style={{ backgroundImage: `url(${publicAsset(contract.landmark.assetPath)})` }}
-          />
-        </div>
         <div
-          className="ar1-stage-kit-foreground"
-          style={{ backgroundImage: `url(${publicAsset(contract.foreground.assetPath)})` }}
+          className="ar1-stage-region-art"
+          style={{ backgroundImage: `url(${regionBgR(contract.regionId)})` }}
         />
-        <div className="ar1-stage-reeds reeds-left" />
-        <div className="ar1-stage-reeds reeds-right" />
+        <div className="ar1-stage-night" />
         <div className="ar1-stage-mist">
           {Array.from({ length: contract.ambientMotion.mistPool }, (_, i) => <i key={i} />)}
         </div>

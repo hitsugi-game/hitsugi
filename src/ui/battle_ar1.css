@@ -25,118 +25,6 @@
 .ar1-stage-night::before { left: -13%; }
 .ar1-stage-night::after { right: -16%; transform: rotate(-14deg); }
 
-.ar1-stage-soil {
-  position: absolute;
-  left: -5%;
-  right: -5%;
-  bottom: -12%;
-  height: 76%;
-  clip-path: polygon(0 18%, 17% 7%, 39% 13%, 58% 4%, 79% 10%, 100% 1%, 100% 100%, 0 100%);
-  background:
-    radial-gradient(ellipse at 18% 55%, rgba(54, 80, 68, .27) 0 13%, transparent 31%),
-    radial-gradient(ellipse at 73% 42%, rgba(11, 24, 34, .46) 0 16%, transparent 34%),
-    radial-gradient(ellipse at 47% 76%, rgba(34, 48, 44, .42) 0 22%, transparent 42%),
-    #182326;
-  box-shadow: inset 0 3px 0 rgba(109, 135, 144, .12);
-  transform: perspective(760px) rotateX(6deg);
-  transform-origin: 50% 100%;
-}
-
-.ar1-stage-water {
-  position: absolute;
-  left: 12%;
-  right: 9%;
-  bottom: 12%;
-  height: 33%;
-  border-radius: 51% 44% 55% 39%;
-  background:
-    radial-gradient(ellipse at 61% 22%, rgba(201, 168, 106, .16), transparent 17%),
-    #0b1822;
-  border-top: 1px solid rgba(109, 135, 144, .28);
-  transform: skewX(-7deg);
-}
-
-.ar1-stage-shrine {
-  position: absolute;
-  left: 50%;
-  top: 8%;
-  width: min(27vw, 350px);
-  height: min(22vw, 240px);
-  transform: translateX(-50%);
-  filter: drop-shadow(0 20px 11px rgba(0, 0, 0, .48));
-}
-.ar1-stage-shrine::before {
-  content: '';
-  position: absolute;
-  left: 9%;
-  right: 9%;
-  top: 12%;
-  height: 31%;
-  background: #111722;
-  clip-path: polygon(0 58%, 12% 27%, 40% 12%, 50% 0, 60% 12%, 88% 27%, 100% 58%, 71% 51%, 50% 66%, 28% 51%);
-  border-bottom: 2px solid rgba(201, 168, 106, .34);
-}
-.ar1-stage-shrine i {
-  position: absolute;
-  top: 39%;
-  width: 6%;
-  height: 51%;
-  background: #1d252b;
-  transform-origin: 50% 0;
-}
-.ar1-stage-shrine i:first-child { left: 29%; transform: rotate(-2deg); }
-.ar1-stage-shrine i:nth-child(2) { right: 29%; transform: rotate(3deg); }
-.ar1-stage-shrine b {
-  position: absolute;
-  left: 18%;
-  right: 18%;
-  bottom: 4%;
-  height: 17%;
-  border: 1px solid rgba(109, 135, 144, .28);
-  border-radius: 50%;
-  background: #0b1822;
-}
-.ar1-stage-kit-shrine {
-  position: absolute;
-  z-index: 2;
-  inset: -17% -24% -12%;
-  background: center bottom / contain no-repeat;
-}
-
-.ar1-stage-kit-foreground {
-  position: absolute;
-  z-index: 2;
-  left: 0;
-  right: 0;
-  bottom: -3%;
-  height: 55%;
-  background: center bottom / 100% auto no-repeat;
-}
-
-.ar1-stage-reeds {
-  position: absolute;
-  bottom: -2%;
-  width: 28%;
-  height: 48%;
-  border-bottom: 15px solid #05070d;
-  filter: drop-shadow(0 -2px 0 rgba(54, 80, 68, .3));
-}
-.ar1-stage-reeds::before,
-.ar1-stage-reeds::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  width: 4px;
-  height: 86%;
-  background: #13231f;
-  border-radius: 70% 20% 10% 10%;
-  transform: rotate(-9deg);
-  box-shadow: 24px 12px #1c302b, 51px -5px #13231f, 78px 18px #263a36, 108px 3px #172923, 138px 25px #263a36;
-}
-.ar1-stage-reeds::after { left: 31px; height: 66%; transform: rotate(8deg); opacity: .88; }
-.reeds-left { left: -2%; }
-.reeds-right { right: -2%; transform: scaleX(-1); }
-
 .ar1-stage-mist i {
   position: absolute;
   left: 19%;
@@ -279,6 +167,37 @@
 .ar1-hero-mark small { color: #d5c8ac; font-size: 10px; }
 .ar1-hero-rare { border-right-color: #ffe1a0; }
 
+/* M53: 戦闘は探索地図を再現しない。地域画を一枚だけ敷き、戦絵札と判断情報を前へ出す。
+   旧root/祠cutout/CSS地形の同時表示は、探索と戦場の区別を曖昧にしたためDOMから撤去した。 */
+.ar1-battle-stage { background: #05070d; }
+.ar1-stage-environment { background: #05070d; }
+.ar1-stage-region-art {
+  position: absolute;
+  inset: -2%;
+  background: center 54% / cover no-repeat;
+  filter: saturate(.52) brightness(.46) contrast(1.08);
+  transform: scale(1.02);
+}
+.ar1-stage-night {
+  background:
+    linear-gradient(90deg, rgba(5, 7, 13, .54), rgba(5, 7, 13, .08) 28%, rgba(5, 7, 13, .08) 72%, rgba(5, 7, 13, .54)),
+    linear-gradient(180deg, rgba(5, 7, 13, .4), transparent 34%, rgba(5, 7, 13, .26) 70%, rgba(5, 7, 13, .78));
+}
+.ar1-stage-night::before { content: none; }
+.ar1-stage-night::after {
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: 0;
+  width: auto;
+  height: 42%;
+  border-radius: 0;
+  border-top: 1px solid rgba(201, 168, 106, .13);
+  background: linear-gradient(180deg, rgba(16, 25, 35, .1), rgba(5, 7, 13, .7));
+  opacity: 1;
+  transform: none;
+}
+
 @keyframes ar1-reverse-ember {
   0% { transform: translate(0, 9vh) scale(.65); opacity: 0; }
   24% { opacity: .76; }
@@ -288,9 +207,7 @@
 @keyframes ar1-mist { from { transform: translateX(-5%); } to { transform: translateX(5%); } }
 
 @media (max-width: 560px) {
-  .ar1-stage-shrine { top: 12%; width: 46vw; height: 35vw; }
-  .ar1-stage-water { left: 4%; right: 3%; bottom: 8%; height: 36%; }
-  .ar1-stage-reeds { width: 38%; height: 43%; opacity: .78; }
+  .ar1-stage-region-art { background-position: 50% 50%; }
   .ar1-stage-identity {
     top: 7px;
     left: 8px;

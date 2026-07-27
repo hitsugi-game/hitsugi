@@ -23,7 +23,7 @@ import { getReduceMotion } from '../core/settings'
 import type { RegionStageContract } from '../core/data/region_stage_contracts'
 import type { RegionVisualVersion } from '../core/feature_flags'
 import type { RegionExperienceProfile } from '../core/data/region_experience'
-import { buildAr1HotarubiStage, loadAr1HotarubiAssets, type Ar1HotarubiStage } from './render/ar1_hotarubi'
+import { buildAr1HotarubiStage, type Ar1HotarubiStage } from './render/ar1_hotarubi'
 import { buildRegionExperienceStage, type RegionExperienceStage } from './render/region_experience_layer'
 import { isDarkLight, isPursuitLight } from './light_pressure'
 import { activeShadeCount } from './shade_population'
@@ -335,17 +335,10 @@ export class DungeonEngine {
 
     this.registry = new TextureRegistry(this.app.renderer)
     const seed = this.opts.seed ?? (this.floorIndex + 1) * 7919
-    // V2 requests only its two reviewed kit files. If unmounted during either await, stop before
-    // touching containers; load failure itself is handled by the Graphics fallback.
-    const ar1Assets = this.opts.stageContract
-      ? await loadAr1HotarubiAssets(this.opts.stageContract, import.meta.env.BASE_URL)
-      : null
-    if (this.destroyed) return
-
     // AR1 target floor exclusively mounts its batched material kit. The legacy ground/water
     // is not constructed underneath it; OFF and non-target floors stay on the V1 path.
     if (this.opts.stageContract) {
-      this.ar1Stage = buildAr1HotarubiStage(this.grid, TILE, this.opts.stageContract, seed, ar1Assets ?? undefined)
+      this.ar1Stage = buildAr1HotarubiStage(this.grid, TILE, this.opts.stageContract, seed)
       this.layerGround.addChild(this.ar1Stage.ground)
       this.layerMid.addChild(this.ar1Stage.mid, this.ar1Stage.foreground)
       this.layerGlow.addChild(this.ar1Stage.effects)

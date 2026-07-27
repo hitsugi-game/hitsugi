@@ -75,11 +75,9 @@ async function expectNoHorizontalOverflow(page: Page): Promise<void> {
 
 test('AR1 Dungeon and Battle preserve one Hotarubi stage identity and pooled budget', async ({ page }, info) => {
   test.setTimeout(60_000)
-  const kitResponses: { url: string; status: number }[] = []
-  page.on('response', (response) => {
-    if (response.url().includes('/visual-recovery/hotarubi/')) {
-      kitResponses.push({ url: response.url(), status: response.status() })
-    }
+  const explorationRasterRequests: string[] = []
+  page.on('request', (request) => {
+    if (request.url().includes('/visual-recovery/hotarubi/')) explorationRasterRequests.push(request.url())
   })
   await bootV2Dungeon(page)
 
@@ -89,34 +87,38 @@ test('AR1 Dungeon and Battle preserve one Hotarubi stage identity and pooled bud
   await expect(dungeon).toHaveAttribute('data-stage-ground-materials', 'wet-soil,shallow-black-water')
   await expect(dungeon).toHaveAttribute('data-stage-navigation-cue', 'flattened-grass-and-reflected-lamps')
   await expect(dungeon).toHaveAttribute('data-stage-danger-cue', 'reverse-ember-flow')
+  await expect(dungeon).toHaveAttribute('data-scene-layering', 'map-native')
   const budget = await page.evaluate(() => (window as unknown as Ar1GameWindow).__dungeon?.ar1VisualBudget()) as {
     staticGraphics: number; textures: number; poiMarkers: number; telegraphs: number
-    embers: number; rings: number; mist: number
+    embers: number; rings: number; mist: number; terrainMarks: number; edgeReeds: number
   }
   expect(budget).toMatchObject({
-    staticGraphics: 6,
-    textures: 2,
+    staticGraphics: 5,
+    textures: 0,
     telegraphs: 1,
     embers: 10,
     rings: 3,
     mist: 2,
   })
   expect(budget.poiMarkers).toBeGreaterThan(0)
+  expect(budget.terrainMarks).toBeGreaterThan(12)
+  expect(budget.edgeReeds).toBeGreaterThan(0)
   await snapshot(page, `ar1-dungeon-hotarubi-${info.project.name}`)
-  expect(kitResponses).toHaveLength(2)
-  expect(kitResponses.every((response) => response.status === 200)).toBe(true)
-  expect(kitResponses.some((response) => response.url.includes('drowned-shrine-firefly-reed'))).toBe(true)
-  expect(kitResponses.some((response) => response.url.includes('foreground-root-reed'))).toBe(true)
+  expect(explorationRasterRequests).toEqual([])
 
   await continueToBattle(page)
   const battle = page.locator('.battle-screen')
   await expect(battle).toHaveAttribute('data-visual-version', 'v2')
   await expect(battle).toHaveAttribute('data-stage-contract-id', CONTRACT_ID)
   await expect(page.locator('.ar1-battle-stage')).toHaveAttribute('data-stage-contract-id', CONTRACT_ID)
+  await expect(page.locator('.ar1-battle-stage')).toHaveAttribute('data-scene-layering', 'battle-first')
   await expect(page.locator('.ar1-stage-identity')).toContainText('螢火の窪地・水没社')
   await expect(page.locator('.ar1-stage-identity')).toContainText('濡土と浅水')
   await expect(page.locator('.battle-stage-bg')).toHaveCount(0)
   await expect(page.locator('.stage-ground')).toHaveCount(0)
+  await expect(page.locator('.ar1-stage-region-art')).toHaveCSS('background-image', /bg_r_hotarubi_no_kubochi\.jpg/)
+  await expect(page.locator('.ar1-stage-kit-foreground')).toHaveCount(0)
+  await expect(page.locator('.ar1-stage-kit-shrine')).toHaveCount(0)
 
   const identity = await page.locator('.ar1-stage-identity').boundingBox()
   const viewport = page.viewportSize()
@@ -125,6 +127,32 @@ test('AR1 Dungeon and Battle preserve one Hotarubi stage identity and pooled bud
   expect(identity!.x).toBeGreaterThanOrEqual(0)
   expect(identity!.x + identity!.width).toBeLessThanOrEqual(viewport!.width)
   await snapshot(page, `ar1-battle-hotarubi-${info.project.name}`)
+})
+
+test('M54 wide-short viewport keeps exploration map-native and battle image-backed', async ({ page }, info) => {
+  test.skip(info.project.name !== 'pc-1280', 'The reported 1782x695 viewport needs one dedicated desktop probe.')
+  test.setTimeout(60_000)
+  await page.setViewportSize({ width: 1782, height: 695 })
+  await bootV2Dungeon(page)
+
+  const dungeon = page.locator('.dungeon-screen')
+  await expect(dungeon).toHaveAttribute('data-scene-layering', 'map-native')
+  const budget = await page.evaluate(() => (window as unknown as Ar1GameWindow).__dungeon?.ar1VisualBudget()) as {
+    textures: number; terrainMarks: number; edgeReeds: number
+  }
+  expect(budget.textures).toBe(0)
+  expect(budget.terrainMarks).toBeGreaterThan(12)
+  expect(budget.edgeReeds).toBeGreaterThan(0)
+  await expectNoHorizontalOverflow(page)
+  await snapshot(page, 'm54-dungeon-map-native-wide-short-1782x695')
+
+  await continueToBattle(page)
+  const stage = page.locator('.ar1-battle-stage')
+  await expect(stage).toHaveAttribute('data-scene-layering', 'battle-first')
+  await expect(page.locator('.ar1-stage-region-art')).toHaveCSS('background-image', /bg_r_hotarubi_no_kubochi\.jpg/)
+  await expect(page.locator('.ar1-stage-kit-foreground, .ar1-stage-kit-shrine, .ar1-stage-soil, .ar1-stage-water')).toHaveCount(0)
+  await expectNoHorizontalOverflow(page)
+  await snapshot(page, 'm54-battle-wide-short-1782x695')
 })
 
 test('V2 gate keeps OFF on V1 and gives non-AR1 floors/regions a code-native regional layer', async ({ page }) => {

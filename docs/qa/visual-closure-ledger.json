@@ -711,7 +711,7 @@
         "1280x720",
         "390x844"
       ],
-      "hero": "The walking field combines authored region materials, landmarks, route glyphs, and danger telegraphs.",
+      "hero": "The native map geometry leads; wet ruts, water rings, edge reeds, route glyphs, and danger telegraphs enrich only the readable TileKind field without exploration raster overlays.",
       "support": "Supporting frames use the shared indigo, soot, vermilion, warm-gold, and paper-material family without competing with the hero.",
       "groundContact": "Characters, facilities, combatants, or document planes use explicit borders, feet, shadows, or contact mattes appropriate to this surface.",
       "depth": "Background atmosphere, the decision-bearing middle layer, and a restrained foreground are separated without covering controls.",
@@ -724,7 +724,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Dungeon.tsx",
-        "sourceSha256": "2a5d6d22f661663d01d44f19967060da004cf42002ecb35057a6e19ca9cf1578",
+        "sourceSha256": "cf0cb77d87409e94baac5865d732fae61a987ab3c1927aff656d7637764ef7f6",
         "runtimePath": "src/dungeon/render/region_experience_layer.ts",
         "runtimeSha256": "9b779a9edb7086fd7a0d1f3cb6b2e8e8f6bf9b17f9d709750a6cd14372339b46",
         "rightsStatus": "pending",
@@ -734,6 +734,7 @@
       "owner": "visual-recovery/dungeon",
       "evidence": [
         "src/ui/Dungeon.tsx",
+        "src/dungeon/render/ar1_hotarubi.ts",
         "src/dungeon/render/region_experience_layer.ts",
         "tests/visual/ar1_dungeon_battle.spec.ts"
       ],
@@ -760,7 +761,7 @@
         "1280x720",
         "390x844"
       ],
-      "hero": "Shared contact mattes and one rare-or-boss hero clarify combatants, threat, action, and reward provenance.",
+      "hero": "One coherent regional backdrop and shared contact mattes keep combatants, threat, action, and reward provenance ahead of scenery.",
       "support": "Supporting frames use the shared indigo, soot, vermilion, warm-gold, and paper-material family without competing with the hero.",
       "groundContact": "Characters, facilities, combatants, or document planes use explicit borders, feet, shadows, or contact mattes appropriate to this surface.",
       "depth": "Background atmosphere, the decision-bearing middle layer, and a restrained foreground are separated without covering controls.",
@@ -769,13 +770,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/battle_ar1.css",
-        "sha256": "5a6e83aedf7df4c1a5a27ac3b67abe982b740d2c85771279cc7f015b596756b6"
+        "sha256": "f945330d04f60e30ea1a8ad37f8e6ef515b31b7b66d23d09f3f3d50d55be01ee"
       },
       "provenance": {
         "sourcePath": "src/ui/Battle.tsx",
-        "sourceSha256": "bbae798a6f37d358181c9b8e9ad40d702f86093b5ac94705fab8e05fa20eef7d",
+        "sourceSha256": "a23610ce0e13b7910b746cc2a1232988f84041640505a962a0ef154d3dca9208",
         "runtimePath": "src/ui/battle_ar1.css",
-        "runtimeSha256": "5a6e83aedf7df4c1a5a27ac3b67abe982b740d2c85771279cc7f015b596756b6",
+        "runtimeSha256": "f945330d04f60e30ea1a8ad37f8e6ef515b31b7b66d23d09f3f3d50d55be01ee",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
