@@ -484,3 +484,4 @@ M18後の継続改善として、強制的な日課ではなく、家族・神�
 - **保存契約**: optional pending V2へopen時の三候補とdrawNumberを即保存し、claimで一度だけ星札/縁/historyを反映する。reloadで同候補へ戻り、open/claim二重送信、旧save、破損saveで複製0とする。
 - **主戦判断**: M47Cで成立した中盤通常連戦は変更せず、現状ほぼ無圧力なtier3主11体へ主戦用「止・受・崩」を4/4/3体で割り当てる。まず骸星（止）・夢幻（受）・翡翠（崩）の三体pilotを400 seedで測り、正対処の安全と未対処との差を確認してから11体へ展開する。全戦闘オートは公開兆しだけを使って同じ対処を行う。
 - **根拠/gate**: 現行1,000 seedで50籤の星札中央値43/180・重複7・極2、500籤で実効上限後重複14。tier3主11体は素手/戦術とも勝率100%、10体の戦術被HP2.1〜7.0%。新設計は50籤new-first中央値48以上、未所持保証違反0、tier3正対処勝率95%以上、対処差8/11以上をgateとする。詳細は`docs/GACHA_BALANCE_PRECISION_PLAN_20260728.md`。runtimeは未実装。
+- **Forge強化状態**: Round 1の6 blocking中5件を独立CLOSED。一籤一救済、open snapshot、drawNumber冪等性、11主parameter、確定兆しを追加した。一方`measurement-oracle-undefined`がRound 2でも未解消となり停止条件へ到達。auto三方針と危険手の集約、stop閾値、claim原子性、rescue validatorの計4件が残るため合格扱いせず、runtime実装へ進めない。状態正本は`docs/CODEX_FORGE_STATE.md`。

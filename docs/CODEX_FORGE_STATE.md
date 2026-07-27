@@ -1,47 +1,51 @@
-# Codex Forge State — M55 探索体験強化「灯跡の夜藪」設計正本
+# Codex Forge State — M56 星籤「三星択一」・主戦精密化 設計正本
 
 ## ①対象
 
-- 成果物: `docs/DUNGEON_EXPLORATION_APPEAL_FORGE_20260728.md`
-- 目的: M54のmap-native探索を、実装可能・測定可能で本作固有の魅力設計へ収束させる
+- 成果物: `docs/GACHA_BALANCE_PRECISION_PLAN_20260728.md`
+- 目的: 無課金収集の選択価値、確率説明、主戦対処差、保存安全性を実装者によらず同じ結果になる正本へ収束させる
 
 ## ②固定合格ライン
 
-- 客観条件: 必須節（命題、状態、loop、camera、操作、POI、地域、物語、HUD、a11y、性能、phase、受入、見送り）を全て持ち、参照pathが実在し、GDD v3 §8.37、M51、M47Cと矛盾しない。
-- 主観5軸は各4/5以上: A 世界観固有性、B 探索動機、C 操作明瞭性、D 地域展開性、E 実装可能性。
-- blocking: 大型探索画像再導入、未踏/報酬漏洩、決定論・進行・既存数値破壊、音/色だけの必須情報、pilot前の40地域量産、検証不能。最大3round。
+- 客観条件: 必須14節、既存参照path実在、数値・確率・保存契約の内部矛盾0。
+- 主観5軸は各4/5以上: A 選びたくなる収集体験、B 確率・保証・救済の信頼性、C 主戦の対処差と公平性、D 実装・計測可能性、E 保存整合・引き直し/二重反映耐性。
+- blocking: 客観失敗、3点以下、または実装結果を変える曖昧さ。最大5round。途中で基準を緩めない。
 
 ## ③ラウンド履歴
 
 | Round | 判定 | 得点 A/B/C/D/E | Blocking | 要約 |
 |---:|---|---|---:|---|
-| 1 | FAIL | 4/5/5/5/3 | 4 | 報酬tier side-channel、発見状態の所有、性能計測環境、観察oracleが未定義 |
-| 2 | PASS | 4/5/5/5/4 | 0 | 別の独立評価者が4 IDを全てCLOSEDと認定。runtime実装完了ではなく設計正本の合格 |
+| 1 | FAIL | 4/4/4/3/3 | 6 | 新規path表記、主数、救済snapshot、冪等ledger、主parameter、計測oracleが未確定 |
+| 2 | FAIL | 5/4/3/3/3 | 4 | 元6 ID中5件CLOSED。計測oracleが2ラウンド連続未解消で停滞条件に到達し、数値・claim原子性・validatorに新規3件 |
 
 ## ④blocking台帳
 
 | ID | State | Consecutive unresolved | Closure evidence | Certifier |
 |---|---|---:|---|---|
-| confirmed-reward-tier-side-channel | closed | 1 | §9.1で未開封cueをtier非依存化し、reward情報を持たない純関数とtier差同一testを固定 | Round 2 independent |
-| discovery-state-ownership-missing | closed | 1 | §4.1で`discoveryV1`を正本化し、delta、safe checkpoint、rollback、migration、BAK testを固定 | Round 2 independent |
-| benchmark-environment-undefined | closed | 1 | §15でbrowser/profile/10秒scenario/反復/fps・p95/M54同job比較を固定 | Round 2 independent |
-| observation-oracle-undefined | closed | 1 | Phase Eで対象13名、5課題、分母、合否値、重大摩擦、未達差戻しを固定 | Round 2 independent |
+| `§11 実装候補の3テストパス / missing-reference-paths` | closed | 1 | [既存]13件は全実在、未作成3件は[新規作成]へ区分 | Round 2 independent |
+| `§2.2・§8.2・§9.2 tier3主数 / boss-count-mismatch` | closed | 1 | §2.2を11体中10体へ明確化し、regionsと一致する11 enemyIdを列挙 | Round 2 independent |
+| `§4.3・§4.4・§5 pending報酬 / rescue-snapshot-undefined` | closed | 1 | 一籤一救済、10回保証優先、candidate reward/rescueのopen snapshotを固定 | Round 2 independent |
+| `§5 open/claim冪等契約 / idempotency-ledger-undefined` | closed | 1 | expected draw、単調drawNumber、lastReceiptでhistory件数非依存の再送拒否を固定 | Round 2 independent |
+| `§8.2 tier3主設定 / boss-parameters-undefined` | closed | 1 | 11主のID、周期、予告、強手、対処値と確定兆しstateを固定。ただし共通閾値との新規矛盾は別ID | Round 2 independent |
+| `§9.2 400-seed gate / measurement-oracle-undefined` | unresolved | 2 | 4 policyと式は追加したが、auto三方針の適用単位と危険手のrun間集約が未定義 | Round 2 independent |
+| `§8.1・§8.2・§10 / stop-threshold-conflict` | unresolved | 1 | §8.1/§10の共通12%と§8.2の主別10/11/12%が競合 | Round 2 independent |
+| `§5 claim / claim-commit-atomicity-undefined` | unresolved | 1 | openはsave-firstだがclaimの同順序・失敗時rollbackが明文化されていない | Round 2 independent |
+| `§4.3・§5 validation / rescue-id-overlap-contradiction` | unresolved | 1 | candidate内guaranteed IDは正常だが「救済ID重複」の拒否対象が未定義 | Round 2 independent |
 
 ## ⑤settled list
 
-- M54の探索ラスター0枚、M53の戦闘一枚背景、M51のrunSeed/checkpoint、全戦闘オートは固定前提であり、Forge中に再審議しない。
-- room archetypeと地形生成変更は別mission。M55は現行地形上の構図・反応・発見・地域文法に限定する。
-- 血脈・世代差の探索中作用、canvasのscreen reader同等経路、帰還記録3件の優先・重複規則はRound 1のnon-blocking。M55 Phase Aの開始条件へは昇格させず、該当phaseの実装前に個別設計する。
-- Round 2 caveatとして、reward cueとtierの統計相関test、全safe checkpointのevent matrix、M54性能baseline artifactとrunner失効条件、Phase Dの回答者数・採点規則を実装時に固定する。
+- 位階率60/28/10/2、獲得頻度、10/20/50保証、全戦闘オート、有償なし、限定なし、星札非必須は固定前提で再審議しない。
+- `nextStarLotteryOdds()`丸め、星札の短期価値、meterのa11yはRound 1 non-blocking。blocking修正へ混ぜず、該当実装phaseの受入候補として残す。
+- runtime実装、画像生成、commit、push、deployは今回の単一成果物Forgeの対象外。
 
 ## ⑥次の一手
 
-- Forgeは合格。runtimeへ変更は入れていない。ユーザーが実装を依頼した場合のみ、正本§21どおりPhase A「読める構図」を単独missionとして開始する。
+- 同じ`measurement-oracle-undefined`が2ラウンド連続未解消のため、このForge runでは修正を続けない。代替はM56の「protocol・数値・oracle appendix」だけを別成果物にし、auto三方針×400 seedの行列、危険手集約式、stop threshold単一情報源、claim save-first、validatorの許容/拒否集合を先に固定してから正本へ統合する。
 
 ## ⑦次ゴール候補
 
-- M55 Phase A: camera clamp、地図占有率、未踏輪郭、暗部率、HUD交差を3幅・map四隅・灯3状態で実装検証する。
+- M56 Forge再開前の限定ゴール: `docs/M56_PROTOCOL_ORACLE_APPENDIX_20260728.md`へ残る4 IDだけを収束させる。合格後にM56正本へ統合し、その後Phase Aへ進む。
 
 ## ⑧terminal印
 
-合格 — 2026-07-28T02:11:50+09:00 — Round 2 independent closure、A/B/C/D/E=4/5/5/5/4、blocking 0
+停滞 — 2026-07-28T03:24:00+09:00 — `measurement-oracle-undefined`が2ラウンド連続未解消。元6 ID中5件は閉鎖したが、新規blocking 3件を含む計4件が残存

@@ -28,7 +28,7 @@
 
 ## ローカル計画・未実装
 
-- **M56 星籤「三星択一」・主戦精密化（設計公開・runtime未実装）**: 現行1,000 seedで星籤50回の星札中央値43/180・重複7・極2、500回の実効上限後重複14を確認。位階率と10/20/50保証を変えず、同位階三柱から一柱を選ぶpending保存式へ設計し、次回実確率、未所持添え札、縁極の星返り、全所持表示を正確化する。M47Cの通常中盤は維持し、勝率100%・10体の戦術被HP2.1〜7.0%に留まるtier3主11体へ主戦用「止・受・崩」を三体pilotから導入する。全戦闘オート、有償なし、限定なし、必須戦力なし。正本`docs/GACHA_BALANCE_PRECISION_PLAN_20260728.md`は`842faf0`で公開済みだが、runtime/save/UIは未変更。
+- **M56 星籤「三星択一」・主戦精密化（Forge強化・停滞・runtime未実装）**: 一籤一救済、10回保証優先、open時reward snapshot、単調drawNumber冪等性、確定主兆し、tier3主11体のID/周期/強手/対処値、4 policy測定式まで正本を強化。Round 1の6 ID中5件は独立CLOSEDだが、計測oracleが2ラウンド連続未解消となりForge停止条件へ到達した。残りはauto三方針と危険手の集約、stop閾値の単一化、claim save-first、rescue validatorの4件。公開済み`842faf0`よりローカル正本は進んでいるが、Forge未合格でruntime/save/UIは未変更。状態は`docs/CODEX_FORGE_STATE.md`。
 
 - **M55 探索体験強化「灯跡の夜藪」（設計公開・runtime未実装）**: M54の画像0枚・map-nativeを維持し、地図5状態、時間尺度別loop、歩行反応、距離別POI、宝/稀相/主の非漏洩兆し、4地域pilot、発見checkpoint、固定性能profile、13名の観察oracleを正本化。Round 1の4 blockingを限定修正し、別評価者のRound 2でA/B/C/D/E=`4/5/5/5/4`、4 ID CLOSED、blocking 0。正本`docs/DUNGEON_EXPLORATION_APPEAL_FORGE_20260728.md`は`842faf0`で公開済みだが、runtime・素材・saveは未変更。実装開始時はPhase Aだけを先行する。
 

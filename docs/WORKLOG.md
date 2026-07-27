@@ -1505,3 +1505,11 @@
 - **公開対象**: M52の共通Sheet中央固定を`a30b794`、M53〜M54の探索`map-native`・戦闘`battle-first`分離を`b23eda0`、M55探索強化案とM56星籤・主戦精密化案の設計正本を`842faf0`としてmainへpushした。M55〜M56は文書のみで、runtime/save/UIには未実装。
 - **ローカル最終gate**: 単独再実行の全Vitest 54 files/789 tests、lint、data 0 errors/既存rank warn 1、visual closure 23 routes/40 regions/6 overlays/69 entries、manifest 9/9、production buildに合格。M52 focused 3/3、出立PC/mobile 2/2、AR1 M54 PC/mobile 10 pass/2 intended skip。初回の並列Vitestは資源競合でworker 2件が終了し、大型Playwright一括実行は時間枠超過したため、契約単位へ分割して再実行し全件合格した。生成baseline PNG 5件は追跡対象の元内容へ復元し、公開差分から除外した。
 - **CI/公開確認**: GitHub Actions run `30291730297`はbuild・deployとも成功。`https://hitsugi-game.github.io/hitsugi/`、entry `index-xfQC8Kyi.js`、CSS `index-BF5_P4fd.css`、Dungeon `Dungeon-Mi4eywdc.js`をHTTP 200で取得し、entryの`battle-first`/`ar1-stage-region-art`、CSSの`100dvh`/`ar1-stage-region-art`、Dungeonの`map-native`/`terrainMarks`を確認した。GitHub Actions各actionのNode 20非推奨警告は公開を妨げない後続保守項目。
+
+## 2026-07-28（M56 設計正本 Forge強化）
+
+- **固定合格ライン**: 成果物を`docs/GACHA_BALANCE_PRECISION_PLAN_20260728.md`一つへ限定。必須14節、既存参照実在、数値/確率/保存矛盾0と、収集・信頼・主戦・実装計測・保存安全の5軸各4/5以上、blocking 0、最大5roundを固定した。runtime、画像、commit、push、deployは対象外。
+- **Round 1**: 客観は既存baseline test 2 files/13 tests合格だったが、独立評価A/B/C/D/E=`4/4/4/3/3`、blocking 6。新規test path表記、主数、救済snapshot、冪等ledger、11主parameter、400-seed oracleを検出した。
+- **欠陥限定修正**: 既存13/[新規]3 pathを分離し、11主数を統一。一籤一救済・10回保証優先、candidate reward/rescueのopen snapshot、expected draw/lastReceipt/save-first openを追加。M56主だけを確定兆しとし、11 enemyIdへ周期・予告・強手・対処値を設定。4 policy、同seed、分母、相対差、percentileを定義した。
+- **Round 2/停止**: 独立Closureで元6 ID中5件CLOSED、A/B/C/D/E=`5/4/3/3/3`。`measurement-oracle-undefined`はauto三方針と危険手集約が残り2ラウンド連続未解消となった。さらにstop閾値競合、claim原子性、rescue validatorの3 IDを検出。Forge停止規則により同runで修正を反復せず、terminalを停滞とした。
+- **代替経路**: 次回は残り4 IDだけのprotocol/oracle appendixを別成果物として固定し、独立合格後にM56正本へ統合する。現行確率、runtime/save/UI、公開版は変更していない。M55完了stateは`docs/CODEX_FORGE_STATE_M55_20260728.md`へ退避した。
