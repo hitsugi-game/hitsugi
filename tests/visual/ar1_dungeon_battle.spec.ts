@@ -77,7 +77,9 @@ test('AR1 Dungeon and Battle preserve one Hotarubi stage identity and pooled bud
   test.setTimeout(60_000)
   const explorationRasterRequests: string[] = []
   page.on('request', (request) => {
-    if (request.url().includes('/visual-recovery/hotarubi/')) explorationRasterRequests.push(request.url())
+    if (/\/img\/bg_r_[^/]+\.(?:png|jpe?g|webp)(?:\?|$)/i.test(request.url()) || request.url().includes('/visual-recovery/hotarubi/')) {
+      explorationRasterRequests.push(request.url())
+    }
   })
   await bootV2Dungeon(page)
 
@@ -159,7 +161,9 @@ test('V2 gate keeps OFF on V1 and gives non-AR1 floors/regions a code-native reg
   test.setTimeout(60_000)
   const kitRequests: string[] = []
   page.on('request', (request) => {
-    if (request.url().includes('/visual-recovery/hotarubi/')) kitRequests.push(request.url())
+    if (/\/img\/bg_r_[^/]+\.(?:png|jpe?g|webp)(?:\?|$)/i.test(request.url()) || request.url().includes('/visual-recovery/hotarubi/')) {
+      kitRequests.push(request.url())
+    }
   })
   await page.goto('/?regionVisualV2=0')
   await page.waitForFunction(() => '__game' in window, null, { timeout: 15_000 })
@@ -187,7 +191,7 @@ test('V2 gate keeps OFF on V1 and gives non-AR1 floors/regions a code-native reg
   expect(await page.evaluate(() => (window as unknown as Ar1GameWindow).__dungeon?.regionExperienceVisualBudget())).toMatchObject({
     textures: 0, landmarks: 0, telegraphs: 2,
   })
-  await expect(page.locator('.dungeon-region-backdrop[data-region-art="yoi_forest"]')).toBeVisible()
+  await expect(page.locator('.dungeon-region-backdrop')).toHaveCount(0)
   expect(kitRequests).toEqual([])
 })
 

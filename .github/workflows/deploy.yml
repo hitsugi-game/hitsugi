@@ -1,43 +1,110 @@
-name: Deploy to GitHub Pages
+name: Verify and deploy GitHub Pages
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build:
+  verify:
+    name: Verify release candidate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run lint # M19 C1: 出荷ゲート(oxlint)
-      - run: node scripts/validate_data.mjs # M19 C1: データ整合ゲート
-      - run: npx vitest run # M19 C2: 回帰テストゲート
-      - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Use repository npm version
+        run: npm install --global npm@11.12.1 && npm --version
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Audit high and critical vulnerabilities
+        run: npm audit --audit-level=high
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Validate game data
+        run: node scripts/validate_data.mjs
+
+      - name: Validate visual closure
+        run: npm run check:visual-closure
+
+      - name: Validate visual recovery manifest
+        run: npm run check:visual-manifest
+
+      - name: Validate public asset BOM
+        run: npm run check:asset-bom
+
+      - name: Unit and integration tests
+        run: npm test
+
+      - name: Build release candidate
+        run: npm run build
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+
+      - name: Validate built copies of public assets
+        run: npm run check:asset-bom:dist
+
+      - name: Enforce staged performance ceilings
+        run: npm run check:performance
+
+      - name: Install release browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Cross-browser core route and recovery smoke
+        run: npm run test:release-smoke
+
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-smoke-${{ github.run_id }}
+          path: tests/release/.artifacts
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Package verified Pages candidate
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: dist
 
   deploy:
-    needs: build
+    name: Deploy production
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Checkout verification script
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+      - name: Verify public HTML, bundles and commit marker
+        run: node scripts/verify_deployment.mjs "${{ steps.deployment.outputs.page_url }}" "${{ github.sha }}"

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "policy": "Initial-transfer JS and total CSS targets are release blockers. Total dist remains a regression ceiling until the legacy visual library is rights-audited and request-level physical-device evidence exists.",
+  "budgets": {
+    "initialEntryJsGzip": {
+      "targetBytes": 256000,
+      "baselineBytes": 74134,
+      "hardCeilingBytes": 256000,
+      "stage": "target-enforced",
+      "note": "M60: initial HTML module entry plus modulepreload closure. Save/store/routes load only after their user-visible boundary."
+    },
+    "totalCssGzip": {
+      "targetBytes": 65536,
+      "baselineBytes": 62799,
+      "hardCeilingBytes": 65536,
+      "stage": "target-enforced"
+    },
+    "totalDistBytes": {
+      "targetBytes": 220000000,
+      "baselineBytes": 255926255,
+      "hardCeilingBytes": 260000000,
+      "stage": "regression-only",
+      "note": "Large visual library is not an initial-transfer budget; request allowlists and physical-device telemetry remain separate gates."
+    }
+  }
+}

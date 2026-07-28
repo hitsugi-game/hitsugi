@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useGame } from '../core/store'
+import { LANTERN_TENDING_COST, LANTERN_TENDING_RATIO, useGame } from '../core/store'
 import { seasonLabel, isFestivalMonth, MOTTOS } from '../core/types'
 import type { MottoId, Element, GenerationVowId } from '../core/types'
 import { GENERATION_VOWS, isAdult, seasonsLeft } from '../core/inheritance'
@@ -48,6 +48,7 @@ export function HomeScreen() {
   const departDungeon = useGame((s) => s.departDungeon)
   const doFestival = useGame((s) => s.doFestival)
   const doRest = useGame((s) => s.doRest)
+  const tendLantern = useGame((s) => s.tendLantern)
   const markGossipSeen = useGame((s) => s.markGossipSeen)
   const dailyVisit = useGame((s) => s.dailyVisit)
   const consumeLegacyShioriRecap = useGame((s) => s.consumeLegacyShioriRecap)
@@ -68,6 +69,7 @@ export function HomeScreen() {
   const [showStoryMargin, setShowStoryMargin] = useState(false)
   const [showAllArchive, setShowAllArchive] = useState(false)
   const [showSuccessionPlan, setShowSuccessionPlan] = useState(false)
+  const [decisionAttention, setDecisionAttention] = useState(false)
 
   const alive = data.family.filter((c) => c.alive)
   const adults = alive.filter((c) => isAdult(c, data.seasonIndex))
@@ -87,14 +89,23 @@ export function HomeScreen() {
   const famRef = useRef<HTMLDivElement>(null)
   const actRef = useRef<HTMLDivElement>(null)
   const ledRef = useRef<HTMLDivElement>(null)
+  const decisionAttentionTimer = useRef<number | null>(null)
   const jumpToDecisions = () => {
     const target = actRef.current
     if (!target) return
-    target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (decisionAttentionTimer.current !== null) window.clearTimeout(decisionAttentionTimer.current)
+    setDecisionAttention(true)
+    // 「決断を見る」は装飾的な移動ではなく操作の結果なので、長いtablet画面でも
+    // 中間位置に止まったように見せない。金縁の応答を残し、移動とfocusは即時確定する。
+    target.scrollIntoView({ behavior: 'auto', block: 'start' })
     window.setTimeout(() => {
       target.querySelector<HTMLButtonElement>('.action-cards button:not(:disabled)')?.focus({ preventScroll: true })
-    }, 260)
+    }, 0)
+    decisionAttentionTimer.current = window.setTimeout(() => setDecisionAttention(false), 1600)
   }
+  useEffect(() => () => {
+    if (decisionAttentionTimer.current !== null) window.clearTimeout(decisionAttentionTimer.current)
+  }, [])
   const crisis = !cen.hasHeir || cen.dying.length > 0
   const crisisTitle = [
     cen.alive.length <= 1 && !cen.hasHeir ? '後継なし' : '',
@@ -201,11 +212,16 @@ export function HomeScreen() {
       <div className="home-core-grid">
       <div ref={famRef} className="home-core-family">
         <Panel title="燈守家の一族">
-          <FamilyBoard data={data} />
+          <FamilyBoard data={data} onTendLantern={tendLantern} />
         </Panel>
       </div>
 
-      <div ref={actRef} id="monthly-decisions" className="home-core-actions">
+      <div
+        ref={actRef}
+        id="monthly-decisions"
+        className={`home-core-actions ${decisionAttention ? 'is-jump-target' : ''}`}
+        aria-label="今月の決断"
+      >
       <Panel title="今月の決断 — 一つ選べば月が替わる">
         <p className="rec-reason"><span className="rec-mark">薦</span>綴の見立て — {priorityRec.reason}</p>
         <div className="action-cards">
@@ -398,7 +414,7 @@ function ActionCard({
 }
 
 // ---- M18 P2: 一族欄の二面化 — 大札(選択人物)+小札+血脈診断 ----
-function FamilyBoard({ data }: { data: GameData }) {
+function FamilyBoard({ data, onTendLantern }: { data: GameData; onTendLantern: (charId: string) => void }) {
   const [selId, setSelId] = useState<string | null>(null)
   const c = census(data)
   if (c.alive.length === 0) {
@@ -406,15 +422,38 @@ function FamilyBoard({ data }: { data: GameData }) {
   }
   const head = c.alive.find((x) => x.isHead) ?? c.alive[0]
   const sel = c.alive.find((x) => x.id === selId) ?? head
+  const missingMp = sel.maxMp - sel.mp
+  const tendingAmount = Math.min(missingMp, Math.max(1, Math.ceil(sel.maxMp * LANTERN_TENDING_RATIO)))
+  const canTend = missingMp > 0 && data.hoto >= LANTERN_TENDING_COST
   // 小札は詳細表示の選択後も同じDOMを残す。選択した札を配列から外すと、
   // キーボードフォーカスが失われ「次の人物」へ続けて移れなくなるため。
   const smalls = c.alive
   return (
     <div className="family-board">
-      <div className="family-main">
+      <div className="family-detail">
+        <div className="family-folio-heading"><span>当代の記</span><small>選んだ一人の資質と現在</small></div>
         <CharCard char={sel} seasonIndex={data.seasonIndex} progressionMode="detail" />
+        <div className="family-mp-care" data-ready={canTend ? 'true' : 'false'}>
+          <div>
+            <span>月を送らない手当て</span>
+            <b>灯芯手入れ — {sel.name}の灯力を{tendingAmount > 0 ? `${tendingAmount}回復` : '満ちたまま保つ'}</b>
+            <small>奉燈{LANTERN_TENDING_COST}。静養せず、選択中の一人だけを整える。</small>
+          </div>
+          <button
+            type="button"
+            className="btn family-mp-care-action"
+            disabled={!canTend}
+            onClick={() => onTendLantern(sel.id)}
+          >
+            {missingMp <= 0 ? '灯力は満ちている' : data.hoto < LANTERN_TENDING_COST ? `奉燈があと${LANTERN_TENDING_COST - data.hoto}` : `手入れする −${LANTERN_TENDING_COST}`}
+          </button>
+        </div>
+      </div>
+      <div className="family-register">
         {smalls.length > 1 && (
-          <div className="family-smalls">
+          <>
+          <div className="family-folio-heading"><span>家譜札</span><small>札を選ぶと左の記が替わる</small></div>
+          <div className="family-smalls" data-family-count={smalls.length}>
             {smalls.map((ch) => (
               <CharCard
                 key={ch.id}
@@ -424,12 +463,18 @@ function FamilyBoard({ data }: { data: GameData }) {
                 progressionMode="summary"
                 selected={sel.id === ch.id}
                 onClick={() => setSelId(ch.id)}
-              />
+              >
+                <span className="family-selected-status" aria-hidden={sel.id !== ch.id}>
+                  <b>{ch.name}</b>
+                  <span>当代の記に表示中</span>
+                </span>
+              </CharCard>
             ))}
           </div>
+          </>
         )}
+        <BloodlineDiagnosis data={data} />
       </div>
-      <BloodlineDiagnosis data={data} />
     </div>
   )
 }

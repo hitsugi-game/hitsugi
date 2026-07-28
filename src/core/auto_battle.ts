@@ -4,7 +4,7 @@ import type { BattleAction } from './battle'
 import { consumableById } from './data/consumables'
 import { skillById } from './data/skills'
 import type { AutoBattlePolicy } from './settings'
-import { priorityBehaviorEnemy } from './enemy_behaviors'
+import { priorityBehaviorEnemy, upcomingEnemyBehaviorCue } from './enemy_behaviors'
 
 export type AutoActionCategory =
   | 'critical-heal-skill'
@@ -134,12 +134,15 @@ function criticalHealing(
 
 /**
  * 乱数も状態変更も持たず、返したBattleActionはその時点の生存者・MP・在庫で実行できる。
- * economyは技/道具を決して使わず、steadyは生存、allOutは殲滅を優先する。
+ * economyは通常時に技/道具を温存する。ただし確定した主の強手を止める／崩す時と、
+ * 主戦中の瀕死だけは必要最小限の技を使う。全戦闘オートを選べる契約の中で、
+ * 「温存」が主戦を意図的に捨てる方針にならないようにする。
  */
 export function chooseAutoAction(context: AutoBattleContext): AutoActionChoice {
   const { battle, actor, policy } = context
   const foes = battle.enemies.filter((enemy) => enemy.hp > 0)
   if (foes.length === 0 || actor.hp <= 0) return regularAttack(battle, foes)
+  const isCommittedBoss = foes.some((enemy) => upcomingEnemyBehaviorCue(battle, enemy)?.certainty === 'committed')
 
   // M43: 初見を含む全戦闘のオートで、画面に出ている兆しと同じ情報だけを使う。
   // 停止設定や報酬には触れず、三方針の資源規律も維持する。
@@ -154,7 +157,7 @@ export function chooseAutoAction(context: AutoBattleContext): AutoActionChoice {
 
   const stopThreat = priorityBehaviorEnemy(battle, 'stop')
   if (stopThreat) {
-    if (policy === 'economy') {
+    if (policy === 'economy' && !isCommittedBoss) {
       const choice = regularAttack(battle, foes, stopThreat)
       return { ...choice, reason: `${stopThreat.name}の強手を止めるため狙いを集める`, category: 'telegraph-stop' }
     }
@@ -164,6 +167,9 @@ export function chooseAutoAction(context: AutoBattleContext): AutoActionChoice {
       .sort((a, b) => {
         const weakA = isWeak(a.element, stopThreat) ? 1 : 0
         const weakB = isWeak(b.element, stopThreat) ? 1 : 0
+        if (policy === 'economy') {
+          return weakB - weakA || actualMpCost(actor, a) - actualMpCost(actor, b) || b.power - a.power
+        }
         return weakB - weakA || b.power - a.power || actualMpCost(actor, a) - actualMpCost(actor, b)
       })[0]
     if (attackSkill) {
@@ -178,7 +184,8 @@ export function chooseAutoAction(context: AutoBattleContext): AutoActionChoice {
   }
 
   const breakThreat = priorityBehaviorEnemy(battle, 'break')
-  if (breakThreat && policy !== 'economy') {
+  const breakCue = breakThreat ? upcomingEnemyBehaviorCue(battle, breakThreat) : undefined
+  if (breakThreat && (policy !== 'economy' || breakCue?.certainty === 'committed')) {
     const breakingSkill = actor.skills
       .map(safeSkill)
       .filter((skill): skill is Skill => !!skill
@@ -193,9 +200,23 @@ export function chooseAutoAction(context: AutoBattleContext): AutoActionChoice {
         category: 'telegraph-break',
       }
     }
+    if (breakCue?.certainty === 'committed') {
+      return {
+        action: { type: 'guard' },
+        reason: `${breakThreat.name}の構えを崩す技がないため、強手を受け流す`,
+        category: 'telegraph-guard',
+      }
+    }
   }
 
-  if (policy === 'economy') return regularAttack(battle, foes)
+  if (policy === 'economy') {
+    // 主戦だけは瀕死を放置しない。道具は温存したまま、本人が使える回復技に限定する。
+    if (isCommittedBoss) {
+      const healing = criticalHealing(battle, actor, [])
+      if (healing) return healing
+    }
+    return regularAttack(battle, foes)
+  }
 
   if (policy === 'steady') {
     const healing = criticalHealing(battle, actor, context.consumables ?? [])

@@ -9,6 +9,34 @@
   overflow-x: hidden;
 }
 
+.vc3b-rite-return {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: min(100%, 860px);
+  min-height: 44px;
+  margin: 0 auto clamp(8px, 1.5vh, 14px);
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(201, 168, 106, 0.22);
+  color: #a99f8e;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+
+.vc3b-rite-return .btn {
+  flex: 0 0 auto;
+  min-height: 46px;
+}
+
+.vc3b-rite-return .btn:focus-visible {
+  outline: 3px solid #efe6d4;
+  outline-offset: 3px;
+}
+
 .vc3b-scene::before {
   position: fixed;
   inset: 0;
@@ -297,6 +325,17 @@
     padding: 12px 12px 28px;
     overflow-y: auto;
   }
+
+  .vc3b-rite-return {
+    align-items: flex-start;
+    gap: 9px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .vc3b-rite-return span { max-width: 52%; }
 
   .vc3b-surface-header { margin-bottom: 9px; }
   .vc3b-surface-signature { height: 28px; margin-bottom: 2px; transform: scale(0.78); transform-origin: bottom; }

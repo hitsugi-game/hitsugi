@@ -2,12 +2,14 @@ import type { GameData, ChronicleEntry, NarrativeScene, Character, StatKey } fro
 import { recoverNarrativeOnLoad } from './narrative'
 import { migrateCollectionV2 } from './collection'
 import { migrateJourneyMetrics } from './journey_metrics'
-import { migrateStarLottery } from './star_lottery'
+import { isValidStarLotteryPendingV2, migrateStarLottery } from './star_lottery'
 import { migrateCharacterProgression } from './character_progression'
 import { recalcStats } from './inheritance'
 import { ITEM_BASES } from './data/items'
+import { GODS } from './data/gods'
 import { dungeonByRegion } from '../dungeon/maps'
 import { isDungeonRunSeed } from '../dungeon/run_variation'
+import { safeStorageGet, safeStorageRemove, safeStorageSet, type StorageFailureReason } from './storage'
 
 const KEY_V1 = 'hitsugi_save_v1' // 季節単位(1ターン=1季)時代のセーブ
 const KEY_V3 = 'hitsugi_save_v3' // 月単位(1ターン=1月)
@@ -64,10 +66,6 @@ export function onExternalSaveChange(cb: () => void): () => void {
   return () => window.removeEventListener('storage', handler)
 }
 
-function isQuotaError(e: unknown): boolean {
-  return e instanceof DOMException && (e.name === 'QuotaExceededError' || e.code === 22)
-}
-
 // chronicle境界 — 'event'以外(誕生/死/契り/勝鬨/節目)は一族の骨格なので世代数が嵩んでも落とさない。
 export function boundChronicle(entries: ChronicleEntry[], max = CHRON_MAX): ChronicleEntry[] {
   if (entries.length <= max) return entries
@@ -99,6 +97,7 @@ function isFiniteNumber(value: unknown, min = Number.NEGATIVE_INFINITY): value i
 
 const ITEM_SOURCES = new Set(['shop', 'chest', 'boss', 'rare', 'divine'])
 const STAT_KEYS = new Set(['str', 'vit', 'dex', 'agi', 'mnd', 'luk'])
+const GOD_RANK_BY_ID = new Map(GODS.map((god) => [god.id, god.rank]))
 
 function isValidItem(value: unknown): boolean {
   if (!isRecord(value) || typeof value.id !== 'string' || value.id.length === 0) return false
@@ -217,6 +216,30 @@ function isValidNarrative(value: unknown): boolean {
   return true
 }
 
+function isValidLotteryRescue(value: unknown): value is { kind: 'guaranteed-new' | 'star-return'; godId: string } {
+  return isRecord(value) &&
+    (value.kind === 'guaranteed-new' || value.kind === 'star-return') &&
+    typeof value.godId === 'string' && GOD_RANK_BY_ID.has(value.godId)
+}
+
+function isValidLotteryReceipt(value: unknown, drawsUsed: number): boolean {
+  if (!isRecord(value) || typeof value.requestId !== 'string' || !value.requestId.trim()) return false
+  if (!Number.isInteger(value.drawNumber) || !isFiniteNumber(value.drawNumber, 1) || value.drawNumber > drawsUsed) return false
+  if (typeof value.selectedGodId !== 'string' || !GOD_RANK_BY_ID.has(value.selectedGodId)) return false
+  if (!isStringArray(value.grantedGodIds) || value.grantedGodIds.length < 1 || value.grantedGodIds.length > 2 ||
+      new Set(value.grantedGodIds).size !== value.grantedGodIds.length ||
+      !value.grantedGodIds.includes(value.selectedGodId) || value.grantedGodIds.some((id) => !GOD_RANK_BY_ID.has(id))) return false
+  if (!isRecord(value.affinityDelta)) return false
+  if (Object.entries(value.affinityDelta).some(([id, amount]) => (
+    !GOD_RANK_BY_ID.has(id) || !Number.isInteger(amount) || !isFiniteNumber(amount, 1)
+  ))) return false
+  if (value.rescue !== undefined) {
+    if (!isValidLotteryRescue(value.rescue)) return false
+    if (!value.grantedGodIds.includes(value.rescue.godId)) return false
+  }
+  return true
+}
+
 // 構造+意味の妥当性 — BAK復旧を機能させる下限不変条件(devil指摘: 構造検証だけでは意味的破損を素通しする)
 export function isValidSave(d: unknown): d is GameData & { saveSeq?: number } {
   if (!d || typeof d !== 'object') return false
@@ -285,24 +308,37 @@ export function isValidSave(d: unknown): d is GameData & { saveSeq?: number } {
   if (g.starLottery !== undefined) {
     const lottery = g.starLottery
     if (!isRecord(lottery) || !isStringArray(lottery.cards) || !Array.isArray(lottery.history) ||
-      typeof lottery.drawsUsed !== 'number' || !Number.isFinite(lottery.drawsUsed) || lottery.drawsUsed < 0 ||
+      lottery.cards.some((id) => !GOD_RANK_BY_ID.has(id)) || new Set(lottery.cards).size !== lottery.cards.length ||
+      typeof lottery.drawsUsed !== 'number' || !Number.isInteger(lottery.drawsUsed) || lottery.drawsUsed < 0 ||
       (lottery.lastRequestId !== undefined && typeof lottery.lastRequestId !== 'string')) return false
     for (const entry of lottery.history) {
       if (!isRecord(entry) || typeof entry.requestId !== 'string' || typeof entry.drawNumber !== 'number' ||
         !isStringArray(entry.godIds) || !isStringArray(entry.newGodIds) || !isStringArray(entry.duplicateGodIds) ||
         typeof entry.affinityGained !== 'number' || typeof entry.atSeason !== 'number') return false
     }
+    if (lottery.pendingV2 !== undefined &&
+      !isValidStarLotteryPendingV2(lottery.pendingV2, lottery.drawsUsed, lottery.cards)) return false
+    if (lottery.lastReceipt !== undefined && !isValidLotteryReceipt(lottery.lastReceipt, lottery.drawsUsed)) return false
+  }
+  if (g.framedHeirloomIds !== undefined) {
+    if (!isStringArray(g.framedHeirloomIds) || g.framedHeirloomIds.length > 3 ||
+      new Set(g.framedHeirloomIds).size !== g.framedHeirloomIds.length) return false
   }
   if (g.dungeonRun !== undefined && !isValidDungeonRun(g.dungeonRun, new Set(g.family.map((character) => character.id)))) return false
   return true
 }
 
-type Persisted = GameData & { lastPlayedAt: number; saveSeq: number }
+type Persisted = GameData & { lastPlayedAt: number; saveSeq: number; saveFingerprint?: string }
 
-function readRaw(key: string): { raw: string; data: Persisted } | null {
+export type SaveFailureReason = StorageFailureReason | 'read-only' | 'serialization' | 'verification'
+
+export type SaveResult =
+  | { ok: true; saveSeq: number; fingerprint: string; chronicleLimit: number }
+  | { ok: false; reason: SaveFailureReason; previousSavePreserved: boolean }
+
+function parseRaw(raw: string | null): { raw: string; data: Persisted } | null {
+  if (!raw) return null
   try {
-    const raw = localStorage.getItem(key)
-    if (!raw) return null
     const data = JSON.parse(raw) as Persisted
     if (!isValidSave(data)) return null
     return { raw, data }
@@ -311,56 +347,112 @@ function readRaw(key: string): { raw: string; data: Persisted } | null {
   }
 }
 
-export function saveGame(data: GameData): void {
-  if (saveReadOnly) return // M33: 別タブの保存を検知した後は保存を止め、相手の新しい進行を上書きしない
+function readRaw(key: string): { raw: string; data: Persisted } | null {
+  const stored = safeStorageGet(key)
+  return stored.ok ? parseRaw(stored.value) : null
+}
+
+function fingerprint(raw: string): string {
+  let hash = 0x811c9dc5
+  for (let i = 0; i < raw.length; i++) {
+    hash ^= raw.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0')
+}
+
+function restoreMain(raw: string | null): boolean {
+  const current = safeStorageGet(KEY)
+  if (current.ok && current.value === raw) return true
+  const restored = raw === null ? safeStorageRemove(KEY) : safeStorageSet(KEY, raw)
+  if (!restored.ok) return false
+  const reread = safeStorageGet(KEY)
+  return reread.ok && reread.value === raw
+}
+
+export function saveGame(data: GameData): SaveResult {
+  if (saveReadOnly) return { ok: false, reason: 'read-only', previousSavePreserved: true }
+  const oldMain = safeStorageGet(KEY)
+  const oldBak = safeStorageGet(KEY_BAK)
+  if (!oldMain.ok || !oldBak.ok) {
+    const reason = !oldMain.ok ? oldMain.reason : !oldBak.ok ? oldBak.reason : 'unavailable'
+    return { ok: false, reason, previousSavePreserved: true }
+  }
   // load専用のrecoverNarrativeOnLoadはここで呼ばない。表示中sceneを保存のたびに
   // 灯の余白へ退避してしまうため、保存時は追加schemaの正規化だけに留める。
   const withProgression = normalizeCharacterProgression(data)
   const withCollection = { ...withProgression, collectionV2: migrateCollectionV2(withProgression) }
   const withJourney = { ...withCollection, journeyMetrics: migrateJourneyMetrics(withCollection) }
-  const normalizedData: GameData = { ...withJourney, starLottery: migrateStarLottery(withJourney) }
+  const normalizedWithMetadata: GameData & { saveSeq?: number; saveFingerprint?: string } = {
+    ...withJourney,
+    starLottery: migrateStarLottery(withJourney),
+  }
+  // load後のobjectには永続層だけの検証metadataが残っている。次のpayloadへ旧fingerprintを
+  // 混ぜると、再読込照合時に「fingerprintを除いた本文」と一致せず、正常な進行を旧mainへ
+  // rollbackしてしまう。game dataだけを次の署名対象にする。
+  delete normalizedWithMetadata.saveSeq
+  delete normalizedWithMetadata.saveFingerprint
+  const normalizedData: GameData = normalizedWithMetadata
   // 直前の正常セーブ(saveSeq取得+BAK候補)
-  const prev = readRaw(KEY)
+  const prev = parseRaw(oldMain.value)
   // M32修正: seqは本体だけでなくBAKの最大も上回らせる。本体破損時にseqが1へ再起動すると、
   // 残存する高seqの古いBAKが loadGame の比較で勝ち、直前に保存した正常データを恒久的に覆い隠す。
-  const prevBak = readRaw(KEY_BAK)
+  const prevBak = parseRaw(oldBak.value)
   const seq = Math.max(prev?.data.saveSeq ?? 0, prevBak?.data.saveSeq ?? 0) + 1
+  const savedAt = Date.now()
 
-  const serialize = (chronMax: number) =>
-    JSON.stringify({ ...normalizedData, chronicle: boundChronicle(normalizedData.chronicle, chronMax), lastPlayedAt: Date.now(), saveSeq: seq })
-
-  // 1世代BAK — 合算が予算超ならBAKを捨てる(救う機構がquotaの引き金にならないように)
-  if (prev) {
-    try {
-      const estimatedMain = serialize(CHRON_MAX).length
-      if (estimatedMain + prev.raw.length <= BAK_BUDGET_CHARS) {
-        localStorage.setItem(KEY_BAK, prev.raw)
-      } else {
-        localStorage.removeItem(KEY_BAK)
-      }
-    } catch {
-      // BAKの失敗は本保存を妨げない
-    }
+  const serialize = (chronMax: number): { raw: string; fingerprint: string } => {
+    const payload = JSON.stringify({
+      ...normalizedData,
+      chronicle: boundChronicle(normalizedData.chronicle, chronMax),
+      lastPlayedAt: savedAt,
+      saveSeq: seq,
+    })
+    const valueFingerprint = fingerprint(payload)
+    const parsed = JSON.parse(payload) as Persisted
+    return { raw: JSON.stringify({ ...parsed, saveFingerprint: valueFingerprint }), fingerprint: valueFingerprint }
   }
 
   // 本保存 — quota時のみ梯子(1200→600→0)。年代記の全喪失 > セーブの全喪失。
   const ladder = [CHRON_MAX, CHRON_TIGHT, 0]
   for (let i = 0; i < ladder.length; i++) {
+    let candidate: { raw: string; fingerprint: string }
     try {
-      localStorage.setItem(KEY, serialize(ladder[i]))
+      candidate = serialize(ladder[i])
+    } catch {
+      return { ok: false, reason: 'serialization', previousSavePreserved: true }
+    }
+    const write = safeStorageSet(KEY, candidate.raw)
+    if (write.ok) {
+      const persisted = safeStorageGet(KEY)
+      const parsed = persisted.ok && persisted.value !== null ? parseRaw(persisted.value) : null
+      const copy = parsed ? { ...parsed.data } : null
+      if (copy) delete copy.saveFingerprint
+      const matches = !!parsed && parsed.data.saveSeq === seq && parsed.data.saveFingerprint === candidate.fingerprint &&
+        !!copy && fingerprint(JSON.stringify(copy)) === candidate.fingerprint
+      if (!matches) {
+        const preserved = restoreMain(oldMain.value)
+        return { ok: false, reason: 'verification', previousSavePreserved: preserved }
+      }
+
+      // mainの永続化を再読込で確認してから初めてBAKを更新する。
+      if (prev) {
+        if (candidate.raw.length + prev.raw.length <= BAK_BUDGET_CHARS) safeStorageSet(KEY_BAK, prev.raw)
+        else safeStorageRemove(KEY_BAK)
+      }
       if (i === 1) warnOnce('蔵書が嵩んでいた — 古い出来事の記を畳んで保存した。')
       if (i === 2) warnOnce('記の場所が足りない — 年代記を畳んで家族だけ保存した。「セーブの管理」で控えの書き出しを勧める。')
-      return
-    } catch (e) {
-      if (!isQuotaError(e)) {
-        // stringify不能等の別種バグをquotaと誤診しない
-        console.error('saveGame failed (non-quota):', e)
-        return
-      }
+      return { ok: true, saveSeq: seq, fingerprint: candidate.fingerprint, chronicleLimit: ladder[i] }
+    }
+    if (write.reason !== 'quota') {
+      const preserved = restoreMain(oldMain.value)
+      console.error(`saveGame failed (${write.reason})`)
+      return { ok: false, reason: write.reason, previousSavePreserved: preserved }
     }
   }
   // 全段失敗(プライベートモード等の恒常失敗を含む)= 致命。軽い警告に握り潰されないよう critical で。
   warnOnce('この端末には記が保存できていない。「セーブの管理」からの書き出しで控えを残すことを強く勧める。', 'critical')
+  return { ok: false, reason: 'quota', previousSavePreserved: restoreMain(oldMain.value) }
 }
 
 // v1(季節単位)→v3(月単位): 時間軸を3倍に換算
@@ -485,16 +577,18 @@ export function loadGame(): GameData | null {
       }
     }
     // v4が無い/破損 — 旧版からの移行を試す
-    const rawV3 = localStorage.getItem(KEY_V3)
+    const rawV3Result = safeStorageGet(KEY_V3)
+    const rawV3 = rawV3Result.ok ? rawV3Result.value : null
     if (rawV3) {
       const migrated = finalizeLoaded(migrateV3(JSON.parse(rawV3) as GameData), true)
-      localStorage.removeItem(KEY_V3)
+      safeStorageRemove(KEY_V3)
       return migrated
     }
-    const rawV1 = localStorage.getItem(KEY_V1)
+    const rawV1Result = safeStorageGet(KEY_V1)
+    const rawV1 = rawV1Result.ok ? rawV1Result.value : null
     if (rawV1) {
       const migrated = finalizeLoaded(migrateV3(migrateV1(JSON.parse(rawV1) as GameData)), true)
-      localStorage.removeItem(KEY_V1)
+      safeStorageRemove(KEY_V1)
       return migrated
     }
     return null
@@ -507,25 +601,22 @@ export function loadGame(): GameData | null {
 export { migrateCodexSeen }
 
 export function hasSave(): boolean {
-  return (
-    localStorage.getItem(KEY) !== null ||
-    localStorage.getItem(KEY_BAK) !== null ||
-    localStorage.getItem(KEY_V3) !== null ||
-    localStorage.getItem(KEY_V1) !== null
-  )
+  return [KEY, KEY_BAK, KEY_V3, KEY_V1].some((key) => {
+    const stored = safeStorageGet(key)
+    return stored.ok && stored.value !== null
+  })
 }
 
-export type SaveSlotStatus = 'none' | 'ready' | 'recoverable' | 'damaged'
+export type SaveSlotStatus = 'none' | 'ready' | 'recoverable' | 'damaged' | 'unavailable'
 
 /**
  * タイトルで「続けられる記」と「存在するが読めない記」を混同しないための
  * 読み取り専用診断。ロードや移行、保存内容の書換えは行わない。
  */
 export function inspectSaveSlot(): SaveSlotStatus {
-  const rawMain = localStorage.getItem(KEY)
-  const rawBak = localStorage.getItem(KEY_BAK)
-  const rawV3 = localStorage.getItem(KEY_V3)
-  const rawV1 = localStorage.getItem(KEY_V1)
+  const reads = [KEY, KEY_BAK, KEY_V3, KEY_V1].map((key) => safeStorageGet(key))
+  if (reads.some((result) => !result.ok)) return 'unavailable'
+  const [rawMain, rawBak, rawV3, rawV1] = reads.map((result) => result.ok ? result.value : null)
   if (rawMain === null && rawBak === null && rawV3 === null && rawV1 === null) return 'none'
 
   if (readRaw(KEY)) return 'ready'
@@ -568,7 +659,9 @@ export function exportableSaveData(): GameData | null {
       const migrated = kind === 'v1' ? migrateV3(migrateV1(parsed)) : migrateV3(parsed)
       return normalizeLoadedData(migrated, migrated.lastPlayedAt ?? 0)
     }
-    return migrateLegacy(localStorage.getItem(KEY_V3), 'v3') ?? migrateLegacy(localStorage.getItem(KEY_V1), 'v1')
+    const v3 = safeStorageGet(KEY_V3)
+    const v1 = safeStorageGet(KEY_V1)
+    return migrateLegacy(v3.ok ? v3.value : null, 'v3') ?? migrateLegacy(v1.ok ? v1.value : null, 'v1')
   } catch {
     return null
   }
@@ -579,11 +672,8 @@ export function exportSaveString(): string | null {
   return candidate ? JSON.stringify(candidate) : null
 }
 
-export function clearSave(): void {
-  localStorage.removeItem(KEY)
-  localStorage.removeItem(KEY_BAK)
-  localStorage.removeItem(KEY_V3)
-  localStorage.removeItem(KEY_V1)
+export function clearSave(): boolean {
+  return [KEY, KEY_BAK, KEY_V3, KEY_V1].map((key) => safeStorageRemove(key)).every((result) => result.ok)
 }
 
 // ---- セーブのエクスポート/インポート(データ移行・バックアップ用) ----
@@ -611,13 +701,31 @@ export function downloadSave(): boolean {
 
 // JSON文字列を検証してセーブへ書き込む。成功時true。
 // M19 C3: 生setItemでなくsaveGame経路を通す(bound/BAK/saveSeq/quota梯子が全て効く=devil指摘の穴を閉じる)。
-export function importSaveString(json: string): boolean {
+export type ImportSaveResult =
+  | { ok: true; saveSeq: number; fingerprint: string }
+  | { ok: false; reason: 'invalid-json' | 'invalid-save' | SaveFailureReason; previousSavePreserved: boolean }
+
+export function importSaveStringResult(json: string): ImportSaveResult {
+  let parsed: unknown
   try {
-    const parsed = JSON.parse(json) as Partial<GameData>
-    if (!isValidSave(parsed)) return false
-    saveGame(parsed as GameData)
-    return true
+    parsed = JSON.parse(json)
   } catch {
-    return false
+    return { ok: false, reason: 'invalid-json', previousSavePreserved: true }
   }
+  if (!isValidSave(parsed)) return { ok: false, reason: 'invalid-save', previousSavePreserved: true }
+  try {
+    const result = saveGame(parsed as GameData)
+    if (!result.ok) return result
+    const persisted = readRaw(KEY)
+    if (persisted?.data.saveSeq !== result.saveSeq || persisted.data.saveFingerprint !== result.fingerprint) {
+      return { ok: false, reason: 'verification', previousSavePreserved: false }
+    }
+    return { ok: true, saveSeq: result.saveSeq, fingerprint: result.fingerprint }
+  } catch {
+    return { ok: false, reason: 'serialization', previousSavePreserved: true }
+  }
+}
+
+export function importSaveString(json: string): boolean {
+  return importSaveStringResult(json).ok
 }

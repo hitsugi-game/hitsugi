@@ -5,7 +5,7 @@ import { skillById } from '../src/core/data/skills'
 import { ageOf } from '../src/core/inheritance'
 import { exportJourneyMetrics, journeyQaSummary, markJourneyMilestone, summarizeCampaignRuns } from '../src/core/journey_metrics'
 import { Rng } from '../src/core/rng'
-import { useGame } from '../src/core/store'
+import { LANTERN_TENDING_COST, LANTERN_TENDING_RATIO, useGame } from '../src/core/store'
 import type { BattleAction, BattleState, Character } from '../src/core/types'
 import { levelCap } from '../src/core/character_progression'
 
@@ -79,7 +79,7 @@ function safeParty(): string[] {
   return field.slice(0, 4).map((char) => char.id)
 }
 
-function restUntilReady(maxMonths = 8): number {
+function restUntilReady(maxMonths = 8, onRest: () => void = () => undefined): number {
   const started = useGame.getState().data!.seasonIndex
   for (let i = 0; i < maxMonths; i += 1) {
     const data = useGame.getState().data!
@@ -87,6 +87,7 @@ function restUntilReady(maxMonths = 8): number {
     const ready = adults(data.family, data.seasonIndex)
     if (ready.length > 0 && ready.every((char) => char.hp === char.maxHp)) break
     useGame.getState().doRest()
+    onRest()
     settleNarrative()
     assignAvailableRites()
   }
@@ -107,10 +108,16 @@ function tryKeepLineage() {
   }
 }
 
-function runEncounter(regionId: string, boss: boolean, partyOverride?: string[]) {
+function runEncounter(
+  regionId: string,
+  boss: boolean,
+  partyOverride?: string[],
+  beforeDepart: (party: string[]) => void = () => undefined,
+) {
   assignAvailableRites()
   const party = partyOverride ?? safeParty()
   if (party.length === 0) return null
+  beforeDepart(party)
   useGame.getState().departDungeon(regionId, party)
   useGame.getState().chooseBoon(null)
   useGame.getState().dungeonEncounter(boss)
@@ -132,7 +139,7 @@ function runEncounter(regionId: string, boss: boolean, partyOverride?: string[])
  * 新規saveから初ボス、寿命死・継承を経て最終地域まで実際の戦闘処理を通すQA policy。
  * 勝敗や戦利品は一切代入せず、storeの探索・戦闘・帰還結果だけを集計する。
  */
-function simulateCampaign(seed: number) {
+function simulateCampaign(seed: number, lanternPilot = false) {
   const random = vi.spyOn(Math, 'random').mockReturnValue((((seed * 2654435761) >>> 0) + 1) / 0x1_0000_0000)
   const now = vi.spyOn(Date, 'now').mockReturnValue(1_800_000_000_000 + seed)
   try {
@@ -142,19 +149,39 @@ function simulateCampaign(seed: number) {
     now.mockRestore()
   }
   useGame.setState({ rng: new Rng(seed) })
+  let restUses = 0
+  let tendingUses = 0
+  // 計測前固定policy:
+  // - 最大MPの30%以上が欠けた隊員だけ
+  // - 契りに必要な奉燈100を残せる時だけ
+  // - 出立直前だけ（満タン連打、途中引直しをしない）
+  const beforeDepart = (partyIds: string[]) => {
+    if (!lanternPilot) return
+    for (const id of partyIds) {
+      const data = useGame.getState().data!
+      const member = data.family.find((character) => character.id === id && character.alive)
+      if (!member || data.hoto - LANTERN_TENDING_COST < 100) continue
+      const recovery = Math.ceil(member.maxMp * LANTERN_TENDING_RATIO)
+      if (member.maxMp - member.mp < recovery) continue
+      useGame.getState().tendLantern(id)
+      if (useGame.getState().data!.hoto === data.hoto - LANTERN_TENDING_COST) tendingUses += 1
+    }
+  }
+  const countedRest = () => { restUses += 1 }
   const founder = useGame.getState().data!.family[0]
   useGame.getState().doPact(founder.id, 'ishiusu')
   while (useGame.getState().data!.seasonIndex < 7) {
     useGame.getState().doRest()
+    countedRest()
     settleNarrative()
   }
   assignAvailableRites()
 
   // 宵の森の雑兵を実戦闘で討ち、初ボス前の奉燈と帰還導線を作る。
   for (let i = 0; i < 3 && !useGame.getState().data!.flags.extinct; i += 1) {
-    runEncounter('yoi_forest', false)
+    runEncounter('yoi_forest', false, undefined, beforeDepart)
     settleNarrative()
-    restUntilReady(2)
+    restUntilReady(2, countedRest)
   }
   const founderAfterOpeningLevel = useGame.getState().data!.family.find((character) => character.id === founder.id)?.level ?? 1
 
@@ -173,6 +200,7 @@ function simulateCampaign(seed: number) {
     const party = safeParty()
     if (party.length === 0) {
       useGame.getState().doRest()
+      countedRest()
       settleNarrative()
       continue
     }
@@ -190,10 +218,10 @@ function simulateCampaign(seed: number) {
 
     // 正規解禁後の最終戦は一人で初挑戦し、敗北→回復→全隊再挑戦を実測する。
     if (region.id === 'akashi_miyama') {
-      const probe = runEncounter(region.id, true, party.slice(0, 1))
+      const probe = runEncounter(region.id, true, party.slice(0, 1), beforeDepart)
       reachedEndgame = probe !== null
       if (probe === 'lost') {
-        defeatRecoveryMonths.push(restUntilReady())
+        defeatRecoveryMonths.push(restUntilReady(8, countedRest))
         tryKeepLineage()
         assignAvailableRites()
       }
@@ -202,15 +230,15 @@ function simulateCampaign(seed: number) {
 
     let result: ReturnType<typeof runEncounter> = null
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      result = runEncounter(region.id, true)
+      result = runEncounter(region.id, true, undefined, beforeDepart)
       settleNarrative()
       if (index === 0) reachedFirstBoss = result !== null
       if (region.id === 'akashi_miyama') reachedEndgame = result !== null
       if (result !== 'lost') {
-        restUntilReady(1)
+        restUntilReady(1, countedRest)
         break
       }
-      defeatRecoveryMonths.push(restUntilReady())
+      defeatRecoveryMonths.push(restUntilReady(8, countedRest))
       tryKeepLineage()
       assignAvailableRites()
       if (useGame.getState().data!.flags.extinct) break
@@ -221,6 +249,7 @@ function simulateCampaign(seed: number) {
   while (useGame.getState().data!.seasonIndex < 26 && !useGame.getState().data!.flags.extinct) {
     tryKeepLineage()
     useGame.getState().doRest()
+    countedRest()
     assignAvailableRites()
   }
   const end = useGame.getState().data!
@@ -250,6 +279,8 @@ function simulateCampaign(seed: number) {
     activeCapReachedCount: activeExperienced.filter((character) => character.level >= levelCap(character)).length,
     deadExperiencedCount: deadExperienced.length,
     deadExperiencedLowLevelCount: deadExperienced.filter((character) => character.level <= 2).length,
+    restUses,
+    tendingUses,
   }
 }
 
@@ -319,7 +350,42 @@ describe('M43 save-local journey metrics', () => {
 
     // 同じseedは勝敗・世代・通貨・復帰月まで完全一致する。
     expect(simulateCampaign(37)).toEqual(results[36])
+
+    // M57灯芯手入れ経済gate。閾値・policyは上のsimulateCampaign内で計測前固定。
+    // baselineと同じ100 seedを使い、価格15/30%は同時に動かさない。
+    const tendingResults = Array.from({ length: 100 }, (_, index) => simulateCampaign(index + 1, true))
+    const baselineRestUses = results.reduce((sum, run) => sum + run.restUses, 0)
+    const tendingRestUses = tendingResults.reduce((sum, run) => sum + run.restUses, 0)
+    const tendingUseCount = tendingResults.reduce((sum, run) => sum + run.tendingUses, 0)
+    const baselineCompletion = results.reduce((sum, run) => sum + run.bossRegionsCleared / run.bossRegionsTotal, 0) / results.length
+    const tendingCompletion = tendingResults.reduce((sum, run) => sum + run.bossRegionsCleared / run.bossRegionsTotal, 0) / tendingResults.length
+    const tendingHoto = tendingResults.map((run) => run.hoto).sort((a, b) => a - b)
+    const tendingGate = {
+      seeds: 100,
+      cost: LANTERN_TENDING_COST,
+      recoveryRatio: LANTERN_TENDING_RATIO,
+      progressionImpossible: tendingResults.filter((run) => !run.reachedFirstBoss || !run.reachedEndgame || !run.inherited).length,
+      extinct: tendingResults.filter((run) => run.extinct).length,
+      uses: tendingUseCount,
+      usesPerCampaignMonth: tendingUseCount / tendingResults.reduce((sum, run) => sum + run.seasons, 0),
+      restUseRatio: tendingRestUses / Math.max(1, baselineRestUses),
+      completionDelta: tendingCompletion - baselineCompletion,
+      hoto: {
+        p10: tendingHoto[Math.floor(tendingHoto.length * .1)],
+        p50: tendingHoto[Math.floor(tendingHoto.length * .5)],
+        p90: tendingHoto[Math.floor(tendingHoto.length * .9)],
+      },
+    }
+    expect(
+      tendingGate.progressionImpossible === 0
+      && tendingGate.extinct === 0
+      && tendingGate.uses > 0
+      && tendingGate.restUseRatio >= .95
+      && tendingGate.completionDelta >= -.02
+      && tendingGate.hoto.p10 >= 0,
+      JSON.stringify(tendingGate),
+    ).toBe(true)
   // Windows CI/desktopでは39地域×100 seedの実store戦闘が90秒前後まで伸びる。
-  // 内容を縮めず基準線を守るため、実測余裕を持たせる。
-  }, 120_000)
+  // M57の同seed比較で200 campaignになるため、内容を縮めず余裕を持たせる。
+  }, 300_000)
 })

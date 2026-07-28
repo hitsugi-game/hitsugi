@@ -121,6 +121,7 @@ export function ForgeScreen({ initialTab = 'buy' }: { initialTab?: Tab }) {
   const equipItem = useGame((s) => s.equipItem)
   const trainStat = useGame((s) => s.trainStat)
   const forgeUpgrade = useGame((s) => s.forgeUpgrade)
+  const toggleFrameHeirloom = useGame((s) => s.toggleFrameHeirloom)
 
   const [tab, setTab] = useState<Tab>(initialTab)
   const [charId, setCharId] = useState<string | null>(null)
@@ -344,6 +345,11 @@ export function ForgeScreen({ initialTab = 'buy' }: { initialTab?: Tab }) {
           isMobile={isMobile}
           query={search}
           onQueryChange={setSearch}
+          onToggleFrame={(itemId) => {
+            const changed = toggleFrameHeirloom(itemId)
+            emitToast(changed ? '家宝の額を整えた。' : '額装は三品まで。先に一品を額から戻してください。', changed ? 'info' : 'error')
+            return changed
+          }}
         />
       )}
 

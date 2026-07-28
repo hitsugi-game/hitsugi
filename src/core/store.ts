@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type {
   BattleLogEntry, BattleState, Character, Combatant, Element, GameData, GenerationVowId, Item, MottoId,
-  NarrativeScene, Screen, StarLotteryHistoryEntry, Stats,
+  NarrativeScene, Screen, StarLotteryHistoryEntry, StarLotteryPendingV2, StarLotteryReceiptV2, Stats,
 } from './types'
 import type { BattleAction } from './battle'
 import { consumableById } from './data/consumables'
@@ -59,7 +59,12 @@ import {
   specialShadeUsedKey, type RareEncounter,
 } from './rare_encounters'
 import { markJourneyMilestone, migrateJourneyMetrics } from './journey_metrics'
-import { drawStarLottery, migrateStarLottery } from './star_lottery'
+import {
+  claimStarLottery as claimStarLotteryData,
+  drawStarLottery,
+  migrateStarLottery,
+  openStarLottery as openStarLotteryData,
+} from './star_lottery'
 import { grantBattleXp } from './character_progression'
 import {
   createBattleRewardPlan,
@@ -70,6 +75,11 @@ import {
 
 // UIへ流す演出イベント(誕生・死亡は順に画面表示)
 type PendingScene = NarrativeScene
+
+// 郷の灯芯手入れ。静養と違って月を送らず、選んだ一人の灯力だけを整える。
+// 戦闘中にも使える灯明油(45回復/奉燈30)を食わないよう、回復効率は同程度に留める。
+export const LANTERN_TENDING_COST = 15
+export const LANTERN_TENDING_RATIO = 0.3
 
 export interface BattleRewardGrowth {
   charId: string
@@ -162,12 +172,23 @@ interface GameStore {
   setLastWords: (charId: string, words: string) => void
   designateHeir: (charId: string | null) => void
   setGenerationVow: (vowId: GenerationVowId) => void
+  toggleFrameHeirloom: (itemId: string) => boolean
   drawStarLottery: (requestId: string) => StarLotteryHistoryEntry | null
+  openStarLottery: (
+    requestId: string,
+    expectedDrawNumber: number,
+  ) => { pending: StarLotteryPendingV2 | null; reason?: string }
+  claimStarLottery: (
+    requestId: string,
+    drawNumber: number,
+    godId: string,
+  ) => { receipt: StarLotteryReceiptV2 | null; result: StarLotteryHistoryEntry | null; reason?: string }
   resolveFinale: (choiceIndex: number) => void
 
   // 店・装備・修練(季を消費しない)
   buyItem: (baseId: string) => void
   buyConsumable: (id: string) => void // M28-C: 回復薬など消耗品を買う(奉燈で。GameData.consumablesへ)
+  tendLantern: (charId: string) => void // 郷で選択中の一人のMPを回復(月消費なし)
   equipItem: (charId: string, itemId: string) => void
   trainStat: (charId: string, key: keyof GameData['family'][number]['potential']) => void
 
@@ -1410,6 +1431,27 @@ export const useGame = create<GameStore>((set, get) => {
       saveGame(get().data!)
     },
 
+    toggleFrameHeirloom: (itemId) => {
+      const data = get().data
+      if (!data) return false
+      const existing = [
+        ...data.inventory,
+        ...data.family.flatMap((character) => Object.values(character.equipment).filter((item): item is Item => !!item)),
+      ]
+      const item = existing.find((candidate) => candidate.id === itemId)
+      if (!item || (!item.legacyOf && item.generation <= 0)) return false
+      const availableIds = new Set(existing.map((candidate) => candidate.id))
+      const framed = [...new Set((data.framedHeirloomIds ?? []).filter((id) => availableIds.has(id)))]
+      const already = framed.includes(itemId)
+      if (!already && framed.length >= 3) return false
+      const next = already ? framed.filter((id) => id !== itemId) : [...framed, itemId]
+      const nd = { ...data, framedHeirloomIds: next }
+      const saved = saveGame(nd)
+      if (!saved.ok) return false
+      set({ data: nd })
+      return true
+    },
+
     drawStarLottery: (requestId) => {
       const data = get().data
       if (!data) return null
@@ -1418,6 +1460,30 @@ export const useGame = create<GameStore>((set, get) => {
       set({ data: outcome.data })
       saveGame(outcome.data)
       return outcome.result
+    },
+
+    openStarLottery: (requestId, expectedDrawNumber) => {
+      const data = get().data
+      if (!data) return { pending: null, reason: 'no_data' }
+      const outcome = openStarLotteryData(data, requestId, expectedDrawNumber, get().rng)
+      if (!outcome.pending) return { pending: null, reason: outcome.reason }
+      const saved = saveGame(outcome.data)
+      if (!saved.ok) return { pending: null, reason: `persist_${saved.reason}` }
+      set({ data: outcome.data, rng: new Rng(outcome.data.seed) })
+      return { pending: outcome.pending }
+    },
+
+    claimStarLottery: (requestId, drawNumber, godId) => {
+      const data = get().data
+      if (!data) return { receipt: null, result: null, reason: 'no_data' }
+      const outcome = claimStarLotteryData(data, requestId, drawNumber, godId)
+      if (!outcome.receipt) return { receipt: null, result: null, reason: outcome.reason }
+      if (outcome.data !== data) {
+        const saved = saveGame(outcome.data)
+        if (!saved.ok) return { receipt: null, result: null, reason: `persist_${saved.reason}` }
+        set({ data: outcome.data })
+      }
+      return { receipt: outcome.receipt, result: outcome.result }
     },
 
     // v3.1 M9(M16-2): 誕生時の命名。家譜の産声の行も新しい名で書き直す
@@ -1637,6 +1703,21 @@ export const useGame = create<GameStore>((set, get) => {
             ? stacks.map((s, i) => (i === idx ? { ...s, count: s.count + 1 } : s))
             : [...stacks, { id, count: 1 }]
         return { ...d, hoto: d.hoto - def.price, consumables: next }
+      })
+    },
+
+    tendLantern: (charId) => {
+      mutate((d) => {
+        const target = d.family.find((character) => character.id === charId)
+        if (!target?.alive || target.mp >= target.maxMp || d.hoto < LANTERN_TENDING_COST) return d
+        const restored = Math.max(1, Math.ceil(target.maxMp * LANTERN_TENDING_RATIO))
+        return {
+          ...d,
+          hoto: d.hoto - LANTERN_TENDING_COST,
+          family: d.family.map((character) => character.id === charId
+            ? { ...character, mp: Math.min(character.maxMp, character.mp + restored) }
+            : character),
+        }
       })
     },
 

@@ -47,6 +47,21 @@ test('郷: 全5幅でページ横overflowを発生させない', async ({ page }
   expect(overflow, `横overflow (${info.project.name})`).toBeLessThanOrEqual(0)
 })
 
+test('郷: 決断を見るは決断欄を可視化し、最初の実行可能な選択へfocusを渡す', async ({ page }) => {
+  await boot(page, 'home')
+  const jump = page.getByTestId('decision-jump')
+  const decisions = page.locator('#monthly-decisions')
+  const firstEnabled = decisions.locator('.action-cards button:not(:disabled)').first()
+
+  await jump.click()
+
+  await expect(decisions).toHaveClass(/is-jump-target/)
+  await expect(firstEnabled).toBeFocused({ timeout: 2_000 })
+  const top = await decisions.evaluate((node) => node.getBoundingClientRect().top)
+  expect(top).toBeGreaterThanOrEqual(0)
+  expect(top).toBeLessThanOrEqual(160)
+})
+
 test('郷: 一族小札はTab到達・Space実行・focus可視で、選択後も同じDOMとfocusを保つ', async ({ page }) => {
   await boot(page, 'home')
   await page.evaluate(() => {
@@ -71,7 +86,7 @@ test('郷: 一族小札はTab到達・Space実行・focus可視で、選択後�
   await expectVisibleKeyboardFocus(target)
   await page.keyboard.press('Space')
   await expect(target).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('.family-main > .char-card').first()).toContainText('焦点を継ぐ者')
+  await expect(page.locator('.family-detail > .char-card').first()).toContainText('焦点を継ぐ者')
   await expectVisibleKeyboardFocus(target)
   expect(await target.getAttribute('data-ar0-node-identity')).toBe('kept')
 })
@@ -110,6 +125,8 @@ test('郷: 一族小札はPC/mobileで氏名を縦割れさせず、札内に情
     const rowBox = row.getBoundingClientRect()
     const nameStyle = getComputedStyle(name)
     return {
+      selected: card.getAttribute('aria-pressed') === 'true',
+      selectedStatusVisible: (card.querySelector<HTMLElement>('.family-selected-status')?.getBoundingClientRect().height ?? 0) > 0,
       cardWidth: cardBox.width,
       headHeight: head.getBoundingClientRect().height,
       rowInsideX: rowBox.left >= cardBox.left - 1 && rowBox.right <= cardBox.right + 1,
@@ -120,7 +137,11 @@ test('郷: 一族小札はPC/mobileで氏名を縦割れさせず、札内に情
   }))
 
   for (const metric of metrics) {
-    expect(metric.cardWidth, `${info.project.name}: 小札に可読幅がある`).toBeGreaterThanOrEqual(248)
+    expect(metric.cardWidth, `${info.project.name}: 小札に可読幅がある`).toBeGreaterThanOrEqual(info.project.name.startsWith('mobile-') ? 140 : 180)
+    if (metric.selected) {
+      expect(metric.selectedStatusVisible, `${info.project.name}: 選択人物は重複要約せず表示中と示す`).toBe(true)
+      continue
+    }
     expect(metric.headHeight, `${info.project.name}: 氏名が縦一列にならない`).toBeLessThanOrEqual(44)
     expect(metric.rowInsideX, `${info.project.name}: 横方向が札内に収まる`).toBe(true)
     expect(metric.rowInsideY, `${info.project.name}: 縦方向が札内に収まる`).toBe(true)
@@ -129,6 +150,38 @@ test('郷: 一族小札はPC/mobileで氏名を縦割れさせず、札内に情
   }
   await expect(cards.nth(2)).toContainText('玄')
   await expect(cards.nth(2).locator('.portrait img')).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true)
+})
+
+test('郷: PCの一族欄は当代の記と家譜札を見開きにし、モバイルだけ縦へ戻す', async ({ page }, info) => {
+  await boot(page, 'home')
+  await page.evaluate(() => {
+    const game = (window as unknown as UiGameWindow).__game
+    const current = game.store.getState().data
+    const head = current.family[0]
+    game.store.setState({
+      data: {
+        ...current,
+        family: [
+          head,
+          { ...head, id: `${String(head.id)}__folio2`, name: '玄', isHead: false },
+          { ...head, id: `${String(head.id)}__folio3`, name: '一灯', isHead: false },
+        ],
+      },
+    })
+  })
+
+  const detail = page.locator('.family-detail')
+  const register = page.locator('.family-register')
+  const [detailBox, registerBox] = await Promise.all([detail.boundingBox(), register.boundingBox()])
+  expect(detailBox).not.toBeNull()
+  expect(registerBox).not.toBeNull()
+  if (info.project.name.startsWith('pc-')) {
+    expect(Math.abs(detailBox!.y - registerBox!.y), `${info.project.name}: 見開きの上端`).toBeLessThanOrEqual(2)
+    expect(registerBox!.x, `${info.project.name}: 家譜札は詳細の右`).toBeGreaterThan(detailBox!.x + detailBox!.width - 2)
+  } else if (info.project.name.startsWith('mobile-')) {
+    expect(registerBox!.y, `${info.project.name}: 家譜札は詳細の下`).toBeGreaterThan(detailBox!.y + detailBox!.height - 2)
+  }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true)
 })
 

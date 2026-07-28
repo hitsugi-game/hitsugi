@@ -51,9 +51,23 @@
 }
 .settings-sound-now span { color: var(--text-dim); font-size: 10px; letter-spacing: .12em; }
 .settings-sound-now strong { min-width: 0; color: var(--gold); font-size: 11px; line-height: 1.45; }
+.settings-sound-now strong small { display: block; margin-top: 2px; color: var(--text-dim); font-size: 10px; font-weight: 400; }
 .settings-mix-grid { display: grid; gap: 2px; margin: 0 0 8px; }
 .settings-mix-grid .setting-row { margin-bottom: 0; }
 .settings-mix-grid .setting-label { min-width: 44px; }
+.settings-toolbox .settings-richness-row { justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.settings-richness-row .setting-label { white-space: nowrap; }
+.settings-richness-row .setting-select {
+  min-width: 128px;
+  min-height: 44px;
+  padding: 7px 30px 7px 10px;
+  border: 1px solid rgba(201, 168, 106, 0.42);
+  border-radius: 4px;
+  background: #111421;
+  color: var(--text);
+  font: inherit;
+}
+.settings-richness-row .setting-select:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .settings-help { margin-top: 10px; border: 1px dashed rgba(201, 168, 106, 0.28); }
 .settings-help summary { min-height: 44px; display: flex; align-items: center; padding: 0 10px; color: var(--gold); cursor: pointer; }
 .settings-help summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }

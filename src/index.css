@@ -1420,23 +1420,6 @@ button {
   overflow: hidden;
 }
 .dungeon-canvas { position: absolute; inset: 0; z-index: 1; }
-.dungeon-region-backdrop {
-  position: absolute;
-  inset: -3%;
-  z-index: 0;
-  background-position: center;
-  background-size: cover;
-  filter: saturate(.72) contrast(1.08) brightness(.52);
-  transform: scale(1.04);
-}
-.dungeon-region-backdrop::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at center, rgba(8,11,19,.04) 0 28%, rgba(8,11,19,.58) 84%),
-    linear-gradient(180deg, rgba(5,7,13,.26), rgba(5,7,13,.08) 48%, rgba(5,7,13,.5));
-}
 .dungeon-hud-top {
   position: absolute; top: 8px; right: 10px; z-index: 5;
   display: flex; align-items: center; gap: 10px;

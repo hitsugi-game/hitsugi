@@ -154,4 +154,6 @@ export function installTestHooks(): void {
     },
   }
   ;(window as unknown as { __game: TestHooks }).__game = hooks
+  // productionの初期配信分割ではGameRuntimeを開始操作まで読まない。QA状態投入時だけ明示的に開く。
+  window.setTimeout(() => window.dispatchEvent(new Event('hitsugi:test-runtime-ready')), 0)
 }

@@ -4,7 +4,7 @@ interface GameWindow {
   __game: {
     reset: () => void
     store: {
-      getState: () => { data: { family: Array<{ id: string }>; flags: Record<string, unknown> } }
+      getState: () => { data: { family: Array<{ id: string }>; flags: Record<string, unknown>; narrative?: Record<string, unknown> } }
       setState: (update: unknown) => void
     }
   }
@@ -95,6 +95,37 @@ test('灯の岐路は三択の順と同格を保ち、確認後だけendingへ�
   await expect(page.locator('[data-scene-primary="true"]')).toHaveCount(1)
   await page.getByRole('button', { name: 'この答えを綴じる' }).click()
   await expect(page.locator('[data-scene-route="ending"]')).toBeVisible()
+})
+
+test('成人の儀は画面内から郷へ戻り、灯の余白から同じ儀を再開できる', async ({ page }) => {
+  await boot(page)
+  await page.evaluate(() => {
+    const game = (window as never as GameWindow).__game
+    game.reset()
+    const state = game.store.getState()
+    const charId = state.data.family[0].id
+    const scene = { kind: 'ceremony', charId }
+    game.store.setState({
+      data: { ...state.data, narrative: { ...state.data.narrative, active: scene, activeOpenedAt: Date.now() } },
+      screen: { id: 'ceremony', charId },
+    })
+  })
+
+  const back = page.getByRole('button', { name: '← 郷へ戻る' })
+  await expect(back).toBeVisible()
+  const geometry = await back.evaluate((button) => {
+    const rect = button.getBoundingClientRect()
+    return { height: rect.height, top: rect.top, bottom: rect.bottom, viewport: window.innerHeight }
+  })
+  expect(geometry.height).toBeGreaterThanOrEqual(44)
+  expect(geometry.top).toBeGreaterThanOrEqual(0)
+  expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewport)
+
+  await back.click()
+  await expect(page.locator('.home-screen')).toBeVisible()
+  await page.getByRole('button', { name: /^灯の余白/ }).click()
+  await page.getByRole('button', { name: /成人の儀 — 灯座を選ぶ/ }).click()
+  await expect(page.locator('[data-scene-route="ceremony"]')).toBeVisible()
 })
 
 test('reduced-motionでもsurfaceと選択情報を失わない', async ({ page }) => {

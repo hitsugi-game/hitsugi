@@ -32,6 +32,8 @@ public/img/*.png
 
 # playwright(実ブラウザ受入テスト M25/M26)
 /tests/visual/.artifacts/
+/tests/release/.artifacts/
+/.artifacts/
 /playwright-report/
 /test-results/
 /tests/visual/.shots/

@@ -4,6 +4,14 @@
 
 ## 直近の公開修正
 
+- **M60 統合改善（release candidate・公開待ち）**: 保存を検証付き結果へ変更し、storage拒否／破損save／root例外から復旧できる入口を追加。タイトル先行＋全route遅延読込で初期JSを74,281 gzip bytesへ削減。戦闘mobile可読性、一族1/2/4/8人grid、M57/M58、三星択一、主戦「止・受・崩」三体、三品の家宝額を統合した。音楽は23画面・地域・季節・世代・物語・戦況を10分超の決定論的変奏へ反映し、三段階の豊かさとlive変奏名を追加。探索はM54の地域ラスター取得0へ戻した。全戦闘オート、M53 battle-first、既存報酬、非FOMOを維持する。全Vitest 59 files/826、機械gate、重点5幅、production Chromium/Firefox/WebKit release smoke 15/15へ合格。独立監査P0/P1 0、blocking 0、SHIP-with-notes。main公開と公開bundle確認後に公開済みへ更新する。
+
+- **M59 残改善余地の多角監査（達成・ローカル文書・runtime未変更）**: 正典・実装・test・公開bundle・CI・配信量・既存監査をgameplay/UX/technicalの3系統で照合。P0をM58単独公開可能化、mobile核心情報、外部baseline、root/storage/save import信頼へ限定。M57はUI/layoutと灯芯手入れ経済を分け、後者を100 seed非劣化gate付きP1とした。release/性能/M55 Phase A/M56 blocking・Phase A/visual rightsも段階化した。M47〜M49とM47Bの古い未公開表記は公開実態へ同期。独立Round 1の3 blockingを限定修正し、最終closure blocking 0。正本は`docs/PRODUCT_IMPROVEMENT_BACKLOG_M59_20260728.md`。実装、commit、push、deploy、外部送信なし。
+
+- **M58 成人・生業の儀の帰郷導線（ローカル実装・未公開）**: 成人の儀と生業の儀の選択前／確認前に「← 郷へ戻る」を常設し、未決定の儀を既存の「灯の余白」へ保存して同じ人物から再開できるようにした。選択確定、月送り、人物成長は発生しない。全Vitest 54 files/793 tests、Playwright共有scene 5幅20/20、lint、data、closure69、manifest9、production buildに合格。commit/push/deployなし。
+
+- **M57 決断導線・灯芯手入れ・家譜見開き（ローカル実装・未公開）**: 「決断を見る」を上端位置＋有効カードfocus＋1.6秒の金縁応答へ修正。選択中の一人へ奉燈15で最大MP30%を戻す、月を送らない「灯芯手入れ」を追加した。一族欄はPCで当代の記／家譜札＋血脈診断の見開き、モバイルで縦組みへ再編。focused Vitest 17、Playwrightの決断PC 1/1、一族PC1280/mobile390 4/4、lint、buildに合格。commit/push/deployなし。
+
 - **M54 探索地図のmap-native化（公開済み）**: M53の探索側を再修正し、右上の水没施設画と根のラスター前景を表示だけでなく読込経路から撤去。元のTileKind地図を主役に戻し、地形内だけへ決定論的な濡れた轍、泥溜まり、水紋、小さな岸葦を追加した。探索ラスター要求0、`map-native`、texture budget 0を回帰固定。戦闘の地域背景1枚構成は維持。添付相当1782×695、PC1280/mobile390でAR1 10 pass/2 intended skip、全Vitest 789、lint/data/closure69/manifest9/buildに合格。M52は`a30b794`、M53〜M54は`b23eda0`としてmainへ公開し、Actions run `30291730297`と公開bundleのHTTP 200・`map-native`/`battle-first` markerを確認済み。
 
 - **M53 探索地図・戦闘舞台の視覚役割分離（公開済み・探索側はM54へ更新）**: 戦闘では探索用の根、祠cutout、CSS地形を重ねず、地域背景1枚＋暗幕＋戦闘札だけへ整理した。M53時点の探索用ラスター端景は実画面検収で撤回し、公開版ではM54の`map-native`へ更新済み。`battle-first`、地域背景1枚、旧collage要素0、横overflow 0をPC/mobile回帰で固定した。実装`b23eda0`、Actions run `30291730297`でPages公開成功。
@@ -18,9 +26,9 @@
 
 - **M50 適応型音楽・一族人物表示（公開済み）**: 全23画面を11曲へ割り当て、通常/稀相/主戦、戦況tension、家祖ID由来の血脈三音、句構成、crossfade、重要SE duckを実装。music/effects/ambience bus、4音量、消音、起伏控えめ、gesture unlock、非表示停止/復帰を追加し、旧地域環境音は0.38秒fade後に切断する。一族小札は横送り不要のgridへ変更し、玄を含む灯形未決定の幼子は既存人物顔を仮肖像として表示する。新規音源/画像0、save/戦闘計算/報酬/全戦闘オート不変。focused Vitest 12、Playwright PC/mobile 14、全Vitest 765、lint/data/build/closure69/manifest9、npm audit 0、独立/security監査blocking 0。実装`6c8d2a5`、Actions run `30128251561`でPages公開成功。公開HTML/JS/CSSと人物顔をHTTP 200で確認。`face_*`の生成モデル系譜は既存未確認gateを継承し、権利確認済みとは扱わない。
 
-- **M47 郷の薬種見世・戦支度盤（ローカル実装・未公開）**: 郷の「すぐ行く」と豆腐屋から、既存回復薬を月消費なしで直接購入できる薬種見世を追加。所持・効果・価格・武功解禁・不足を一画面に集約し、共通Sheetの外側click/Escape/focus復帰を維持。PC戦闘盤は最大1180pxで中央寄せし、手番者の顔、各行動の目的、敵勢/広域兆し/携行薬、薬切れ補充案内を追加した。戦闘計算・全戦闘オート・報酬・save schemaは不変。lint/data/build/visual closure/manifest/Vitest全750件と、実ブラウザPC1280/mobile390の購入・幅・overflow確認に合格。commit/push/deployなし。
-- **M48 戦果後の戦況ログと固定継続CTA（ローカル実装・未公開）**: 勝敗画面の左側に既存戦闘ログの直近8行を残し、右側を結果本文のスクロール領域と独立CTAへ分離。`夜藪に、僅かな静けさが戻った。`を含む戦況の記憶を結果確認中も保持し、`戦果を携えて進む`は本文をスクロールせず押せる構造にした。M47の戦闘計算・報酬精算・全戦闘オートは不変。lint/data/build/visual closure/manifest/Vitestと実ブラウザPC/mobile確認後にpush/deploy予定。
-- **M49 今月の決断ジャンプ（ローカル実装・未公開）**: Home上部の「決断を見る」に移動先`monthly-decisions`を付与し、スクロール後に最初の有効な決断カードへフォーカスを渡す。固定ヘッダーに隠れないscroll marginとM49 contract testを追加。決断処理そのものは不変。
+- **M47 郷の薬種見世・戦支度盤（公開済み・M59文書同期）**: 郷の「すぐ行く」と豆腐屋から、既存回復薬を月消費なしで直接購入できる薬種見世を追加。所持・効果・価格・武功解禁・不足を一画面に集約し、共通Sheetの外側click/Escape/focus復帰を維持。PC戦闘盤は最大1180pxで中央寄せし、手番者の顔、各行動の目的、敵勢/広域兆し/携行薬、薬切れ補充案内を追加した。実装`27c4e91`は現行`origin/main`の祖先で、公開bundleの「薬種見世」を2026-07-28に再確認した。
+- **M48 戦果後の戦況ログと固定継続CTA（公開済み・M59文書同期）**: 勝敗画面の左側に既存戦闘ログの直近8行を残し、右側を結果本文のスクロール領域と独立CTAへ分離。`夜藪に、僅かな静けさが戻った。`を含む戦況の記憶を結果確認中も保持し、`戦果を携えて進む`は本文をスクロールせず押せる構造にした。実装`11cf246`は現行`origin/main`の祖先で、公開bundleの継続CTAを2026-07-28に再確認した。
+- **M49 今月の決断ジャンプ（公開済み・M59文書同期）**: Home上部の「決断を見る」に移動先`monthly-decisions`を付与し、スクロール後に最初の有効な決断カードへフォーカスを渡す。実装`6c4b6b5`は現行`origin/main`の祖先で、公開bundleのmarkerを2026-07-28に再確認した。M57の追加応答はローカル未公開のまま分離する。
 
 - **M46 資質連動level・戦果見立て（公開済み）**: Lv1現行互換の加算熟達、資質score上限8〜12、旧save冪等移行、全戦闘オート同報酬をruntime/save/UIへ実装。架空slotを同じreward plan由来の確定戦果・候補敵種ごと4%・携行/即時表示へ置換し、`planned → settled → continued`で二重付与を防止。XP tier係数は3→5の単一調整後、開幕/生涯level分布も合格。Vitest 746、PC/mobile M46 4/4＋既存戦闘/稀相4/4、独立監査PASS / blocking 0。実装`d9f9ac8`、Actions run `30058466579`でPages公開成功。公開bundle `index-CEUkgKbm.js`のM46 markerとHTTP 200を確認。
 
@@ -28,7 +36,7 @@
 
 ## ローカル計画・未実装
 
-- **M56 星籤「三星択一」・主戦精密化（Forge強化公開・停滞・runtime未実装）**: 一籤一救済、10回保証優先、open時reward snapshot、単調drawNumber冪等性、確定主兆し、tier3主11体のID/周期/強手/対処値、4 policy測定式まで正本を強化。Round 1の6 ID中5件は独立CLOSEDだが、計測oracleが2ラウンド連続未解消となりForge停止条件へ到達した。残りはauto三方針と危険手の集約、stop閾値の単一化、claim save-first、rescue validatorの4件。正本・状態を`32c1389`としてmainへ公開し、Actions run `30311235233`と公開bundleのHTTP 200・commit markerを確認済み。Forge未合格でruntime/save/UIは未変更。状態は`docs/CODEX_FORGE_STATE.md`。
+- **M56 星籤「三星択一」・主戦精密化（設計Forgeの履歴・runtimeはM60で実装）**: 一籤一救済、10回保証優先、open時reward snapshot、単調drawNumber冪等性、確定主兆し、tier3主11体のID/周期/強手/対処値、4 policy測定式まで正本を強化した。当時は計測oracle、auto三方針、stop閾値、claim save-first、rescue validatorを閉じられずruntime未変更で停止したが、M60で4 IDを独立appendixへ分離して閉鎖し、三星択一と主戦三体pilotをruntime/save/UIへ実装した。元設計の公開commitは`32c1389`、実装状態は本書M60行と`docs/CODEX_MISSION_STATE.md`を正とする。
 
 - **M55 探索体験強化「灯跡の夜藪」（設計公開・runtime未実装）**: M54の画像0枚・map-nativeを維持し、地図5状態、時間尺度別loop、歩行反応、距離別POI、宝/稀相/主の非漏洩兆し、4地域pilot、発見checkpoint、固定性能profile、13名の観察oracleを正本化。Round 1の4 blockingを限定修正し、別評価者のRound 2でA/B/C/D/E=`4/5/5/5/4`、4 ID CLOSED、blocking 0。正本`docs/DUNGEON_EXPLORATION_APPEAL_FORGE_20260728.md`は`842faf0`で公開済みだが、runtime・素材・saveは未変更。実装開始時はPhase Aだけを先行する。
 
@@ -110,7 +118,7 @@
 ## 既知の残タスク(次期候補)
 
 - **M43外部gate**: 初見8名、一世代5名、低性能物理端末で初回30分・初継承・魅力を検証する。local milestoneの外部送信は未実装。
-- **公開品質**: Dungeon checkpointの公開反映（ローカル実装済み）、root Error Boundary、PR preview/main保護/browser smoke、実機performance gate。
+- **公開品質**: Dungeon checkpointはM47Bとして公開済み。残りはroot Error Boundary、storage拒否fallback、save import実書込み確認、PR preview/main保護/browser smoke、実機performance gate。
 - **量産境界**: promptEn・画像工場・神/敵/地域追加は完了履歴として保持し、M42の実ユーザーgateを閉じるまで再開しない。
 
 ## 開発メモ

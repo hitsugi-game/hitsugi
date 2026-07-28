@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 const audio = readFileSync('src/core/audio.ts', 'utf8')
-const app = readFileSync('src/App.tsx', 'utf8')
+const app = readFileSync('src/GameRuntime.tsx', 'utf8')
 const settings = readFileSync('src/ui/Settings.tsx', 'utf8')
 const homeCss = readFileSync('src/ui/m17_home.css', 'utf8')
 const components = readFileSync('src/ui/components.tsx', 'utf8')
@@ -38,6 +38,20 @@ describe('M50 audio lifecycle and UI contracts', () => {
     }
     expect(settings).toContain('音楽の起伏を控えめに')
     expect(settings).toContain('今の調べ')
+  })
+
+  it('exposes the M60 richness and visible variation contracts without adding a scheduler', () => {
+    expect(settings).toContain('id="setting-music-richness"')
+    expect(settings).toContain('audio.currentTrackVariantLabel')
+    expect(settings).toContain('useSyncExternalStore')
+    expect(settings).toContain('audio.subscribeNowPlaying')
+    expect(audio).toContain('this.emitNowPlaying()')
+    expect(audio).toContain("richness: 'hitsugi_audio_richness'")
+    expect(audio).toContain('phrasePlanAt(this.activeTrack, phrase')
+    expect(audio).toContain('evolvedLineageMotif(this.founderId')
+    expect(audio).toContain('disconnectTimers = new Map<number, AudioNode>()')
+    expect(app).toContain('audio.setSceneContext({')
+    expect(app).toContain('narrativeStage: data?.narrative?.stage')
   })
 
   it('lays every family card out without a horizontal slider and uses a human portrait before coming of age', () => {

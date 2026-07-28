@@ -3,7 +3,7 @@
 //  (2) 消耗品入りセーブ load→save→load で安定(旧セーブ互換の optional フィールド)
 //  (3) 戦闘で道具→HP回復し在庫が1減る / 在庫0では使えない(ターンを消費しない)
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useGame } from '../src/core/store'
+import { LANTERN_TENDING_COST, LANTERN_TENDING_RATIO, useGame } from '../src/core/store'
 import { saveGame, loadGame } from '../src/core/save'
 import { consumableById, CONSUMABLES } from '../src/core/data/consumables'
 
@@ -26,6 +26,54 @@ beforeEach(() => {
 })
 
 describe('M28-C 回復薬(消耗品)', () => {
+  it('郷の灯芯手入れは月を送らず、選んだ一人のMPだけを回復する', () => {
+    const initial = useGame.getState().data!
+    const target = initial.family[0]
+    const other = initial.family[1]
+    const targetMp = 0
+    const otherMp = other ? Math.max(0, other.mp - 1) : undefined
+    useGame.setState({
+      data: {
+        ...initial,
+        hoto: 100,
+        family: initial.family.map((character) => character.id === target.id
+          ? { ...character, mp: targetMp }
+          : other && character.id === other.id ? { ...character, mp: otherMp! } : character),
+      },
+    })
+
+    useGame.getState().tendLantern(target.id)
+
+    const after = useGame.getState().data!
+    const tended = after.family.find((character) => character.id === target.id)!
+    expect(tended.mp).toBe(Math.ceil(target.maxMp * LANTERN_TENDING_RATIO))
+    expect(after.hoto).toBe(100 - LANTERN_TENDING_COST)
+    expect(after.seasonIndex).toBe(initial.seasonIndex)
+    if (other) expect(after.family.find((character) => character.id === other.id)!.mp).toBe(otherMp)
+  })
+
+  it('灯力満タンまたは奉燈不足では灯芯手入れの対価を取らない', () => {
+    const initial = useGame.getState().data!
+    const target = initial.family[0]
+    useGame.setState({ data: { ...initial, hoto: 100 } })
+    useGame.getState().tendLantern(target.id)
+    expect(useGame.getState().data!.hoto).toBe(100)
+
+    useGame.setState({
+      data: {
+        ...useGame.getState().data!,
+        hoto: LANTERN_TENDING_COST - 1,
+        family: useGame.getState().data!.family.map((character) => character.id === target.id
+          ? { ...character, mp: 0 }
+          : character),
+      },
+    })
+    useGame.getState().tendLantern(target.id)
+    const after = useGame.getState().data!
+    expect(after.hoto).toBe(LANTERN_TENDING_COST - 1)
+    expect(after.family.find((character) => character.id === target.id)!.mp).toBe(0)
+  })
+
   it('購入で在庫が増え奉燈が減る / equipment・inventoryには入らない(devil)', () => {
     const g = useGame.getState()
     useGame.setState({ data: { ...g.data!, hoto: 1000, consumables: [] } }) // 初期備えを空にして純増を測る

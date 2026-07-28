@@ -8,6 +8,13 @@ import { voiceFor } from './data/voices'
 import { tomoshigataById } from './data/toza'
 import { jobById } from './data/jobs'
 import { enemyBehaviorStep, upcomingEnemyBehaviorCue } from './enemy_behaviors'
+import {
+  bossActionFor,
+  initialBossMechanic,
+  recordBossCounterDamage,
+  settleBossStrong,
+  syncBossMechanic,
+} from './boss_mechanics'
 
 // ---- コンバータント生成 ----
 export function combatantFromChar(c: Character, row: 'front' | 'back'): Combatant {
@@ -113,6 +120,7 @@ export function startBattle(party: Combatant[], enemies: Combatant[]): BattleSta
     phase: 'input',
     chain: 0,
     leaderKey: leader?.key,
+    bossMechanic: initialBossMechanic(enemies),
   }
   return { ...st, order: computeOrder(st) }
 }
@@ -189,6 +197,12 @@ export function performAction(st0: BattleState, actorKey: string, action: Battle
       allies: st.allies.map((c) => (c.key === key ? fn(c) : c)),
       enemies: st.enemies.map((c) => (c.key === key ? fn(c) : c)),
     }
+  }
+
+  // 防御は「巡の末」ではなく、構えた本人が次に別の行動を始めるまで有効。
+  // 素早い敵が次巡の先頭で強手を放つ場合でも、直前に遅い味方が選んだ防御を失わせない。
+  if (action.type !== 'guard' && actor.guard) {
+    updateCombatant(actorKey, (c) => ({ ...c, guard: false }))
   }
 
   if (action.type === 'guard') {
@@ -299,6 +313,9 @@ export function performAction(st0: BattleState, actorKey: string, action: Battle
           'dmg',
           { actorKey: actor.key, targetKey: t.key, amount: final, element: el, crit, weak: em > 1 },
         )
+        if (actor.isAlly && !t.isAlly) {
+          st = recordBossCounterDamage(st, t.key, Math.min(beforeHp, final), !!skill && em > 1)
+        }
         // M43「崩す」: 危険な構えへ弱点属性の技を当てた時だけ、次の二巡の敵火力を落とす。
         // Combatantへ永続項目を増やさず、既存のturn付き攻撃補正を負値で再利用する。
         // 通常攻撃では発動しないため、兆しを読んで技を選ぶ意味が残る。
@@ -308,7 +325,11 @@ export function performAction(st0: BattleState, actorKey: string, action: Battle
           if (liveTarget && liveTarget.hp > 0) {
             updateCombatant(t.key, (c) => ({
               ...c,
-              buffs: { ...c.buffs, atkUp: 2, atkMag: Math.min(c.buffs.atkMag ?? 0, -0.35) },
+              buffs: {
+                ...c.buffs,
+                atkUp: 2,
+                atkMag: Math.min(c.buffs.atkMag ?? 0, breakCue.certainty === 'committed' ? -0.3 : -0.35),
+              },
             }))
             push(`${t.name}の構えを崩した! 次の強手が鈍る。`, 'chain', {
               actorKey: actor.key, targetKey: t.key, element: el, weak: true,
@@ -396,6 +417,7 @@ export function performAction(st0: BattleState, actorKey: string, action: Battle
     }
   }
 
+  if (!actor.isAlly) st = settleBossStrong(st, actorKey)
   return endOfAction(st, entries, rng)
 }
 
@@ -430,13 +452,12 @@ function endOfAction(st0: BattleState, entries: BattleLogEntry[], rng?: Rng): Ac
   if (idx >= order.length) {
     idx = 0
     turn += 1
-    // ターン終了処理: ガード解除・バフ減衰
+    // ターン終了処理: バフ減衰。ガードは本人の次行動開始まで維持する。
     const decay = (c: Combatant): Combatant => {
       const atkAlive = !!c.buffs.atkUp && c.buffs.atkUp > 1
       const defAlive = !!c.buffs.defUp && c.buffs.defUp > 1
       return {
         ...c,
-        guard: false,
         buffs: {
           atkUp: atkAlive ? c.buffs.atkUp! - 1 : undefined,
           defUp: defAlive ? c.buffs.defUp! - 1 : undefined,
@@ -460,7 +481,7 @@ function endOfAction(st0: BattleState, entries: BattleLogEntry[], rng?: Rng): Ac
       return endOfAction({ ...st, orderIndex: order.length - 1 }, entries, rng)
     }
   }
-  return { state: { ...st, orderIndex: idx, turn, order }, entries }
+  return { state: syncBossMechanic({ ...st, orderIndex: idx, turn, order }), entries }
 }
 
 // 敵AI: 序盤12種は読める2〜3手の文法、それ以外は従来の確率AI。
@@ -470,6 +491,13 @@ export function enemyAction(st: BattleState, actor: Combatant, rng: Rng): Battle
   const alive = st.allies.filter((c) => c.hp > 0)
   if (alive.length === 0) return { type: 'guard' }
   const front = alive.filter((c) => c.row === 'front')
+  const bossAction = bossActionFor(st, actor)
+  if (bossAction) {
+    const target = rng.pick(bossAction.type === 'attack' && front.length > 0 ? front : alive)
+    return bossAction.type === 'skill'
+      ? { type: 'skill', skillId: bossAction.skillId, targetKey: target.key }
+      : { type: 'attack', targetKey: target.key }
+  }
   const behaviorStep = enemyBehaviorStep(actor.enemyId, st.turn)
   if (behaviorStep) {
     const behaviorTargets = behaviorStep.target === '前列ひとり' && front.length > 0 ? front : alive

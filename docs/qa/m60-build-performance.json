@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 2,
+  "buildFingerprint": "429c5d090a5620d6701a85f288d63b6f721740e707fa8d68a6b8d62d7247c3e7",
+  "entry": {
+    "path": "assets/index-DEofh_AK.js",
+    "bytes": 233330,
+    "gzipBytes": 73859
+  },
+  "initialTransfer": {
+    "js": [
+      {
+        "path": "assets/index-DEofh_AK.js",
+        "bytes": 233330,
+        "gzipBytes": 73859
+      },
+      {
+        "path": "assets/rolldown-runtime-QTnfLwEv.js",
+        "bytes": 694,
+        "gzipBytes": 422
+      }
+    ],
+    "jsGzipBytes": 74281,
+    "css": [
+      {
+        "path": "assets/index-D5JlTZB9.css",
+        "bytes": 97376,
+        "gzipBytes": 21115
+      }
+    ],
+    "cssGzipBytes": 21115
+  },
+  "totals": {
+    "files": 2881,
+    "bytes": 255926975,
+    "jsBytes": 2249241,
+    "jsGzipBytes": 695842,
+    "cssBytes": 256524,
+    "cssGzipBytes": 62784
+  },
+  "budget": {
+    "initialEntryJsGzip": {
+      "targetBytes": 256000,
+      "baselineBytes": 74134,
+      "hardCeilingBytes": 256000,
+      "stage": "target-enforced",
+      "note": "M60: initial HTML module entry plus modulepreload closure. Save/store/routes load only after their user-visible boundary."
+    },
+    "totalCssGzip": {
+      "targetBytes": 65536,
+      "baselineBytes": 62799,
+      "hardCeilingBytes": 65536,
+      "stage": "target-enforced"
+    },
+    "totalDistBytes": {
+      "targetBytes": 220000000,
+      "baselineBytes": 255926255,
+      "hardCeilingBytes": 260000000,
+      "stage": "regression-only",
+      "note": "Large visual library is not an initial-transfer budget; request allowlists and physical-device telemetry remain separate gates."
+    }
+  },
+  "targetStatus": "met",
+  "files": [
+    {
+      "path": "assets/Battle-DvpRw0qC.js",
+      "bytes": 51236,
+      "gzipBytes": 15926
+    },
+    {
+      "path": "assets/Battle-gxSasrMt.css",
+      "bytes": 42345,
+      "gzipBytes": 9509
+    },
+    {
+      "path": "assets/browserAll-CAtAOSa0.js",
+      "bytes": 230,
+      "gzipBytes": 174
+    },
+    {
+      "path": "assets/BufferResource-Cm52vgg2.js",
+      "bytes": 10564,
+      "gzipBytes": 2801
+    },
+    {
+      "path": "assets/Cache-D1QM-wNu.js",
+      "bytes": 1098,
+      "gzipBytes": 555
+    },
+    {
+      "path": "assets/CanvasPool-IMTNFc5L.js",
+      "bytes": 756,
+      "gzipBytes": 426
+    },
+    {
+      "path": "assets/canvasUtils-DP9fnD9n.js",
+      "bytes": 6020,
+      "gzipBytes": 2022
+    },
+    {
+      "path": "assets/Chronicle-BY0OnanO.css",
+      "bytes": 5401,
+      "gzipBytes": 1717
+    },
+    {
+      "path": "assets/Chronicle-CqmU62pl.js",
+      "bytes": 13399,
+      "gzipBytes": 4440
+    },
+    {
+      "path": "assets/Codex-BcdnRQEZ.css",
+      "bytes": 6167,
+      "gzipBytes": 1917
+    },
+    {
+      "path": "assets/Codex-CJGqqTFi.js",
+      "bytes": 11312,
+      "gzipBytes": 3843
+    },
+    {
+      "path": "assets/components-Ba-wb_q-.js",
+      "bytes": 7145,
+      "gzipBytes": 2793
+    },
+    {
+      "path": "assets/Dungeon-CFb8mFi6.css",
+      "bytes": 8606,
+      "gzipBytes": 2374
+    },
+    {
+      "path": "assets/Dungeon-DuakH2PG.js",
+      "bytes": 114591,
+      "gzipBytes": 38941
+    },
+    {
+      "path": "assets/Expedition-BdauJrAg.js",
+      "bytes": 23534,
+      "gzipBytes": 7853
+    },
+    {
+      "path": "assets/Expedition-UZu5U448.css",
+      "bytes": 15831,
+      "gzipBytes": 3683
+    },
+    {
+      "path": "assets/Facilities-B-HN0gsy.js",
+      "bytes": 6928,
+      "gzipBytes": 2441
+    },
+    {
+      "path": "assets/Facilities-BXAivYAx.css",
+      "bytes": 8766,
+      "gzipBytes": 2417
+    },
+    {
+      "path": "assets/FamilyTree-B1A9kX9B.js",
+      "bytes": 5998,
+      "gzipBytes": 2602
+    },
+    {
+      "path": "assets/FamilyTree-BGX1tToJ.css",
+      "bytes": 4044,
+      "gzipBytes": 1338
+    },
+    {
+      "path": "assets/Filter-OuKfGrLY.js",
+      "bytes": 38750,
+      "gzipBytes": 10987
+    },
+    {
+      "path": "assets/Forge-B34Uhf35.js",
+      "bytes": 39699,
+      "gzipBytes": 12821
+    },
+    {
+      "path": "assets/Forge-Dmjpm5K1.css",
+      "bytes": 14928,
+      "gzipBytes": 3619
+    },
+    {
+      "path": "assets/GameRuntime-842P8vZN.js",
+      "bytes": 18932,
+      "gzipBytes": 6356
+    },
+    {
+      "path": "assets/GameRuntime-UjX3xvds.css",
+      "bytes": 3026,
+      "gzipBytes": 970
+    },
+    {
+      "path": "assets/GCManagedHash-b-QiKDKp.js",
+      "bytes": 26700,
+      "gzipBytes": 9296
+    },
+    {
+      "path": "assets/Geometry-DUvGI1VU.js",
+      "bytes": 62515,
+      "gzipBytes": 20322
+    },
+    {
+      "path": "assets/getTextureBatchBindGroup-CBTZ-juL.js",
+      "bytes": 342,
+      "gzipBytes": 268
+    },
+    {
+      "path": "assets/GodArtFallback-CQAEt7Ko.js",
+      "bytes": 1095,
+      "gzipBytes": 595
+    },
+    {
+      "path": "assets/GraphicsContext-CEDaUnm3.js",
+      "bytes": 53767,
+      "gzipBytes": 17272
+    },
+    {
+      "path": "assets/Home-CvSr23nS.js",
+      "bytes": 36578,
+      "gzipBytes": 12871
+    },
+    {
+      "path": "assets/Home-ULpRF8BF.css",
+      "bytes": 5237,
+      "gzipBytes": 1692
+    },
+    {
+      "path": "assets/img-B9BtSma2.js",
+      "bytes": 1660,
+      "gzipBytes": 750
+    },
+    {
+      "path": "assets/index-D5JlTZB9.css",
+      "bytes": 97376,
+      "gzipBytes": 21115
+    },
+    {
+      "path": "assets/index-DEofh_AK.js",
+      "bytes": 233330,
+      "gzipBytes": 73859
+    },
+    {
+      "path": "assets/init-BndRz0hm.js",
+      "bytes": 115,
+      "gzipBytes": 111
+    },
+    {
+      "path": "assets/lib-BV4l6NQ8.js",
+      "bytes": 291943,
+      "gzipBytes": 82639
+    },
+    {
+      "path": "assets/m17_home-DfcAMjb_.css",
+      "bytes": 13656,
+      "gzipBytes": 3334
+    },
+    {
+      "path": "assets/Pact-6QyzEUEP.css",
+      "bytes": 4991,
+      "gzipBytes": 1593
+    },
+    {
+      "path": "assets/Pact-DKlvQYzk.js",
+      "bytes": 13117,
+      "gzipBytes": 4881
+    },
+    {
+      "path": "assets/RenderTargetSystem-DCi4LZjZ.js",
+      "bytes": 51767,
+      "gzipBytes": 14352
+    },
+    {
+      "path": "assets/rolldown-runtime-QTnfLwEv.js",
+      "bytes": 694,
+      "gzipBytes": 422
+    },
+    {
+      "path": "assets/save-CDOiqXn6.js",
+      "bytes": 434713,
+      "gzipBytes": 113849
+    },
+    {
+      "path": "assets/Scenes-BrdjUiBA.js",
+      "bytes": 29026,
+      "gzipBytes": 9766
+    },
+    {
+      "path": "assets/Scenes-C4rYnr60.css",
+      "bytes": 8430,
+      "gzipBytes": 2363
+    },
+    {
+      "path": "assets/shareCard-DR6x2W43.js",
+      "bytes": 4821,
+      "gzipBytes": 2227
+    },
+    {
+      "path": "assets/shell-CezpnWAU.css",
+      "bytes": 1891,
+      "gzipBytes": 828
+    },
+    {
+      "path": "assets/shell-ogoKPwtL.js",
+      "bytes": 6014,
+      "gzipBytes": 2386
+    },
+    {
+      "path": "assets/StarLottery-C2WXDC7K.css",
+      "bytes": 6724,
+      "gzipBytes": 1696
+    },
+    {
+      "path": "assets/StarLottery-D1GobGxk.js",
+      "bytes": 9746,
+      "gzipBytes": 3448
+    },
+    {
+      "path": "assets/store-t6FxggBf.js",
+      "bytes": 588128,
+      "gzipBytes": 192166
+    },
+    {
+      "path": "assets/Village-B2CgKcOh.js",
+      "bytes": 47387,
+      "gzipBytes": 16780
+    },
+    {
+      "path": "assets/Village-C-pJ3fN7.css",
+      "bytes": 9105,
+      "gzipBytes": 2619
+    },
+    {
+      "path": "assets/villagers-5i7fwA2U.js",
+      "bytes": 5538,
+      "gzipBytes": 2538
+    },
+    {
+      "path": "assets/webworkerAll-Fe_OmI2F.js",
+      "bytes": 53,
+      "gzipBytes": 63
+    }
+  ]
+}

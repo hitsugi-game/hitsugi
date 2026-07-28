@@ -107,16 +107,23 @@
 
 /* ==== M18 P2: 郷ホーム再設計(血脈診断/推奨/帳/アンカー/月送り確認) ==== */
 
-/* 一族欄二面化 — 左=大札+小札 / 右=血脈診断 */
-.family-board { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(220px, 1fr); gap: 14px; align-items: start; min-width: 0; }
-.family-main { min-width: 0; }
+/* 一族欄二面化 — 左=当代の記 / 右=家譜札+血脈診断。PCでは見開き、狭幅だけ縦組み。 */
+.family-board { display: grid; grid-template-columns: minmax(330px, .95fr) minmax(300px, 1.05fr); gap: 14px; align-items: start; min-width: 0; }
+.family-detail, .family-register { min-width: 0; }
+.family-register { display: grid; gap: 10px; }
+.family-folio-heading {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin: 0 2px 6px; padding-bottom: 5px; border-bottom: 1px solid rgba(201, 168, 106, .22);
+}
+.family-folio-heading span { color: var(--gold); font-size: 12px; letter-spacing: .22em; }
+.family-folio-heading small { color: var(--text-dim); font-size: 12px; }
 .family-smalls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(248px, 100%), 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
   width: 100%;
   max-width: 100%;
-  margin-top: 8px;
+  margin: 0;
   overflow: visible;
   padding: 2px;
 }
@@ -125,31 +132,112 @@
   /* M41: 小札を縮小アイコンにせず、氏名・世代・八季の灯を一息で読める家譜札にする。 */
   width: 100%;
   min-width: 0;
-  min-height: 86px;
-  padding: 10px;
+  min-height: 78px;
+  overflow: hidden;
+  padding: 8px;
   text-align: left;
 }
-.family-smalls .char-card-row { align-items: center; gap: 10px; }
+.family-selected-status { display: none; }
+.family-smalls .char-card.selected .char-card-row { display: none; }
+.family-smalls .char-card.selected .family-selected-status {
+  display: grid;
+  place-content: center;
+  gap: 3px;
+  min-height: 60px;
+  text-align: center;
+}
+.family-selected-status b { color: var(--gold); font-size: 12px; letter-spacing: .12em; }
+.family-selected-status span { color: var(--text); font-size: 12px; }
+.family-smalls .char-card-row { align-items: center; gap: 7px; }
 .family-smalls .char-head {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
   align-items: start;
-  gap: 6px;
+  gap: 2px 6px;
 }
+.family-smalls .char-head .element-badge { grid-column: 1; grid-row: 2; justify-self: start; }
 .home-screen .family-smalls .char-name {
+  grid-column: 1 / -1;
+  grid-row: 1;
   min-width: 0;
   font-size: 14px;
   line-height: 1.35;
   letter-spacing: 0.06em;
   overflow-wrap: normal;
   word-break: keep-all;
+  white-space: nowrap;
 }
-.family-smalls .char-gen { margin-left: 0; white-space: nowrap; }
-.family-smalls .head-mark { display: inline-block; margin-right: 4px; }
-.family-smalls .life-flames { max-width: 100%; white-space: nowrap; }
+.family-smalls .char-gen { grid-column: 2; grid-row: 2; margin-left: 0; white-space: nowrap; }
+.family-smalls .head-mark { display: inline-block; margin-right: 4px; font-size: 12px; }
+.family-smalls .life-flames { max-width: 100%; gap: 1px; font-size: 12px; white-space: nowrap; }
+.family-smalls .life-months { margin-left: 3px; font-size: 12px; }
 .family-smalls .child-note { line-height: 1.4; }
+.home-screen .family-smalls .m46-level-line,
+.home-screen .family-smalls .m46-aptitude-tag { font-size: 12px; }
 .family-smalls .char-card:focus-visible { scroll-margin-block: 8px; }
-@media (max-width: 640px) { .family-board { grid-template-columns: 1fr; } }
+.family-mp-care {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  margin-top: 9px; padding: 9px 10px; border: 1px solid rgba(201, 168, 106, .25);
+  border-left: 2px solid var(--el-moon); background: rgba(12, 14, 28, .72);
+}
+.family-mp-care > div { min-width: 0; display: grid; gap: 2px; }
+.family-mp-care span { color: var(--el-moon); font-size: 12px; letter-spacing: .14em; }
+.family-mp-care b { color: var(--text); font-size: 12px; font-weight: 600; }
+.family-mp-care small { color: var(--text-dim); font-size: 12px; line-height: 1.4; }
+.family-mp-care-action { min-height: 46px; margin: 0; padding: 6px 10px; white-space: nowrap; }
+@media (max-width: 820px) {
+  .family-board { grid-template-columns: 1fr; }
+  .family-smalls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .family-mp-care { grid-template-columns: 1fr; }
+  .family-mp-care-action { width: 100%; }
+  .family-folio-heading { align-items: flex-start; flex-direction: column; gap: 2px; }
+  .family-smalls { gap: 8px; }
+  .family-smalls .char-card { min-height: 116px; padding: 7px; }
+  .family-smalls .char-card-row {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-items: start;
+    gap: 5px 7px;
+  }
+  .family-smalls .char-card-body { display: contents; }
+  .family-smalls .char-head { grid-column: 1 / -1; grid-row: 1; }
+  .family-smalls .char-portrait-wrap { grid-column: 1; grid-row: 2; }
+  .family-smalls .portrait-sm { width: 40px; height: 54px; }
+  .family-smalls .life-flames { grid-column: 2; grid-row: 2; align-self: start; white-space: normal; }
+  .family-smalls .life-flames .flame { display: none; }
+  .family-smalls .life-months { display: block; margin-left: 0; }
+  .family-smalls .life-months::before { content: '余命 '; }
+  .family-smalls .child-note { grid-column: 2; grid-row: 2; margin-top: 24px; font-size: 12px; }
+  .family-smalls .m46-progression-summary { grid-column: 1 / -1; grid-row: 3; margin-top: 0; }
+  .family-smalls .m46-level-line { flex-wrap: wrap; gap: 2px 5px; }
+  .family-smalls .m46-aptitude-tags { gap: 3px; }
+  .family-smalls .m46-aptitude-tag { padding-inline: 4px; }
+  .family-smalls .char-card.selected { min-height: 116px; }
+  .family-smalls .char-card.selected .family-selected-status { min-height: 98px; }
+}
+
+/* M57: Home固有の見開き幅と、上部「決断を見る」の可視応答。 */
+.home-core-actions { position: relative; scroll-margin-top: 112px; }
+.home-core-actions.is-jump-target .panel {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px rgba(232, 163, 61, .28), 0 0 26px rgba(232, 163, 61, .16);
+}
+@media (max-width: 959px) {
+  /* 一列へ畳む幅では、月の必須判断を長い人物詳細より先に置く。これにより
+     tabletでも「決断を見る」の移動先を上端へ確定でき、家譜を読み切る必要がない。 */
+  .home-core-actions { grid-row: 1; }
+  .home-core-family { grid-row: 2; }
+}
+@media (min-width: 1180px) {
+  .home-core-grid { grid-template-columns: minmax(680px, 1.45fr) minmax(340px, .55fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-core-actions.is-jump-target .panel { transition: none; }
+}
 
 /* 狭幅では、長い固有名や資源値がグリッドの最小内容幅を押し広げない。 */
 .home-screen,

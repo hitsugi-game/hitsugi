@@ -1,6 +1,6 @@
 // データ整合の機械検証(GDD_v3 §5) — 読み取り専用のトリップワイヤ
 // 使い方: node scripts/validate_data.mjs [--strict-dist]
-//   --strict-dist: 星神の位階分布が最終目標(48/36/28/8)と一致しないとエラー
+//   --strict-dist: M9拡張後の星神180柱の確定分布(68/51/43/18)と一致しないとエラー
 // 検査: id重複 / gods→skills参照 / regions→enemies参照 / 位階分布の報告
 // 注意: TSをテキスト解析する簡易検査。型と実行時の厳密性は tsc とゲーム本体が担う。
 
@@ -91,17 +91,17 @@ for (const ref of regionBossRefs) {
 console.log(`events(expedition): ${eventIds.length}件(≒事件+その他id)`)
 console.log(`skills(全供給源): ${skillIds.size}本`)
 
-// ---- 位階分布(GDD_v3 §1: 最終 48/36/28/8) ----
+// ---- 位階分布(GDD_v3 §8.43: M9拡張後の180柱を現行正典として固定) ----
 const dist = [1, 2, 3, 4].map((r) => godRanks.filter((x) => x === r).length)
-const TARGET = [48, 36, 28, 8]
-console.log(`god rank分布: 下${dist[0]}/中${dist[1]}/上${dist[2]}/極${dist[3]} (最終目標 ${TARGET.join('/')})`)
+const TARGET = [68, 51, 43, 18]
+console.log(`god rank分布: 下${dist[0]}/中${dist[1]}/上${dist[2]}/極${dist[3]} (現行確定 ${TARGET.join('/')})`)
 const strict = process.argv.includes('--strict-dist')
 if (strict) {
   TARGET.forEach((t, i) => {
     if (dist[i] !== t) err(`rank${i + 1}の柱数 ${dist[i]} ≠ 目標 ${t}`)
   })
-} else if (dist.some((d, i) => d > TARGET[i])) {
-  warn('位階のいずれかが最終目標を超過している(計画を確認)')
+} else if (dist.some((d, i) => d !== TARGET[i])) {
+  warn('位階分布が現行正典と異なる(データ追加または削除を確認)')
 }
 
 // ---- 結果 ----

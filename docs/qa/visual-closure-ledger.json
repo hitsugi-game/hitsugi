@@ -32,7 +32,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Title.tsx",
-        "sourceSha256": "aee1be492426c1fd2729276466937c14e81a03402eb7309727ca20fbeddbaf1b",
+        "sourceSha256": "61401dccf0f7c8ddf5e74fedf55ff9c02aefd464bafb56cb80ce7c8842d96443",
         "runtimePath": "src/ui/vc2_entry.css",
         "runtimeSha256": "fdbe6a0c551c9b1859f3aa3b39ddf01370db3a6652db97a19b5e4b3a1de3795e",
         "rightsStatus": "pending",
@@ -80,7 +80,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Title.tsx",
-        "sourceSha256": "aee1be492426c1fd2729276466937c14e81a03402eb7309727ca20fbeddbaf1b",
+        "sourceSha256": "61401dccf0f7c8ddf5e74fedf55ff9c02aefd464bafb56cb80ce7c8842d96443",
         "runtimePath": "src/ui/vc2_entry.css",
         "runtimeSha256": "fdbe6a0c551c9b1859f3aa3b39ddf01370db3a6652db97a19b5e4b3a1de3795e",
         "rightsStatus": "pending",
@@ -126,13 +126,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/m17_home.css",
-        "sha256": "a8457cd969561fe6cdd9488fb41c4dd47ed9cef720a719595fdb02f3512a3fab"
+        "sha256": "16fe15d646381d46411c511dc1fa522764e193cc86f6bb87fead2c49cb09bd7e"
       },
       "provenance": {
         "sourcePath": "src/ui/Home.tsx",
-        "sourceSha256": "f8e1ce4b3ba109dff7bb6fa6bd65217c6b607dd06bfea6be6c2b24e901434902",
+        "sourceSha256": "32196251dbd2205375359257d2e7bbf06ec6da14f59c196da6171656dfcc942e",
         "runtimePath": "src/ui/m17_home.css",
-        "runtimeSha256": "a8457cd969561fe6cdd9488fb41c4dd47ed9cef720a719595fdb02f3512a3fab",
+        "runtimeSha256": "16fe15d646381d46411c511dc1fa522764e193cc86f6bb87fead2c49cb09bd7e",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -274,13 +274,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -324,13 +324,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -374,13 +374,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -424,13 +424,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -474,13 +474,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -524,13 +524,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -574,13 +574,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -711,7 +711,7 @@
         "1280x720",
         "390x844"
       ],
-      "hero": "The native map geometry leads; wet ruts, water rings, edge reeds, route glyphs, and danger telegraphs enrich only the readable TileKind field without exploration raster overlays.",
+      "hero": "The walking field combines authored region materials, landmarks, route glyphs, and danger telegraphs.",
       "support": "Supporting frames use the shared indigo, soot, vermilion, warm-gold, and paper-material family without competing with the hero.",
       "groundContact": "Characters, facilities, combatants, or document planes use explicit borders, feet, shadows, or contact mattes appropriate to this surface.",
       "depth": "Background atmosphere, the decision-bearing middle layer, and a restrained foreground are separated without covering controls.",
@@ -724,7 +724,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Dungeon.tsx",
-        "sourceSha256": "cf0cb77d87409e94baac5865d732fae61a987ab3c1927aff656d7637764ef7f6",
+        "sourceSha256": "c5ed99ace75010947ecaf8c5f22c3b6475fd5e18886a2f97dc0eb10e65d2c9f7",
         "runtimePath": "src/dungeon/render/region_experience_layer.ts",
         "runtimeSha256": "9b779a9edb7086fd7a0d1f3cb6b2e8e8f6bf9b17f9d709750a6cd14372339b46",
         "rightsStatus": "pending",
@@ -734,7 +734,6 @@
       "owner": "visual-recovery/dungeon",
       "evidence": [
         "src/ui/Dungeon.tsx",
-        "src/dungeon/render/ar1_hotarubi.ts",
         "src/dungeon/render/region_experience_layer.ts",
         "tests/visual/ar1_dungeon_battle.spec.ts"
       ],
@@ -761,7 +760,7 @@
         "1280x720",
         "390x844"
       ],
-      "hero": "One coherent regional backdrop and shared contact mattes keep combatants, threat, action, and reward provenance ahead of scenery.",
+      "hero": "Shared contact mattes and one rare-or-boss hero clarify combatants, threat, action, and reward provenance.",
       "support": "Supporting frames use the shared indigo, soot, vermilion, warm-gold, and paper-material family without competing with the hero.",
       "groundContact": "Characters, facilities, combatants, or document planes use explicit borders, feet, shadows, or contact mattes appropriate to this surface.",
       "depth": "Background atmosphere, the decision-bearing middle layer, and a restrained foreground are separated without covering controls.",
@@ -774,7 +773,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Battle.tsx",
-        "sourceSha256": "a23610ce0e13b7910b746cc2a1232988f84041640505a962a0ef154d3dca9208",
+        "sourceSha256": "a21c596679db3e9624c59600384c9281358fe377549fccc05397a78591f135bd",
         "runtimePath": "src/ui/battle_ar1.css",
         "runtimeSha256": "f945330d04f60e30ea1a8ad37f8e6ef515b31b7b66d23d09f3f3d50d55be01ee",
         "rightsStatus": "pending",
@@ -827,7 +826,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Forge.tsx",
-        "sourceSha256": "074d302bf6a4b772fddb5fb16123ba6ec13041b8c2f5b0c2d3d457d6716917f8",
+        "sourceSha256": "e7584f0a2e711179ba9292158fbe031843227a776f72d35c069e6db3f577fe7c",
         "runtimePath": "src/ui/forge_vc3.css",
         "runtimeSha256": "1321f6a630c950ad120bf64bb177eb4608f2a48aa9ce4d64d93993b5e9a39613",
         "rightsStatus": "pending",
@@ -1022,13 +1021,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -1072,13 +1071,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/scenes_vc3b.css",
-        "sha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5"
+        "sha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571"
       },
       "provenance": {
         "sourcePath": "src/ui/Scenes.tsx",
-        "sourceSha256": "6fc7b0c4e288bb7a1c6433452d9df3e2d96f1c5b03b3c4b98f20125c85ea65bc",
+        "sourceSha256": "d173f259461d2d68626b5ca54f56c4a1954a51fa83ee562706b7c8e8ea179c68",
         "runtimePath": "src/ui/scenes_vc3b.css",
-        "runtimeSha256": "f4273069c4b804a1d4904a37486e6661d3c8c6cf544f735498d5c6d9797abcd5",
+        "runtimeSha256": "5e1fb15a6d2051be9edb3ae9a7e39386a2e87f5b4836a30ec2298baa43de5571",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -3218,7 +3217,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Forge.tsx",
-        "sourceSha256": "074d302bf6a4b772fddb5fb16123ba6ec13041b8c2f5b0c2d3d457d6716917f8",
+        "sourceSha256": "e7584f0a2e711179ba9292158fbe031843227a776f72d35c069e6db3f577fe7c",
         "runtimePath": "src/ui/forge_vc3.css",
         "runtimeSha256": "1321f6a630c950ad120bf64bb177eb4608f2a48aa9ce4d64d93993b5e9a39613",
         "rightsStatus": "pending",
@@ -3266,13 +3265,13 @@
       "motionSound": "Entry motion is restrained and removed under reduced-motion; global button sound remains centrally attached.",
       "runtimeBundle": {
         "path": "src/ui/settings_vc6.css",
-        "sha256": "57afed2ecd46bcd1880bc2e2209a74f8d07225748cdb98eb179b8f2796b16265"
+        "sha256": "d08f1f6709bbfca1ca85263969a89e2c223b3a10874335773508f43ecb312ed0"
       },
       "provenance": {
         "sourcePath": "src/ui/Settings.tsx",
-        "sourceSha256": "5958034d464d36ec3a5a938570fbb9e7a495fcf2392f4a237a6ef5f12198a891",
+        "sourceSha256": "b36f5d0851eee40c43243606a1f48e8bb71b66516de0833366e04ba0f7898866",
         "runtimePath": "src/ui/settings_vc6.css",
-        "runtimeSha256": "57afed2ecd46bcd1880bc2e2209a74f8d07225748cdb98eb179b8f2796b16265",
+        "runtimeSha256": "d08f1f6709bbfca1ca85263969a89e2c223b3a10874335773508f43ecb312ed0",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -3319,13 +3318,13 @@
       "motionSound": "Entry motion is restrained and removed under reduced-motion; global button sound remains centrally attached.",
       "runtimeBundle": {
         "path": "src/ui/settings_vc6.css",
-        "sha256": "57afed2ecd46bcd1880bc2e2209a74f8d07225748cdb98eb179b8f2796b16265"
+        "sha256": "d08f1f6709bbfca1ca85263969a89e2c223b3a10874335773508f43ecb312ed0"
       },
       "provenance": {
         "sourcePath": "src/ui/Settings.tsx",
-        "sourceSha256": "5958034d464d36ec3a5a938570fbb9e7a495fcf2392f4a237a6ef5f12198a891",
+        "sourceSha256": "b36f5d0851eee40c43243606a1f48e8bb71b66516de0833366e04ba0f7898866",
         "runtimePath": "src/ui/settings_vc6.css",
-        "runtimeSha256": "57afed2ecd46bcd1880bc2e2209a74f8d07225748cdb98eb179b8f2796b16265",
+        "runtimeSha256": "d08f1f6709bbfca1ca85263969a89e2c223b3a10874335773508f43ecb312ed0",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -3421,13 +3420,13 @@
       "motionSound": "Entry motion is restrained and removed under reduced-motion; global button sound remains centrally attached.",
       "runtimeBundle": {
         "path": "src/index.css",
-        "sha256": "485c897e183174b07672dabff6c20e3daac7e6adaac17e2405ba3aeeccad0216"
+        "sha256": "3bf0c55c9d66d9075cfcae0db0c3977df85f223c04c918168348067d962b6697"
       },
       "provenance": {
         "sourcePath": "src/App.tsx",
-        "sourceSha256": "afb541efb3df0ebf0123813911142504379c14a46daaf33ec9cc19e40f971646",
+        "sourceSha256": "bee0f93e754098a96648542aad36a9c723ff1d3d64b17333836f878f957f92be",
         "runtimePath": "src/index.css",
-        "runtimeSha256": "485c897e183174b07672dabff6c20e3daac7e6adaac17e2405ba3aeeccad0216",
+        "runtimeSha256": "3bf0c55c9d66d9075cfcae0db0c3977df85f223c04c918168348067d962b6697",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },
@@ -3473,13 +3472,13 @@
       "motionSound": "Ambient motion stays subordinate to decisions, respects reduced motion, and uses the existing world/audio hooks without adding per-button sound.",
       "runtimeBundle": {
         "path": "src/ui/star_lottery.css",
-        "sha256": "66925c5c8b71aad98541f1b65a664f032581885490c7e9c087e86975e4dc68d4"
+        "sha256": "7530ab21bba3436394b5e9168ec3a0bed56337ff19ca8a56715de6a3b446a8c8"
       },
       "provenance": {
         "sourcePath": "src/ui/StarLottery.tsx",
-        "sourceSha256": "8b75e06b1c33ea5dcb95984eae53447a796c984fefebe15afb2c285c6ae89fbb",
+        "sourceSha256": "64e7f6bdc9c6337c200747f406dac7800667b8fe8a8546f70766abea25062b5a",
         "runtimePath": "src/ui/star_lottery.css",
-        "runtimeSha256": "66925c5c8b71aad98541f1b65a664f032581885490c7e9c087e86975e4dc68d4",
+        "runtimeSha256": "7530ab21bba3436394b5e9168ec3a0bed56337ff19ca8a56715de6a3b446a8c8",
         "rightsStatus": "pending",
         "reviewer": "Codex local integration; human art direction and rights clearance remain external gates."
       },

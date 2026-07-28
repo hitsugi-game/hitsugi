@@ -61,7 +61,7 @@ test('通常攻撃: 対象選択と予告だけでは発火せず明示実行だ
   await expect(attack).toBeEnabled()
 
   await attack.click()
-  const target = page.locator('.combatant.is-enemy[role="button"]').first()
+  const target = page.locator('.combatant.is-enemy .combatant-hitbox').first()
   await expect(target).toBeFocused()
   await target.press('Enter')
 

@@ -29,6 +29,13 @@ describe('VC3B scene surface contract', () => {
     expect(sceneCss).toContain('min-height: 48px')
   })
 
+  it('成人と生業の儀は郷への退避導線と再開先を明示する', () => {
+    expect(sceneSource).toContain('data-zone="rite-return"')
+    expect(sceneSource).toContain('← 郷へ戻る')
+    expect(sceneSource).toContain('未決定の儀は「灯の余白」に残り、後から再開できる')
+    expect(sceneCss).toMatch(/\.vc3b-rite-return[\s\S]*?min-height:\s*44px/)
+  })
+
   it('Finaleは既存三択を直接確定せず、同格選択の後に一つの確認CTAを出す', () => {
     expect(FINALE_CHOICES.map((choice) => choice.id)).toEqual(['cut', 'save', 'inherit'])
     expect(Object.keys(ENDINGS)).toEqual(['cut', 'save', 'inherit'])

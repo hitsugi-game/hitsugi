@@ -1514,3 +1514,48 @@
 - **Round 2/停止**: 独立Closureで元6 ID中5件CLOSED、A/B/C/D/E=`5/4/3/3/3`。`measurement-oracle-undefined`はauto三方針と危険手集約が残り2ラウンド連続未解消となった。さらにstop閾値競合、claim原子性、rescue validatorの3 IDを検出。Forge停止規則により同runで修正を反復せず、terminalを停滞とした。
 - **代替経路**: 次回は残り4 IDだけのprotocol/oracle appendixを別成果物として固定し、独立合格後にM56正本へ統合する。現行確率、runtime/save/UI、公開版は変更していない。M55完了stateは`docs/CODEX_FORGE_STATE_M55_20260728.md`へ退避した。
 - **公開**: 対象6文書を`32c1389`としてmainへpush。ローカルはlint、data 0 errors/既存rank warn 1、全Vitest 54 files/789 tests、production build、機密候補0、対象限定stageに合格。Actions run `30311235233`はbuild/deploy成功。公開HTML、entry `index-CbwLRBqH.js`、CSS `index-BF5_P4fd.css`、Dungeon `Dungeon-DE6z9YI-.js`をHTTP 200で取得し、commit marker、`battle-first`、`100dvh`、`map-native`を確認した。runtime差分は0で、ゲーム挙動は変更していない。
+
+## 2026-07-28（M57 決断導線・灯芯手入れ・家譜見開き）
+
+- **原因**: 「決断を見る」は決断欄がPCで同じ高さにある場合、中央scrollとfocusだけでは変化が見えず、無反応に感じられた。一族欄はHome外側二列と内側の詳細／血脈診断二列が重なり、家譜札に必要な幅がなく一列の長い縦並びになっていた。MPは戦闘用灯明油と月を送る静養だけで、郷の即時回復がなかった。
+- **修正**: 決断欄を固定UI後の上端へ移動し、最初の有効カードへfocus、移動先へ一時金縁を付与。郷で選択中の存命者一人へ、奉燈15・月消費なし・最大MP30%回復の灯芯手入れを追加。一族欄は「当代の記」と「家譜札＋血脈診断」の見開きへ再編し、札を2列化。氏名を縦割れさせず、残り寿命とlevelを維持した。
+- **直接検証**: 灯芯手入れの対象限定、回復量、奉燈、月不変、満タン/不足時無課金をVitestへ追加。focused Vitest 3 files/17 tests、production build、lintに合格。PlaywrightはPC1280で決断click→金縁→focus 1/1、PC1280/mobile390の札overflow・見開き/縦組み4/4。初回PCで札内42px overflowを検出し、氏名行と属性/世代行の二段化、寿命火の縮約後に再合格した。
+- **公開境界**: ローカル実装のみ。commit、push、deployは行っていない。
+
+## 2026-07-28（M58 成人・生業の儀の帰郷導線）
+
+- **原因**: 永続scene queueは成人の儀・生業の儀を「灯の余白」へ退避できたが、両画面に操作がなく、プレイヤーは選択するまで郷へ戻れないように見えていた。
+- **修正**: 両儀の選択前／確認前へ「← 郷へ戻る」と退避先の説明を追加。既存`deferCurrentScene()`へ接続し、未確定の儀を保存してHomeの「灯の余白」から同じ人物の画面へ戻す。灯型・家業の確定、月送り、成長値は変えない。
+- **直接検証**: store testで未確定、Home帰還、deferred保存、同じ`charId`での再開を確認。UI contractを追加し、PlaywrightでPC1440/1280、tablet768、mobile390/360のbutton可視、46px操作面、viewport内配置、Home帰還、灯の余白からの再開を5/5確認した。初回は2幅で44pxが浮動小数点丸めにより43.999pxとなったため、操作面を46pxへ広げて再合格。共有scene全回帰20/20、全Vitest 54 files/793 tests、lint、data 0 error、visual closure 69、manifest 9、production buildにも合格した。
+- **公開境界**: ローカル実装のみ。commit、push、deployは行っていない。
+
+## 2026-07-28（M59 残改善余地の多角監査）
+
+- **契約**: 現行HITSUGIの改善余地を、正典、実装、test、既存監査、公開bundle、CI、配信物の直接証拠から重複なしのP0〜P3へ統合する。新機能実装、素材生成、数値変更、commit、push、deploy、外部送信は対象外。既存M57/M58 dirty差分を保護した。
+- **直接確認**: `HEAD=origin/main=afc42e6`、最新Actions run `30311447155` success、公開HTML HTTP 200/entry `index-B8ol1AVx.js`。公開bundleにはM47薬種見世、M48継続CTA、M49 decision markerがあり、M57灯芯手入れ/M58帰郷markerはない。`public/`は2,825 files/241.68MiB、local `dist/`は2,847 files/244.01MiB、main JS約1.46MiB。`npm audit`はprod/devとも0。
+- **三系統監査**: gameplay、UX、technicalを別のread-only explorerへ分離。素材量より、公開同期、mobileの8px対処文/一族密度、初見/一世代/実機baseline、root/storage/save import、release preview/CI、性能、権利BOMを先行課題とした。設計のみのM55/M56/M45はPhase/pilot単位へ限定した。
+- **追加発見**: `saveGame()`は書込み失敗結果を返さず、`importSaveString()`が無条件成功を返す経路がある。起動時storage拒否はError Boundary以前にblank化しうる。未設定GoatCounterでも第三者scriptを取得する。visual closure 69 greenは全件`code-integrated`で、state/human/rights/performance完了を意味しない。
+- **正典同期**: `docs/PRODUCT_IMPROVEMENT_BACKLOG_M59_20260728.md`を台帳正本として作成し、GDD_v3 §8.42へ判断を同期。STATUSのM47〜M49とDungeon checkpointの古い未公開表記を、git祖先と公開bundle証拠に合わせて修正した。
+- **独立監査Round 1**: A/B/C/D/E=`3/4/2/3/4`、blocking 3。mission state未同期、save import P0のroadmap脱落、M58閉じ込め修正とM57経済変更の同梱を検出した。M58を独立release、save/storageをWave 0B release blocker、M57 UIを0C、灯芯手入れを100 seedの資源経済pilotへ分離した。
+- **独立closure**: 再監査でstateとsave roadmapをCLOSED。M57経済pilotのSTATUS行誤記1件を修正し、最終closureで3 IDすべてCLOSED、blocking 0。台帳、GDD §8.42、STATUS、mission stateが同じWave 0A/0B/0C/1を持つことを確認した。
+- **公開境界**: 本missionではruntime、素材、save、game balanceを変更せず、commit、push、deploy、外部テスト、analytics有効化も行わない。
+
+## 2026-07-28（M60 全改善・音楽強化 release candidate）
+
+- **契約**: M59台帳のうちコードと自動検証で閉じられるP0〜P2、M57/M58、音楽強化を統合し、外部の人間・物理端末・権利・Organization設定を偽完了せず、本番公開まで進める。全戦闘オート、既存報酬、M54 map-native、M53 battle-first、非FOMOを不変条件とした。
+- **保存／起動**: `SaveResult`、main/BAKを保持する検証付き書込み、import再読込照合、storage memory fallback、root recoveryを実装。Titleを最初の小さい境界へ分離し、GameRuntimeと全routeを遅延読込した。未設定GoatCounter scriptを削除し、開発test hookもproduction entryから除外した。
+- **体験**: M58帰郷・再開、M57決断／灯芯手入れ／家譜見開き、mobile戦闘の12px以上の対処文、一族1/2/4/8人gridを統合。星籤は同位階三択、基礎／実確率、open/claimのsave-first、10/20/50保証、履歴・収集表示へ改修。主三体へ「止・受・崩」を実装し、全オート三方針は同じ確定兆しで対処する。形見から三品を選ぶ非戦力の家宝額を追加した。
+- **音楽**: 既存11曲のブラウザ合成を、画面、地域、季節、世代、物語段階、戦況緊張から決まる長周期の句へ拡張。最短曲も10分超の節重複を避け、家祖三音を世代で発展させる。`控えめ／均衡／豊か`、現在曲／変奏の文字表示、mute・visibility・高速遷移時timer清掃を追加。外部音源と新規音声ファイルは0。
+- **release基盤**: PR/main共通gate、公式Action SHA固定、Node/npm固定、Dependabot、public asset BOM 2,825点、初期transferと全CSSの性能block、公開後bundle/commit marker検証を追加。初期JSは458,553から74,134 gzip bytesへ削減し250KiB目標を満たした。Chromium/Firefox 1280×720とWebKit/iPhone 13で主要route、破損save、storage拒否を9/9確認した。
+- **未完了を分離**: 初見8名、一世代5名、物理低性能端末、NVDA/VoiceOver、2,816 legacy素材の権利系譜、Organization ruleset、共有preview URL、M55 Phase B/CとP2量産は外部／後続gateへ残す。BOM登録を権利clearと扱わない。
+
+## 2026-07-28（M60 fresh監査の限定修正）
+
+- **探索の役割違反**: Dungeon本体と第一幕導入に残っていた`bg_r_*`地域背景を撤去。M54の`map-native`を「探索時の地域ラスターrequest 0」へ戻し、BattleだけがM53の地域背景1枚を使う。E2Eのrequest監視を`/visual-recovery/hotarubi/`限定から任意の`/img/bg_r_*`へ拡張した。
+- **音楽の表示同期**: adaptive schedulerの句更新を購読可能にし、Settingsは`useSyncExternalStore`で現在曲／変奏を追従する。別timerは追加せず、Sheetを閉じると購読を解除する。PC実時間試験で、設定を開いたまま句と表示名が変わることを確認した。
+- **操作構造**: 星札帖の未所持179札を非操作要素へ変更し、所持札だけをTab対象にした。戦闘札の対象選択hitboxと兆し詳細を兄弟操作へ分け、button相当の入れ子を解消。後列0.92倍後も兆し44px以上、星確定と灯芯手入れ46pxを下限にした。
+- **収集末尾**: 家宝候補の無告知`.slice(0, 12)`を廃止し、12品ずつの「さらに見る」を追加。16品fixtureで末尾を表示し、その品を実際に額装できる受入を追加した。
+- **保存復旧監査**: production release smokeへ、破損main＋正常BAKからの継続、GameRuntime lazy chunk失敗時のroot recovery、storage get/set/remove拒否下でのタイトル警告と郷までの非保存プレイを追加した。
+- **状態同期**: STATUSのM56「runtime未実装」を、M60実装済みの現在と設計当時の履歴が矛盾しない表記へ変更。M60 stateは外部、人間、物理端末、権利、Organization、staging URLをholdのまま維持する。
+- **source freeze後の全検証**: npm audit 0、lint、data 0 errors/0 warnings、closure 69、manifest 9、public/dist BOM 2,825、全Vitest 59 files/826 tests、production build 890 modules、初期JS 74,281 gzip bytes、初期CSS 21,115 gzip bytes、dist 255,926,975 bytesへ合格。production bundleを使うChromium/Firefox desktop＋WebKit mobileは、正常導線、破損save、正常BAK復旧、lazy chunk失敗、storage拒否下の郷到達を15/15で合格した。
+- **最終独立監査**: fresh技術監査はP0 0/P1 0/blocking 0、`SHIP-with-notes`。noteは初期transfer外の500kB超後続chunkの追加分割だけで、250KiB初期JS・64KiB CSS予算は合格済みのため本releaseの阻害ではない。

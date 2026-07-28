@@ -125,6 +125,15 @@ function StatBiasChips({ bias }: { bias: Partial<Record<StatKey, number>> }) {
   )
 }
 
+function RiteReturnControl({ onReturn }: { onReturn: () => void }) {
+  return (
+    <nav className="vc3b-rite-return" data-zone="rite-return" aria-label="儀を中断する">
+      <button type="button" className="btn btn-ghost" onClick={onReturn}>← 郷へ戻る</button>
+      <span>未決定の儀は「灯の余白」に残り、後から再開できる</span>
+    </nav>
+  )
+}
+
 // 誕生の兆し — 神の属性ごとに、生まれた刹那の星のしるしを彩る(bornSeasonで選ぶ)。
 const BIRTH_OMENS: Record<string, string[]> = {
   fire: [
@@ -182,8 +191,11 @@ export function BirthScene({ charId }: { charId: string }) {
     const free = pool.filter((n) => !used.has(n))
     const picks: string[] = []
     for (let i = 0; i < free.length && picks.length < 3; i++) {
-      const n = free[(i * 7 + char.bornSeason) % free.length]
-      if (!picks.includes(n)) picks.push(n)
+      // bornSeason は初代などで負になり得る。JS の負の剰余をそのまま配列添字へ
+      // 使うと undefined が候補へ混ざり、空の命名札と React key 警告を生む。
+      const index = ((i * 7 + char.bornSeason) % free.length + free.length) % free.length
+      const candidate = free[index]
+      if (candidate && !picks.includes(candidate)) picks.push(candidate)
     }
     setCandidates(picks)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -388,6 +400,7 @@ export function LifeScene({ title, lines, bg, narrativeId }: { title: string; li
 export function CeremonyScene({ charId }: { charId: string }) {
   const data = useGame((s) => s.data)!
   const assignTomoshigata = useGame((s) => s.assignTomoshigata)
+  const deferCurrentScene = useGame((s) => s.deferCurrentScene)
   const [chosen, setChosen] = useState<Tomoshigata | null>(null)
   const char = data.family.find((c) => c.id === charId)
   if (!char) return null
@@ -409,6 +422,7 @@ export function CeremonyScene({ charId }: { charId: string }) {
     return (
       <div className="scene-screen screen vc3b-scene vc3b-life-scene" data-scene-surface="life-thread" data-scene-route="ceremony-result">
         <SceneBg file="cg2_seijin.png" />
+        <RiteReturnControl onReturn={deferCurrentScene} />
         <SceneSurfaceHeader surface="life-thread" route="灯型" title="成人の儀" context={`${char.name}が選んだ灯を、身体へ結ぶ。`} />
         <div className="scene-body vc3b-scene-panel" data-scene-group="decision">
           <p style={{ fontSize: 18, color: 'var(--amber)' }}>{gataDef.ritual}</p>
@@ -431,6 +445,7 @@ export function CeremonyScene({ charId }: { charId: string }) {
 
   return (
     <div className="scene-screen screen vc3b-scene vc3b-life-scene" data-scene-surface="life-thread" data-scene-route="ceremony">
+      <RiteReturnControl onReturn={deferCurrentScene} />
       <SceneSurfaceHeader surface="life-thread" route="灯型" title="成人の儀" context={`${char.name}の血潮に、ひとつの灯型を結ぶ。`} />
       <div className="scene-body vc3b-scene-panel" data-scene-group="context">
         <p>
@@ -474,6 +489,7 @@ export function CeremonyScene({ charId }: { charId: string }) {
 export function JobRiteScene({ charId }: { charId: string }) {
   const data = useGame((s) => s.data)!
   const assignJobClass = useGame((s) => s.assignJobClass)
+  const deferCurrentScene = useGame((s) => s.deferCurrentScene)
   const [chosen, setChosen] = useState<JobClassId | null>(null)
   const char = data.family.find((c) => c.id === charId)
   if (!char) return null
@@ -486,6 +502,7 @@ export function JobRiteScene({ charId }: { charId: string }) {
     return (
       <div className="scene-screen screen vc3b-scene vc3b-life-scene" data-scene-surface="life-thread" data-scene-route="jobrite-result">
         <SceneBg file="cg2_nariwai.png" />
+        <RiteReturnControl onReturn={deferCurrentScene} />
         <SceneSurfaceHeader surface="life-thread" route="家業" title="生業の儀" context={`${char.name}が選んだ技を、暮らしへ結ぶ。`} />
         <div className="scene-body vc3b-scene-panel" data-scene-group="decision">
           <p style={{ fontSize: 18, color: 'var(--amber)' }}>{job.ritual}</p>
@@ -508,6 +525,7 @@ export function JobRiteScene({ charId }: { charId: string }) {
 
   return (
     <div className="scene-screen screen vc3b-scene vc3b-life-scene" data-scene-surface="life-thread" data-scene-route="jobrite">
+      <RiteReturnControl onReturn={deferCurrentScene} />
       <SceneSurfaceHeader surface="life-thread" route="家業" title="生業の儀" context={`${char.name}の手に、郷で生きる技をひとつ。`} />
       <div className="scene-body vc3b-scene-panel" data-scene-group="context">
         <p>

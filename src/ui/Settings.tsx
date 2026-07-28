@@ -1,5 +1,6 @@
-import { useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { audio } from '../core/audio'
+import { MUSIC_RICHNESS_LABELS, type MusicRichness } from '../core/audio_model'
 import {
   getReduceMotion, setReduceMotion, getAutoBattleDefault, setAutoBattleDefault,
   getAutoPolicySettings, setAutoPolicySettings, type AutoBattlePolicy,
@@ -16,9 +17,16 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [ambienceVol, setAmbienceVol] = useState(Math.round(audio.ambienceVolume * 100))
   const [muted, setMuted] = useState(audio.muted)
   const [calm, setCalm] = useState(audio.calm)
+  const [richness, setRichness] = useState(audio.richness)
   const [reduceMotion, setRM] = useState(getReduceMotion())
   const [autoDefault, setAutoDef] = useState(getAutoBattleDefault())
   const [autoPolicy, setAutoPolicy] = useState(getAutoPolicySettings())
+  const nowPlaying = useSyncExternalStore(
+    audio.subscribeNowPlaying,
+    () => audio.currentTrackVariantLabel,
+    () => audio.currentTrackVariantLabel,
+  )
+  const [nowTrack, nowVariant = '静寂'] = nowPlaying.split(' / ')
   const changePolicy = (policy: AutoBattlePolicy) => {
     const next = { ...autoPolicy, policy }
     setAutoPolicy(next)
@@ -55,8 +63,9 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         <div className="settings-tool-grid">
           <fieldset className="settings-tool-group">
             <legend>音の加減</legend>
-            <div className="settings-sound-now" aria-label={`今の調べ ${audio.currentTrackLabel}`}>
-              <span>今の調べ</span><strong>{audio.currentTrackLabel}</strong>
+            <div className="settings-sound-now" aria-label={`今の調べ ${nowPlaying}`} aria-live="polite">
+              <span>今の調べ</span>
+              <strong>{nowTrack}<small>{nowVariant}</small></strong>
             </div>
             <div className="setting-row">
               <label className="setting-label" htmlFor="setting-volume">全体</label>
@@ -97,6 +106,25 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
                 <output className="setting-val" htmlFor="setting-ambience-volume" aria-live="polite">{ambienceVol}</output>
               </div>
             </div>
+
+            <div className="setting-row settings-richness-row">
+              <label className="setting-label" htmlFor="setting-music-richness">音楽の重なり</label>
+              <select
+                id="setting-music-richness"
+                aria-label="音楽の重なり"
+                className="setting-select"
+                value={richness}
+                onChange={(event) => {
+                  const next = event.target.value as MusicRichness
+                  setRichness(audio.setRichness(next))
+                }}
+              >
+                {(Object.keys(MUSIC_RICHNESS_LABELS) as MusicRichness[]).map((value) => (
+                  <option key={value} value={value}>{MUSIC_RICHNESS_LABELS[value]}</option>
+                ))}
+              </select>
+            </div>
+            <p className="setting-hint">余白多めは音数を減らし、響き豊かは返しと重ねを増やす。</p>
 
             <button className={`setting-toggle ${muted ? 'on' : ''}`} aria-pressed={muted} onClick={() => setMuted(audio.toggleMute())}>
               <span className="setting-label">音を消す</span>

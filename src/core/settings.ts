@@ -1,6 +1,8 @@
 // UI設定 — localStorage永続。音量は audio.ts が持つ。
 // 旧セーブ/初回は既定値(モーション有効・オート既定OFF)。
 
+import { safeStorageGet, safeStorageRemove, safeStorageSet } from './storage'
+
 const RM_KEY = 'hitsugi_reduce_motion'
 const AB_KEY = 'hitsugi_auto_default'
 const AUTO_POLICY_KEY = 'hitsugi_auto_policy'
@@ -29,14 +31,6 @@ export const DEFAULT_AUTO_POLICY_SETTINGS: AutoPolicySettings = {
   },
 }
 
-function safeStorage(): Storage | undefined {
-  try {
-    return typeof localStorage === 'undefined' ? undefined : localStorage
-  } catch {
-    return undefined
-  }
-}
-
 function isPolicy(value: unknown): value is AutoBattlePolicy {
   return value === 'steady' || value === 'economy' || value === 'allOut'
 }
@@ -46,10 +40,10 @@ function isPolicy(value: unknown): value is AutoBattlePolicy {
  * 設定破損や将来versionを理由に既存の開始挙動を変えない。
  */
 export function getAutoPolicySettings(): AutoPolicySettings {
-  const storage = safeStorage()
-  if (!storage) return structuredClone(DEFAULT_AUTO_POLICY_SETTINGS)
+  const stored = safeStorageGet(AUTO_POLICY_KEY)
+  if (!stored.ok) return structuredClone(DEFAULT_AUTO_POLICY_SETTINGS)
   try {
-    const raw = storage.getItem(AUTO_POLICY_KEY)
+    const raw = stored.value
     if (!raw) return structuredClone(DEFAULT_AUTO_POLICY_SETTINGS)
     const parsed: unknown = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object') return structuredClone(DEFAULT_AUTO_POLICY_SETTINGS)
@@ -78,8 +72,6 @@ export function getAutoPolicySettings(): AutoPolicySettings {
 }
 
 export function setAutoPolicySettings(settings: AutoPolicySettings): void {
-  const storage = safeStorage()
-  if (!storage) return
   const normalized: AutoPolicySettings = {
     version: 1,
     policy: isPolicy(settings.policy) ? settings.policy : DEFAULT_AUTO_POLICY_SETTINGS.policy,
@@ -90,19 +82,16 @@ export function setAutoPolicySettings(settings: AutoPolicySettings): void {
       boss: settings.stops?.boss === true,
     },
   }
-  try {
-    storage.setItem(AUTO_POLICY_KEY, JSON.stringify(normalized))
-  } catch {
-    // 容量超過やprivacy modeでも戦闘そのものを止めない。
-  }
+  safeStorageSet(AUTO_POLICY_KEY, JSON.stringify(normalized))
 }
 
 export function getReduceMotion(): boolean {
-  return localStorage.getItem(RM_KEY) === '1'
+  const stored = safeStorageGet(RM_KEY)
+  return stored.ok && stored.value === '1'
 }
 
 export function setReduceMotion(on: boolean): void {
-  localStorage.setItem(RM_KEY, on ? '1' : '0')
+  safeStorageSet(RM_KEY, on ? '1' : '0')
   applyReduceMotion()
 }
 
@@ -114,9 +103,29 @@ export function applyReduceMotion(): void {
 }
 
 export function getAutoBattleDefault(): boolean {
-  return localStorage.getItem(AB_KEY) === '1'
+  const stored = safeStorageGet(AB_KEY)
+  return stored.ok && stored.value === '1'
 }
 
 export function setAutoBattleDefault(on: boolean): void {
-  localStorage.setItem(AB_KEY, on ? '1' : '0')
+  safeStorageSet(AB_KEY, on ? '1' : '0')
+}
+
+const RESETTABLE_SETTING_KEYS = [
+  RM_KEY,
+  AB_KEY,
+  AUTO_POLICY_KEY,
+  'hitsugi_audio',
+  'hitsugi_audio_vol',
+  'hitsugi_audio_music',
+  'hitsugi_audio_sfx',
+  'hitsugi_audio_ambience',
+  'hitsugi_audio_calm',
+] as const
+
+/** セーブには触れず、起動を妨げ得る端末設定だけを既定値へ戻す。 */
+export function resetSettings(): boolean {
+  const removed = RESETTABLE_SETTING_KEYS.map((key) => safeStorageRemove(key))
+  applyReduceMotion()
+  return removed.every((result) => result.ok)
 }

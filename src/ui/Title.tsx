@@ -1,33 +1,67 @@
 import { useEffect, useRef, useState } from 'react'
-import { useGame } from '../core/store'
 import { APP_BUILD_LABEL } from '../core/version'
-import { inspectSaveSlot, downloadSave, importSaveString, clearSave } from '../core/save'
-import { SceneBg } from './components'
 import { emitToast } from './toast'
 import './vc2_entry.css'
 
-export function TitleScreen() {
-  const newGame = useGame((s) => s.newGame)
-  const continueGame = useGame((s) => s.continueGame)
+type SaveStatus = 'checking' | 'ready' | 'recoverable' | 'damaged' | 'unavailable' | 'none'
+
+function IntroSceneBg({ file }: { file: string }) {
+  const [ok, setOk] = useState(true)
+  if (!ok) return null
+  return (
+    <img
+      className="scene-bg"
+      src={`${import.meta.env.BASE_URL}img/${file.replace(/\.png$/, '.jpg')}`}
+      alt=""
+      aria-hidden
+      onError={() => setOk(false)}
+    />
+  )
+}
+
+export function TitleScreen({ onRuntimeReady }: { onRuntimeReady?: () => void } = {}) {
   const [mode, setMode] = useState<'normal' | 'narrative' | 'data' | null>(null)
   const [confirmNew, setConfirmNew] = useState(false)
-  const [, setSlotVersion] = useState(0)
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('checking')
   const fileRef = useRef<HTMLInputElement>(null)
-  const saveStatus = inspectSaveSlot()
-  const saveExists = saveStatus !== 'none'
+  const saveExists = saveStatus === 'ready' || saveStatus === 'recoverable' || saveStatus === 'damaged'
   const canContinue = saveStatus === 'ready' || saveStatus === 'recoverable'
   const canExport = canContinue
+
+  const refreshSaveStatus = () => {
+    void import('../core/save')
+      .then(({ inspectSaveSlot }) => setSaveStatus(inspectSaveSlot()))
+      .catch(() => setSaveStatus('unavailable'))
+  }
+  useEffect(refreshSaveStatus, [])
 
   // 「はじめから」— 既存セーブがあれば上書き確認を挟む
   const onNewGame = () => { if (saveExists) setConfirmNew(true); else setMode('normal') }
   const onImportFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = () => {
-      const ok = importSaveString(String(reader.result))
-      emitToast(ok ? 'セーブを読み込んだ。「つづきから」で再開できる。' : '読み込めなかった(壊れたファイル)。', ok ? 'info' : 'error')
-      if (ok) setSlotVersion((value) => value + 1)
+      void import('../core/save').then(({ importSaveStringResult }) => {
+        const result = importSaveStringResult(String(reader.result))
+        const failure = result.ok ? '' : result.previousSavePreserved
+          ? '読み込めなかった。既存の記は保持した。ファイルまたは端末の保存設定を確認してください。'
+          : '読み込みの検証に失敗した。再読込せず、復旧頁から控えを書き出してください。'
+        emitToast(result.ok ? 'セーブを読み込んだ。「つづきから」で再開できる。' : failure, result.ok ? 'info' : 'error')
+        refreshSaveStatus()
+      }).catch(() => emitToast('セーブ検証部を読み込めなかった。再読込してください。', 'error'))
     }
     reader.readAsText(file)
+  }
+  const startGame = (narrative: boolean) => {
+    void import('../core/store').then(({ useGame }) => {
+      useGame.getState().newGame(narrative)
+      onRuntimeReady?.()
+    }).catch(() => emitToast('ゲーム本体を読み込めなかった。回線を確認して再読込してください。', 'error'))
+  }
+  const continueGame = () => {
+    void import('../core/store').then(({ useGame }) => {
+      useGame.getState().continueGame()
+      onRuntimeReady?.()
+    }).catch(() => emitToast('一族の記を開けなかった。回線を確認して再読込してください。', 'error'))
   }
 
   return (
@@ -70,15 +104,29 @@ export function TitleScreen() {
             {saveStatus === 'ready' && <>端末の記 <strong>読取可能</strong></>}
             {saveStatus === 'recoverable' && <>端末の記 <strong>控えから復旧可能</strong></>}
             {saveStatus === 'damaged' && <>端末の記 <strong>破損を検出</strong><span>ファイルから正常な控えを読み込むか、この記を消してください。</span></>}
+            {saveStatus === 'unavailable' && <>端末の記 <strong>保存できない</strong><span>ブラウザの保存許可を確認してください。許可がなくても、この場では遊べます。</span></>}
             {saveStatus === 'none' && <>端末の記 <strong>まだない</strong></>}
+            {saveStatus === 'checking' && <>端末の記 <strong>確認中</strong></>}
           </p>
-          <button className="btn" disabled={!canExport} onClick={() => { if (!downloadSave()) emitToast('書き出せる正常なセーブが無い。', 'error') }}>
+          <button className="btn" disabled={!canExport} onClick={() => {
+            void import('../core/save').then(({ downloadSave }) => {
+              if (!downloadSave()) emitToast('書き出せる正常なセーブが無い。', 'error')
+            })
+          }}>
             セーブを書き出す(バックアップ)
           </button>
           <button className="btn" onClick={() => fileRef.current?.click()}>
             セーブを読み込む(ファイルから)
           </button>
-          <button className="btn btn-ghost" disabled={!saveExists} onClick={() => { if (confirm('この端末のセーブを完全に消す。取り消せない。よいか?')) { clearSave(); setSlotVersion((value) => value + 1); emitToast('セーブを消した。', 'info'); setMode(null) } }}>
+          <button className="btn btn-ghost" disabled={!saveExists} onClick={() => {
+            if (!confirm('この端末のセーブを完全に消す。取り消せない。よいか?')) return
+            void import('../core/save').then(({ clearSave }) => {
+              clearSave()
+              refreshSaveStatus()
+              emitToast('セーブを消した。', 'info')
+              setMode(null)
+            })
+          }}>
             セーブを消す
           </button>
           <button className="btn btn-ghost" onClick={() => setMode(null)}>
@@ -93,7 +141,9 @@ export function TitleScreen() {
             {saveStatus === 'ready' && <>端末の記 <strong>続きあり</strong></>}
             {saveStatus === 'recoverable' && <>端末の記 <strong>控えから復せる</strong></>}
             {saveStatus === 'damaged' && <>端末の記 <strong>読めない</strong><span>「セーブの管理」で復旧してください。</span></>}
+            {saveStatus === 'unavailable' && <>端末の記 <strong>保存できない</strong><span>この場では遊べますが、再読込すると進行は残りません。</span></>}
             {saveStatus === 'none' && <>端末の記 <strong>まだない</strong></>}
+            {saveStatus === 'checking' && <>端末の記 <strong>確認中</strong></>}
           </p>
           <button className="btn btn-main" onClick={onNewGame}>
             はじめから
@@ -110,10 +160,10 @@ export function TitleScreen() {
       ) : (
         <div className="title-menu">
           <p className="mode-ask">語り部の問い — いかに歩む?</p>
-          <button className="btn btn-main" onClick={() => newGame(false)}>
+          <button className="btn btn-main" onClick={() => startGame(false)}>
             宿命(標準) — 夜は深く、灯は重い
           </button>
-          <button className="btn" onClick={() => newGame(true)}>
+          <button className="btn" onClick={() => startGame(true)}>
             語り部(易しめ) — 物語を味わう歩み
           </button>
           <button className="btn btn-ghost" onClick={() => setMode(null)}>
@@ -140,8 +190,7 @@ const INTRO_BEATS = [
   '— ゆけ。灯を、継いでゆけ。',
 ]
 
-export function IntroScreen() {
-  const setScreen = useGame((s) => s.setScreen)
+export function IntroScreen({ onFinish }: { onFinish: () => void }) {
   const [beat, setBeat] = useState(0)
   const currentRef = useRef<HTMLParagraphElement>(null)
   const done = beat >= INTRO_BEATS.length
@@ -154,7 +203,7 @@ export function IntroScreen() {
   const advance = () => {
     if (done) return
     if (beat === INTRO_BEATS.length - 1) {
-      setScreen({ id: 'home' })
+      onFinish()
     } else {
       setBeat(beat + 1)
     }
@@ -162,7 +211,7 @@ export function IntroScreen() {
 
   return (
     <div className="screen intro-screen" onClick={advance} data-beat={beat + 1}>
-      <SceneBg file="cg_prologue.png" />
+      <IntroSceneBg file="cg_prologue.png" />
       <div className="intro-spine" aria-hidden><span>千年目の綴り</span></div>
       <div className="intro-text">
         {INTRO_BEATS.slice(0, beat + 1).map((t, i) => (
@@ -179,7 +228,7 @@ export function IntroScreen() {
         className="btn btn-ghost intro-skip"
         onClick={(e) => {
           e.stopPropagation()
-          setScreen({ id: 'home' })
+          onFinish()
         }}
       >
         物語を飛ばす

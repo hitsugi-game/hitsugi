@@ -3,19 +3,24 @@
 
 import {
   DEFAULT_AUDIO_MIX,
+  MUSIC_RICHNESS_LABELS,
   TRACK_LABELS,
-  arrangementAt,
   clampUnit,
-  lineageMotifDegrees,
+  evolvedLineageMotif,
+  normalizeMusicContext,
+  phrasePlanAt,
   sanitizeMix,
+  sanitizeMusicRichness,
   transitionSeconds,
   type AmbienceKind,
   type AudioBusName,
   type AudioMix,
+  type MusicRichness,
+  type MusicSceneContext,
   type TrackName,
 } from './audio_model'
 
-export type { AmbienceKind, AudioBusName, AudioMix, TrackName } from './audio_model'
+export type { AmbienceKind, AudioBusName, AudioMix, MusicRichness, MusicSceneContext, TrackName } from './audio_model'
 
 // A平調子: A3を宮とする陰旋法。負の度数とオクターブ超えにも対応する。
 const HIRAJOSHI = [220.0, 246.94, 261.63, 329.63, 349.23]
@@ -118,6 +123,7 @@ const STORAGE = {
   effects: 'hitsugi_audio_sfx',
   ambience: 'hitsugi_audio_ambience',
   calm: 'hitsugi_audio_calm',
+  richness: 'hitsugi_audio_richness',
 } as const
 
 function safeGet(key: string): string | null {
@@ -143,6 +149,12 @@ export interface AudioDebugSnapshot {
   unlocked: boolean
   muted: boolean
   calm: boolean
+  richness: MusicRichness
+  richnessLabel: string
+  currentVariantLabel: string
+  phraseIndex: number
+  transitionTimers: number
+  sceneContext: MusicSceneContext
   mix: AudioMix
 }
 
@@ -165,6 +177,11 @@ class AudioEngine {
   private phraseIndex = 0
   private _tension = 0
   private founderId = 'hitsugi'
+  private sceneContext: MusicSceneContext = normalizeMusicContext()
+  private _richness: MusicRichness
+  private lastVariantLabel = '待機'
+  private nowPlayingListeners = new Set<() => void>()
+  private disconnectTimers = new Map<number, AudioNode>()
 
   private desiredAmbience: AmbienceKind = 'none'
   private ambienceTimers: number[] = []
@@ -178,6 +195,7 @@ class AudioEngine {
   constructor() {
     this._muted = safeGet(STORAGE.mute) === 'muted'
     this._calm = safeGet(STORAGE.calm) === 'calm'
+    this._richness = sanitizeMusicRichness(safeGet(STORAGE.richness))
     this.mix = sanitizeMix({
       master: storedVolume(STORAGE.master, DEFAULT_AUDIO_MIX.master),
       music: storedVolume(STORAGE.music, DEFAULT_AUDIO_MIX.music),
@@ -189,11 +207,25 @@ class AudioEngine {
 
   get muted(): boolean { return this._muted }
   get calm(): boolean { return this._calm }
+  get richness(): MusicRichness { return this._richness }
   get volume(): number { return this.mix.master }
   get musicVolume(): number { return this.mix.music }
   get effectsVolume(): number { return this.mix.effects }
   get ambienceVolume(): number { return this.mix.ambience }
   get currentTrackLabel(): string { return TRACK_LABELS[this.desiredTrack] }
+  get currentVariantLabel(): string {
+    if (this.desiredTrack === 'none') return '静寂'
+    if (this.activeTrack === this.desiredTrack && this.lastVariantLabel !== '待機') return this.lastVariantLabel
+    return phrasePlanAt(this.desiredTrack, this.phraseIndex, this.sceneContext, this._richness, this._tension).variantLabel
+  }
+  get currentTrackVariantLabel(): string { return `${this.currentTrackLabel} / ${this.currentVariantLabel}` }
+  subscribeNowPlaying = (listener: () => void): (() => void) => {
+    this.nowPlayingListeners.add(listener)
+    return () => this.nowPlayingListeners.delete(listener)
+  }
+  private emitNowPlaying(): void {
+    this.nowPlayingListeners.forEach((listener) => listener())
+  }
 
   private effectiveMaster(): number { return this._muted ? 0 : this.mix.master }
 
@@ -225,6 +257,7 @@ class AudioEngine {
     if (this._muted) {
       this.stopMusicScheduler(true)
       this.clearAmbienceTimers()
+      this.clearDisconnectTimers()
     } else {
       void this.unlock()
     }
@@ -234,11 +267,26 @@ class AudioEngine {
   toggleCalm(): boolean {
     this._calm = !this._calm
     safeSet(STORAGE.calm, this._calm ? 'calm' : 'dynamic')
+    this.emitNowPlaying()
     return this._calm
   }
 
-  setLineage(founderId: string | undefined): void {
+  setRichness(value: MusicRichness): MusicRichness {
+    this._richness = sanitizeMusicRichness(value)
+    safeSet(STORAGE.richness, this._richness)
+    this.emitNowPlaying()
+    return this._richness
+  }
+
+  setSceneContext(context: MusicSceneContext): void {
+    this.sceneContext = normalizeMusicContext(context)
+    this.emitNowPlaying()
+  }
+
+  setLineage(founderId: string | undefined, generation?: number): void {
     this.founderId = founderId || 'hitsugi'
+    if (generation !== undefined) this.sceneContext = normalizeMusicContext({ ...this.sceneContext, generation })
+    this.emitNowPlaying()
   }
 
   async unlock(): Promise<boolean> {
@@ -256,7 +304,12 @@ class AudioEngine {
 
   private ensureGraph(): AudioContext {
     if (this.ctx) return this.ctx
-    const ctx = new AudioContext()
+    const AudioContextConstructor = globalThis.AudioContext ??
+      (globalThis as typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    // 古いiOS WebKitはwebkitAudioContextだけを公開する。どちらも無い環境
+    // （企業端末の制限や一部webview）は無音へ退避し、ゲーム本体は止めない。
+    if (!AudioContextConstructor) throw new Error('Web Audio is unavailable')
+    const ctx = new AudioContextConstructor()
     this.ctx = ctx
 
     const master = ctx.createGain()
@@ -318,6 +371,7 @@ class AudioEngine {
     if (this.hidden) {
       this.stopMusicScheduler(true)
       this.clearAmbienceTimers()
+      this.clearDisconnectTimers()
       if (this.ctx?.state === 'running') void this.ctx.suspend().catch(() => undefined)
       return
     }
@@ -335,6 +389,22 @@ class AudioEngine {
   private connectMusicVoice(gain: GainNode): void {
     gain.connect(this.musicDuckNode!)
     gain.connect(this.reverb!)
+  }
+
+  private disconnectLater(node: AudioNode, delayMs: number): void {
+    const timer = window.setTimeout(() => {
+      this.disconnectTimers.delete(timer)
+      try { node.disconnect() } catch { /* already detached */ }
+    }, delayMs)
+    this.disconnectTimers.set(timer, node)
+  }
+
+  private clearDisconnectTimers(): void {
+    for (const [timer, node] of this.disconnectTimers) {
+      window.clearTimeout(timer)
+      try { node.disconnect() } catch { /* already detached */ }
+    }
+    this.disconnectTimers.clear()
   }
 
   // ---- 楽器 ----
@@ -451,11 +521,15 @@ class AudioEngine {
     if (tension !== undefined) this.setTension(tension)
     if (track === this.desiredTrack) return
     this.desiredTrack = track
+    this.emitNowPlaying()
     if (!this.ctx || !this.unlocked || this._muted || this.hidden) return
     this.switchTrack(track)
   }
 
-  setTension(value: number): void { this._tension = clampUnit(value) }
+  setTension(value: number): void {
+    this._tension = clampUnit(value)
+    this.emitNowPlaying()
+  }
 
   private switchTrack(track: TrackName): void {
     const ctx = this.ctx!
@@ -468,7 +542,7 @@ class AudioEngine {
       oldGain.gain.cancelScheduledValues(now)
       oldGain.gain.setValueAtTime(Math.max(0.0001, oldGain.gain.value), now)
       oldGain.gain.exponentialRampToValueAtTime(0.0001, now + seconds)
-      window.setTimeout(() => { try { oldGain.disconnect() } catch { /* already detached */ } }, (seconds + 2.2) * 1000)
+      this.disconnectLater(oldGain, (seconds + 2.2) * 1000)
     }
     this.activeTrackGain = null
     this.activeTrack = track
@@ -480,6 +554,8 @@ class AudioEngine {
     this.connectMusicVoice(trackGain)
     this.activeTrackGain = trackGain
     this.phraseIndex = 0
+    this.lastVariantLabel = '待機'
+    this.emitNowPlaying()
     this.nextLoopAt = ctx.currentTime + 0.08
     this.scheduleLoop()
     this.musicTimer = window.setInterval(() => this.scheduleLoop(), 420)
@@ -493,10 +569,11 @@ class AudioEngine {
       this.activeTrackGain = null
       this.activeTrack = 'none'
     }
+    if (disconnectActive) this.clearDisconnectTimers()
   }
 
-  private keepNote(index: number, phrase: number, density: number): boolean {
-    return ((index * 37 + phrase * 19 + 11) % 100) / 100 <= density
+  private keepNote(index: number, phraseGate: number, density: number): boolean {
+    return ((index * 37 + phraseGate * 19 + 11) % 100) / 100 <= density
   }
 
   private scheduleLoop(): void {
@@ -511,36 +588,57 @@ class AudioEngine {
     while (this.nextLoopAt < this.ctx.currentTime + 1.1) {
       const base = this.nextLoopAt
       const phrase = this.phraseIndex++
-      const arrangement = arrangementAt(this.activeTrack, phrase, tension)
-      const melody = arrangement.shape === 'answer' ? (pattern.answer ?? pattern.koto) : pattern.koto
+      const effectiveRichness = this._calm && this._richness === 'full' ? 'balanced' : this._richness
+      const arrangement = phrasePlanAt(this.activeTrack, phrase, this.sceneContext, effectiveRichness, tension)
+      if (this.lastVariantLabel !== arrangement.variantLabel) {
+        this.lastVariantLabel = arrangement.variantLabel
+        this.emitNowPlaying()
+      }
+      const sourceMelody = arrangement.shape === 'answer' ? (pattern.answer ?? pattern.koto) : pattern.koto
+      const melody = arrangement.reverseMelody
+        ? sourceMelody.map(([beat, _degree, length], index): Note => [beat, sourceMelody[sourceMelody.length - 1 - index][1], length])
+        : sourceMelody
       const melodyDensity = arrangement.shape === 'breath' ? 0 : arrangement.melodyDensity
       for (let i = 0; i < melody.length; i++) {
-        if (!this.keepNote(i, phrase, melodyDensity)) continue
+        if (!this.keepNote(i, arrangement.noteGate, melodyDensity)) continue
         const [beat, degree, length] = melody[i]
-        const humanize = ((((i + 1) * 13 + phrase * 7) % 17) - 8) / 1000
-        const register = arrangement.shape === 'surge' && i % 4 === 3 ? 5 : 0
-        this.pluck(deg(degree + register), base + beat * secondsPerBeat + humanize, length * secondsPerBeat, 0.19, trackOutput, ((i % 5) - 2) * 0.12)
+        const humanize = ((((i + 1) * 13 + arrangement.humanizePhase * 7) % 17) - 8) / 1000
+        const register = !this._calm && arrangement.shape === 'surge' && i % 4 === 3 ? 5 : 0
+        const noteAt = base + Math.max(0, beat + arrangement.rhythmShift) * secondsPerBeat + humanize
+        const panSlot = ((i + arrangement.panRotation) % 5) - 2
+        this.pluck(deg(degree + arrangement.transpose + register), noteAt, length * secondsPerBeat, 0.19, trackOutput, panSlot * 0.12)
+        if (arrangement.octaveEcho && !this._calm && i % 3 === 0) {
+          this.pluck(deg(degree + arrangement.transpose + 5), noteAt + 0.42 * secondsPerBeat, length * secondsPerBeat * 0.72, 0.075, trackOutput, ((2 - i % 5)) * 0.1)
+        }
+      }
+
+      if (arrangement.counterline) {
+        const counterline = (pattern.answer ?? pattern.koto).filter((_, index) => index % 2 === phrase % 2)
+        counterline.forEach(([beat, degree, length], index) => {
+          this.pluck(deg(degree + arrangement.transpose - 5), base + Math.min(pattern.beats - 0.25, beat + 0.5) * secondsPerBeat, length * secondsPerBeat * 0.8, 0.072, trackOutput, index % 2 === 0 ? -0.28 : 0.28)
+        })
       }
 
       const bass = arrangement.shape === 'breath' ? (pattern.bass ?? []).slice(0, 1) : (pattern.bass ?? [])
-      for (const [beat, degree] of bass) this.bassTone(deg(degree), base + beat * secondsPerBeat, 2 * secondsPerBeat, 0.13, trackOutput)
+      for (const [beat, degree] of bass) this.bassTone(deg(degree + arrangement.transpose), base + beat * secondsPerBeat, 2 * secondsPerBeat, 0.13, trackOutput)
 
       const percussionGain = arrangement.percussionGain * (this._calm ? 0.56 : 1)
       for (const beat of pattern.taiko ?? []) {
         if (percussionGain <= 0.05) continue
-        this.taikoHit(base + beat * secondsPerBeat, beat % 4 === 0, 0.26 * percussionGain, trackOutput)
+        this.taikoHit(base + beat * secondsPerBeat, (Math.floor(beat) + arrangement.accentOffset) % 4 === 0, 0.26 * percussionGain, trackOutput)
       }
       for (const [beat, degree] of pattern.bell ?? []) {
         if (arrangement.shape === 'surge' || (phrase + Math.floor(beat)) % 2 === 0) {
-          this.bellTone(deg(degree), base + beat * secondsPerBeat, this._calm ? 0.055 : 0.075, trackOutput)
+          this.bellTone(deg(degree + arrangement.transpose), base + beat * secondsPerBeat, this._calm ? 0.055 : 0.075, trackOutput)
         }
       }
       if (arrangement.shape === 'opening' || arrangement.shape === 'breath') {
-        for (const [beat, degree, length] of pattern.air ?? []) this.airTone(deg(degree), base + beat * secondsPerBeat, length * secondsPerBeat, 0.045, trackOutput)
+        for (const [beat, degree, length] of pattern.air ?? []) this.airTone(deg(degree + arrangement.transpose), base + beat * secondsPerBeat, length * secondsPerBeat, 0.045, trackOutput)
       }
       if (arrangement.lineageMotif) {
-        const motif = lineageMotifDegrees(this.founderId)
-        motif.forEach((degree, index) => this.pluck(deg(degree + (this.activeTrack === 'battle' || this.activeTrack === 'boss' ? 5 : 0)), base + (2 + index * 1.25) * secondsPerBeat, 0.7 * secondsPerBeat, 0.23, trackOutput, (index - 1) * 0.18))
+        const motif = evolvedLineageMotif(this.founderId, this.sceneContext.generation ?? 1)
+        const battleRegister = this.activeTrack === 'battle' || this.activeTrack === 'rare' || this.activeTrack === 'boss' ? 5 : 0
+        motif.degrees.forEach((degree, index) => this.pluck(deg(degree + arrangement.transpose + battleRegister), base + motif.beatOffsets[index] * secondsPerBeat, 0.7 * secondsPerBeat, 0.23, trackOutput, ((index % 3) - 1) * 0.18))
       }
       if (tension > 0.48 && arrangement.shape !== 'breath') {
         const pulse = (tension - 0.48) / 0.52
@@ -597,7 +695,7 @@ class AudioEngine {
       oldGain.gain.cancelScheduledValues(now)
       oldGain.gain.setValueAtTime(Math.max(0.0001, oldGain.gain.value), now)
       oldGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38)
-      window.setTimeout(() => { try { oldGain.disconnect() } catch { /* already detached */ } }, 700)
+      this.disconnectLater(oldGain, 700)
     }
   }
 
@@ -628,7 +726,14 @@ class AudioEngine {
     | 'page' | 'confirm' | 'cancel' | 'error' | 'tab'
     | 'critHit' | 'weakHit'): void {
     if (this._muted || this.hidden) return
-    const ctx = this.ensureGraph()
+    let ctx: AudioContext
+    try {
+      ctx = this.ensureGraph()
+    } catch {
+      // Web Audioが無い端末では効果音だけを無効化する。button操作や
+      // 画面遷移のclick handlerまで例外で中断させない。
+      return
+    }
     this.unlocked = true
     if (ctx.state === 'suspended') void ctx.resume().then(() => this.syncDesiredState()).catch(() => undefined)
     else this.syncDesiredState()
@@ -671,6 +776,12 @@ class AudioEngine {
       unlocked: this.unlocked,
       muted: this._muted,
       calm: this._calm,
+      richness: this._richness,
+      richnessLabel: MUSIC_RICHNESS_LABELS[this._richness],
+      currentVariantLabel: this.currentVariantLabel,
+      phraseIndex: this.phraseIndex,
+      transitionTimers: this.disconnectTimers.size,
+      sceneContext: { ...this.sceneContext },
       mix: { ...this.mix },
     }
   }

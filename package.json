@@ -3,15 +3,27 @@
   "private": true,
   "version": "0.2.0",
   "type": "module",
+  "packageManager": "npm@11.12.1",
+  "engines": {
+    "node": ">=22 <25",
+    "npm": ">=10"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "check:visual-closure": "node scripts/validate_visual_closure.mjs",
     "check:visual-manifest": "node scripts/validate_visual_recovery_manifest.mjs",
+    "check:asset-bom": "node scripts/public_asset_bom.mjs",
+    "check:asset-bom:dist": "node scripts/public_asset_bom.mjs --dist",
+    "update:asset-bom": "node scripts/public_asset_bom.mjs --write",
+    "check:performance": "node scripts/check_build_performance.mjs",
+    "report:performance": "node scripts/check_build_performance.mjs --write-report",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:visual": "playwright test"
+    "test:visual": "playwright test",
+    "test:release-smoke": "playwright test --config=playwright.release.config.ts",
+    "verify:deploy": "node scripts/verify_deployment.mjs"
   },
   "dependencies": {
     "pixi.js": "^8.19.0",

@@ -1,81 +1,83 @@
 # デプロイ・運用ガイド
 
-## デプロイ(GitHub Pages自動)
-
-`main` へ push すれば GitHub Actions が自動でビルド・デプロイする。手動作業は不要。
+## 公開先と権限境界
 
 - 公開URL: https://hitsugi-game.github.io/hitsugi/
 - リポジトリ: https://github.com/hitsugi-game/hitsugi
-- ワークフロー: `.github/workflows/deploy.yml`(既存)
+- workflow: `.github/workflows/deploy.yml`
+- **`main`へのpushまたは`main`上の手動実行だけが本番公開を行う。** PRは検証とPages候補artifact作成までで、公開しない。
+- Organization ruleset、必須review、Environment reviewerの設定はGitHub管理者の外部gateである。ローカル実装やworkflow変更を、その設定済み証拠として扱わない。
 
-## ステージング環境
+## Release candidateの検証
 
-現在、共有URLを持つステージング環境はない。GitHub上のEnvironmentは`github-pages`のみ、branchは`main`のみで、mainへのpushがそのまま本番公開になる。`npm run dev`による`http://localhost:5173`は開発者PC内の確認用であり、ステージングではない。
+PR、`main` push、手動実行は、同じ`verify` jobで次を順番に通す。
 
-本番前の共有確認を分離する場合は、別branchから別Pages projectへ出すpreview workflowか、Cloudflare Pages等のpreview deploymentを新設する。現行workflowへstagingを追加しただけでは、本番URLと分離されない点に注意する。
+1. Node 22 + `npm@11.12.1` + lockfileによる`npm ci`
+2. `npm audit --audit-level=high`
+3. lint / ゲームデータ / visual closure / visual recovery manifest
+4. 公開素材BOMの全path・SHA-256・byte size照合とrestricted 0
+5. Vitest
+6. TypeScript + Vite production build
+7. BOM登録済み2,825点と`dist/`内コピーのSHA-256・byte size照合
+8. 初期entry、CSS、dist総量の段階的な性能上限
+9. Chromium 1280×720、Firefox 1280×720、WebKit/iPhone 13でTitle、Home、Pact、Dungeon、Battle、破損save、Storage拒否の代表smoke
 
-## アクセス解析(GoatCounter)
+失敗時のPlaywright trace/screenshotは7日保持artifactへ出す。検証済み`dist/`はPages artifactへ梱包するが、PRからはdeployしない。
 
-**GoatCounter** を採用。理由:
-- **無料**(月10万PVまで、個人開発ゲームなら十分)
-- **Cookie不使用**(GDPR/日本の改正個人情報保護法にCookie同意不要で対応)
-- **超軽量**(スクリプト~3KB、体感速度への影響ゼロ)
-- **静的サイト向け**(GitHub Pages との相性が良い、サーバ不要)
+ローカルで同じ主要gateを再現する例:
 
-### 有効化手順(所要3分)
+```powershell
+npm ci
+npm audit --audit-level=high
+npm run lint
+node scripts/validate_data.mjs
+npm run check:visual-closure
+npm run check:visual-manifest
+npm run check:asset-bom
+npm test
+npm run build
+npm run check:asset-bom:dist
+npm run check:performance
+npx playwright install chromium firefox webkit
+npm run test:release-smoke
+```
 
-1. **アカウント作成**: https://www.goatcounter.com/ で無料アカウントを作成
-   - サブドメイン(サイトコード)を選ぶ。例: `umine2025` を選ぶと `https://umine2025.goatcounter.com` で管理画面
-2. **設定ページで hitsugi の設定**:
-   - Site title: 灯継ぎ -HITSUGI-
-   - Site URL: `https://hitsugi-game.github.io/hitsugi/`
-   - Public: OFF(推奨、他人にダッシュボードを見せないなら)
-3. **サイトコードを反映**: `index.html` の GoatCounter script タグの `data-goatcounter` URL を:
-   ```html
-   data-goatcounter="https://your-code.goatcounter.com/count"
-   ```
-   の `your-code` を自分のサブドメイン(例: `umine2025`)に書き換える。
-4. **commit & push**:
-   ```bash
-   git add index.html
-   git commit -m "chore(analytics): GoatCounterのサイトコードを設定"
-   git push
-   ```
-5. **確認**: 数分後 https://umine2025.goatcounter.com/ にアクセスして PV が計測されていることを確認。
+## 本番デプロイと公開後smoke
 
-### 何が計測される
-- **ページビュー**(SPA なので実質1ページだが、内部画面遷移は個別にトラック可能=下記参照)
-- **リファラー**(X からの流入、itch.io からの流入等)
-- **ブラウザ/OS/画面サイズ**の統計
-- **国別**(ざっくり、詳細な位置情報は取らない)
+`verify`成功後、`main`だけがGitHub Pagesへdeployされる。deploy jobは公開URLからHTML、entry JS、CSS、entryが参照するdeferred JS、7桁commit markerを再取得する。どれかがHTTP 2xxでない、またはcommit markerが一致しない場合、workflowは公開成功扱いにしない。
 
-### 内部画面遷移をトラック(任意・将来の拡張)
+手動再検証:
 
-SPA なので画面遷移は URL 変更を伴わない。ゲーム内画面(intro/home/dungeon/battle/pact等)を個別に計測したい場合は `store.setScreen` にフックして `window.goatcounter.count({path: '/game/home'})` 等を呼ぶ。
+```powershell
+npm run verify:deploy -- https://hitsugi-game.github.io/hitsugi/ <expected-commit-sha>
+```
 
-現時点では必須ではない(まず全体PVを把握する段階)。
+## ステージングの現在地
 
-### プライバシー配慮
-- Cookie 非使用、fingerprint 非使用
-- IP アドレスは即時に匿名化(GoatCounter 側で hash 化)
-- Do Not Track を尊重(該当ユーザーは自動除外)
-- サイト上での明示的な同意 UI は不要(EU の GDPR/日本の改正個情法に配慮した設計)
+PRごとに本番と同じ検証とダウンロード可能なPages候補artifactは得られる。一方、第三者がブラウザで直接開ける共有preview URLはまだない。GitHub Pagesの本番Environmentは`github-pages`だけである。
 
-もし念のためプライバシーポリシーを掲載するなら `docs/PRIVACY.md` を作成して footer リンクを追加(現段階では未実装、必要なら別途)。
+共有previewを追加する場合は、本番URLと保存領域を分離した別Pages projectまたはCloudflare Pages等を用意し、URL・権限・保持期間を管理者が承認してから接続する。PR artifactを共有staging URLの代わりと誤記しない。
 
-### 代替案(採用しなかった理由)
+## 公開素材BOMと権利gate
 
-| サービス | 却下理由 |
-|---|---|
-| Google Analytics 4 | Cookie 使用、同意 UI 必須、複雑、プライバシー懸念 |
-| Plausible | 月$9〜有料、または self-host が必要 |
-| Umami | self-host が必要(サーバ運用コスト) |
-| Fathom | 月$15〜有料 |
-| Matomo | self-host か有料 cloud |
+- 正本: `docs/qa/public-asset-bom.json`
+- 更新: `npm run update:asset-bom`
+- 検証: `npm run check:asset-bom`
+- CI blocker: 未登録、欠落、SHA-256不一致、byte size不一致、`restricted`のruntime配置
+- 外部hold: `pending`。pendingは公開・商用利用の権利確認済みを意味しない。
 
-GoatCounter がゲーム個人開発の規模にちょうど良い。
+現在のBOMは配信対象を一件ずつ登録する。既存のvisual recovery manifestで`accepted + cleared`の9点だけ来歴を継承し、それ以外を一括clearedへ昇格しない。生成元、generator/model license、owner approvalが判明した行だけ個別に更新する。
 
-## その他の運用メモ
+## 性能予算
 
-- 画像工場(ComfyUI @ 192.168.1.10:8188): Windowsタスクスケジューラ `hitsugi_asset_factory` が毎時稼働。手動キック不要。
-- 定期的な `docs/STATUS.md` 更新でプロジェクト全体像を維持。
+`docs/qa/performance-budget.json`は、初期transfer JS 250KiB gzip以下と全CSS 64KiB gzip以下をrelease blockerにする。配信素材を含む`dist/`総量は初期転送量ではないため、現行baselineからの回帰上限だけをblockする。物理端末のLCP/INP/CLS、FPS、1% low、memory、10分jankは別の外部実測gateである。
+
+## Supply chain
+
+- Nodeは22、リポジトリのengineは`>=22 <25`、package managerは`npm@11.12.1`を正本とする。
+- GitHub公式Actionsはmajor tag文字列ではなく、確認したcommit SHAへ固定する。
+- DependabotはnpmとGitHub Actionsを週次確認する。更新PRも通常のrelease candidate gateを全て通す。
+
+## 解析とプライバシー
+
+第三者アクセス解析は既定で送信しない。アカウント、送信先、収集項目、privacy表示、同意・拒否方針が明示承認されるまでanalytics scriptを追加しない。ゲームの内部検証用指標は外部送信せず、端末内またはテストartifactで扱う。

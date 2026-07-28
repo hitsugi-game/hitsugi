@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { GameData, Item } from '../core/types'
 import { FOUNDING_ITEM_BASES, ITEM_SERIES_MANIFEST, type ItemBase } from '../core/data/items'
 import { isItemDiscovered, popcount15 } from '../core/collection'
+import { GENERATION_VOWS } from '../core/inheritance'
 import { MaybeImg } from './components'
 import { itemIcon } from './img'
 import { Sheet } from './layout/shell'
@@ -66,12 +67,13 @@ function ShelfDetail({ shelf, data }: { shelf: Shelf; data: GameData }) {
 }
 
 export function ItemCollection({
-  data, isMobile, query = '', onQueryChange,
+  data, isMobile, query = '', onQueryChange, onToggleFrame,
 }: {
   data: GameData
   isMobile: boolean
   query?: string
   onQueryChange?: (query: string) => void
+  onToggleFrame?: (itemId: string) => boolean
 }) {
   const shelves = useMemo<Shelf[]>(() => {
     const foundingBits = FOUNDING_ITEM_BASES.reduce((bits, item, index) => (
@@ -101,6 +103,7 @@ export function ItemCollection({
   }, [data.collectionV2, normalizedQuery, shelves])
   const firstStarted = visibleShelves.find((shelf) => shelf.discovered > 0)?.id ?? visibleShelves[0]?.id ?? null
   const [selectedId, setSelectedId] = useState<string | null>(isMobile ? null : firstStarted)
+  const [heirloomLimit, setHeirloomLimit] = useState(12)
   const selected = visibleShelves.find((shelf) => shelf.id === selectedId)
   const selectedIndex = selected ? visibleShelves.indexOf(selected) : -1
   useEffect(() => {
@@ -113,6 +116,19 @@ export function ItemCollection({
   }
   const foundTotal = shelves.reduce((sum, shelf) => sum + shelf.discovered, 0)
   const completed = shelves.filter((shelf) => shelf.discovered === shelf.items.length).length
+  const existingItems = useMemo(() => allExistingItems(data), [data])
+  const heirlooms = useMemo(
+    () => existingItems
+      .filter((item) => !!item.legacyOf || item.generation > 0)
+      .sort((a, b) => b.generation - a.generation || a.name.localeCompare(b.name, 'ja')),
+    [existingItems],
+  )
+  const framedIds = new Set(data.framedHeirloomIds ?? [])
+  const framed = heirlooms.filter((item) => framedIds.has(item.id))
+  const unframedHeirlooms = heirlooms.filter((item) => !framedIds.has(item.id))
+  const visibleHeirlooms = unframedHeirlooms.slice(0, heirloomLimit)
+  const hiddenHeirloomCount = Math.max(0, unframedHeirlooms.length - visibleHeirlooms.length)
+  const vow = data.generationVow ? GENERATION_VOWS[data.generationVow.id] : undefined
 
   return (
     <section className="item-collection" aria-labelledby="item-collection-title">
@@ -125,6 +141,63 @@ export function ItemCollection({
           <b>{foundTotal}</b><span>/ 810</span><small>完成棚 {completed}/54</small>
         </div>
       </header>
+      <section className="heirloom-gallery" aria-labelledby="heirloom-gallery-title">
+        <header>
+          <div>
+            <span>三つだけ選ぶ、一族の家宝</span>
+            <h3 id="heirloom-gallery-title">形見を、数値でなく物語として飾る</h3>
+          </div>
+          <strong>{framed.length}/3 額装</strong>
+        </header>
+        {framed.length > 0 ? (
+          <div className="heirloom-frames">
+            {framed.map((item) => (
+              <article key={item.id}>
+                <MaybeImg src={itemIcon(item.baseId)} className="heirloom-frame-icon" />
+                <div>
+                  <p>{item.slot === 'weapon' ? '武具' : item.slot === 'armor' ? '防具' : '御守'}・第{item.generation + 1}代</p>
+                  <h4>{item.name}</h4>
+                  <span>
+                    {item.legacyFirstOwner || item.legacyOf ? `初めの持ち主 — ${item.legacyFirstOwner ?? item.legacyOf}` : '名の残らぬ先人から'}
+                  </span>
+                  {item.rareOrigin && <span>因縁 — {item.rareOrigin}が遺した品</span>}
+                  {vow && <span>今代の約束 — {vow.promise}</span>}
+                </div>
+                <button className="btn btn-ghost" onClick={() => onToggleFrame?.(item.id)}>額から戻す</button>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="heirloom-empty">形見を手にしたら、下の候補から最大三品を選べる。戦力や紛失には影響せず、いつでも差し替えられる。</p>
+        )}
+        {heirlooms.length > 0 && (
+          <>
+            <div className="heirloom-candidates" aria-label="額装できる形見">
+              {visibleHeirlooms.map((item) => (
+                <button
+                  key={item.id}
+                  className="btn"
+                  disabled={framed.length >= 3}
+                  onClick={() => onToggleFrame?.(item.id)}
+                >
+                  <span>{item.name}</span>
+                  <small>{item.legacyFirstOwner ?? item.legacyOf ?? `${item.generation}代継承`}</small>
+                  <b>{framed.length >= 3 ? '三品を額装中' : '家宝として飾る'}</b>
+                </button>
+              ))}
+            </div>
+            {hiddenHeirloomCount > 0 && (
+              <button
+                type="button"
+                className="btn btn-ghost heirloom-show-more"
+                onClick={() => setHeirloomLimit((limit) => limit + 12)}
+              >
+                さらに見る（残り{hiddenHeirloomCount}品）
+              </button>
+            )}
+          </>
+        )}
+      </section>
       <div className="collection-search-row">
         <input
           type="search"

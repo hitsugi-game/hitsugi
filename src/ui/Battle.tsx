@@ -3,6 +3,7 @@
 // 踏み込み→被弾フラッシュ→ダメージ数字ポップ→KO溶暗。属性別バースト、行動者の題字タグ、
 // 戦利品スロット(M12-5)、台詞チャネル(M15-1土台: kind:'voice')を備える。
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { useGame, type BattleRewardSettlement } from '../core/store'
 import type { BattleLogEntry, BattleState, Character, Combatant, Element, EnemyIntent, Item, SkillTarget } from '../core/types'
 import { ELEMENT_LABELS, ELEMENT_ADVANTAGE, STAT_LABELS } from '../core/types'
@@ -260,7 +261,7 @@ export function BattleScreen() {
   const bodyRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   // AR0: 対象選択→確認→実行のフォーカス経路。対象札と実行釦へ明示的に移し、
   // Escで一段戻った時は選択札、二段戻った時は起点コマンドへ復元する。
-  const combatantRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const combatantRefs = useRef<Map<string, HTMLButtonElement>>(new Map())
   const confirmButtonRef = useRef<HTMLButtonElement>(null)
   const attackButtonRef = useRef<HTMLButtonElement>(null)
   const skillButtonRef = useRef<HTMLButtonElement>(null)
@@ -763,7 +764,7 @@ export function BattleScreen() {
     if (el) bodyRefs.current.set(key, el)
     else bodyRefs.current.delete(key)
   }
-  const registerCombatantRef = (key: string, el: HTMLDivElement | null) => {
+  const registerCombatantRef = (key: string, el: HTMLButtonElement | null) => {
     if (el) combatantRefs.current.set(key, el)
     else combatantRefs.current.delete(key)
   }
@@ -1457,12 +1458,24 @@ function CombatantNode({
   targetNumber?: number // 対象選択中の1始まり番号(0以下=非表示)
   elementBadge?: { el: Element; adv: Matchup }
   intent?: EnemyIntent // M47: 敵の次行動候補(生存敵・入力番のみ)
-  behaviorCue?: EnemyBehaviorCue // M47: 固有手筋の候補と短い対処。行動予約ではない
+  behaviorCue?: EnemyBehaviorCue // M47候補/M56主の確定手筋と短い対処
   onClick: () => void
   onBodyRef?: (key: string, el: HTMLDivElement | null) => void
-  onCombatantRef?: (key: string, el: HTMLDivElement | null) => void
+  onCombatantRef?: (key: string, el: HTMLButtonElement | null) => void
   children: React.ReactNode
 }) {
+  const [intentDisclosureOpen, setIntentDisclosureOpen] = useState(false)
+  const intentTriggerRef = useRef<HTMLSpanElement>(null)
+  const intentDetailId = `enemy-intent-${c.key.replace(/[^a-zA-Z0-9_-]/g, '-')}`
+  const cueCommitted = behaviorCue?.certainty === 'committed'
+  const cueCertaintyLabel = cueCommitted ? '確定' : '候補'
+  const cueTimingLabel = cueCommitted && behaviorCue.turnsUntilStrong !== undefined
+    ? `あと${Math.max(0, behaviorCue.turnsUntilStrong)}巡`
+    : undefined
+  const closeIntentDisclosure = () => {
+    setIntentDisclosureOpen(false)
+    window.requestAnimationFrame(() => intentTriggerRef.current?.focus())
+  }
   const lunge = fx.some((f) => f.kind === 'lunge')
   const hit = fx.find((f) => f.kind === 'hit')
   const heal = fx.find((f) => f.kind === 'heal')
@@ -1485,44 +1498,98 @@ function CombatantNode({
         hit ? 'fx-hit' : '',
         ko ? 'fx-ko' : '',
       ].join(' ')}
-      ref={(el) => onCombatantRef?.(c.key, el)}
       data-row={role}
+      role="group"
+      aria-label={`${c.name} 体力${c.hp}/${c.maxHp}${selected ? '、選択中' : ''}`}
       style={{ order: role === 'back' ? 0 : 1, zIndex: role === 'front' ? 12 : 10 }}
-      onClick={onClick}
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : -1}
-      aria-pressed={interactive ? !!selected : undefined}
-      aria-describedby={selected ? 'battle-action-confirm' : undefined}
-      aria-label={`${targetNumber && targetNumber > 0 ? `${targetNumber}、` : ''}${c.name} 体力${c.hp}/${c.maxHp}${selected ? '、選択中' : ''}`}
-      onKeyDown={(e) => {
-        if (interactive && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onClick() }
-      }}
     >
+      {interactive && (
+        <button
+          ref={(el) => onCombatantRef?.(c.key, el)}
+          type="button"
+          className="combatant-hitbox"
+          aria-pressed={!!selected}
+          aria-describedby={selected ? 'battle-action-confirm' : undefined}
+          aria-label={`${targetNumber && targetNumber > 0 ? `${targetNumber}、` : ''}${c.name} 体力${c.hp}/${c.maxHp}${selected ? '、選択中' : ''}`}
+          onClick={onClick}
+        />
+      )}
       {!!targetNumber && targetNumber > 0 && <span className="target-num-badge" aria-hidden>{targetNumber}</span>}
-      {/* M47: 敵の行動候補 — 名札の上で「候補」と明記し、色だけに頼らない。 */}
+      {/* M47候補/M56主の確定手 — 確度・危険・対処を文字でも示し、色だけに頼らない。 */}
       {intent && c.hp > 0 && (
         <span
-          className={`enemy-intent intent-${intent}${behaviorCue ? ' has-behavior' : ''}`}
-          data-certainty="candidate"
+          ref={behaviorCue ? intentTriggerRef : undefined}
+          className={`enemy-intent intent-${intent}${behaviorCue ? ' has-behavior' : ''}${intentDisclosureOpen ? ' is-disclosed' : ''}`}
+          data-certainty={cueCommitted ? 'committed' : 'candidate'}
+          data-danger={behaviorCue?.step.danger}
+          data-counter={behaviorCue?.counter}
+          role={behaviorCue ? 'button' : undefined}
+          tabIndex={behaviorCue ? 0 : undefined}
+          aria-expanded={behaviorCue ? intentDisclosureOpen : undefined}
+          aria-controls={behaviorCue ? intentDetailId : undefined}
           title={behaviorCue
-            ? `行動候補: ${behaviorCue.step.tell}。${behaviorCue.step.target}。${behaviorCue.hint}。確定ではない`
+            ? `${cueCommitted ? '確定行動' : '行動候補'}: ${behaviorCue.step.tell}。${cueTimingLabel ? `${cueTimingLabel}。` : ''}${behaviorCue.step.target}。${behaviorCue.hint}。${cueCommitted ? '実行が確定している' : '確定ではない'}。操作して全文を読む`
             : INTENT_TITLE[intent]}
           aria-label={behaviorCue
-            ? `行動候補、${behaviorCue.step.tell}。確定ではない。危険度${behaviorCue.step.danger === 'danger' ? '高い' : '警戒'}。対象${behaviorCue.step.target}。対処、${behaviorCue.hint}`
+            ? `${cueCommitted ? '確定行動' : '行動候補'}、${behaviorCue.step.tell}。${cueTimingLabel ? `${cueTimingLabel}。` : ''}${cueCommitted ? '実行が確定している' : '確定ではない'}。危険度${behaviorCue.step.danger === 'danger' ? '高い' : '警戒'}。対象${behaviorCue.step.target}。対処、${behaviorCue.hint}。操作して全文を読む`
             : INTENT_TITLE[intent]}
+          onClick={behaviorCue ? (event) => {
+            event.stopPropagation()
+            setIntentDisclosureOpen(true)
+          } : undefined}
+          onKeyDown={behaviorCue ? (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              event.stopPropagation()
+              setIntentDisclosureOpen(true)
+            }
+          } : undefined}
         >
           <span className="intent-dot" aria-hidden />
           {behaviorCue ? (
             <>
-              <span className="intent-tell"><em>候補</em><b>{INTENT_LABEL[intent]}</b> {behaviorCue.step.tell}</span>
+              <span className="intent-tell"><em>{cueCertaintyLabel}</em><b>{INTENT_LABEL[intent]}</b> {behaviorCue.step.tell}</span>
               <small className="intent-response">
-                {behaviorCue.step.danger === 'danger' ? '危' : '警'}・{TARGET_SHORT[behaviorCue.step.target]}
+                {cueTimingLabel && <>{cueTimingLabel}・</>}{behaviorCue.step.danger === 'danger' ? '危' : '警'}・{TARGET_SHORT[behaviorCue.step.target]}
                 <i>{COUNTER_LABEL[behaviorCue.counter]}</i>{COUNTER_SHORT[behaviorCue.counter]}
               </small>
+              <span className="intent-disclosure-mark" aria-hidden>詳</span>
             </>
           ) : <><em>候補</em><b>{INTENT_LABEL[intent]}</b></>}
         </span>
       )}
+      {behaviorCue && intentDisclosureOpen && createPortal((
+        <div
+          className="intent-reader-backdrop"
+          onPointerDown={(event) => {
+            event.stopPropagation()
+            if (event.target === event.currentTarget) closeIntentDisclosure()
+          }}
+        >
+          <section
+            id={intentDetailId}
+            className="intent-reader"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`${intentDetailId}-title`}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+              event.stopPropagation()
+              if (event.key === 'Escape') closeIntentDisclosure()
+            }}
+          >
+            <p className="intent-reader-kicker">{cueCommitted ? `確定行動${cueTimingLabel ? `・${cueTimingLabel}` : ''}` : '行動候補・確定ではない'}</p>
+            <h2 id={`${intentDetailId}-title`}>{c.name} — {behaviorCue.step.tell}</h2>
+            <dl>
+              <div><dt>危険度</dt><dd>{behaviorCue.step.danger === 'danger' ? '危険' : '警戒'}</dd></div>
+              <div><dt>対象</dt><dd>{behaviorCue.step.target}</dd></div>
+              <div><dt>対処</dt><dd><b>{COUNTER_LABEL[behaviorCue.counter]}</b>{behaviorCue.hint}</dd></div>
+              {behaviorCue.remainingDamage !== undefined && <div><dt>残り耐久</dt><dd>{Math.max(0, behaviorCue.remainingDamage)}</dd></div>}
+            </dl>
+            <button type="button" className="btn intent-reader-close" autoFocus onClick={closeIntentDisclosure}>戦場へ戻る</button>
+          </section>
+        </div>
+      ), document.body)}
       {voice && <div className="voice-bubble">{voice.voice}</div>}
       <span className="depth-mark" aria-hidden>{role === 'front' ? '前' : '後'}</span>
       <div className="combatant-art-wrap">

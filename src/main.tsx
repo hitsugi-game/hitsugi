@@ -5,15 +5,20 @@ import App from './App.tsx'
 import './ui/m40_coal_workshop.css'
 import { attachUiClickSfx } from './core/audio'
 import { applyReduceMotion } from './core/settings'
-import { installTestHooks } from './dev/testhooks'
+import { RootErrorBoundary } from './ui/RootRecovery'
 
 const detachUiClickSfx = attachUiClickSfx()
 if (import.meta.hot) import.meta.hot.dispose(detachUiClickSfx)
 applyReduceMotion()
-installTestHooks() // dev限定 — 実ブラウザ受入テスト(npm run test:visual)の状態投入口
+if (import.meta.env.DEV) {
+  // dev受入だけが巨大なテスト状態投入部を読む。本番の最初の頁へゲーム全データを逆流させない。
+  void import('./dev/testhooks').then(({ installTestHooks }) => installTestHooks())
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <RootErrorBoundary>
+      <App />
+    </RootErrorBoundary>
   </StrictMode>,
 )

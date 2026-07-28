@@ -14,7 +14,7 @@ test('M46 family growth stays readable without making one card full width', asyn
     game.screen('home')
   })
 
-  const main = page.locator('.family-main > .char-card').first()
+  const main = page.locator('.family-detail > .char-card').first()
   await expect(main.locator('.m46-level-line')).toContainText('Lv 1')
   await expect(main.locator('.m46-progression-detail .m46-stat-growth')).toHaveCount(6)
   const cardBox = await main.boundingBox()

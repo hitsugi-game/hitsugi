@@ -74,6 +74,21 @@ describe('M34 永続scene actions', () => {
     expect(useGame.getState().data!.narrative?.active).toEqual(scene)
   })
 
+  it('成人の儀は未決定のまま郷へ戻り、同じ人物の儀を再開できる', () => {
+    const scene: NarrativeScene = { kind: 'ceremony', charId: 'c1' }
+    const d = game()
+    useGame.setState({ data: { ...d, narrative: { ...d.narrative!, active: scene } }, screen: { id: 'ceremony', charId: scene.charId } })
+
+    useGame.getState().deferCurrentScene()
+    expect(useGame.getState().screen).toEqual({ id: 'home' })
+    expect(useGame.getState().data!.narrative?.deferred).toContainEqual(scene)
+    expect(useGame.getState().data!.family[0].tomoshigata).toBeUndefined()
+
+    useGame.getState().openDeferredScene(narrativeSceneId(scene))
+    expect(useGame.getState().screen).toEqual({ id: 'ceremony', charId: scene.charId })
+    expect(useGame.getState().data!.narrative?.active).toEqual(scene)
+  })
+
   it('完読した章・夢を家譜から再読しても進行と完読数を二重計上しない', () => {
     const scene: NarrativeScene = { kind: 'dreamEp', epId: 'yume_tabibito' }
     const d = game({ flags: { m34_narrative_schema: 1, dreamSeen: true } })

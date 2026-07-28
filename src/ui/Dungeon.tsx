@@ -14,7 +14,7 @@ import { resolveRegionStageContract } from '../core/data/region_stage_contracts'
 import { resolveRegionAudioContract } from '../dungeon/render/region_audio'
 import { loreFor } from '../core/data/lore'
 import { getReduceMotion } from '../core/settings'
-import { regionBgR, stageOf, uiIcon } from './img'
+import { stageOf, uiIcon } from './img'
 import { ageOf } from '../core/inheritance'
 import { EventModal } from './Expedition'
 import { audio } from '../core/audio'
@@ -391,14 +391,6 @@ function DungeonFloor() {
       data-stage-sound-cue={regionAudio?.soundCueId}
       data-scene-layering={stageContract ? 'map-native' : undefined}
     >
-      {run.visualVersion === 'v2' && (
-        <div
-          className="dungeon-region-backdrop"
-          data-region-art={region.id}
-          style={{ backgroundImage: `url(${regionBgR(region.id)})` }}
-          aria-hidden
-        />
-      )}
       <div className="dungeon-canvas" ref={hostRef} />
 
       {/* M29+: 描画初期化に失敗した時だけ、沈黙の空画面でなく手立てを示す */}
@@ -606,7 +598,6 @@ function FirstActIntro() {
   const echo = dungeonEntryEcho(run.regionId, loreFragments)
   return (
     <div className={`act-intro ${getReduceMotion() ? 'act-intro-static' : ''}`} role="status" aria-live="polite">
-      <MaybeImg src={regionBgR(region.id)} className="act-intro-bg" />
       <div className="act-intro-body">
         <span className="act-intro-tier">{'★'.repeat(region.tier)}</span>
         <h2 className="act-intro-name">{region.name}</h2>

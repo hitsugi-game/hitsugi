@@ -12,15 +12,6 @@
   background: rgba(4, 6, 14, 0.55);
   animation: actIntroFade 2.5s ease both;
 }
-.act-intro-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.35;
-  filter: brightness(0.7);
-}
 .act-intro-body {
   position: relative;
   text-align: center;

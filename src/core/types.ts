@@ -256,6 +256,20 @@ export interface Combatant {
 // 表示専用 — 戦闘計算・対象選択・AIには一切使わない(enemyActionは不変)。
 export type EnemyIntent = 'atk' | 'tech' | 'aoe' | 'flee'
 
+export interface BossMechanicV1 {
+  version: 1
+  enemyKey: string
+  enemyId: string
+  counter: 'stop' | 'receive' | 'break'
+  cycleIndex: number
+  phase: 'normal' | 'warning' | 'strong'
+  turnsUntilStrong: number
+  accumulatedDamage: number
+  requiredDamage: number
+  brokenUntilTurn?: number
+  lastResolvedTurn?: number
+}
+
 export interface BattleState {
   allies: Combatant[]
   enemies: Combatant[]
@@ -269,6 +283,7 @@ export interface BattleState {
   leaderKey?: string // v3.1 M12-4: 敵の「長」。斃すと雑兵が浮き足立つ
   morale?: boolean // 長が斃れた後true(敵弱体+逃走判定)
   intents?: Record<string, EnemyIntent> // M47: 敵key→次行動候補(表示専用・非拘束)
+  bossMechanic?: BossMechanicV1 // M56: pilot主の確定兆し。UI/実行/オートの単一情報源
 }
 export interface BattleLogEntry {
   text: string
@@ -428,6 +443,39 @@ export interface StarLotteryHistoryEntry {
   affinityGained: number
   rankFloor?: GodRank
   atSeason: number
+  selectedGodId?: string
+  rescue?: { kind: 'guaranteed-new' | 'star-return'; godId: string }
+}
+
+export interface StarLotteryCandidateRewardV2 {
+  godId: string
+  ownedAtOpen: boolean
+  affinityAtOpen: number
+  mainReward: 'new-card' | 'affinity-plus-one'
+}
+
+export interface StarLotteryPendingV2 {
+  version: 2
+  requestId: string
+  drawNumber: number
+  rank: GodRank
+  candidateGodIds: [string, string, string]
+  candidateRewards: [
+    StarLotteryCandidateRewardV2,
+    StarLotteryCandidateRewardV2,
+    StarLotteryCandidateRewardV2,
+  ]
+  rescue?: { kind: 'guaranteed-new' | 'star-return'; godId: string }
+  openedAtSeason: number
+}
+
+export interface StarLotteryReceiptV2 {
+  requestId: string
+  drawNumber: number
+  selectedGodId: string
+  grantedGodIds: string[]
+  affinityDelta: Record<string, number>
+  rescue?: { kind: 'guaranteed-new' | 'star-return'; godId: string }
 }
 
 export interface StarLotteryState {
@@ -435,6 +483,8 @@ export interface StarLotteryState {
   drawsUsed: number
   history: StarLotteryHistoryEntry[]
   lastRequestId?: string
+  pendingV2?: StarLotteryPendingV2
+  lastReceipt?: StarLotteryReceiptV2
 }
 
 // ---- ゲーム全体状態 ----
@@ -461,6 +511,7 @@ export interface GameData {
   // 表示専用 — ゲームロジックには影響しない。enemies は baseEnemyId 正規化後のID。
   codexSeenIds?: { enemies: string[]; gods: string[] }
   collectionV2?: CollectionV2 // M40: optionalは旧save互換。load後は正規形へmigrationする
+  framedHeirloomIds?: string[] // M60/M45 pilot: 戦力に影響しない家宝額装（最大3、いつでも差替え可）
   loreFrags?: Record<string, number> // 地域ごとの縁起の欠片(0〜3)
   regionsVisited?: string[] // 足を踏み入れた地域
   nemeses?: NemesisRecord[] // v3.1 M16-1: 一族を殺し、名を得た魔性

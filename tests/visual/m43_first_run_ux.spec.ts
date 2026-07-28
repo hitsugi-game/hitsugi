@@ -109,7 +109,7 @@ test('次代の約束は後継と今代の約束を月消費なしで保存す�
   expect(result).toEqual({ heir: 'm43-heir', vow: 'keep_names', season: 0 })
 })
 
-test('星籤は初帰還後に郷から入り、確率と確認を示して一籤だけ使う', async ({ page }) => {
+test('星籤は実確率を示し、保存済み三星からkeyboardでも一柱だけ確定する', async ({ page }) => {
   await boot(page, { id: 'home' })
   await page.evaluate(() => {
     const game = (window as never as GameWindow).__game
@@ -129,10 +129,28 @@ test('星籤は初帰還後に郷から入り、確率と確認を示して一�
   await expect(page.getByRole('heading', { name: '星籤' })).toBeFocused()
   await expect(page.getByText('60%', { exact: true })).toBeVisible()
   await expect(page.getByText('2%', { exact: true })).toBeVisible()
-  await page.getByRole('button', { name: '籤を手に取る' }).click()
-  await expect(page.getByText('籤を一回使います。よろしいですか。')).toBeVisible()
+  await page.getByRole('button', { name: '三星をひらく' }).click()
+  await expect(page.getByText('籤を一回使い、候補三柱を保存します。')).toBeVisible()
   await page.getByRole('button', { name: 'この籤をひらく' }).click()
-  await expect(page.getByText('第1籤', { exact: true })).toBeVisible()
-  const drawsUsed = await page.evaluate(() => (window as never as GameWindow).__game.store.getState().data.starLottery?.drawsUsed)
-  expect(drawsUsed).toBe(1)
+  await expect(page.getByText(/^第1籤・/)).toBeVisible()
+  await expect(page.locator('.star-lottery-candidate-select')).toHaveCount(3)
+  const candidate = page.locator('.star-lottery-candidate-select').first()
+  await candidate.focus()
+  await candidate.press('Enter')
+  const choose = page.getByRole('button', { name: 'この星を選ぶ' })
+  expect((await choose.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44)
+  await choose.click()
+  await expect(page.getByText(/で確定します/)).toBeVisible()
+  await page.getByRole('button', { name: '縁を結ぶ' }).click()
+  const result = await page.evaluate(() => {
+    const lottery = (window as never as GameWindow).__game.store.getState().data.starLottery
+    return { drawsUsed: lottery?.drawsUsed, pending: lottery?.pendingV2, history: lottery?.history.length }
+  })
+  expect(result).toEqual({ drawsUsed: 1, pending: undefined, history: 1 })
+  await expect(page.locator('.star-lottery-grid > button.owned')).toHaveCount(1)
+  await expect(page.locator('.star-lottery-grid > button')).toHaveCount(1)
+  await expect(page.locator('.star-lottery-grid > .unknown')).toHaveCount(179)
+  expect(await page.locator('.star-lottery-grid > .unknown').evaluateAll((nodes) => (
+    nodes.every((node) => (node as HTMLElement).tabIndex === -1)
+  ))).toBe(true)
 })

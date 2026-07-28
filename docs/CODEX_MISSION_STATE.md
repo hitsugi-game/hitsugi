@@ -1,65 +1,76 @@
-# CODEX MISSION STATE — M47C 戦闘予告信頼性と中盤難易度計測
+# CODEX MISSION STATE — M60 全改善・音楽強化・本番公開
 
 ## ①契約
 
-- Definition of done: 実行を予約しない戦闘兆しを明示的な「行動候補」にして虚偽の確定表示をなくし、灯警告を実機構と一致させた後、中盤PTと実floor由来のHP/MP・灯持越し連戦で中盤難易度を実測する。必要と証明された場合だけ最小調整し、全検証・独立監査・Ship Check・main push・GitHub Pages公開確認まで完了する。
-- Out of scope: 新規敵/地域/画像/通貨/FOMO、全戦闘オートの制限、月コスト変更、作業4以降の操作圧縮・ボス反応AI・隊列操作・敵影同期。
-- Constraints: 作業順はWork2→Work3。固定seed 200件とDOM検査で、非拘束兆しが候補表示され確定を装わないことを固定する。中盤計測前に敵数値を触らない。一律強化や死亡率引上げでなく非致死的圧力を優先する。公開セーブを開かない。
-- Permission boundary: ユーザーは実装・commit・main push・deployを明示承認。既存dirty 3ファイル、費用、外部サービス、破壊操作、別repoは対象外。
-- Escalation: 認証不能、公開gate失敗、既存save破損、または計測が戦闘式全面改変を要求する場合だけ停止する。
-- Audit class: independent audit。戦闘の表示契約・バランス・公開を含むため、主実装者と別コンテキストでblocking 0を確認する。
-- Subjective acceptance: 「楽しい」は未証明とし、予告表示契約、勝率、瀕死率、HP/MP消費、灯枯れ、撤退余地を機械実測する。実プレイヤー30分pilotは公開後の外部gateとして分離する。
+- Definition of done: M59台帳のうちコード・設定・自動検証で実現可能なP0〜P2、M57/M58、適応型音楽強化を段階実装し、全機械gate、代表実ブラウザ、性能/保存回帰、fresh独立監査、Ship Check、main push、Pages公開bundle確認まで完了する。
+- Out of scope: 実在する初見8名・一世代5名の代行、物理端末の代行、未確認素材の権利承認、課金/FOMO/P3量産凍結項目、外部analytics送信。
+- Constraints: 既存M57/M58/M59 dirty差分を保護する。M58、M57 UI、灯芯手入れ経済を別gateで扱う。全戦闘オート、既存報酬、M54 map-native、M53 battle-firstを維持する。
+- Permission boundary: ユーザーは本missionのcommit、main push、本番デプロイを明示承認済み。外部analytics、参加者募集、権利承認、課金は未承認。
+- Escalation: 人間、物理端末、権利者が必要なgateは保留へ残し、headless/seed testで代替したと主張しない。blockingが残る機能はdefault-offまたは非公開とする。
+- Audit class: independent audit。公開・save migration・報酬/戦闘・音響・CIを含むため、最終成果をfresh reviewerとShip Checkで監査する。
+- Subjective acceptance: 魅力/音楽は反復変奏数、10分scheduler、場面/地域/世代差、情報の視覚併記、初見課題、実ブラウザ音響stateへ変換する。
 
 ## ②作業分解
 
-| Item | Dependency | Execution path | Acceptance check | Status |
+| Item | Dependency | Owner / execution path | Acceptance check | Status |
 |---|---|---|---|---|
-| A. 現状・契約監査 | brief/GDD/code | main + explorers | 不一致経路、現行sim欠落、dirty境界をfile:lineで確定 | completed |
-| B. Work2 予告修復 | A | main | 固定seed 200件で全兆しを非拘束候補として固定、群れ逃走反映、灯文言と機構一致 | completed |
-| C. Work3 計測器 | B | main | 中盤PT、HP/MP持越し連戦、灯枯れ/主代わり/語り部を測定 | completed |
-| D. 計測後調整 | C | main | 測定証拠が必要性を示す場合だけ限定変更、既存回帰維持 | completed |
-| E. 正典・全検証 | B-D | main | GDD/STATUS/WORKLOG、tsc/lint/data/Vitest/build/Playwright | completed |
-| F. 独立監査・Ship Check | E | fresh reviewer + main | 契約全項目blocking 0、SHIP系判定 | completed |
-| G. 公開 | F | main | 対象限定commit、main push、Actions success、公開HTTP/marker確認 | completed |
+| A. 境界・baseline固定 | AGENTS/GDD/STATUS/M59/git/live | root | dirty hash、公開HEAD、権限、外部gateを記録 | completed |
+| B. Wave 0A/0B | A | root + save_resilience | M58分離、SaveResult、safe storage、root復旧、第三者request 0 | completed |
+| C. Wave 0C/1 | A | ux_mobile + root | 8px解消、1/2/4/8人、200%表示、灯芯100 seed非劣化 | completed |
+| D. M55探索 | B,C | root | Phase Aの自動検証可能範囲、checkpoint決定論、M54不変、PC/mobile | completed（人間観察は外部hold） |
+| E. M56星籤/主戦 | B | root | 4 blocker閉鎖、実確率、save-first三択、主3体400 seed | completed |
+| F. M45継承/収集 | B,C | root | 約束/記憶/家宝pilot、強制queue純増0、非FOMO | completed（神縁・地域拡張は外部hold） |
+| G. 音楽強化 | A | audio_enhance | 10分変奏、世代/地域/場面差、timer leak 0、PC/mobile | completed |
+| H. Release/性能/rights | B〜G | root | PR gate、browser smoke、bundle予算、BOM、未確認rights分離 | completed（管理者・物理計測は外部hold） |
+| I. 統合検証・自己修復 | B〜H | root | lint/data/closure/manifest/Vitest/build/Playwright/性能 | completed |
+| J. 独立監査・Ship Check | I | fresh reviewer + root | blocking 0、SHIP以上 | completed |
+| K. 公開 | J | root | scoped commit、main push、Actions success、公開marker/HTTP 200 | in_progress |
 
 ## ③完了済み
 
-- 2026-07-26T12:00+09:00: ユーザーがA（Work2→Work3）と実装・デプロイを明示承認。
-- 2026-07-26T12:20+09:00: 前段M47B遠征checkpointはローカルcommit、全Vitest 769、M47B Playwright PC/mobile 4/4まで完了。公開前の履歴整理を前提に本missionを開始。
-- dirty worktreeは`src/ui/layout/shell.tsx`、`src/ui/layout/shell_fix_m29.css`、`tests/visual/narrative_m34.spec.ts`の3件。所有外として保持し、stage/commitしない。
+- 2026-07-28T21:00+09:00: `$mission`契約、Goal、7段階planを開始。公開権限とanalytics非承認を分離した。
+- 2026-07-28T21:00+09:00: `HEAD=origin/main=afc42e6`、既存dirty 17 tracked + M59新規文書1を確認。M57/M58/M59以外の既知scope混入なし。
+- 2026-07-28T21:00+09:00: save/storage、mobile UI、音楽を重複しない所有範囲で3 workerへ委譲した。
+- 2026-07-28T23:00+09:00: SaveResult/fingerprint、検証済みmain/BAK、storage拒否を吸収するsafe adapterと非保存のin-memory play、root recovery、Title先行＋全route lazy、PR/main共通release gate、性能予算、公開asset BOMを統合した。
+- 2026-07-28T23:00+09:00: M57/M58、mobile戦闘、一族1/2/4/8人grid、灯芯100+100 seed、三星択一、主戦三体×方針×400 seed、三品の家宝額を統合した。
+- 2026-07-28T23:00+09:00: 既存ブラウザ合成音楽を23画面・地域・季節・世代・物語・戦況の長周期変奏へ拡張し、三段階の重なりと現在曲／変奏名を可視化した。
+- 2026-07-28T23:15+09:00: fresh UX監査の6 P1を限定修正。Dungeon地域ラスター0、変奏名live購読、未所持星札Tab停止0、敵札／兆し操作分離、46px操作面、家宝候補続きを閉じた。正典のM56旧状態矛盾も同期した。
+- 2026-07-28T23:40+09:00: 全Vitest 59 files/826 tests、audit 0、lint、data 0/0、closure 69、manifest 9、BOM public/dist 2,825、build 890 modules、初期JS 74,281 gzip bytes、CSS 21,115 gzip bytes、重点5幅E2Eへ合格。
+- 2026-07-28T23:40+09:00: fresh技術監査はP0 0/P1 0/blocking 0、`SHIP-with-notes`。noteは初期予算外の500kB超後続chunk分割のみで、本releaseの阻害ではない。
 
 ## ④保留リスト
 
-- 実プレイヤー30分pilot、初見8名、一世代5名、低性能物理端末は外部gate。機械計測によるローカル/公開完了を妨げないが、魅力度向上の効果主張には使わない。
+- 初見8名、一世代5名、低性能PC/Android/iPhone、NVDA/VoiceOver実利用は外部gate。自動testとPlaywrightで実行可能部分を先行する。
+- `face_*`と神MAXの生成モデル系譜は所有者/法務gate。BOMへpendingとして登録し、clearedへ偽昇格しない。
+- GitHub Organizationのbranch ruleset/Environment reviewerは管理者設定gate。workflow側のPR checkとsmokeは実装可能。
+- 共有staging URLは未構築。PRでは同一gateとPages artifactを生成するが、本番と別の閲覧URLは管理者判断を待つ。
+- M55 Phase B/C、四地域の人間観察、神縁12柱、地域怪異、宿敵拡張は外部baseline合格後の別pilotとし、本releaseへ偽装同梱しない。
 
 ## ⑤質問キュー
 
-- なし。作業順とdeploy権限はユーザー回答済み。
+- 非クリティカル: 外部初見テストと物理端末テストの実施日程は公開後に所有者と決める。
 
 ## ⑥マイルストーン履歴
 
-- M47C-0: Mission契約、Goal、6段階plan、Work2/3の並行読み取り監査を開始。
-- M47C-1: 予告と実行が別RNG列になる4経路、士気逃走上書き、灯15%がUI専用で実機構は40%/0%境界であることをfile:lineで確定。
-- M47C-2: 全兆しを非拘束候補へ変更し、逃走候補・灯40%/0%を単一情報源化。focused Vitest 20、Battle/Dungeon各5幅に合格。
-- M47C-3: 中盤実Character fixtureと持越しsimを追加。初回監査で固定5戦と深度6を合成した非実在fixtureを撤回し、実マップの敵影数5/6/7/8/2をengine/simで共通化。400 seedの実帰還線floor 3で素手瀕死70.5%、戦術完遂100%を観測し、計測後X=60%を採用。敵数値変更なしでgate合格。
-- M47C-4: 初回全gateはVitest 53 files/782、build、lint、data 0 errors、closure 69、manifest 9、Playwright戦闘15/15、灯5/5、M47B/AR1 13 pass/1 intended skip。初回独立監査のNO-SHIPを受け、実floor計測とcheckpoint参照検証を自己修復。修復後focused 4 files/47 testsは合格し、全gate再実行中。
-- M47C-5: 修復後の型検査、lint、data 0 errors/既存warn 1、closure 69、manifest 9、全Vitest 53 files/783、production buildに合格。Playwrightは戦闘15/15、灯5/5、checkpoint 4/4、AR1 PC/mobile 9 pass/1 intended skip。
-- M47C-6: 独立2系統がSHIP-with-notes/blocking 0。ローカル絶対パス入り未push履歴をautosquashし、指定dirty 3件をdiff hash一致で復元。M47B `10c5b35`、M47C `c6e06f6`をmainへpushし、Actions run `30188332927`のbuild/deployが成功。公開HTML/JS/CSSはHTTP 200、bundle `index-B_r6ojIm.js`で「行動候補」「確定ではない」「敵影が速まり」を確認した。
+- M60-0: 契約・Goal・plan・三系統実装を開始。
+- M60-1: 保存／起動／mobile／M57／M58／M56／収集／音楽／release基盤を統合。
+- M60-2: fresh技術・UX監査の保存救出、WebKit音響、兆し計測、探索画像、操作構造、収集末尾の欠陥を限定修正。
+- M60-3: source freeze後の全機械gate、重点E2E、fresh独立監査を閉鎖。公開工程へ移行。
 
 ## ⑦次の一手
 
-- 公開後の外部gateとして、初見8名・一世代5名・30分pilotを別途実施する。今回の実装・公開missionは完了。
+- scoped commitを作成しmainへpushする。GitHub Actionsのverify/deploy成功後、公開HTMLと再帰的JS/CSS chunk、commit markerを直接検証する。
 
 ## ⑧最終監査表
 
-- **監査種別**: independent audit。初回NO-SHIPの3件を自己修復し、最終はSHIP-with-notes / blocking 0。
-- ✅ Work2: 固定seed 200、候補DOM、灯境界、5幅に合格。
-- ✅ Work3: 実floor由来の中盤連戦400 seed、tier3全11主、旧elite分離、主代わり4条件を測定。
-- ✅ 調整判断: X=60%、戦術完遂100%。現行敵数値で合格したため一律調整を見送り。
-- ✅ 回帰/実ブラウザ: 修復後53 files/783と影響範囲33 pass/1 intended skip。
-- ✅ 独立監査/Ship Check: fresh 2系統でblocking 0。npm audit 0、公開差分/履歴の絶対パス・秘密・PII候補0。
-- ✅ commit/push/deploy: M47B `10c5b35`、M47C `c6e06f6`、Actions `30188332927`、公開HTML/JS/CSSと3 markerを確認。
+- **監査種別**: independent audit + Ship Check。
+- ✅ M59実装可能項目: 実装完了。外部・権利・管理者gateは保留へ分離。
+- ✅ 音楽強化: 23画面・長周期変奏・live表示・timer清掃を実装。
+- ✅ 全機械/ブラウザ/性能gate: source freeze後に合格。
+- ✅ 独立監査blocking 0: P0 0/P1 0、SHIP-with-notes。
+- ⚠️ main公開とproduction確認: 未実施。
+- ✅ 権限境界: deploy承認あり、analytics/権利/外部参加者は未承認として分離。
 
 ## ⑨terminal印
 
-完了 — 2026-07-26T13:50+09:00。実装・検証・独立監査・main公開・HTTP確認済み。
+稼働中 — 2026-07-28T23:40+09:00。全gateと独立監査を閉鎖し、main公開とproduction確認を実行中。
