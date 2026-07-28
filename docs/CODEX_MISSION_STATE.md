@@ -24,7 +24,7 @@
 | H. Release/性能/rights | B〜G | root | PR gate、browser smoke、bundle予算、BOM、未確認rights分離 | completed（管理者・物理計測は外部hold） |
 | I. 統合検証・自己修復 | B〜H | root | lint/data/closure/manifest/Vitest/build/Playwright/性能 | completed |
 | J. 独立監査・Ship Check | I | fresh reviewer + root | blocking 0、SHIP以上 | completed |
-| K. 公開 | J | root | scoped commit、main push、Actions success、公開marker/HTTP 200 | in_progress |
+| K. 公開 | J | root | scoped commit、main push、Actions success、公開marker/HTTP 200 | completed |
 
 ## ③完了済み
 
@@ -37,6 +37,8 @@
 - 2026-07-28T23:15+09:00: fresh UX監査の6 P1を限定修正。Dungeon地域ラスター0、変奏名live購読、未所持星札Tab停止0、敵札／兆し操作分離、46px操作面、家宝候補続きを閉じた。正典のM56旧状態矛盾も同期した。
 - 2026-07-28T23:40+09:00: 全Vitest 59 files/826 tests、audit 0、lint、data 0/0、closure 69、manifest 9、BOM public/dist 2,825、build 890 modules、初期JS 74,281 gzip bytes、CSS 21,115 gzip bytes、重点5幅E2Eへ合格。
 - 2026-07-28T23:40+09:00: fresh技術監査はP0 0/P1 0/blocking 0、`SHIP-with-notes`。noteは初期予算外の500kB超後続chunk分割のみで、本releaseの阻害ではない。
+- 2026-07-29T00:02+09:00: 実装commit `0fc8156`をmainへpush。GitHub Actions run `30369615092`は全release gateとPages deployに成功した。
+- 2026-07-29T00:02+09:00: 公開HTMLと参照される55 JS/CSS/deferred resourcesを再帰検証し、全てHTTP 2xx、commit marker `0fc8156`一致、公開URL HTTP 200を確認した。
 
 ## ④保留リスト
 
@@ -59,7 +61,7 @@
 
 ## ⑦次の一手
 
-- scoped commitを作成しmainへpushする。GitHub Actionsのverify/deploy成功後、公開HTMLと再帰的JS/CSS chunk、commit markerを直接検証する。
+- 外部holdを解く場合は、初見8名／一世代5名、物理端末、アクセシビリティ、権利系譜、共有stagingを個別mission化する。現行公開版の機械的release gateは閉鎖済み。
 
 ## ⑧最終監査表
 
@@ -68,9 +70,9 @@
 - ✅ 音楽強化: 23画面・長周期変奏・live表示・timer清掃を実装。
 - ✅ 全機械/ブラウザ/性能gate: source freeze後に合格。
 - ✅ 独立監査blocking 0: P0 0/P1 0、SHIP-with-notes。
-- ⚠️ main公開とproduction確認: 未実施。
+- ✅ main公開とproduction確認: commit `0fc8156`、Actions `30369615092`、公開55資産2xx、marker一致。
 - ✅ 権限境界: deploy承認あり、analytics/権利/外部参加者は未承認として分離。
 
 ## ⑨terminal印
 
-稼働中 — 2026-07-28T23:40+09:00。全gateと独立監査を閉鎖し、main公開とproduction確認を実行中。
+完了 — 2026-07-29T00:02+09:00。実装、全gate、独立監査、main公開、GitHub Pages配信、公開資産とcommit markerの実測確認を完了。外部holdは完了を偽装せず分離した。

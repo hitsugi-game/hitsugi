@@ -29,9 +29,9 @@
 | `npm run report:performance` | PASS target-enforced ceilings; initial transfer JS 234,024 bytes / 74,281 gzip bytes and initial CSS 97,376 bytes / 21,115 gzip bytes; 250 KiB JS target met |
 | Targeted visual closure | PASS: exploration 5, live music label 1, star tab order 2, target selection 2, intent 3, family 12, heirloom 6 |
 | `npm run test:release-smoke` | PASS, production build on Chromium/Firefox desktop + WebKit mobile 15/15 |
-| `node scripts/verify_deployment.mjs https://hitsugi-game.github.io/hitsugi/ afc42e688a9c98799b382dbd3ea4416917bf1637` | PASS against the currently deployed baseline, HTML plus 17 JS/CSS/deferred resources HTTP 2xx and commit marker `afc42e6` matched |
+| `node scripts/verify_deployment.mjs https://hitsugi-game.github.io/hitsugi/ 0fc8156eb71f753a83fa7cdb95102d2595a1c4c4` | PASS after Actions run `30369615092`, HTML plus 55 JS/CSS/deferred resources HTTP 2xx and commit marker `0fc8156` matched |
 
-The release smoke uses the production build and covers Title → Home → Pact, damaged main/BAK, verified BAK restore, failed lazy chunk root recovery, and storage-denied non-saving play through Home. The deployment row above remains the previous public baseline until the M60 commit is pushed; it will be replaced with the deployed M60 SHA and Actions run after publication.
+The release smoke uses the production build and covers Title → Home → Pact, damaged main/BAK, verified BAK restore, failed lazy chunk root recovery, and storage-denied non-saving play through Home. The same candidate was published by Actions run `30369615092`; its public HTML, recursive bundle graph, and commit marker were verified after deployment.
 
 Fresh independent audit after source freeze: **P0 0 / P1 0 / blocking 0 / SHIP-with-notes**. The only non-blocking note is additional splitting of deferred chunks over 500 kB; initial-transfer budgets already pass.
 

@@ -1559,3 +1559,9 @@
 - **状態同期**: STATUSのM56「runtime未実装」を、M60実装済みの現在と設計当時の履歴が矛盾しない表記へ変更。M60 stateは外部、人間、物理端末、権利、Organization、staging URLをholdのまま維持する。
 - **source freeze後の全検証**: npm audit 0、lint、data 0 errors/0 warnings、closure 69、manifest 9、public/dist BOM 2,825、全Vitest 59 files/826 tests、production build 890 modules、初期JS 74,281 gzip bytes、初期CSS 21,115 gzip bytes、dist 255,926,975 bytesへ合格。production bundleを使うChromium/Firefox desktop＋WebKit mobileは、正常導線、破損save、正常BAK復旧、lazy chunk失敗、storage拒否下の郷到達を15/15で合格した。
 - **最終独立監査**: fresh技術監査はP0 0/P1 0/blocking 0、`SHIP-with-notes`。noteは初期transfer外の500kB超後続chunkの追加分割だけで、250KiB初期JS・64KiB CSS予算は合格済みのため本releaseの阻害ではない。
+
+## 2026-07-29（M60 本番公開）
+
+- **出荷commit**: M56〜M60のruntime、UI、保存、音楽、release基盤、正典、回帰test、証拠を`0fc8156`へ限定stageし、`feat: ship M60 trust collection and adaptive audio`としてmainへpushした。機密らしき代入0、`git diff --cached --check`合格、scope外の生成artifactは追跡対象外。
+- **CI**: GitHub Actions run `30369615092`でnpm audit、lint、data、closure、manifest、BOM、59 files/826 Vitest、build、性能予算、Chromium/Firefox desktop＋WebKit mobile 15/15を再実行し、verify/deployとも成功した。
+- **本番実測**: `https://hitsugi-game.github.io/hitsugi/`はHTTP 200。公開HTMLから再帰取得した55 JS/CSS/deferred resourcesは全てHTTP 2xx、埋込commit markerは`0fc8156`と一致した。M60を公開済みへ更新し、初見利用者、物理端末、支援技術、権利系譜、Organization ruleset、共有stagingは外部holdのまま分離した。

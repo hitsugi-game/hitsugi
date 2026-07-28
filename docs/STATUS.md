@@ -1,16 +1,16 @@
-# 開発ステータス(2026-07-28 更新)
+# 開発ステータス(2026-07-29 更新)
 
 **2026-07-22 runtime実測**: 神180柱・敵579体（通常基礎180＋若/老変異＋主39）・装備810・辞世1370・事件282・地域40・配信画像2825点。**次の制約は物量でなく、初回30分・戦闘の対処差・初代継承・実利用計測・公開前検証**。M42監査の正本は`docs/PRODUCT_IMPROVEMENT_AUDIT_M42_20260722.md`。
 
 ## 直近の公開修正
 
-- **M60 統合改善（release candidate・公開待ち）**: 保存を検証付き結果へ変更し、storage拒否／破損save／root例外から復旧できる入口を追加。タイトル先行＋全route遅延読込で初期JSを74,281 gzip bytesへ削減。戦闘mobile可読性、一族1/2/4/8人grid、M57/M58、三星択一、主戦「止・受・崩」三体、三品の家宝額を統合した。音楽は23画面・地域・季節・世代・物語・戦況を10分超の決定論的変奏へ反映し、三段階の豊かさとlive変奏名を追加。探索はM54の地域ラスター取得0へ戻した。全戦闘オート、M53 battle-first、既存報酬、非FOMOを維持する。全Vitest 59 files/826、機械gate、重点5幅、production Chromium/Firefox/WebKit release smoke 15/15へ合格。独立監査P0/P1 0、blocking 0、SHIP-with-notes。main公開と公開bundle確認後に公開済みへ更新する。
+- **M60 統合改善（公開済み）**: 保存を検証付き結果へ変更し、storage拒否／破損save／root例外から復旧できる入口を追加。タイトル先行＋全route遅延読込で初期JSを74,281 gzip bytesへ削減。戦闘mobile可読性、一族1/2/4/8人grid、M57/M58、三星択一、主戦「止・受・崩」三体、三品の家宝額を統合した。音楽は23画面・地域・季節・世代・物語・戦況を10分超の決定論的変奏へ反映し、三段階の豊かさとlive変奏名を追加。探索はM54の地域ラスター取得0へ戻した。全戦闘オート、M53 battle-first、既存報酬、非FOMOを維持する。全Vitest 59 files/826、機械gate、重点5幅、production Chromium/Firefox/WebKit release smoke 15/15へ合格。独立監査P0/P1 0、blocking 0、SHIP-with-notes。実装`0fc8156`、Actions run `30369615092`でPages公開成功。公開HTMLと55 JS/CSS/deferred resourcesのHTTP 2xx、commit marker一致を確認済み。
 
 - **M59 残改善余地の多角監査（達成・ローカル文書・runtime未変更）**: 正典・実装・test・公開bundle・CI・配信量・既存監査をgameplay/UX/technicalの3系統で照合。P0をM58単独公開可能化、mobile核心情報、外部baseline、root/storage/save import信頼へ限定。M57はUI/layoutと灯芯手入れ経済を分け、後者を100 seed非劣化gate付きP1とした。release/性能/M55 Phase A/M56 blocking・Phase A/visual rightsも段階化した。M47〜M49とM47Bの古い未公開表記は公開実態へ同期。独立Round 1の3 blockingを限定修正し、最終closure blocking 0。正本は`docs/PRODUCT_IMPROVEMENT_BACKLOG_M59_20260728.md`。実装、commit、push、deploy、外部送信なし。
 
-- **M58 成人・生業の儀の帰郷導線（ローカル実装・未公開）**: 成人の儀と生業の儀の選択前／確認前に「← 郷へ戻る」を常設し、未決定の儀を既存の「灯の余白」へ保存して同じ人物から再開できるようにした。選択確定、月送り、人物成長は発生しない。全Vitest 54 files/793 tests、Playwright共有scene 5幅20/20、lint、data、closure69、manifest9、production buildに合格。commit/push/deployなし。
+- **M58 成人・生業の儀の帰郷導線（M60で公開済み）**: 成人の儀と生業の儀の選択前／確認前に「← 郷へ戻る」を常設し、未決定の儀を既存の「灯の余白」へ保存して同じ人物から再開できるようにした。選択確定、月送り、人物成長は発生しない。M60の全release gateとActions run `30369615092`を通して公開済み。
 
-- **M57 決断導線・灯芯手入れ・家譜見開き（ローカル実装・未公開）**: 「決断を見る」を上端位置＋有効カードfocus＋1.6秒の金縁応答へ修正。選択中の一人へ奉燈15で最大MP30%を戻す、月を送らない「灯芯手入れ」を追加した。一族欄はPCで当代の記／家譜札＋血脈診断の見開き、モバイルで縦組みへ再編。focused Vitest 17、Playwrightの決断PC 1/1、一族PC1280/mobile390 4/4、lint、buildに合格。commit/push/deployなし。
+- **M57 決断導線・灯芯手入れ・家譜見開き（M60で公開済み）**: 「決断を見る」を上端位置＋有効カードfocus＋1.6秒の金縁応答へ修正。選択中の一人へ奉燈15で最大MP30%を戻す、月を送らない「灯芯手入れ」を追加した。一族欄はPCで当代の記／家譜札＋血脈診断の見開き、モバイルで縦組みへ再編。M60の100+100 seed資源経済gate、全release gate、Actions run `30369615092`を通して公開済み。
 
 - **M54 探索地図のmap-native化（公開済み）**: M53の探索側を再修正し、右上の水没施設画と根のラスター前景を表示だけでなく読込経路から撤去。元のTileKind地図を主役に戻し、地形内だけへ決定論的な濡れた轍、泥溜まり、水紋、小さな岸葦を追加した。探索ラスター要求0、`map-native`、texture budget 0を回帰固定。戦闘の地域背景1枚構成は維持。添付相当1782×695、PC1280/mobile390でAR1 10 pass/2 intended skip、全Vitest 789、lint/data/closure69/manifest9/buildに合格。M52は`a30b794`、M53〜M54は`b23eda0`としてmainへ公開し、Actions run `30291730297`と公開bundleのHTTP 200・`map-native`/`battle-first` markerを確認済み。
 
