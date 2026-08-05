@@ -1,0 +1,526 @@
+/* M61: 灯脈劇場 — 生成コンセプトの構図を、既存の地域一枚絵と戦絵札で実装する。
+   戦闘ロジック/報酬/操作順は変えず、battle_m47.css より後に読み込む表示層だけの差分。 */
+
+.battle-m61 {
+  --m61-ink: rgba(4, 7, 12, .94);
+  --m61-lacquer: rgba(13, 12, 13, .95);
+  --m61-brass: rgba(201, 168, 106, .58);
+  --m61-paper: #e8ddc8;
+  grid-template-rows: 58px minmax(0, 1fr) clamp(204px, 25vh, 246px);
+  background: #05070d;
+  color: var(--m61-paper);
+}
+
+/* ── 上段: 肖像付きの行動順を一本の組紐として読む ── */
+.battle-m61 .battle-top-rail {
+  gap: 12px;
+  padding: 4px 68px 4px 14px;
+  border-bottom-color: rgba(201, 168, 106, .42);
+  background:
+    linear-gradient(90deg, rgba(29, 21, 15, .88), rgba(5, 8, 14, .94) 30% 72%, rgba(29, 18, 12, .78)),
+    #05070d;
+  box-shadow: 0 5px 24px rgba(0, 0, 0, .46), inset 0 -1px rgba(255, 226, 170, .05);
+}
+.battle-m61 .battle-top-rail .turn-order {
+  position: relative;
+  z-index: 1;
+  gap: 8px;
+  padding: 2px 4px;
+  align-items: center;
+}
+.battle-m61 .turn-order-turn {
+  flex: 0 0 auto;
+  min-width: 78px;
+  color: #dfba72;
+  font-size: 16px;
+  letter-spacing: .18em;
+  text-shadow: 0 0 12px rgba(232, 163, 61, .22);
+}
+.battle-m61 .battle-top-rail .turn-chip {
+  position: relative;
+  flex: 0 1 126px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-width: 58px;
+  height: 44px;
+  max-width: 126px;
+  padding: 3px 8px 3px 3px;
+  border: 1px solid rgba(201, 168, 106, .32);
+  border-radius: 4px 12px 4px 12px;
+  background: linear-gradient(145deg, rgba(31, 26, 23, .96), rgba(7, 10, 16, .94));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .34);
+  overflow: visible;
+}
+.battle-m61 .battle-top-rail .turn-chip.is-enemy {
+  border-color: rgba(177, 64, 59, .46);
+  background: linear-gradient(145deg, rgba(39, 19, 20, .96), rgba(7, 10, 16, .94));
+}
+.battle-m61 .battle-top-rail .turn-chip.is-now {
+  flex-basis: 148px;
+  max-width: 148px;
+  border-color: #e8a33d;
+  box-shadow: 0 0 0 1px rgba(255, 218, 151, .12), 0 0 18px rgba(232, 163, 61, .34);
+}
+.battle-m61 .turn-chip-portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  transform: rotate(45deg);
+  border: 1px solid rgba(223, 186, 114, .58);
+  background: #11131a;
+}
+.battle-m61 .turn-chip-portrait img {
+  width: 52px;
+  height: 52px;
+  max-width: none;
+  object-fit: cover;
+  transform: rotate(-45deg) scale(1.08);
+  filter: saturate(.72) contrast(1.08) brightness(.84);
+}
+.battle-m61 .turn-chip-portrait > i {
+  position: absolute;
+  z-index: 0;
+  transform: rotate(-45deg);
+  color: #c9a86a;
+  font-size: 13px;
+  font-style: normal;
+}
+.battle-m61 .turn-chip-copy {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  justify-content: start;
+  gap: 3px;
+  min-width: 0;
+}
+.battle-m61 .turn-chip-copy b {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: #e9deca;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.battle-m61 .turn-chip-copy em,
+.battle-m61 .turn-chip-copy .turn-chip-side {
+  color: #c3aa79;
+  font-size: 8px;
+  font-style: normal;
+  line-height: 1;
+}
+.battle-m61 .turn-chip-copy em { color: #ffca75; font-weight: 800; }
+.battle-m61 .turn-order-more { display: none; }
+
+/* ── 中央: 一枚の地域画を舞台化し、戦絵札を地面へ接地する ── */
+.battle-m61 .battle-stage {
+  isolation: isolate;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(201, 168, 106, .26);
+  background: #070b11;
+  box-shadow: inset 0 -40px 58px rgba(0, 0, 0, .34);
+}
+.battle-m61 .battle-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 82%, rgba(201, 168, 106, .1), transparent 38%),
+    linear-gradient(90deg, rgba(3, 5, 9, .48), transparent 25% 75%, rgba(3, 5, 9, .48)),
+    linear-gradient(180deg, rgba(3, 5, 9, .18), transparent 38%, rgba(3, 5, 9, .58));
+  pointer-events: none;
+}
+.battle-m61.battle-visual-v2 .ar1-stage-region-art {
+  inset: -3%;
+  background-position: center 58%;
+  filter: saturate(.72) brightness(.58) contrast(1.08);
+  transform: scale(1.035);
+}
+.battle-m61.battle-visual-v2 .ar1-stage-night {
+  background:
+    linear-gradient(90deg, rgba(5, 7, 13, .46), rgba(5, 7, 13, .03) 28% 72%, rgba(5, 7, 13, .48)),
+    linear-gradient(180deg, rgba(5, 7, 13, .38), transparent 38%, rgba(5, 7, 13, .2) 66%, rgba(5, 7, 13, .78));
+}
+.battle-m61 .stage-battlers {
+  z-index: 2;
+  grid-template-columns: 44% 12% 44%;
+  align-items: end;
+  width: 100%;
+  max-width: 1360px;
+  padding: clamp(46px, 7vh, 76px) 22px 10px;
+}
+.battle-m61 .enemy-side,
+.battle-m61 .ally-side {
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 6px 4px;
+}
+.battle-m61 .enemy-grid,
+.battle-m61 .ally-grid {
+  align-items: end;
+  align-content: end;
+  column-gap: clamp(10px, 1.2vw, 18px);
+  row-gap: 3px;
+}
+.battle-m61 .battle-art-frame {
+  width: clamp(122px, 10vw, 154px);
+  border-radius: 3px 12px 3px 12px;
+  border-color: rgba(201, 168, 106, .5);
+  background: linear-gradient(155deg, rgba(31, 25, 20, .82), rgba(5, 8, 13, .88));
+  box-shadow: 0 16px 28px rgba(0, 0, 0, .56), inset 0 0 0 1px rgba(255, 235, 196, .035);
+}
+.battle-m61 .enemy-grid.slot-preset-1 .battle-art-frame,
+.battle-m61 .ally-grid.slot-preset-1 .battle-art-frame { width: clamp(194px, 16vw, 232px); }
+.battle-m61 .enemy-grid.slot-preset-2 .battle-art-frame,
+.battle-m61 .ally-grid.slot-preset-2 .battle-art-frame { width: clamp(158px, 13vw, 190px); }
+.battle-m61 .enemy-boss-slot .battle-art-frame { width: clamp(218px, 19vw, 282px); }
+.battle-m61 .battle-art-frame .baf-inner {
+  inset: 4%;
+  border-radius: 1px 8px 1px 8px;
+}
+.battle-m61 .battle-art-frame .baf-shade {
+  height: 34%;
+  background: linear-gradient(180deg, transparent, rgba(5, 7, 13, .28) 52%, rgba(5, 7, 13, .72));
+}
+.battle-m61 .combatant.is-enemy .battle-art-frame {
+  border-color: rgba(153, 73, 68, .58);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, .58), 0 0 22px rgba(108, 29, 28, .08);
+}
+.battle-m61 .combatant.is-ally .battle-art-frame {
+  border-color: rgba(201, 168, 106, .55);
+}
+.battle-m61 .combatant-art-wrap::after {
+  content: '';
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  bottom: -9px;
+  height: 16px;
+  z-index: -1;
+  border: 1px solid rgba(201, 168, 106, .2);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(3, 5, 9, .8), transparent 72%);
+  pointer-events: none;
+}
+.battle-m61 .combatant-plate {
+  box-sizing: border-box;
+  width: calc(100% - 8px);
+  max-width: 100%;
+  margin-top: 6px;
+  padding: 3px 6px 4px;
+  border: 1px solid rgba(201, 168, 106, .34);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(8, 10, 15, .9), rgba(5, 7, 11, .96));
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .4);
+}
+.battle-m61 .combatant-name {
+  display: block;
+  overflow: hidden;
+  color: #e9deca;
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.battle-m61 .combatant-plate .bar { height: 14px; margin-top: 2px; }
+.battle-m61 .combatant.acting::before {
+  content: '';
+  top: 3%;
+  width: 84%;
+  height: 74%;
+  border: 1px solid rgba(255, 183, 82, .48);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 153, 55, .2), transparent 66%);
+  box-shadow: 0 0 30px rgba(255, 137, 46, .28), inset 0 0 22px rgba(255, 190, 91, .12);
+}
+.battle-m61 .combatant.acting .battle-art-frame {
+  border-color: #f0b356;
+  filter: none;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, .58), 0 0 24px rgba(232, 163, 61, .38);
+}
+.battle-m61 .combatant.targetable:hover { transform: translateY(-3px) scale(1.035); }
+.battle-m61 .combatant.is-selected-target .battle-art-frame {
+  outline: 2px solid #e06743;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 1px rgba(255, 224, 174, .2), 0 0 30px rgba(224, 73, 49, .52);
+}
+.battle-m61 .combatant.is-selected-target::after {
+  content: '◆ 標的';
+  top: -20px;
+  border: 1px solid rgba(255, 218, 162, .44);
+  background: #a83d30;
+  color: #fff0d8;
+}
+.battle-m61 .combatant.is-enemy .enemy-intent.has-behavior {
+  max-width: min(238px, 22vw);
+  margin-bottom: 10px;
+  padding: 5px 9px 5px 8px;
+  border-radius: 3px 11px 3px 11px;
+  border-color: rgba(183, 111, 76, .6);
+  background: linear-gradient(135deg, rgba(35, 19, 18, .96), rgba(8, 10, 16, .95));
+  box-shadow: 0 7px 18px rgba(0, 0, 0, .42);
+}
+.battle-m61 .battle-log-strip {
+  z-index: 3;
+  min-height: 30px;
+  padding: 4px max(14px, calc((100vw - 1320px) / 2));
+  border-top: 1px solid rgba(201, 168, 106, .2);
+  background: linear-gradient(90deg, rgba(5, 7, 13, .96), rgba(21, 17, 15, .88) 50%, rgba(5, 7, 13, .96));
+}
+.battle-m61 .battle-log-strip-text p { color: #d7c5a7; font-size: 11px; letter-spacing: .04em; }
+.battle-m61 .battle-log-strip .log-expand { min-width: 44px; min-height: 44px; margin-block: -7px; }
+
+/* ── 下段: 漆塗りの軍議盤。PCは生成案どおり五手を横一列にする ── */
+.battle-m61 .battle-bottom {
+  width: min(1420px, calc(100% - 40px));
+  max-width: 1420px;
+  grid-template-columns: minmax(190px, 220px) minmax(560px, 1fr) minmax(210px, 244px);
+  gap: 10px;
+  padding: 10px 12px max(10px, env(safe-area-inset-bottom));
+  border-color: rgba(201, 168, 106, .42);
+  border-radius: 12px 12px 0 0;
+  background:
+    linear-gradient(110deg, rgba(92, 53, 25, .14), transparent 30% 70%, rgba(119, 46, 31, .09)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 5px),
+    rgba(5, 7, 11, .94);
+  box-shadow: 0 -12px 36px rgba(0, 0, 0, .5), inset 0 1px rgba(255, 233, 192, .05);
+}
+.battle-m61 .turnpanel-actor,
+.battle-m61 .turnpanel-center,
+.battle-m61 .turnpanel-detail {
+  border-color: rgba(201, 168, 106, .42);
+  border-radius: 3px 10px 3px 10px;
+  background:
+    linear-gradient(145deg, rgba(81, 48, 26, .17), transparent 44%),
+    linear-gradient(160deg, rgba(23, 18, 15, .97), rgba(7, 9, 13, .98));
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, .22);
+}
+.battle-m61 .turnpanel-actor-main .portrait {
+  width: 58px;
+  height: 72px;
+  border-radius: 2px 8px 2px 8px;
+}
+.battle-m61 .turnpanel-actor-main { grid-template-columns: 58px minmax(0, 1fr); }
+.battle-m61 .command-board-heading {
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(201, 168, 106, .2);
+}
+.battle-m61 .cmd-auto-persist {
+  min-height: 44px;
+  margin-bottom: 4px;
+  border-radius: 2px 8px 2px 8px;
+}
+.battle-m61 .auto-policy-chip { min-height: 38px; }
+.battle-m61 .cmd-grid .cmd-btn:not(.cmd-auto) {
+  border-radius: 2px 8px 2px 8px;
+  background:
+    linear-gradient(150deg, rgba(201, 168, 106, .1), transparent 42%),
+    linear-gradient(180deg, rgba(39, 31, 24, .95), rgba(13, 13, 15, .98));
+}
+.battle-m61 .cmd-grid .cmd-btn:not(.cmd-auto):hover:not(:disabled) {
+  border-color: #e8a33d;
+  background: linear-gradient(180deg, rgba(80, 51, 25, .95), rgba(24, 18, 16, .98));
+}
+.battle-m61 .battle-tactical-kicker { color: #d2ac67; font-size: 10.5px; }
+.battle-m61 .battle-tactical-note { color: #c2b39c; font-size: 11px; }
+
+@media (min-width: 1100px) {
+  .battle-m61 .turnpanel-center .cmd-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .battle-m61 .cmd-grid .cmd-btn:not(.cmd-auto) {
+    grid-template-columns: 1fr;
+    grid-template-rows: 34px auto;
+    justify-items: center;
+    gap: 4px;
+    min-height: 76px;
+    padding: 7px 5px 6px;
+    text-align: center;
+  }
+  .battle-m61 .cmd-grid .cmd-mark { width: 33px; height: 33px; }
+  .battle-m61 .cmd-grid .cmd-copy { justify-items: center; }
+  .battle-m61 .cmd-grid .cmd-copy small { display: block; max-width: 100%; }
+}
+
+/* Tablet: 舞台は上下二帯、軍議盤は手番+操作へ絞り説明を重複させない。 */
+@media (max-width: 1099px) and (min-width: 561px) {
+  .battle-m61 { grid-template-rows: 56px minmax(0, 1fr) clamp(220px, 31vh, 292px); }
+  .battle-m61 .battle-top-rail { padding-left: 8px; }
+  .battle-m61 .turn-order-turn { min-width: 62px; font-size: 13px; }
+  .battle-m61 .battle-top-rail .turn-chip { flex-basis: 88px; grid-template-columns: 30px minmax(0, 1fr); height: 40px; padding-left: 2px; }
+  .battle-m61 .turn-chip-portrait { width: 28px; height: 28px; }
+  .battle-m61 .turn-chip-portrait img { width: 42px; height: 42px; }
+  .battle-m61 .stage-battlers { align-items: stretch; padding: 36px 8px 4px; }
+  .battle-m61 .enemy-side,
+  .battle-m61 .ally-side { padding-block: 4px; }
+  .battle-m61 .enemy-side { justify-content: flex-end; }
+  .battle-m61 .ally-side { justify-content: flex-start; }
+  .battle-m61 .battle-art-frame { width: 72px; }
+  .battle-m61 .enemy-grid.slot-preset-1 .battle-art-frame,
+  .battle-m61 .ally-grid.slot-preset-1 .battle-art-frame { width: 96px; }
+  .battle-m61 .enemy-grid.slot-preset-2 .battle-art-frame,
+  .battle-m61 .ally-grid.slot-preset-2 .battle-art-frame { width: 84px; }
+  .battle-m61 .enemy-boss-slot .battle-art-frame { width: 128px; }
+  .battle-m61 .combatant.is-enemy .enemy-intent.has-behavior { max-width: 34vw; margin-bottom: 3px; padding-block: 3px; }
+  .battle-m61 .battle-bottom {
+    width: calc(100% - 16px);
+    grid-template-columns: minmax(160px, 190px) minmax(0, 1fr);
+    gap: 7px;
+    padding: 7px 8px 8px;
+  }
+  .battle-m61 .turnpanel-detail { display: none; }
+  .battle-m61 .cmd-grid .cmd-btn:not(.cmd-auto) { min-height: 50px; }
+}
+
+/* Phone: 情報量は落とさず、肖像→敵→味方→操作の一方向へする。 */
+@media (max-width: 560px) {
+  .battle-m61 { grid-template-rows: 52px minmax(0, 1fr) clamp(258px, 36vh, 312px); }
+  .battle-m61 .battle-top-rail { gap: 3px; padding: 3px 58px 3px 5px; }
+  .battle-m61 .battle-top-rail .turn-order { gap: 3px; padding: 1px 2px; }
+  .battle-m61 .turn-order-turn { min-width: 34px; font-size: 9px; letter-spacing: .02em; }
+  .battle-m61 .battle-top-rail .turn-chip {
+    flex: 0 0 34px;
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 34px;
+    min-width: 34px;
+    max-width: 34px;
+    height: 36px;
+    padding: 3px;
+    border-radius: 3px 9px 3px 9px;
+  }
+  .battle-m61 .battle-top-rail .turn-chip.is-now { flex-basis: 36px; width: 36px; max-width: 36px; }
+  .battle-m61 .battle-top-rail .turn-chip[data-step='2'],
+  .battle-m61 .battle-top-rail .turn-chip[data-step='3'],
+  .battle-m61 .battle-top-rail .turn-chip[data-step='4'],
+  .battle-m61 .battle-top-rail .turn-chip[data-step='5'] { display: none; }
+  .battle-m61 .turn-chip-portrait { width: 27px; height: 27px; margin: auto; }
+  .battle-m61 .turn-chip-portrait img { width: 40px; height: 40px; }
+  .battle-m61 .turn-chip-copy { position: absolute; inset: auto -3px -7px; display: block; text-align: center; }
+  .battle-m61 .turn-chip-copy b,
+  .battle-m61 .turn-chip-copy .turn-chip-side { display: none; }
+  .battle-m61 .turn-chip-copy em {
+    display: inline-block;
+    padding: 1px 4px;
+    border-radius: 6px;
+    background: #9b4f25;
+    color: #fff0d8;
+  }
+  .battle-m61 .turn-order-more {
+    position: relative;
+    z-index: 30;
+    display: block;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+  }
+  .battle-m61 .turn-order-more > summary {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(201, 168, 106, .48);
+    border-radius: 4px 10px 4px 10px;
+    background: linear-gradient(145deg, rgba(42, 31, 22, .98), rgba(8, 10, 15, .98));
+    color: #e8c57d;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    list-style: none;
+    cursor: pointer;
+  }
+  .battle-m61 .turn-order-more > summary::-webkit-details-marker { display: none; }
+  .battle-m61 .turn-order-more[open] > summary {
+    border-color: #e8a33d;
+    box-shadow: 0 0 14px rgba(232, 163, 61, .3);
+  }
+  .battle-m61 .turn-order-detail {
+    position: fixed;
+    z-index: 80;
+    top: 52px;
+    left: 8px;
+    right: 8px;
+    padding: 9px 10px 10px;
+    border: 1px solid rgba(201, 168, 106, .65);
+    border-radius: 3px 10px 3px 10px;
+    background: rgba(7, 9, 14, .98);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .7);
+  }
+  .battle-m61 .turn-order-detail ol {
+    display: grid;
+    gap: 3px;
+    margin: 7px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .battle-m61 .turn-order-detail li {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    min-height: 28px;
+    padding: 3px 7px;
+  }
+  .battle-m61 .turn-order-detail li > b { overflow: hidden; color: #eee2cf; text-overflow: ellipsis; white-space: nowrap; }
+  .battle-m61 .stage-battlers { align-items: stretch; padding: 27px 4px 2px; }
+  .battle-m61 .enemy-side { padding: 14px 3px 1px; }
+  .battle-m61 .ally-side { justify-content: flex-start; padding: 1px 3px; }
+  .battle-m61 .battle-art-frame { width: 63px; border-radius: 2px 7px 2px 7px; }
+  .battle-m61 .enemy-grid.slot-preset-1 .battle-art-frame,
+  .battle-m61 .ally-grid.slot-preset-1 .battle-art-frame { width: 84px; }
+  .battle-m61 .enemy-grid.slot-preset-2 .battle-art-frame,
+  .battle-m61 .ally-grid.slot-preset-2 .battle-art-frame { width: 75px; }
+  .battle-m61 .enemy-boss-slot .battle-art-frame { width: 108px; }
+  .battle-m61 .combatant-plate { margin-top: 2px; padding: 1px 3px 2px; }
+  .battle-m61 .slot-preset-34 .combatant-plate { width: 64px; min-width: 64px; }
+  .battle-m61 .combatant-name { font-size: 9px; }
+  .battle-m61 .combatant-plate .bar { height: 10px; }
+  .battle-m61 .combatant.is-enemy .enemy-intent.has-behavior {
+    max-width: 42vw;
+    margin-bottom: 6px;
+    padding: 2px 5px;
+    transform: none;
+  }
+  .battle-m61 .battle-log-strip { min-height: 24px; padding: 2px 7px; }
+  .battle-m61 .battle-log-strip .log-expand { min-height: 44px; margin-block: -10px; }
+  .battle-m61 .battle-bottom {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+    padding: 6px 7px max(7px, env(safe-area-inset-bottom));
+    border-radius: 9px 9px 0 0;
+  }
+  .battle-m61 .turnpanel-actor { display: none; }
+  .battle-m61 .turnpanel-center { padding: 5px 6px; }
+  .battle-m61 .auto-control-stack { grid-template-columns: minmax(0, 1.15fr) minmax(145px, .85fr); }
+  .battle-m61 .auto-policy-chips { min-width: 0; }
+  .battle-m61 .turnpanel-center .cmd-grid { flex: 0 0 auto; align-content: start; margin-top: 6px; }
+  .battle-m61 .command-board-heading { min-height: 18px; padding-bottom: 2px; }
+  .battle-m61 .cmd-auto-persist { min-height: 44px; }
+  .battle-m61 .auto-policy-chip { min-height: 44px; }
+  .battle-m61 .cmd-grid .cmd-btn:not(.cmd-auto) { min-height: 48px; }
+}
+
+@media (max-width: 375px) {
+  .battle-m61 .battle-top-rail .turn-order { gap: 2px; padding-inline: 0; }
+  .battle-m61 .turn-order-turn { min-width: 22px; max-width: 22px; font-size: 8px; letter-spacing: 0; }
+  .battle-m61 .battle-top-rail .turn-chip {
+    flex-basis: 28px;
+    width: 28px;
+    min-width: 28px;
+    max-width: 28px;
+    padding-inline: 1px;
+  }
+  .battle-m61 .battle-top-rail .turn-chip.is-now { flex-basis: 30px; width: 30px; max-width: 30px; }
+  .battle-m61 .turn-chip-portrait { width: 25px; height: 25px; }
+}

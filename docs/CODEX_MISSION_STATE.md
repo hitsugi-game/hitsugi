@@ -1,78 +1,66 @@
-# CODEX MISSION STATE — M60 全改善・音楽強化・本番公開
+# CODEX MISSION STATE — M61 戦闘舞台「灯脈劇場」実装
 
 ## ①契約
 
-- Definition of done: M59台帳のうちコード・設定・自動検証で実現可能なP0〜P2、M57/M58、適応型音楽強化を段階実装し、全機械gate、代表実ブラウザ、性能/保存回帰、fresh独立監査、Ship Check、main push、Pages公開bundle確認まで完了する。
-- Out of scope: 実在する初見8名・一世代5名の代行、物理端末の代行、未確認素材の権利承認、課金/FOMO/P3量産凍結項目、外部analytics送信。
-- Constraints: 既存M57/M58/M59 dirty差分を保護する。M58、M57 UI、灯芯手入れ経済を別gateで扱う。全戦闘オート、既存報酬、M54 map-native、M53 battle-firstを維持する。
-- Permission boundary: ユーザーは本missionのcommit、main push、本番デプロイを明示承認済み。外部analytics、参加者募集、権利承認、課金は未承認。
-- Escalation: 人間、物理端末、権利者が必要なgateは保留へ残し、headless/seed testで代替したと主張しない。blockingが残る機能はdefault-offまたは非公開とする。
-- Audit class: independent audit。公開・save migration・報酬/戦闘・音響・CIを含むため、最終成果をfresh reviewerとShip Checkで監査する。
-- Subjective acceptance: 魅力/音楽は反復変奏数、10分scheduler、場面/地域/世代差、情報の視覚併記、初見課題、実ブラウザ音響stateへ変換する。
+- **Definition of done**: 2026-08-04生成の最上位戦闘画面案が示す「左右対峙・一枚の地域舞台・全身戦絵・敵兆し・下部軍議盤」を、既存Battle runtime上の操作可能UIとして実装する。PC 1280/1440、tablet 768、mobile 390/360で入力、標的選択、技、道具、オート、結果遷移と横overflow 0を実ブラウザ検証し、型/lint/Vitest/build、fresh独立監査へ合格する。
+- **Out of scope**: 戦闘計算、敵AI、報酬率、セーブ形式、敵・人物・地域の新規量産、生成コンセプト画像そのものの配信組込み、公開デプロイ。
+- **Constraints**: 全戦闘オート、同一報酬、M53 `battle-first`、スマホ同格、墨金の家譜、44px以上の操作面、対象選択→予告→明示実行を維持する。既存dirtyの加護カード修正4ファイルを上書きしない。
+- **Permission boundary**: ローカルの可逆なコード・CSS・test・正典更新だけを行う。commit、push、deploy、外部送信、未確認素材の権利昇格は行わない。
+- **Escalation**: 既存素材だけで全身cutoutを成立させられない場合は、札を破壊的に消さず同一舞台へ馴染ませる。戦闘契約や素材権利の変更が必要なら停止して確認する。
+- **Audit class**: independent audit。主要操作画面の全面再構成であり、PC/mobile、アクセシビリティ、戦闘契約への回帰リスクが高いため。
+- **Subjective acceptance**: 生成案と現行実画面を、舞台占有、左右対峙、人物焦点、兆し→標的→操作の視線順、画材統一、余白、低いAIテンプレ感の7軸で比較する。自動testだけを魅力の証明とは扱わない。
 
 ## ②作業分解
 
 | Item | Dependency | Owner / execution path | Acceptance check | Status |
 |---|---|---|---|---|
-| A. 境界・baseline固定 | AGENTS/GDD/STATUS/M59/git/live | root | dirty hash、公開HEAD、権限、外部gateを記録 | completed |
-| B. Wave 0A/0B | A | root + save_resilience | M58分離、SaveResult、safe storage、root復旧、第三者request 0 | completed |
-| C. Wave 0C/1 | A | ux_mobile + root | 8px解消、1/2/4/8人、200%表示、灯芯100 seed非劣化 | completed |
-| D. M55探索 | B,C | root | Phase Aの自動検証可能範囲、checkpoint決定論、M54不変、PC/mobile | completed（人間観察は外部hold） |
-| E. M56星籤/主戦 | B | root | 4 blocker閉鎖、実確率、save-first三択、主3体400 seed | completed |
-| F. M45継承/収集 | B,C | root | 約束/記憶/家宝pilot、強制queue純増0、非FOMO | completed（神縁・地域拡張は外部hold） |
-| G. 音楽強化 | A | audio_enhance | 10分変奏、世代/地域/場面差、timer leak 0、PC/mobile | completed |
-| H. Release/性能/rights | B〜G | root | PR gate、browser smoke、bundle予算、BOM、未確認rights分離 | completed（管理者・物理計測は外部hold） |
-| I. 統合検証・自己修復 | B〜H | root | lint/data/closure/manifest/Vitest/build/Playwright/性能 | completed |
-| J. 独立監査・Ship Check | I | fresh reviewer + root | blocking 0、SHIP以上 | completed |
-| K. 公開 | J | root | scoped commit、main push、Actions success、公開marker/HTTP 200 | completed |
+| A. baseline・境界固定 | AGENTS/GDD/STATUS/git/現行画面 | root | dirty保護、現行PC画像、権限、契約、既存selectorを記録 | completed |
+| B. Battle構造・素材・test監査 | A | explorer 3系統 + root | DOM/CSS、既存素材、影響testの証拠を回収 | completed |
+| C. PC灯脈劇場 | B | root | 一枚舞台、左右対峙、人物拡大、兆し、標的、軍議盤を1280/1440実測 | completed |
+| D. mobile/tablet同格化 | C | root | 768/390/360で名前/HP/兆し/主要操作、overflow 0、44px | completed |
+| E. 統合検証・限定修正 | C,D | root | focused/full Vitest、lint、build、重点Playwright、生成案比較 | completed |
+| F. fresh独立監査・正典同期 | E | fresh reviewer + root | blocking 0、GDD/STATUS/WORKLOG/state一致 | completed |
 
 ## ③完了済み
 
-- 2026-07-28T21:00+09:00: `$mission`契約、Goal、7段階planを開始。公開権限とanalytics非承認を分離した。
-- 2026-07-28T21:00+09:00: `HEAD=origin/main=afc42e6`、既存dirty 17 tracked + M59新規文書1を確認。M57/M58/M59以外の既知scope混入なし。
-- 2026-07-28T21:00+09:00: save/storage、mobile UI、音楽を重複しない所有範囲で3 workerへ委譲した。
-- 2026-07-28T23:00+09:00: SaveResult/fingerprint、検証済みmain/BAK、storage拒否を吸収するsafe adapterと非保存のin-memory play、root recovery、Title先行＋全route lazy、PR/main共通release gate、性能予算、公開asset BOMを統合した。
-- 2026-07-28T23:00+09:00: M57/M58、mobile戦闘、一族1/2/4/8人grid、灯芯100+100 seed、三星択一、主戦三体×方針×400 seed、三品の家宝額を統合した。
-- 2026-07-28T23:00+09:00: 既存ブラウザ合成音楽を23画面・地域・季節・世代・物語・戦況の長周期変奏へ拡張し、三段階の重なりと現在曲／変奏名を可視化した。
-- 2026-07-28T23:15+09:00: fresh UX監査の6 P1を限定修正。Dungeon地域ラスター0、変奏名live購読、未所持星札Tab停止0、敵札／兆し操作分離、46px操作面、家宝候補続きを閉じた。正典のM56旧状態矛盾も同期した。
-- 2026-07-28T23:40+09:00: 全Vitest 59 files/826 tests、audit 0、lint、data 0/0、closure 69、manifest 9、BOM public/dist 2,825、build 890 modules、初期JS 74,281 gzip bytes、CSS 21,115 gzip bytes、重点5幅E2Eへ合格。
-- 2026-07-28T23:40+09:00: fresh技術監査はP0 0/P1 0/blocking 0、`SHIP-with-notes`。noteは初期予算外の500kB超後続chunk分割のみで、本releaseの阻害ではない。
-- 2026-07-29T00:02+09:00: 実装commit `0fc8156`をmainへpush。GitHub Actions run `30369615092`は全release gateとPages deployに成功した。
-- 2026-07-29T00:02+09:00: 公開HTMLと参照される55 JS/CSS/deferred resourcesを再帰検証し、全てHTTP 2xx、commit marker `0fc8156`一致、公開URL HTTP 200を確認した。
+- 2026-08-04: `git status --short`で既存dirtyを `docs/WORKLOG.md`、`src/ui/Dungeon.tsx`、`src/ui/dungeon_m25.css`、`tests/visual/boon_draft_layout.spec.ts` の4件に固定。Battle系の既存dirty 0。
+- 2026-08-04: `AGENTS.md`、`docs/GDD_v3.md`、`docs/STATUS.md`、旧M60 terminal stateを確認。全戦闘オート、M53 battle-first、スマホ同格、同一報酬を本契約へ継承。
+- 2026-08-04: 現行PC 1280×720の味方3/敵2実画面を `C:/Users/junna/AppData/Local/Temp/hitsugi-battle-sample-pc.png` へ取得。生成案は配信素材にせず構図参照へ限定。
+- 2026-08-04: `Battle.tsx`と最後尾`battle_m61.css`で、顔札つき行動順、一枚舞台、敵左／味方右、敵兆し、年齢別味方戦絵、下段五行動の軍議盤を実装。tablet/mobileは縦の対峙と二列操作へ再構成。
+- 2026-08-04: mobile兆し余白、360px行動順、4対4名札幅、オート報告`aria-live`、AR1 focus selector、visual closure SHAを限定修正。
+- 2026-08-04: 初回独立監査のP1「mobile縮約時の全行動順欠落」を全順序aria-label＋44px「順+n」展開で閉鎖。P2の成人姿fallbackと901〜1099px軍議盤も修正し、1024px境界testを追加。
+- 2026-08-04: 全Vitest 59 files/826 tests、lint、build 891 modules、visual closure 69、manifest 9、diff-checkに合格。PlaywrightはM61 11 passed/4 intended skips、兆し＋標的確認15/15、全戦闘オート5/5、4対4 5/5。
+- 2026-08-04: fresh再監査はP0 0/P1 0/blocking 0、SHIP-with-notes。物理端末とNVDA/VoiceOverは外部gateのまま。
 
 ## ④保留リスト
 
-- 初見8名、一世代5名、低性能PC/Android/iPhone、NVDA/VoiceOver実利用は外部gate。自動testとPlaywrightで実行可能部分を先行する。
-- `face_*`と神MAXの生成モデル系譜は所有者/法務gate。BOMへpendingとして登録し、clearedへ偽昇格しない。
-- GitHub Organizationのbranch ruleset/Environment reviewerは管理者設定gate。workflow側のPR checkとsmokeは実装可能。
-- 共有staging URLは未構築。PRでは同一gateとPages artifactを生成するが、本番と別の閲覧URLは管理者判断を待つ。
-- M55 Phase B/C、四地域の人間観察、神縁12柱、地域怪異、宿敵拡張は外部baseline合格後の別pilotとし、本releaseへ偽装同梱しない。
+- 新規生成戦闘背景・人物cutoutの公開利用は権利/所有者承認を伴うため本mission外。既存配信素材とCSSで先行する。
+- 外部初見者、物理端末、NVDA/VoiceOver実利用は自動ブラウザで代替完了と主張しない。
 
 ## ⑤質問キュー
 
-- 非クリティカル: 外部初見テストと物理端末テストの実施日程は公開後に所有者と決める。
+- 非クリティカル: ローカル合格後にcommit/push/deployするかは、最終報告後にユーザー判断を受ける。
 
 ## ⑥マイルストーン履歴
 
-- M60-0: 契約・Goal・plan・三系統実装を開始。
-- M60-1: 保存／起動／mobile／M57／M58／M56／収集／音楽／release基盤を統合。
-- M60-2: fresh技術・UX監査の保存救出、WebKit音響、兆し計測、探索画像、操作構造、収集末尾の欠陥を限定修正。
-- M60-3: source freeze後の全機械gate、重点E2E、fresh独立監査を閉鎖。公開工程へ移行。
+- M61-0: mission契約、Goal、5段階plan、3系統read-only探索、現行baselineを開始。
+- M61-1: PC/tablet/mobile灯脈劇場、年齢別戦絵、顔札行動順、五手軍議盤、専用5幅testを実装。
+- M61-2: source freeze gate合格。初回独立監査P1 1/P2 2を限定修正し、再監査blocking 0へ到達。
 
 ## ⑦次の一手
 
-- 外部holdを解く場合は、初見8名／一世代5名、物理端末、アクセシビリティ、権利系譜、共有stagingを個別mission化する。現行公開版の機械的release gateは閉鎖済み。
+- ユーザー判断後に限定stage・commitし、明示的なdeploy依頼がある場合だけmainへpushする。
 
 ## ⑧最終監査表
 
-- **監査種別**: independent audit + Ship Check。
-- ✅ M59実装可能項目: 実装完了。外部・権利・管理者gateは保留へ分離。
-- ✅ 音楽強化: 23画面・長周期変奏・live表示・timer清掃を実装。
-- ✅ 全機械/ブラウザ/性能gate: source freeze後に合格。
-- ✅ 独立監査blocking 0: P0 0/P1 0、SHIP-with-notes。
-- ✅ main公開とproduction確認: commit `0fc8156`、Actions `30369615092`、公開55資産2xx、marker一致。
-- ✅ 権限境界: deploy承認あり、analytics/権利/外部参加者は未承認として分離。
+- **監査種別**: independent audit（実装freeze後に実施）。
+- ✅ PC灯脈劇場: 1280/1440で一枚舞台、左右対峙、人物焦点、兆し、軍議盤を確認。
+- ✅ mobile/tablet同格: 768/390/360で縦対峙、名前/HP/兆し/主要操作、overflow 0、44pxを確認。
+- ✅ 戦闘操作・オート・報酬契約: 標的明示実行15/15、全戦闘オート5/5、4対4 5/5。戦闘計算と報酬データは未変更。
+- ✅ 機械gate・実ブラウザ: Vitest 826/826、lint、build、closure/manifest/diff-check、M61 11 passed/4 intended skips（5幅10件＋1024px境界1件）。
+- ✅ 権限境界・既存dirty保護: 現時点で逸脱なし。
+- ✅ fresh独立監査: 初回P1 1/P2 2を閉鎖し、再監査P0 0/P1 0/blocking 0、SHIP-with-notes。
 
 ## ⑨terminal印
 
-完了 — 2026-07-29T00:02+09:00。実装、全gate、独立監査、main公開、GitHub Pages配信、公開資産とcommit markerの実測確認を完了。外部holdは完了を偽装せず分離した。
+完遂 — 2026-08-04T03:48:00+09:00。M61ローカル実装・直接検証・正典同期・fresh独立監査を完了。commit/push/deployは未実施。

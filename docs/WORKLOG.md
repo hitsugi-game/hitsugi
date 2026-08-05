@@ -1565,3 +1565,11 @@
 - **出荷commit**: M56〜M60のruntime、UI、保存、音楽、release基盤、正典、回帰test、証拠を`0fc8156`へ限定stageし、`feat: ship M60 trust collection and adaptive audio`としてmainへpushした。機密らしき代入0、`git diff --cached --check`合格、scope外の生成artifactは追跡対象外。
 - **CI**: GitHub Actions run `30369615092`でnpm audit、lint、data、closure、manifest、BOM、59 files/826 Vitest、build、性能予算、Chromium/Firefox desktop＋WebKit mobile 15/15を再実行し、verify/deployとも成功した。
 - **本番実測**: `https://hitsugi-game.github.io/hitsugi/`はHTTP 200。公開HTMLから再帰取得した55 JS/CSS/deferred resourcesは全てHTTP 2xx、埋込commit markerは`0fc8156`と一致した。M60を公開済みへ更新し、初見利用者、物理端末、支援技術、権利系譜、Organization ruleset、共有stagingは外部holdのまま分離した。
+
+## 2026-08-04（M61 戦闘舞台「灯脈劇場」ローカル実装）
+
+- **契約**: 生成した最上位戦闘画面案を構図参照に限定し、既存Battle runtimeへ「上段の行動順／一枚の地域舞台／敵左・味方右の対峙／敵兆し／下段の軍議盤」を実装した。戦闘計算、報酬率、セーブ形式は変更せず、全戦闘オート、M53 battle-first、スマホ同格、対象選択後の明示実行を維持した。
+- **実装**: `Battle.tsx`へM61識別子、顔札つき行動順、年齢段階に合う味方戦絵fallbackを追加し、`battle_m61.css`を最後尾の舞台層として接続した。PCでは五つの戦闘行動を横一列、tablet/mobileでは二列操作盤を一方向に読める配置へ再構成し、装飾層は非操作、主要操作面は44px以上とした。
+- **自己修復**: mobileの敵兆しと札の軽微な重なり、360pxの行動順overflow、4対4時の名札幅を限定修正した。全戦闘オートの状態報告へ`aria-live=polite`を付与し、AR1の旧focus selectorを実際の`.combatant-hitbox`へ同期した。全Vitest初回の唯一の不合格はBattle/Dungeon変更後のvisual closure SHA不一致で、69件の台帳を現在ソースへ正規同期して解消した。初回独立監査のP1 1件（mobile縮約時の全行動順欠落）とP2 2件（成人姿fallbackの札種別、901〜1099px軍議盤幅）を、44pxの「順+n」展開、候補別`isPose`、tablet境界拡張で閉鎖した。隔離release worktreeの性能gateで総CSSが64KiBを176 bytes超えたため、静的発光を残して点滅animationと重複装飾だけを除き、操作・情報量を変えず性能予算へ戻した。
+- **検証**: 全Vitest **59 files / 826 tests**、oxlint、production build **891 modules**、visual closure **23 routes / 40 regions / 6 overlays / 69 entries**、visual manifest **9/9**、公開素材BOM **2,825/2,825**、性能予算、`git diff --check`に合格。M61専用は5幅10件＋1024px境界1件の **11 passed / 4 intended skips**、既存の敵兆し＋標的確認は5幅 **15/15**、全戦闘オート **5/5**、味方4対敵4 **5/5**。画像読込、左右または縦の対峙、全行動順の読上げ／展開、札重なり12%以下、44px操作面、横overflow 0を実DOMで確認した。production Chromium/Firefox/WebKit release smokeも **15/15**。fresh再監査は **P0 0 / P1 0 / blocking 0、SHIP-with-notes**。noteは物理端末とNVDA/VoiceOverの外部gateだけを残す。
+- **素材・公開境界**: 新規生成コンセプト画像は配信へ同梱せず、既存の地域背景・敵札・年齢別戦絵とCSSだけで再構成した。既存legacy素材のrights statusはpendingのままで、権利clearへ昇格していない。commit、push、deployは本mission外として未実施。

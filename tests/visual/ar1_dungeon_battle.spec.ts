@@ -276,7 +276,8 @@ test('AR1R-B 1600px completion frame has no overflow and retains keyboard target
   await attack.focus()
   await expect(attack).toBeFocused()
   await page.keyboard.press('Enter')
-  const firstTarget = page.locator('.combatant.targetable').first()
+  // 実際のキーボード焦点先はgroup外郭ではなく、対象選択用button。
+  const firstTarget = page.locator('.combatant.targetable .combatant-hitbox').first()
   await expect(firstTarget).toBeFocused()
   await page.keyboard.press('Escape')
   await expect(attack).toBeFocused()

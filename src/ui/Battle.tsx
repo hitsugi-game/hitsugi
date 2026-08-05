@@ -31,8 +31,12 @@ import { regionById } from '../core/data/regions'
 import { resolveRegionStageContract, type RegionStageContract } from '../core/data/region_stage_contracts'
 import { loreFor } from '../core/data/lore'
 import { bossEmotion } from '../core/narrative'
+import { ageOf } from '../core/inheritance'
 import { Bar, MaybeImg, Portrait } from './components'
-import { gameImg, spriteImg, poseImg, skillIcon, cutinImg, regionBgR, bossBgImg } from './img'
+import {
+  gameImg, spriteImg, poseImg, skillIcon, cutinImg, regionBgR, bossBgImg,
+  faceImg, provisionalFaceImg, stageOf, type AgeStage,
+} from './img'
 import { BattleArtFrame, type CardTier } from './battle/BattleArtFrame'
 import './m17_battle.css'
 import './battle_m24.css'
@@ -41,6 +45,7 @@ import './battle_ar1.css'
 import './battle_m43.css'
 import './battle_m46.css'
 import './battle_m47.css'
+import './battle_m61.css'
 
 function Ar1BattleStage({ contract }: { contract: RegionStageContract }) {
   return (
@@ -789,7 +794,8 @@ export function BattleScreen() {
 
   return (
     <div
-      className={`screen battle-screen stage-${stageFamily}${stageContract ? ' battle-visual-v2' : ''}${ar1Hero ? ` battle-hero-${ar1Hero}` : ''}`}
+      className={`screen battle-screen battle-m61 stage-${stageFamily}${stageContract ? ' battle-visual-v2' : ''}${ar1Hero ? ` battle-hero-${ar1Hero}` : ''}`}
+      data-battle-layout="tomoshibi-theater"
       data-visual-version={stageContract ? 'v2' : 'v1'}
       data-stage-contract-id={stageContract?.id}
       data-region-id={regionId}
@@ -817,7 +823,7 @@ export function BattleScreen() {
       {/* AR0: 上端は行動順・報酬予告・全画面設定釦だけの予約帯。戦場と同じ
           position層へ混ぜないため、敵兆し/敵札が上端UIへ侵入しない。 */}
       <div className="battle-top-rail" data-zone="battle-top">
-        <TurnOrderBar battle={battle} />
+        <TurnOrderBar battle={battle} family={family} />
         {rewardSettlement && <BattleRewardForecast settlement={rewardSettlement} />}
       </div>
 
@@ -869,7 +875,12 @@ export function BattleScreen() {
 
         {/* M25§4.2/§4.3: 敵/味方の陣形と灯脈をまとめる「同じtransformコンテナ」。
             HP札・行動順・コマンド盤はこの外にあるため、被弾shakeで揺れない(§4.3手順4)。 */}
-        <div ref={stageRef} className={`stage-battlers${shakeKey ? ' stage-shake' : ''}`}>
+        <div
+          ref={stageRef}
+          className={`stage-battlers${shakeKey ? ' stage-shake' : ''}`}
+          data-enemy-count={battle.enemies.filter((c) => c.hp > 0).length}
+          data-ally-count={battle.allies.filter((c) => c.hp > 0).length}
+        >
           <div className={`enemy-side${isBossBattle ? ' has-boss' : ''}`}>
             {isBossBattle && bossCombatant && (
               <div className="enemy-boss-slot">
@@ -934,6 +945,7 @@ export function BattleScreen() {
               {battle.allies.map((a, i) => {
                 const ch = charOf(a)
                 const role = roleOf(i, battle.allies.length)
+                const ageStage = ch ? stageOf(ageOf(ch, seasonIndex)) : 'adult'
                 return (
                   <CombatantNode
                     key={a.key}
@@ -945,14 +957,14 @@ export function BattleScreen() {
                     acting={actor?.key === a.key && battle.phase === 'input'}
                     chainBadge={0}
                     cardTier="normal"
-                    spriteKey={ch?.tomoshigata ? `pose_${ch.tomoshigata}_${ch.sex}_adult.png` : undefined}
+                    spriteKey={ch?.tomoshigata ? `pose_${ch.tomoshigata}_${ch.sex}_${ageStage}.png` : undefined}
                     dimmed={isDimmed(a.key)}
                     targetNumber={targetableAllies.indexOf(a) + 1}
                     onClick={() => onAllyClick(a)}
                     onBodyRef={registerBodyRef}
                     onCombatantRef={registerCombatantRef}
                   >
-                    <AllyVisual gata={ch?.tomoshigata ?? 'homura'} sex={ch?.sex ?? 'm'} element={a.element} />
+                    <AllyVisual gata={ch?.tomoshigata ?? 'homura'} sex={ch?.sex ?? 'm'} element={a.element} stage={ageStage} />
                   </CombatantNode>
                 )
               })}
@@ -1027,7 +1039,7 @@ export function BattleScreen() {
                   />
                 )}
                 {autoReport.length > 0 && (
-                  <div className="auto-battle-report" aria-label="オート戦闘の見立て">
+                  <div className="auto-battle-report" aria-label="オート戦闘の見立て" aria-live="polite">
                     {autoReport.map((line) => <p key={line}>{line}</p>)}
                     {auto && (
                       <div className="auto-result-continuation">
@@ -1166,10 +1178,6 @@ export function BattleScreen() {
                       <span className="cmd-mark" aria-hidden>守</span>
                       <span className="cmd-copy"><b>防御</b><small>次の傷を抑える</small></span>
                     </button>
-                    <button className="cmd-btn cmd-flee" disabled={!isPlayerTurn} data-zone="command" onClick={() => runCommand({ type: 'flee' }, '逃げる')}>
-                      <span className="cmd-mark" aria-hidden>退</span>
-                      <span className="cmd-copy"><b>逃げる</b><small>戦果を捨て退く</small></span>
-                    </button>
                     {/* M28-C: 道具(回復薬)。所持が無ければ無効表示で領域は保つ。 */}
                     <button
                       ref={itemButtonRef}
@@ -1181,6 +1189,10 @@ export function BattleScreen() {
                       <span className="cmd-mark" aria-hidden>薬</span>
                       <span className="cmd-copy"><b>道具</b><small>{availItems.length > 0 ? '傷と灯を補う' : '郷で補充できる'}</small></span>
                       {availItems.length > 0 && <span className="sk-info">{availItems.reduce((n, x) => n + x.count, 0)}</span>}
+                    </button>
+                    <button className="cmd-btn cmd-flee" disabled={!isPlayerTurn} data-zone="command" onClick={() => runCommand({ type: 'flee' }, '逃げる')}>
+                      <span className="cmd-mark" aria-hidden>退</span>
+                      <span className="cmd-copy"><b>逃げる</b><small>戦果を捨て退く</small></span>
                     </button>
                   </div>
                 </>
@@ -1288,7 +1300,10 @@ export function BattleScreen() {
 
 // 第N巡と、現在から最大6手の行動順(§5.4「上段行動順」)。§3.3: 次撃倍率をここへ常設する
 // UI視覚(2026-07-17): 「今」を発光バッジ化、敵味方を色非依存の1字印(味/魔)でも判別できるようにする。
-function TurnOrderBar({ battle }: { battle: NonNullable<ReturnType<typeof useGame.getState>['battle']> }) {
+function TurnOrderBar({ battle, family }: {
+  battle: NonNullable<ReturnType<typeof useGame.getState>['battle']>
+  family: Character[]
+}) {
   const byKey = new Map([...battle.allies, ...battle.enemies].map((c) => [c.key, c]))
   const seq = [...battle.order.slice(battle.orderIndex), ...battle.order.slice(0, battle.orderIndex)]
     .map((k) => byKey.get(k))
@@ -1298,27 +1313,62 @@ function TurnOrderBar({ battle }: { battle: NonNullable<ReturnType<typeof useGam
   const chainTargetKey = battle.chainTarget
   const chainTargetAlive = chainTargetKey ? (byKey.get(chainTargetKey)?.hp ?? 0) > 0 : false
   const mult = chainTargetAlive && battle.chain > 0 ? chainMultiplier(battle.chain) : null
+  const orderLabel = seq.map((c, i) => `${i === 0 ? '現在' : `${i}手後`}、${c.isAlly ? '味方' : '魔性'}の${c.name}`).join('、')
   return (
-    <div className="turn-order" aria-label="行動順" data-zone="turnorder">
+    <div className="turn-order" role="group" aria-label={`行動順：${orderLabel}`} data-zone="turnorder">
       <span className="turn-order-turn">第{battle.turn}巡</span>
       {mult !== null && (
         <span className="turn-chain-mult" title="次撃倍率">
           <i className="turn-chain-mult-ico" aria-hidden>灯</i>次撃×{mult.toFixed(2)}
         </span>
       )}
-      {seq.map((c, i) => (
-        <span
-          key={`${c.key}-${i}`}
-          className={`turn-chip ${c.isAlly ? 'is-ally' : 'is-enemy'} ${i === 0 ? 'is-now' : ''}`}
-          data-step={i}
-          aria-current={i === 0 ? 'step' : undefined}
-          title={`${i === 0 ? '現在' : `あと${i}手`}・${c.name}`}
-        >
-          {i === 0 && <em>今</em>}
-          <i className="turn-chip-side">{c.isAlly ? '味' : '魔'}</i>
-          {c.name}
-        </span>
-      ))}
+      {seq.map((c, i) => {
+        const ally = c.isAlly ? family.find((member) => member.id === c.charId) : undefined
+        const turnArt = ally
+          ? (faceImg(ally) ?? provisionalFaceImg(ally))
+          : c.enemyId
+            ? gameImg(enemyById(c.enemyId).sprite)
+            : null
+        return (
+          <span
+            key={`${c.key}-${i}`}
+            className={`turn-chip ${c.isAlly ? 'is-ally' : 'is-enemy'} ${i === 0 ? 'is-now' : ''}`}
+            data-step={i}
+            data-element={c.element}
+            aria-current={i === 0 ? 'step' : undefined}
+            title={`${i === 0 ? '現在' : `あと${i}手`}・${c.name}`}
+          >
+            <span className="turn-chip-portrait" aria-hidden>
+              <i>{ELEMENT_LABELS[c.element]}</i>
+              <MaybeImg src={turnArt} />
+            </span>
+            <span className="turn-chip-copy">
+              {i === 0 && <em>今</em>}
+              <i className="turn-chip-side">{c.isAlly ? '味' : '魔'}</i>
+              <b>{c.name}</b>
+            </span>
+          </span>
+        )
+      })}
+      {seq.length > 2 && (
+        <details className="turn-order-more">
+          <summary aria-label={`全行動順を開く。${orderLabel}`} title="全行動順を開く">
+            <span aria-hidden>順+{seq.length - 2}</span>
+          </summary>
+          <div className="turn-order-detail">
+            <strong>この巡の行動順</strong>
+            <ol>
+              {seq.map((c, i) => (
+                <li key={`detail-${c.key}-${i}`}>
+                  <span>{i === 0 ? '今' : `+${i}`}</span>
+                  <b>{c.name}</b>
+                  <small>{c.isAlly ? '味方' : '魔性'}・{ELEMENT_LABELS[c.element]}</small>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </details>
+      )}
     </div>
   )
 }
@@ -1641,9 +1691,13 @@ function CombatantNode({
 }
 
 // 味方の立ち姿 — M17: 戦闘立ち姿(pose_*)→歩行スプライトのleft向き(旧来)→灯の炎、の順に退避
-function AllyVisual({ gata, sex, element }: { gata: string; sex: string; element: string }) {
-  const candidates = [poseImg(gata, sex, 'adult'), spriteImg(`walk_${gata}_${sex}_left_1.png`)]
-  const key = `${gata}:${sex}`
+function AllyVisual({ gata, sex, element, stage }: { gata: string; sex: string; element: string; stage: AgeStage }) {
+  const candidates = [
+    { src: poseImg(gata, sex, stage), isPose: true },
+    { src: poseImg(gata, sex, 'adult'), isPose: true },
+    { src: spriteImg(`walk_${gata}_${sex}_left_1.png`), isPose: false },
+  ].filter((candidate, index, list) => list.findIndex((item) => item.src === candidate.src) === index)
+  const key = `${gata}:${sex}:${stage}`
   const [idx, setIdx] = useState(0)
   const [lastKey, setLastKey] = useState(key)
   if (key !== lastKey) {
@@ -1653,11 +1707,11 @@ function AllyVisual({ gata, sex, element }: { gata: string; sex: string; element
   if (idx >= candidates.length) {
     return <span className="ally-flame" data-el={element}>🔥</span>
   }
-  const isPose = idx === 0
+  const candidate = candidates[idx]
   return (
     <img
-      className={isPose ? 'ally-pose' : 'ally-stand'}
-      src={candidates[idx]}
+      className={candidate.isPose ? 'ally-pose' : 'ally-stand'}
+      src={candidate.src}
       alt=""
       onError={() => setIdx((i) => i + 1)}
     />

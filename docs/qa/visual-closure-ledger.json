@@ -773,7 +773,7 @@
       },
       "provenance": {
         "sourcePath": "src/ui/Battle.tsx",
-        "sourceSha256": "a21c596679db3e9624c59600384c9281358fe377549fccc05397a78591f135bd",
+        "sourceSha256": "113e000f86db887d1a10d2d2fcb77751213235182c6b9d25931d014fe780f2fc",
         "runtimePath": "src/ui/battle_ar1.css",
         "runtimeSha256": "f945330d04f60e30ea1a8ad37f8e6ef515b31b7b66d23d09f3f3d50d55be01ee",
         "rightsStatus": "pending",
