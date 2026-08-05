@@ -1580,8 +1580,8 @@
 - **CI**: GitHub Actions run `31008582327`でnpm audit、lint、data、closure、manifest、BOM、59 files/826 Vitest、build、性能予算、Chromium/Firefox desktop＋WebKit mobile release smokeを再実行し、verify/deployとも成功した。独立出荷監査はP0/P1/P2 0、blocking 0、`SHIP-with-notes`。
 - **本番実測**: `https://hitsugi-game.github.io/hitsugi/`の公開HTMLと55 JS/CSS/deferred resourcesは全てHTTP 2xx、埋込commit markerは`e8afbff`と一致した。物理端末、NVDA/VoiceOver、外部初見者評価は未検証の外部gateとして維持する。
 
-## 2026-08-05（GitHub Actions Node.js 24ランタイム移行・ローカル）
+## 2026-08-05（GitHub Actions Node.js 24ランタイム移行・公開済み）
 
 - **原因**: ゲームのbuildに使うNode.jsは既に22だが、`actions/checkout@v4`、`actions/setup-node@v4`、`actions/upload-artifact@v4`が内部でNode.js 20を使うため、GitHub-hosted runnerがNode.js 24へ強制実行する非推奨警告を出していた。
 - **変更**: checkout/setup-node/upload-artifactをNode.js 24対応のv7へ、Pages梱包/deployを同世代のv5へ更新。供給網保護のため、全Actionを公式release tagの解決済み40桁commit SHAで固定した。プロジェクトの`node-version: 22`、npm 11.12.1、出荷gate、権限、成果物、公開検証手順は変更しない。
-- **境界**: ローカルbranch `codex/actions-node24-runtime`で検証し、mainへのpushと本番deployはユーザーの明示確認後に行う。
+- **公開検証**: `42b978f`をmainへpushし、GitHub Actions run `31011617744`のverify/deployが成功。公開HTMLと55 JS/CSS/deferred resourcesは全てHTTP 2xx、commit markerは`42b978f`と一致した。verify/deploy両jobのannotationは0件で、Node.js 20非推奨警告が解消したことをAPIでも確認した。
