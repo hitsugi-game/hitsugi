@@ -2,11 +2,9 @@
 
 **2026-07-22 runtime実測**: 神180柱・敵579体（通常基礎180＋若/老変異＋主39）・装備810・辞世1370・事件282・地域40・配信画像2825点。**次の制約は物量でなく、初回30分・戦闘の対処差・初代継承・実利用計測・公開前検証**。M42監査の正本は`docs/PRODUCT_IMPROVEMENT_AUDIT_M42_20260722.md`。
 
-## ローカル実装・公開前
-
-- **M61 戦闘舞台「灯脈劇場」**: 生成コンセプトの構図を、配信中の地域背景1枚と戦絵札へ分解して実装。上段を肖像付き行動順、中央を敵左／一族右の対峙舞台、下段を手番／5手／見立ての軍議盤へ再構成した。タブレットは2列、mobileは敵帯→味方帯→二列操作盤の一方向へ応答し、360pxまで主要操作44px以上・横overflow 0を維持する。一族姿は幼子／成人／老年を月齢で選択。全戦闘オート、報酬、戦闘計算、M53 battle-first、M54 map-nativeは不変。生成コンセプト画像と新規素材はruntimeへ追加していない。commit、push、deployは未実施。詳細はGDD_v3 §8.44と`docs/CODEX_MISSION_STATE.md`。
-
 ## 直近の公開修正
+
+- **M61 戦闘舞台「灯脈劇場」（公開済み）**: 生成コンセプトの構図を、配信中の地域背景1枚と戦絵札へ分解して実装。上段を肖像付き行動順、中央を敵左／一族右の対峙舞台、下段を手番／5手／見立ての軍議盤へ再構成した。タブレットは2列、mobileは敵帯→味方帯→二列操作盤の一方向へ応答し、360pxまで主要操作44px以上・横overflow 0を維持する。一族姿は幼子／成人／老年を月齢で選択。全戦闘オート、報酬、戦闘計算、M53 battle-first、M54 map-nativeは不変。生成コンセプト画像と新規素材はruntimeへ追加していない。実装`e8afbff`、Actions run `31008582327`でPages公開成功。公開HTMLと55 JS/CSS/deferred resourcesのHTTP 2xx、commit marker一致を確認済み。詳細はGDD_v3 §8.44と`docs/CODEX_MISSION_STATE.md`。
 
 - **M60 統合改善（公開済み）**: 保存を検証付き結果へ変更し、storage拒否／破損save／root例外から復旧できる入口を追加。タイトル先行＋全route遅延読込で初期JSを74,281 gzip bytesへ削減。戦闘mobile可読性、一族1/2/4/8人grid、M57/M58、三星択一、主戦「止・受・崩」三体、三品の家宝額を統合した。音楽は23画面・地域・季節・世代・物語・戦況を10分超の決定論的変奏へ反映し、三段階の豊かさとlive変奏名を追加。探索はM54の地域ラスター取得0へ戻した。全戦闘オート、M53 battle-first、既存報酬、非FOMOを維持する。全Vitest 59 files/826、機械gate、重点5幅、production Chromium/Firefox/WebKit release smoke 15/15へ合格。独立監査P0/P1 0、blocking 0、SHIP-with-notes。実装`0fc8156`、Actions run `30369615092`でPages公開成功。公開HTMLと55 JS/CSS/deferred resourcesのHTTP 2xx、commit marker一致を確認済み。
 

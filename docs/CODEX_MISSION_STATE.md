@@ -39,17 +39,18 @@
 
 ## ⑤質問キュー
 
-- 非クリティカル: ローカル合格後にcommit/push/deployするかは、最終報告後にユーザー判断を受ける。
+- 解決済み: 2026-08-05にユーザーからdeployの明示依頼を受け、限定stage・commit・main push・公開確認まで実施した。
 
 ## ⑥マイルストーン履歴
 
 - M61-0: mission契約、Goal、5段階plan、3系統read-only探索、現行baselineを開始。
 - M61-1: PC/tablet/mobile灯脈劇場、年齢別戦絵、顔札行動順、五手軍議盤、専用5幅testを実装。
 - M61-2: source freeze gate合格。初回独立監査P1 1/P2 2を限定修正し、再監査blocking 0へ到達。
+- M61-3: `e8afbff`をmainへpush。Actions run `31008582327`のverify/deployと、公開HTML＋55 JS/CSS/deferred resourcesの2xx・commit marker一致を確認。
 
 ## ⑦次の一手
 
-- ユーザー判断後に限定stage・commitし、明示的なdeploy依頼がある場合だけmainへpushする。
+- runtime公開は完了。残る外部初見者、物理端末、NVDA/VoiceOverの実利用確認は自動検証済みと扱わず、次回の外部品質gateとして維持する。
 
 ## ⑧最終監査表
 
@@ -63,4 +64,4 @@
 
 ## ⑨terminal印
 
-完遂 — 2026-08-04T03:48:00+09:00。M61ローカル実装・直接検証・正典同期・fresh独立監査を完了。commit/push/deployは未実施。
+公開完遂 — 2026-08-05。M61実装`e8afbff`をmainへpushし、GitHub Actions run `31008582327`のverify/deploy成功と公開commit marker一致を確認。外部初見者、物理端末、NVDA/VoiceOverは未検証の外部gateとして残す。

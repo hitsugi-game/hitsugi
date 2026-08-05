@@ -1573,3 +1573,9 @@
 - **自己修復**: mobileの敵兆しと札の軽微な重なり、360pxの行動順overflow、4対4時の名札幅を限定修正した。全戦闘オートの状態報告へ`aria-live=polite`を付与し、AR1の旧focus selectorを実際の`.combatant-hitbox`へ同期した。全Vitest初回の唯一の不合格はBattle/Dungeon変更後のvisual closure SHA不一致で、69件の台帳を現在ソースへ正規同期して解消した。初回独立監査のP1 1件（mobile縮約時の全行動順欠落）とP2 2件（成人姿fallbackの札種別、901〜1099px軍議盤幅）を、44pxの「順+n」展開、候補別`isPose`、tablet境界拡張で閉鎖した。隔離release worktreeの性能gateで総CSSが64KiBを176 bytes超えたため、静的発光を残して点滅animationと重複装飾だけを除き、操作・情報量を変えず性能予算へ戻した。
 - **検証**: 全Vitest **59 files / 826 tests**、oxlint、production build **891 modules**、visual closure **23 routes / 40 regions / 6 overlays / 69 entries**、visual manifest **9/9**、公開素材BOM **2,825/2,825**、性能予算、`git diff --check`に合格。M61専用は5幅10件＋1024px境界1件の **11 passed / 4 intended skips**、既存の敵兆し＋標的確認は5幅 **15/15**、全戦闘オート **5/5**、味方4対敵4 **5/5**。画像読込、左右または縦の対峙、全行動順の読上げ／展開、札重なり12%以下、44px操作面、横overflow 0を実DOMで確認した。production Chromium/Firefox/WebKit release smokeも **15/15**。fresh再監査は **P0 0 / P1 0 / blocking 0、SHIP-with-notes**。noteは物理端末とNVDA/VoiceOverの外部gateだけを残す。
 - **素材・公開境界**: 新規生成コンセプト画像は配信へ同梱せず、既存の地域背景・敵札・年齢別戦絵とCSSだけで再構成した。既存legacy素材のrights statusはpendingのままで、権利clearへ昇格していない。commit、push、deployは本mission外として未実施。
+
+## 2026-08-05（M61 本番公開）
+
+- **出荷commit**: M61のBattle runtime、専用CSS、5幅回帰、visual closure、正典だけを9ファイルへ限定し、`e8afbff`（`feat(battle): ship M61 tomoshibi theater`）としてmainへpushした。既存dirtyの加護カード・Dungeon変更は混入させず、新規画像と`public/`差分は0、秘密情報らしき文字列も0。
+- **CI**: GitHub Actions run `31008582327`でnpm audit、lint、data、closure、manifest、BOM、59 files/826 Vitest、build、性能予算、Chromium/Firefox desktop＋WebKit mobile release smokeを再実行し、verify/deployとも成功した。独立出荷監査はP0/P1/P2 0、blocking 0、`SHIP-with-notes`。
+- **本番実測**: `https://hitsugi-game.github.io/hitsugi/`の公開HTMLと55 JS/CSS/deferred resourcesは全てHTTP 2xx、埋込commit markerは`e8afbff`と一致した。物理端末、NVDA/VoiceOver、外部初見者評価は未検証の外部gateとして維持する。
