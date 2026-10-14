@@ -1,0 +1,9 @@
+
+> hitsugi@0.2.0 test
+> vitest run --maxWorkers=2
+
+
+ RUN  v4.1.10 C:/Users/junna/Documents/Claude/_fable5/hitsugi
+
+ ❯ tests/visual_closure_validator.test.ts (8 tests | 1 failed) 3881ms
+     × derives and closes the current 23 routes, 40 regions, and route-external overlays 642ms

@@ -3,19 +3,9 @@
   .battle-screen { grid-template-rows: 52px minmax(0, 1fr) clamp(184px, 22vh, 218px); }
   .battle-screen:has(.victory-scroll) { grid-template-rows: 52px minmax(0, 1fr) clamp(236px, 34vh, 360px); }
   .battle-bottom {
-    width: min(1180px, calc(100% - 32px));
-    max-width: 1180px;
     margin-inline: auto;
-    grid-template-columns: minmax(190px, 224px) minmax(480px, 1fr) minmax(205px, 244px);
-    gap: 10px;
-    padding: 8px 10px 10px;
     border: 1px solid rgba(201, 168, 106, 0.28);
     border-bottom: 0;
-    border-radius: 10px 10px 0 0;
-    background:
-      linear-gradient(90deg, rgba(177, 125, 58, 0.045), transparent 24% 76%, rgba(177, 125, 58, 0.04)),
-      rgba(5, 8, 13, 0.88);
-    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.32), inset 0 1px rgba(255, 255, 255, 0.025);
   }
 }
 
@@ -61,12 +51,6 @@
 .victory-continue { padding-top: 1px; border-top: 1px solid rgba(201, 168, 106, 0.22); }
 .victory-continue .btn-main { width: 100%; min-height: 46px; }
 
-.turnpanel-actor, .turnpanel-center, .turnpanel-detail {
-  border-color: rgba(201, 168, 106, 0.48);
-  background:
-    linear-gradient(145deg, rgba(83, 55, 28, 0.16), transparent 44%),
-    linear-gradient(160deg, rgba(25, 19, 15, 0.96), rgba(9, 10, 12, 0.97));
-}
 .turnpanel-actor { justify-content: flex-start; gap: 7px; }
 .turnpanel-actor-main { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px; align-items: center; }
 .turnpanel-actor-main .portrait { width: 48px; height: 58px; border-color: rgba(201, 168, 106, 0.42); }
@@ -130,11 +114,6 @@
 .battle-tactical-note { margin: 0; color: #b5aa99; font-size: 10.5px; line-height: 1.55; }
 
 @media (max-width: 900px) and (min-width: 561px) {
-  .battle-bottom {
-    width: calc(100% - 16px);
-    grid-template-columns: minmax(150px, 190px) minmax(360px, 1fr) minmax(170px, 205px);
-    gap: 6px;
-  }
   .cmd-grid .cmd-copy small { display: none; }
   .cmd-grid .cmd-btn:not(.cmd-auto) { grid-template-columns: 25px minmax(0, 1fr); gap: 5px; padding-inline: 6px; }
   .cmd-grid .cmd-mark { width: 25px; height: 25px; }

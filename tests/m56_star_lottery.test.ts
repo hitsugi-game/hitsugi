@@ -90,5 +90,6 @@ describe('M56 三星択一', () => {
     expect(newCounts[Math.floor(newCounts.length * .5)]).toBeGreaterThanOrEqual(48)
     expect(newCounts[Math.floor(newCounts.length * .1)]).toBeGreaterThanOrEqual(45)
     expect(rankObservations[4]).toBeGreaterThan(0)
-  }, 30_000)
+  // 5万回の抽選分布検証。描画やbuildとの並行実行でも試行数を削らず完走させる。
+  }, 120_000)
 })

@@ -1,0 +1,8 @@
+
+> hitsugi@0.2.0 check:performance
+> node scripts/check_build_performance.mjs
+
+initial JS: assets/index-CYeHIQ83.js, assets/rolldown-runtime-QTnfLwEv.js / 74279 gzip bytes
+initial CSS: assets/index-D5JlTZB9.css / 21115 gzip bytes
+dist: 2881 files / 255948237 bytes; target met
+performance budgets: OK (initial 250 KiB JS and 64 KiB total CSS targets enforced)

@@ -5,6 +5,7 @@ const village = readFileSync('src/ui/Village.tsx', 'utf8')
 const villageCss = readFileSync('src/ui/village_m47.css', 'utf8')
 const battle = readFileSync('src/ui/Battle.tsx', 'utf8')
 const battleCss = readFileSync('src/ui/battle_m47.css', 'utf8')
+const battleTheaterCss = readFileSync('src/ui/battle_m61.css', 'utf8')
 
 describe('M47 郷の薬種見世と戦支度盤', () => {
   it('郷から既存consumables在庫へ直接購入できる', () => {
@@ -24,7 +25,8 @@ describe('M47 郷の薬種見世と戦支度盤', () => {
   })
 
   it('PC戦闘盤は定幅中央寄せで、行動理由と戦況を同時に読める', () => {
-    expect(battleCss).toContain('max-width: 1180px')
+    // 現行M61の定幅。M47の旧1180px宣言は後続CSSで上書きされていた。
+    expect(battleTheaterCss).toContain('max-width: 1420px')
     expect(battleCss).toContain('margin-inline: auto')
     expect(battle).toContain('className="command-board-heading"')
     expect(battle).toContain('継足を重ねる')

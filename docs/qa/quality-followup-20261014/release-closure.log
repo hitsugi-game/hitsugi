@@ -1,0 +1,5 @@
+
+> hitsugi@0.2.0 check:visual-closure
+> node scripts/validate_visual_closure.mjs
+
+visual closure OK: 23 routes, 40 regions, 6 overlays, 69 ledger entries

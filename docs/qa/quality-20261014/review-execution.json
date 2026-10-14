@@ -1,0 +1,84 @@
+{
+  "recordedAt": "2026-10-14T12:08:11.2847131+09:00",
+  "reviews": [
+    {
+      "version": "quality-20261014-v2",
+      "sessionId": "01a137b5-fca1-7071-babb-d56253d3d047",
+      "requestedModel": "gpt-6-astra",
+      "requestedReasoningEffort": "high",
+      "observedServerModel": null,
+      "observedServerReasoningEffort": null,
+      "cliVersion": "codex-cli 0.162.0-alpha.17.2",
+      "cliSha256": "D13914CED6C7AF174D8D638DB938284231227312104B06A25E9608C632A7DAEC",
+      "exitCode": null,
+      "exitNote": "Completed review and turn.completed event retained; numeric process exit was not separately saved",
+      "inputManifest": "input-manifest-v2.json",
+      "inputManifestSha256": "3adfd3a4200217b1369266491410b2694a72bb15cd003a97131fd463c21f2a32",
+      "output": "independent-review-v2.md",
+      "outputSha256": "58a9fc5b38a8b6f5fee28360c81b895e2fa80869135d99febdafc8bee87e18bd",
+      "eventLog": "independent-review-v2-events.jsonl",
+      "eventLogSha256": "d5b1ec128a8965776deb3383c2c4a1a606ceed1fd3b45211451a47a872095de6"
+    },
+    {
+      "version": "quality-20261014-v3",
+      "sessionId": "01a13848-2b16-7722-aedf-c82d3e70c4f0",
+      "requestedModel": "gpt-6-astra",
+      "requestedReasoningEffort": "high",
+      "observedServerModel": null,
+      "observedServerReasoningEffort": null,
+      "cliVersion": "codex-cli 0.162.0-alpha.17.2",
+      "cliSha256": "D13914CED6C7AF174D8D638DB938284231227312104B06A25E9608C632A7DAEC",
+      "exitCode": null,
+      "exitNote": "Completed review and turn.completed event retained; numeric process exit was not separately saved",
+      "inputManifest": "input-manifest-v3.json",
+      "inputManifestSha256": "3f8b29049e6676eb3a17fb37b9e7bdf50c228f32f7c88a88d0904f3563e95ce6",
+      "output": "independent-review-v3.md",
+      "outputSha256": "07584baeee7bc150ed2eeee26e0027b4b4dd0ea46366aad1d7ebcbc77ac581be",
+      "eventLog": "independent-review-v3-events.jsonl",
+      "eventLogSha256": "11701567da4f7400120542ace14c048e1f65ad238d7f57d44d0de55edf13c09b"
+    },
+    {
+      "version": "quality-20261014-v4b",
+      "sessionId": "01a1385a-25da-70a0-9936-4510b3042a0a",
+      "requestedModel": "gpt-6-astra",
+      "requestedReasoningEffort": "high",
+      "observedServerModel": null,
+      "observedServerReasoningEffort": null,
+      "cliVersion": "codex-cli 0.162.0-alpha.17.2",
+      "cliSha256": "D13914CED6C7AF174D8D638DB938284231227312104B06A25E9608C632A7DAEC",
+      "exitCode": 0,
+      "exitNote": "Observed process exit 0",
+      "inputManifest": "input-manifest-v4b.json",
+      "inputManifestSha256": "076202ed2d5e2ea9fe12c5fb4ffa78b6586b2322c157c98b5ba1a22a340f56ea",
+      "output": "independent-review-v4b.md",
+      "outputSha256": "859531267324d9342e9ab18cde8711e3053e35ad18adda99e332fdca83c65fe3",
+      "eventLog": "independent-review-v4b-events.jsonl",
+      "eventLogSha256": "9530939aa202706509a7a179e83ae793a4e789aadc4c993c2805966fb1a5fa73"
+    }
+  ],
+  "invalidAttempts": [
+    {
+      "version": "v1",
+      "sessionId": "01a137b5-19a5-72c1-b9d5-64e28c58f5f4",
+      "reason": "Initial non-TTY stdin invocation did not produce a primary review and was cancelled; repeated with TTY as v2",
+      "exitCode": null,
+      "retainedLog": "independent-review-events.jsonl"
+    },
+    {
+      "version": "v4",
+      "reason": "Missing copied brief and beat table detected after launch; cancelled before primary review",
+      "exitCode": 1,
+      "retainedLog": "independent-review-v4-events.jsonl"
+    }
+  ],
+  "finalSourceAgreement": {
+    "manifest": "input-manifest-v4b.json",
+    "checkedFiles": 184,
+    "changedFiles": [],
+    "allEqual": true
+  },
+  "postFreezeChanges": [
+    "tests/visual/quality_20261014.spec.ts: wait for dev GameRuntime Settings button before clicking Continue; no game source change",
+    "QA reports and project documentation"
+  ]
+}

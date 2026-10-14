@@ -1,0 +1,14 @@
+Q15 captured console output, 2026-10-14 (not a new test run)
+Command: npm test -- tests/quality_pact_focus_20261014.test.ts tests/pact_policy.test.ts --maxWorkers=1
+
+> hitsugi@0.2.0 test
+> vitest run tests/quality_pact_focus_20261014.test.ts tests/pact_policy.test.ts --maxWorkers=1
+
+ RUN  v4.1.10 C:/Users/junna/Documents/Claude/_fable5/hitsugi
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  12:36:25
+   Duration  1.10s (transform 415ms, setup 0ms, import 606ms, tests 19ms, environment 0ms)
+
+Breakdown: new Q15 tests 11, existing pact_policy tests 8.

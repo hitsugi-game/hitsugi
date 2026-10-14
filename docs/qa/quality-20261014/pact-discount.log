@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 C:/Users/junna/Documents/Claude/_fable5/hitsugi
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  11:52:52
+   Duration  710ms (transform 297ms, setup 0ms, import 386ms, tests 8ms, environment 0ms)
+

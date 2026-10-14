@@ -1,0 +1,219 @@
+
+> hitsugi@0.2.0 test
+> vitest run
+
+
+ RUN  v4.1.10 C:/Users/junna/Documents/Claude/_fable5/hitsugi
+
+ ❯ tests/m56_star_lottery.test.ts (5 tests | 1 failed) 30220ms
+     × 1000 seed×50籤で保証違反0、new-firstの中央値48以上・p10 45以上 30168ms
+ ❯ tests/visual_closure_validator.test.ts (8 tests | 1 failed) 10367ms
+     × derives and closes the current 23 routes, 40 regions, and route-external overlays 1186ms
+ ❯ tests/m47_medicine_battle_ui.test.ts (5 tests | 1 failed) 73ms
+     × PC戦闘盤は定幅中央寄せで、行動理由と戦況を同時に読める 53ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m47_medicine_battle_ui.test.ts > M47 郷の薬種見世と戦支度盤 > PC戦闘盤は定幅中央寄せで、行動理由と戦況を同時に読める
+AssertionError: expected '/* M47: PC戦闘コマンドを読みやすい定幅の「戦支度盤」へ。戦闘ロジ…' to contain 'max-width: 1180px'
+
+- Expected
++ Received
+
+- max-width: 1180px
++ /* M47: PC戦闘コマンドを読みやすい定幅の「戦支度盤」へ。戦闘ロジックと操作順は不変。 */
++ @media (min-width: 561px) {
++   .battle-screen { grid-template-rows: 52px minmax(0, 1fr) clamp(184px, 22vh, 218px); }
++   .battle-screen:has(.victory-scroll) { grid-template-rows: 52px minmax(0, 1fr) clamp(236px, 34vh, 360px); }
++   .battle-bottom {
++     margin-inline: auto;
++     border: 1px solid rgba(201, 168, 106, 0.28);
++     border-bottom: 0;
++   }
++ }
++
++ /* M48: 勝利後も左に戦況の記を残し、右側の結果本文だけをスクロールさせる。
++    継続CTAは独立行に固定し、戦果の長さに関係なく常に押せる状態を保つ。 */
++ .victory-scroll {
++   display: grid;
++   grid-template-columns: minmax(180px, 0.34fr) minmax(0, 1fr);
++   gap: 10px;
++   width: 100%;
++   height: 100%;
++   min-height: 0;
++   overflow: hidden;
++ }
++ .victory-log-panel {
++   display: flex;
++   flex-direction: column;
++   min-width: 0;
++   min-height: 0;
++   padding: 9px 10px;
++   border: 1px solid rgba(201, 168, 106, 0.28);
++   border-radius: 5px;
++   background: linear-gradient(160deg, rgba(15, 18, 24, 0.96), rgba(8, 11, 17, 0.92));
++ }
++ .victory-log-heading {
++   display: flex;
++   align-items: baseline;
++   justify-content: space-between;
++   gap: 8px;
++   padding-bottom: 7px;
++   border-bottom: 1px solid rgba(201, 168, 106, 0.24);
++   color: var(--gold);
++   font-size: 11px;
++   letter-spacing: 0.12em;
++ }
++ .victory-log-heading small { color: var(--text-dim); font-size: 10px; letter-spacing: 0; }
++ .victory-log-list { min-height: 0; overflow-y: auto; padding: 5px 2px 0 0; scrollbar-width: thin; }
++ .victory-log-list p { margin: 0; padding: 5px 0; border-bottom: 1px dashed rgba(201, 168, 106, 0.14); color: var(--text-dim); font-size: 10.5px; line-height: 1.45; }
++ .victory-log-list p:last-child { color: var(--text); }
++ .victory-log-note { flex: 0 0 auto; margin: 6px 0 0; color: var(--text-dim); font-size: 9.5px; }
++ .victory-result-main { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 7px; min-width: 0; min-height: 0; overflow: hidden; }
++ .victory-result-body { display: grid; align-content: start; gap: 8px; min-height: 0; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; }
++ .victory-continue { padding-top: 1px; border-top: 1px solid rgba(201, 168, 106, 0.22); }
++ .victory-continue .btn-main { width: 100%; min-height: 46px; }
++
++ .turnpanel-actor { justify-content: flex-start; gap: 7px; }
++ .turnpanel-actor-main { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px; align-items: center; }
++ .turnpanel-actor-main .portrait { width: 48px; height: 58px; border-color: rgba(201, 168, 106, 0.42); }
++ .turnpanel-actor-vitals { min-width: 0; display: grid; gap: 3px; }
++ .turnpanel-kicker, .command-board-heading span, .battle-tactical-kicker {
++   color: #b89b65;
++   font-size: 9.5px;
++   letter-spacing: 0.16em;
++ }
++ .turnpanel-actor-name { color: #f0e6d2; letter-spacing: 0.07em; }
++ .turnpanel-party-mp {
++   margin-top: auto;
++   padding-top: 6px;
++   border-top: 1px dashed rgba(201, 168, 106, 0.2);
++ }
++
++ .command-board-heading {
++   display: flex;
++   align-items: baseline;
++   justify-content: space-between;
++   gap: 8px;
++   min-height: 22px;
++   padding: 0 2px 4px;
++ }
++ .command-board-heading b { color: #ddd3c0; font-size: 11px; font-weight: 500; }
++ .turnpanel-center .auto-control-stack { margin-bottom: 5px; }
++ .turnpanel-center .cmd-grid { gap: 5px; }
++ .cmd-grid .cmd-btn:not(.cmd-auto) {
++   display: grid;
++   grid-template-columns: 30px minmax(0, 1fr);
++   align-items: center;
++   gap: 7px;
++   min-height: 48px;
++   padding: 5px 9px;
++   text-align: left;
++ }
++ .cmd-grid .cmd-mark {
++   display: grid;
++   place-items: center;
++   width: 29px;
++   height: 29px;
++   border: 1px solid rgba(201, 168, 106, 0.34);
++   border-radius: 50%;
++   color: #d5bd88;
++   background: radial-gradient(circle, rgba(201, 168, 106, 0.12), rgba(0, 0, 0, 0.22));
++   font-family: serif;
++   font-size: 13px;
++ }
++ .cmd-grid .cmd-copy { display: grid; min-width: 0; line-height: 1.15; }
++ .cmd-grid .cmd-copy b { color: #eee5d5; font-size: 13px; letter-spacing: 0.08em; }
++ .cmd-grid .cmd-copy small { margin-top: 3px; color: #998f80; font-size: 9.5px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
++ .cmd-grid .cmd-main .cmd-mark { border-color: #e1a84e; color: #ffd28c; box-shadow: 0 0 12px rgba(232, 163, 61, 0.16); }
++ .cmd-grid .cmd-flee { opacity: 0.78; }
++
++ .battle-tactical-brief { display: grid; gap: 7px; height: 100%; align-content: start; }
++ .battle-tactical-kicker { margin: 0; padding-bottom: 6px; border-bottom: 1px solid rgba(201, 168, 106, 0.2); }
++ .battle-tactical-brief dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin: 0; }
++ .battle-tactical-brief dl > div { padding: 5px 3px; border-left: 1px solid rgba(201, 168, 106, 0.2); text-align: center; }
++ .battle-tactical-brief dt { color: #8f867a; font-size: 9px; }
++ .battle-tactical-brief dd { margin: 2px 0 0; color: #ead9b8; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
++ .battle-tactical-note { margin: 0; color: #b5aa99; font-size: 10.5px; line-height: 1.55; }
++
++ @media (max-width: 900px) and (min-width: 561px) {
++   .cmd-grid .cmd-copy small { display: none; }
++   .cmd-grid .cmd-btn:not(.cmd-auto) { grid-template-columns: 25px minmax(0, 1fr); gap: 5px; padding-inline: 6px; }
++   .cmd-grid .cmd-mark { width: 25px; height: 25px; }
++ }
++
++ @media (max-width: 560px) {
++   .battle-screen:has(.victory-scroll) { grid-template-rows: 44px minmax(0, 1fr) clamp(286px, 52vh, 460px); }
++   .battle-bottom { width: 100%; max-width: none; margin: 0; }
++   .command-board-heading { min-height: 20px; }
++   .turnpanel-actor-main { grid-template-columns: 42px minmax(0, 1fr); }
++   .turnpanel-actor-main .portrait { width: 42px; height: 50px; }
++   .cmd-grid .cmd-btn:not(.cmd-auto) { grid-template-columns: 25px minmax(0, 1fr); min-height: 48px; padding: 4px 7px; }
++   .cmd-grid .cmd-mark { width: 25px; height: 25px; font-size: 12px; }
++   .cmd-grid .cmd-copy small { display: none; }
++   .battle-tactical-brief { display: none; }
++   .victory-scroll { grid-template-columns: 1fr; grid-template-rows: minmax(82px, 0.48fr) minmax(0, 1fr); gap: 6px; }
++   .victory-log-panel { padding: 7px 8px; }
++   .victory-log-list { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; padding-top: 4px; }
++   .victory-log-list p { flex: 0 0 min(230px, 72vw); padding: 4px 7px; border: 1px solid rgba(201, 168, 106, 0.14); border-radius: 3px; }
++   .victory-log-note { display: none; }
++   .victory-result-main { gap: 5px; }
++   .victory-continue .btn-main { min-height: 48px; }
++ }
++
++ @media (prefers-reduced-motion: reduce) {
++   .cmd-grid .cmd-mark { box-shadow: none; }
++ }
++
+
+ ❯ tests/m47_medicine_battle_ui.test.ts:27:23
+     25|   })
+     26|
+     27|   it('PC戦闘盤は定幅中央寄せで、行動理由と戦況を同時に読める', () => {
+       |                       ^
+     28|     // 現行M61の定幅。M47の旧1180px宣言は後続CSSで上書きされていた。
+     29|     expect(battleTheaterCss).toContain('max-width: 1420px')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/m56_star_lottery.test.ts > M56 三星択一 > 1000 seed×50籤で保証違反0、new-firstの中央値48以上・p10 45以上
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/m56_star_lottery.test.ts:69:3
+     67|   })
+     68|
+     69|   it('1000 seed×50籤で保証違反0、new-firstの中央値48以上・p10 45以上', () => {
+       |   ^
+     70|     const newCounts: number[] = []
+     71|     const rankObservations: Record<GodRank, number> = { 1: 0, 2: 0, 3:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/visual_closure_validator.test.ts > visual closure ledger validator > derives and closes the current 23 routes, 40 regions, and route-external overlays
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "entries[2].provenance.sourceSha256: does not match src/ui/Home.tsx",
++   "entries[4].provenance.sourceSha256: does not match src/ui/Pact.tsx",
++ ]
+
+ ❯ tests/visual_closure_validator.test.ts:47:27
+
+     45|   it('derives and closes the current 23 routes, 40 regions, and route-…
+     46|     const result = validateVisualClosure({ root, ledgerPath: canonical…
+     47|     expect(result.errors).toEqual([])
+       |                           ^
+     48|     expect(result.counts).toEqual({ routes: 23, regions: 40, overlays:…
+     49|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  3 failed | 59 passed (62)
+      Tests  3 failed | 890 passed (893)
+   Start at  11:34:19
+   Duration  541.37s (transform 14.79s, setup 0ms, import 31.84s, tests 621.37s, environment 33ms)
+

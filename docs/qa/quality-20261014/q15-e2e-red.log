@@ -1,0 +1,20 @@
+Q15 captured failure excerpts before the focus repair, 2026-10-14
+Command: npx playwright test tests/visual/quality_pact_focus_20261014.spec.ts --project=pc-1280 -g '封印行に先頭|矢印'
+
+Fixture: fame=520, regionsCleared=[], rank=4, living adult parent, hoto=0.
+The available-row assertion passed with 2 inspectable rows.
+
+1) 封印行に先頭を塞がれても、閲覧可能な極ツ星へTabで入れる
+Locator: locator('.god-row[tabindex="0"]')
+Expected: 1
+Received: 0
+Timeout: 7000ms
+
+2) 矢印・Home・Endは封印行を飛ばし、閲覧選択を勝手に変更しない
+Locator: locator('.god-row[aria-disabled="false"]').last()
+Expected: focused
+Received: inactive
+Timeout: 7000ms
+After ArrowDown from the first inspectable row, the second inspectable row did not receive focus.
+
+2 failed. Both failures were repaired and passed in the final PC/mobile runs.

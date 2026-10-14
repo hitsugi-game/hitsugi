@@ -1,0 +1,5 @@
+
+> hitsugi@0.2.0 check:visual-manifest
+> node scripts/validate_visual_recovery_manifest.mjs
+
+visual manifest OK: 9 entries, 9 unique IDs

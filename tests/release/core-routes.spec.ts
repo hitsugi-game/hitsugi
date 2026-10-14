@@ -10,7 +10,7 @@ function monitorConsole(page: Page): string[] {
   return problems
 }
 
-test('production Title → Home → Pact flow renders without browser errors or QA hooks', async ({ page }) => {
+test('production Title → Home → Pact flow renders without browser errors or QA hooks', async ({ page }, info) => {
   const problems = monitorConsole(page)
   await page.goto('/')
   await expect(page.locator('.title-screen')).toBeVisible()
@@ -20,9 +20,16 @@ test('production Title → Home → Pact flow renders without browser errors or 
   await page.getByRole('button', { name: /宿命/ }).click()
   await page.getByRole('button', { name: '物語を飛ばす' }).click()
   await expect(page.locator('.home-screen')).toBeVisible()
+  await expect(page.locator('.home-screen')).toHaveCSS('opacity', '1')
+  await page.screenshot({ path: `docs/qa/quality-20261014/home-${info.project.name}.png`, fullPage: true })
 
   await page.getByRole('button', { name: /星契り — 次代を授かる/ }).click()
   await expect(page.getByRole('heading', { name: '交神の儀' })).toBeVisible()
+  await expect(page.locator('.pact-screen')).toContainText('翌月に子が生まれる')
+  await expect(page.locator('.pact-screen')).not.toContainText('左の星名')
+  await expect(page.locator('.pact-screen')).toHaveCSS('opacity', '1')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
+  await page.screenshot({ path: `docs/qa/quality-20261014/pact-${info.project.name}.png`, fullPage: true })
 
   expect(problems, problems.join('\n')).toEqual([])
 })

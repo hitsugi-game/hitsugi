@@ -11,6 +11,7 @@ import { REGIONS } from '../core/data/regions'
 import { REGION_LORE } from '../core/data/lore'
 import { ITEM_SERIES_MANIFEST } from '../core/data/items'
 import { collectionDiscoveredCount, popcount15 } from '../core/collection'
+import { recordedPactGodIds } from '../core/pact_records'
 import { downloadChronicleCard, copyShareText } from './shareCard'
 import { MaybeImg, Panel } from './components'
 import { faceImg } from './img'
@@ -40,7 +41,8 @@ function computeRecords(data: GameData) {
   const loreDone = loreRegions.filter((r) => cleared.has(r.id) && (frags[r.id] ?? 0) >= 3).length
   const collTotal = baseEnemies.length + GODS.length + loreRegions.length
   const collDone = enemySeen + godSeen + loreDone
-  const collPct = collTotal > 0 ? Math.round((collDone / collTotal) * 100) : 0
+  // 四捨五入で未収集の項目が残るのに100%・全収集称号を出さない。
+  const collPct = collTotal > 0 ? Math.floor((collDone / collTotal) * 100) : 0
   const itemSeen = collectionDiscoveredCount(data.collectionV2)
   const itemSeriesStarted = ITEM_SERIES_MANIFEST.filter((series) => popcount15(data.collectionV2?.itemSeriesBits[series.seriesId] ?? 0) > 0).length
   const itemSeriesComplete = ITEM_SERIES_MANIFEST.filter((series) => popcount15(data.collectionV2?.itemSeriesBits[series.seriesId] ?? 0) === 15).length
@@ -50,7 +52,7 @@ function computeRecords(data: GameData) {
     .map((series) => series.name)
   return {
     gens, alive, fallenN, kills, exped, years, towerBest, fame: data.fame,
-    godsPacted: knownGods.size, familiars: data.familiars?.length ?? 0,
+    godsPacted: recordedPactGodIds(data).size, familiars: data.familiars?.length ?? 0,
     regionsCleared: data.regionsCleared.length, regionsTotal: REGIONS.length,
     enemySeen, enemyTotal: baseEnemies.length, godSeen, godTotal: GODS.length,
     loreDone, loreTotal: loreRegions.length, collPct,
@@ -70,8 +72,8 @@ const ACHIEVEMENTS: { name: string; hint: string; test: (r: RecordSummary) => bo
   // M19 B3: 図鑑コンプの節目称号 — 収集率に到達の褒美を与える
   { name: '見聞の徒', hint: '魔性図鑑を半分(50%)まで埋める', test: (r) => r.enemyTotal > 0 && r.enemySeen / r.enemyTotal >= 0.5 },
   { name: '夜藪の博士', hint: '魔性図鑑を全て(100%)埋める', test: (r) => r.enemyTotal > 0 && r.enemySeen >= r.enemyTotal },
-  { name: '星に親しむ家', hint: '星神の半分(50%)と契る', test: (r) => r.godTotal > 0 && r.godSeen / r.godTotal >= 0.5 },
-  { name: '星霊の盟家', hint: '全ての星神(100%)と契る', test: (r) => r.godTotal > 0 && r.godSeen >= r.godTotal },
+  { name: '星に親しむ家', hint: '星神の半分(50%)と契る', test: (r) => r.godTotal > 0 && r.godsPacted / r.godTotal >= 0.5 },
+  { name: '星霊の盟家', hint: '全ての星神(100%)と契る', test: (r) => r.godTotal > 0 && r.godsPacted >= r.godTotal },
   { name: '千年の識者', hint: '総合収集率100%に至る', test: (r) => r.collPct >= 100 },
   { name: '千の魔性を討つ', hint: '討伐数1000', test: (r) => r.kills >= 1000 },
   { name: '千年の武', hint: '武功500', test: (r) => r.fame >= 500 },
@@ -184,7 +186,7 @@ export function ChronicleScreen() {
               <span>魔性の拓影</span><b>{rec.enemySeen}/{rec.enemyTotal}</b><small>遭遇した姿を見返す</small>
             </button>
             <button className="btn collection-portal" onClick={() => setScreen({ id: 'codex', tab: 'gods' })}>
-              <span>星神の御影</span><b>{rec.godSeen}/{rec.godTotal}</b><small>契った神を見返す</small>
+              <span>星神の御影</span><b>{rec.godSeen}/{rec.godTotal}</b><small>識った神を見返す</small>
             </button>
             <button className="btn collection-portal collection-portal-items" onClick={() => setScreen({ id: 'forge', tab: 'collection' })}>
               <span>宝具系譜録</span><b>{rec.itemSeen}/{rec.itemTotal}</b><small>{rec.itemSeriesStarted}系譜を開始・{rec.itemSeriesComplete}棚完成</small>

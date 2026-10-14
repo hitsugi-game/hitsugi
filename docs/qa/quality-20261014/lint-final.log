@@ -1,0 +1,4 @@
+
+> hitsugi@0.2.0 lint
+> oxlint src tests scripts vite.config.ts playwright.config.ts playwright.release.config.ts
+

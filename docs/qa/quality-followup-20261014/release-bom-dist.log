@@ -1,0 +1,9 @@
+
+> hitsugi@0.2.0 check:asset-bom:dist
+> node scripts/public_asset_bom.mjs --dist
+
+public asset BOM FAILED (4)
+- dist-sha256-mismatch: favicon.svg
+- dist-byte-size-mismatch: favicon.svg
+- dist-sha256-mismatch: icons.svg
+- dist-byte-size-mismatch: icons.svg

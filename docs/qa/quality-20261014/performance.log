@@ -1,0 +1,8 @@
+
+> hitsugi@0.2.0 check:performance
+> node scripts/check_build_performance.mjs
+
+initial JS: assets/index-BHvHZfLl.js, assets/rolldown-runtime-QTnfLwEv.js / 74284 gzip bytes
+initial CSS: assets/index-D5JlTZB9.css / 21115 gzip bytes
+dist: 2881 files / 255944759 bytes; target met
+PERFORMANCE REGRESSION: CSS gzip 65702 > hard ceiling 65536

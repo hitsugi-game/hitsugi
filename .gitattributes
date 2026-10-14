@@ -1,0 +1,6 @@
+# Public SVG bytes must match the asset BOM on Windows and Linux.
+public/*.svg text eol=lf
+
+# Preserve literal QA evidence, including CRLF, tool whitespace and recorded hashes.
+docs/qa/quality-20261014/** -text -whitespace
+docs/qa/quality-followup-20261014/** -text -whitespace

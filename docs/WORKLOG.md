@@ -1585,3 +1585,10 @@
 - **原因**: ゲームのbuildに使うNode.jsは既に22だが、`actions/checkout@v4`、`actions/setup-node@v4`、`actions/upload-artifact@v4`が内部でNode.js 20を使うため、GitHub-hosted runnerがNode.js 24へ強制実行する非推奨警告を出していた。
 - **変更**: checkout/setup-node/upload-artifactをNode.js 24対応のv7へ、Pages梱包/deployを同世代のv5へ更新。供給網保護のため、全Actionを公式release tagの解決済み40桁commit SHAで固定した。プロジェクトの`node-version: 22`、npm 11.12.1、出荷gate、権限、成果物、公開検証手順は変更しない。
 - **公開検証**: `42b978f`をmainへpushし、GitHub Actions run `31011617744`のverify/deployが成功。公開HTMLと55 JS/CSS/deferred resourcesは全てHTTP 2xx、commit markerは`42b978f`と一致した。verify/deploy両jobのannotationは0件で、Node.js 20非推奨警告が解消したことをAPIでも確認した。
+
+## 2026-10-14（品質点検・追加修正・公開指示）
+
+- **修正**: 最終戦第二相の再挑戦、岐路・未読結末の保存復帰、クリア後の断絶、章順、故人の未実施儀、要約、個人化結末の主述、第二相図鑑、契約と縁の区別、収集100%表示、割引後費用、保存診断中の新規開始、スマホHPを補正した。続行依頼により星契りのTab・矢印操作、共通目標、継ぐ後日談の交代周期も修正した。
+- **検証**: 全65ファイル／930件PASS。目標判定のファイル分離後にも限定30件、画面10件、本番Chromium／Firefox／WebKit 15件を再実行した。星契り画面10件、lint、data、closure、manifest、public/dist BOM、build、性能予算も合格。差分コードレビューは指摘0件。新しい読取専用CLIのAstra/high指定による最終固定版評価は指摘0件・構造20/25点。旧判定・途中失敗・生ログはQA記録へ保持する。
+- **公開指示**: Ownerが「commit・push・公開してください」と指示した。ローカルmainが最新mainより4コミット古かったため、最新`331ea70`から管理worktreeを作成した。公開済みM61とCI更新を保持し、今回の品質修正とQA記録を移した。元の作業フォルダーのDot素材制作と別件の加護カード変更は保持した。
+- **出荷確認**: 出荷コピーで依存導入、監査、機械検証、build、本番ブラウザを確認してからmainへpushする。Actionsのverify/deployと公開HTML・遅延読込を含むJS/CSS・commit markerを照合する。詳細は`docs/qa/quality-followup-20261014/release-20261014.md`。

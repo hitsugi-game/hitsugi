@@ -1,0 +1,4 @@
+Reading additional input from stdin...
+{"type":"thread.started","thread_id":"01a137b5-19a5-72c1-b9d5-64e28c58f5f4"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"指定されたソースと evidence の生ログを読み、物語の因果とゲーム上の到達条件を照合します。読取専用で確認し、指摘と未検証事項を分けます。評価には code-review-skill、日本語の推敲には yomiyasu を適用します。\n"}}

@@ -1,0 +1,28 @@
+
+Running 1 test using 1 worker
+
+(node:57304) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [mobile-390] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ (10.4s)
+
+
+  1) [mobile-390] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ ────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      75 |     return Number.parseFloat(getComputedStyle(label).lineHeight) <= bar.clientHeight
+      76 |   }))
+    > 77 |   expect(hpTextFits.every(Boolean)).toBe(true)
+         |                                     ^
+      78 |
+      79 |   const viewport = page.viewportSize()!
+      80 |   if (viewport.width > 768) {
+        at C:\Users\junna\Documents\Claude\_fable5\hitsugi\tests\visual\m61_battle_theater.spec.ts:77:37
+
+    Error Context: tests\visual\.artifacts\m61_battle_theater-M61-灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ-mobile-390\error-context.md
+
+  1 failed
+    [mobile-390] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ ─────

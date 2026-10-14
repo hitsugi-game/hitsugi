@@ -1,0 +1,17 @@
+[WebServer] (node:58024) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 45 tests using 1 worker
+
+(node:22700) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   1 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:22:1 › 新規Homeは報酬より最優先を一件だけ示し、PCの第一画面に今月の決断が入る (30.4s)
+(node:40800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   2 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:34:1 › 画面進入は先頭へ戻りh1を読み始めにする。星契り初期は推薦三柱 (35.1s)
+(node:52572) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   3 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:48:1 › 出立は唯一成人を仮編成し、mobileは周辺五地点の横絵巻にする (30.2s)
+(node:56540) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  4 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:60:1 › 宝具録は小太刀で絞り、解除すれば54棚へ戻る (8.2s)

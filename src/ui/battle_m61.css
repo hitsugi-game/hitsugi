@@ -2,9 +2,6 @@
    戦闘ロジック/報酬/操作順は変えず、battle_m47.css より後に読み込む表示層だけの差分。 */
 
 .battle-m61 {
-  --m61-ink: rgba(4, 7, 12, .94);
-  --m61-lacquer: rgba(13, 12, 13, .95);
-  --m61-brass: rgba(201, 168, 106, .58);
   --m61-paper: #e8ddc8;
   grid-template-rows: 58px minmax(0, 1fr) clamp(204px, 25vh, 246px);
   background: #05070d;
@@ -230,7 +227,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.battle-m61 .combatant-plate .bar { height: 14px; margin-top: 2px; }
+.battle-m61 .combatant-plate .bar { height: 17px; margin-top: 2px; }
 .battle-m61 .combatant.acting::before {
   content: '';
   top: 3%;
@@ -484,7 +481,6 @@
   .battle-m61 .combatant-plate { margin-top: 2px; padding: 1px 3px 2px; }
   .battle-m61 .slot-preset-34 .combatant-plate { width: 64px; min-width: 64px; }
   .battle-m61 .combatant-name { font-size: 9px; }
-  .battle-m61 .combatant-plate .bar { height: 10px; }
   .battle-m61 .combatant.is-enemy .enemy-intent.has-behavior {
     max-width: 42vw;
     margin-bottom: 6px;

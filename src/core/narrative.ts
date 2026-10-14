@@ -4,6 +4,7 @@ import type {
 import { CHAPTERS } from './data/story'
 import { DREAM_EPISODES } from './data/dreams'
 import { REGIONS } from './data/regions'
+import { CHAPTER_SUMMARIES, DREAM_EPISODE_SUMMARIES, INTRO_DREAM_SUMMARY } from './data/narrative_summaries'
 
 export type NarrativeChannel = 'ambient' | 'discovery' | 'scene'
 export type NarrativeTrigger =
@@ -244,6 +245,21 @@ export function chapterIdByTitle(title: string): string | undefined {
   return CHAPTERS.find((chapter) => chapter.title === title)?.id
 }
 
+/** スキップした章・夢の本文要約。未知の場面へ別の物語を補わない。 */
+export function narrativeSceneSummary(scene: NarrativeScene): string | null {
+  if (scene.kind === 'dream') return INTRO_DREAM_SUMMARY
+  if (scene.kind === 'dreamEp') {
+    return DREAM_EPISODES.some((episode) => episode.id === scene.epId)
+      ? DREAM_EPISODE_SUMMARIES[scene.epId] ?? null
+      : null
+  }
+  if (scene.kind !== 'life') return null
+  const chapter = scene.narrativeId !== undefined
+    ? CHAPTERS.find((candidate) => candidate.id === scene.narrativeId)
+    : CHAPTERS.find((candidate) => candidate.title === scene.title)
+  return chapter ? CHAPTER_SUMMARIES[chapter.id] ?? null : null
+}
+
 export function generationQuestion(data: GameData): string {
   const items = [
     ...data.inventory,
@@ -292,46 +308,57 @@ export interface FamilyEcho {
   text: string
 }
 
-export function familyFinaleEchoes(data: GameData): FamilyEcho[] {
-  const out: FamilyEcho[] = []
+// 表示用の文章と結末用の文型が、同じ元データを参照する。
+function familyFinaleContext(data: GameData) {
   const firstDead = data.family
     .filter((c) => !c.alive)
     .sort((a, b) => (a.deathSeason ?? Number.MAX_SAFE_INTEGER) - (b.deathSeason ?? Number.MAX_SAFE_INTEGER))[0]
-  if (firstDead) {
-    out.push({ label: '最初に見送った灯', text: `${firstDead.name}${firstDead.lastWords ? `「${firstDead.lastWords.slice(0, 24)}」` : ` — ${firstDead.epitaph}`}` })
-  }
-
   const ownership = new Map<string, { item: GameData['inventory'][number]; owner?: Character }>()
   for (const item of data.inventory) ownership.set(item.id, { item })
   for (const char of data.family) {
     for (const item of Object.values(char.equipment)) if (item) ownership.set(item.id, { item, owner: char })
   }
-  const heirloom = [...ownership.values()].sort((a, b) => b.item.generation - a.item.generation)[0]
-  if (heirloom && heirloom.item.generation > 0) {
+  const oldestItem = [...ownership.values()].sort((a, b) => b.item.generation - a.item.generation)[0]
+  const heirloom = oldestItem && oldestItem.item.generation > 0 ? oldestItem : undefined
+  const completedLoreCount = Object.values(data.loreFrags ?? {}).filter((n) => n >= 3).length
+  const nemesis = [...(data.nemeses ?? [])].sort((a, b) => b.level - a.level)[0]
+  const head = data.family.find((c) => c.alive && c.isHead) ?? data.family[0]
+  return { firstDead, heirloom, completedLoreCount, nemesis, head }
+}
+
+export function familyFinaleEchoes(data: GameData): FamilyEcho[] {
+  const out: FamilyEcho[] = []
+  const { firstDead, heirloom, completedLoreCount, nemesis, head } = familyFinaleContext(data)
+  if (firstDead) {
+    out.push({ label: '最初に見送った灯', text: `${firstDead.name}${firstDead.lastWords ? `「${firstDead.lastWords.slice(0, 24)}」` : ` — ${firstDead.epitaph}`}` })
+  }
+  if (heirloom) {
     out.push({
       label: '最も長く継いだ形見',
       text: `${heirloom.item.name} — ${heirloom.item.legacyFirstOwner ? `${heirloom.item.legacyFirstOwner}から` : ''}${heirloom.item.generation}代${heirloom.owner ? `、${heirloom.owner.name}の手にある` : ''}`,
     })
   }
 
-  const completedLore = Object.entries(data.loreFrags ?? {}).filter(([, n]) => n >= 3)
-  const nemesis = [...(data.nemeses ?? [])].sort((a, b) => b.level - a.level)[0]
   if (nemesis) out.push({ label: '因縁を結んだ名', text: `${nemesis.name} — ${nemesis.victim}の仇` })
-  else if (completedLore[0]) out.push({ label: '真相まで読んだ土地', text: `${completedLore.length}つの土地の縁起を、最後まで記した` })
+  else if (completedLoreCount > 0) out.push({ label: '真相まで読んだ土地', text: `${completedLoreCount}つの土地の縁起を、最後まで記した` })
 
   if (out.length === 0) {
-    const head = data.family.find((c) => c.alive && c.isHead) ?? data.family[0]
     out.push({ label: 'ここへ運んだ灯', text: `${head?.name ?? '名もなき当主'}が、家の最初の答えを選ぶ` })
   }
   return out.slice(0, 3)
 }
 
 export function personalizedEndingBeat(data: GameData, ending: 'cut' | 'save' | 'inherit'): string {
-  const names = familyFinaleEchoes(data).map((echo) => echo.text.split(/[「—]/)[0].trim()).filter(Boolean)
-  const anchor = names.slice(0, 2).join('と') || (data.family[0]?.name ?? '名もなき一族')
-  if (ending === 'cut') return `${anchor}から続く名を読み上げ、二人を独りにしないまま、千年の夜を送った。`
-  if (ending === 'save') return `${anchor}が運んだ灯も封印へ重なった。今度の錠前は、誰か一人の犠牲ではない。`
-  return `${anchor}が継いだ名と役目は、頂と郷を往き来する新しい家譜になった。`
+  const { firstDead, heirloom, completedLoreCount, nemesis, head } = familyFinaleContext(data)
+  const family = firstDead ? `${firstDead.name}から続く一族` : head ? `${head.name}の一族` : '名もなき一族'
+  const memories: string[] = []
+  if (heirloom) memories.push(`${heirloom.item.name}は${heirloom.item.generation}代、手を渡ってきた。`)
+  if (nemesis) memories.push(`${nemesis.name}と${nemesis.victim}の因縁も、家譜に残っている。`)
+  else if (completedLoreCount > 0) memories.push(`${completedLoreCount}つの土地の縁起を、最後まで家譜に記した。`)
+  if (ending === 'cut') memories.push(`${family}の名を読み上げ、二人を独りにしないまま、千年の夜を送った。`)
+  else if (ending === 'save') memories.push(`${family}が運んだ灯も封印へ重なった。今度の錠前は、誰か一人の犠牲ではない。`)
+  else memories.push(`${family}が継いだ名と役目は、頂と郷を往き来する新しい家譜になった。`)
+  return memories.join('')
 }
 
 export function regionQuestion(regionName: string, loreFragments: number, cleared: boolean): string {

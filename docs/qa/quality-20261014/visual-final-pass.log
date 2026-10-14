@@ -1,0 +1,74 @@
+[WebServer] (node:32972) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 30 tests using 1 worker
+
+(node:53836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   1 [pc-1440] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ (1.1m)
+(node:14108) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -   2 [pc-1440] › tests\visual\m61_battle_theater.spec.ts:134:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+  ok  3 [pc-1440] › tests\visual\m61_battle_theater.spec.ts:170:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める (5.6s)
+  ok  4 [pc-1440] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅 (12.5s)
+  ok  5 [pc-1440] › tests\visual\quality_20261014.spec.ts:27:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する (4.8s)
+  ok  6 [pc-1440] › tests\visual\quality_20261014.spec.ts:60:1 › 縁だけでは契約数や契約称号を付与しない (3.9s)
+(node:50316) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  7 [pc-1280] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ (7.2s)
+  ok  8 [pc-1280] › tests\visual\m61_battle_theater.spec.ts:134:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ (5.5s)
+  ok  9 [pc-1280] › tests\visual\m61_battle_theater.spec.ts:170:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める (5.3s)
+  ok 10 [pc-1280] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅 (14.8s)
+  ok 11 [pc-1280] › tests\visual\quality_20261014.spec.ts:27:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する (5.4s)
+  ok 12 [pc-1280] › tests\visual\quality_20261014.spec.ts:60:1 › 縁だけでは契約数や契約称号を付与しない (4.6s)
+(node:55412) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 13 [tablet-768] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ (8.4s)
+  -  14 [tablet-768] › tests\visual\m61_battle_theater.spec.ts:134:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+  ok 15 [tablet-768] › tests\visual\m61_battle_theater.spec.ts:170:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める (5.6s)
+  ok 16 [tablet-768] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅 (11.4s)
+  ok 17 [tablet-768] › tests\visual\quality_20261014.spec.ts:27:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する (4.7s)
+  ok 18 [tablet-768] › tests\visual\quality_20261014.spec.ts:60:1 › 縁だけでは契約数や契約称号を付与しない (2.9s)
+(node:1948) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 19 [mobile-390] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ (4.7s)
+  -  20 [mobile-390] › tests\visual\m61_battle_theater.spec.ts:134:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+  ok 21 [mobile-390] › tests\visual\m61_battle_theater.spec.ts:170:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める (3.3s)
+  ok 22 [mobile-390] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅 (6.5s)
+  ok 23 [mobile-390] › tests\visual\quality_20261014.spec.ts:27:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する (2.1s)
+  ok 24 [mobile-390] › tests\visual\quality_20261014.spec.ts:60:1 › 縁だけでは契約数や契約称号を付与しない (2.4s)
+(node:54352) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 25 [mobile-360] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ (6.4s)
+  -  26 [mobile-360] › tests\visual\m61_battle_theater.spec.ts:134:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+  ok 27 [mobile-360] › tests\visual\m61_battle_theater.spec.ts:170:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める (5.0s)
+  ok 28 [mobile-360] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅 (8.2s)
+  ok 29 [mobile-360] › tests\visual\quality_20261014.spec.ts:27:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する (3.2s)
+  ok 30 [mobile-360] › tests\visual\quality_20261014.spec.ts:60:1 › 縁だけでは契約数や契約称号を付与しない (2.9s)
+
+
+  1) [pc-1440] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ ───────
+
+    Test timeout of 60000ms exceeded.
+
+    Error: page.goto: Test timeout of 60000ms exceeded.
+    Call log:
+      - navigating to "http://localhost:5173/?regionVisualV2=1", waiting until "load"
+
+
+      15 |
+      16 | async function gotoM61Battle(page: Page, allies = 3, enemies = 2): Promise<void> {
+    > 17 |   await page.goto('/?regionVisualV2=1')
+         |              ^
+      18 |   await page.waitForFunction(() => '__game' in window, null, { timeout: 15_000 })
+      19 |   await page.evaluate(({ allies, enemies, contractId }) => {
+      20 |     const game = (window as unknown as M61Window).__game
+        at gotoM61Battle (C:\Users\junna\Documents\Claude\_fable5\hitsugi\tests\visual\m61_battle_theater.spec.ts:17:14)
+        at C:\Users\junna\Documents\Claude\_fable5\hitsugi\tests\visual\m61_battle_theater.spec.ts:47:9
+
+    Error Context: tests\visual\.artifacts\m61_battle_theater-M61-灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ-pc-1440\error-context.md
+
+  1 failed
+    [pc-1440] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ ────────
+  4 skipped
+  25 passed (4.3m)

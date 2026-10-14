@@ -1,0 +1,36 @@
+
+> hitsugi@0.2.0 test:release-smoke
+> playwright test --config=playwright.release.config.ts
+
+[WebServer] (node:45368) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] [PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+[WebServer]   - vite:prepare-out-dir (44%)
+[WebServer]   - vite:css-post (24%)
+[WebServer]   - vite:css (9%)
+[WebServer]   - vite:build-import-analysis (9%)
+[WebServer] See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+[WebServer] 
+[WebServer] [plugin builtin:vite-reporter] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:43216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 15 tests using 1 worker
+
+(node:33628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [release-chromium-1280] › tests\release\core-routes.spec.ts:13:1 › production Title → Home → Pact flow renders without browser errors or QA hooks (10.9s)
+  ok  2 [release-chromium-1280] › tests\release\core-routes.spec.ts:30:1 › damaged save remains recoverable and never produces a blank screen (3.5s)
+  ok  3 [release-chromium-1280] › tests\release\core-routes.spec.ts:44:1 › corrupt main save resumes from a verified BAK in the production bundle (11.2s)
+  ok  4 [release-chromium-1280] › tests\release\core-routes.spec.ts:64:1 › a failed production lazy chunk reaches the root recovery page instead of a blank screen (4.2s)
+  ok  5 [release-chromium-1280] › tests\release\core-routes.spec.ts:76:1 › denied browser storage is disclosed and non-saving play reaches Home (7.3s)
+(node:51352) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  6 [release-firefox-1280] › tests\release\core-routes.spec.ts:13:1 › production Title → Home → Pact flow renders without browser errors or QA hooks (23.5s)
+  ok  7 [release-firefox-1280] › tests\release\core-routes.spec.ts:30:1 › damaged save remains recoverable and never produces a blank screen (9.3s)
+  ok  8 [release-firefox-1280] › tests\release\core-routes.spec.ts:44:1 › corrupt main save resumes from a verified BAK in the production bundle (21.4s)
+  ok  9 [release-firefox-1280] › tests\release\core-routes.spec.ts:64:1 › a failed production lazy chunk reaches the root recovery page instead of a blank screen (16.1s)

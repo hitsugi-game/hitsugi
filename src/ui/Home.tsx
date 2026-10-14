@@ -4,9 +4,8 @@ import { seasonLabel, isFestivalMonth, MOTTOS } from '../core/types'
 import type { MottoId, Element, GenerationVowId } from '../core/types'
 import { GENERATION_VOWS, isAdult, seasonsLeft } from '../core/inheritance'
 import { isStarLotteryUnlocked, remainingStarLotteryDraws } from '../core/star_lottery'
-import { GODS } from '../core/data/gods'
-import { ENEMIES } from '../core/data/enemies'
-import { REGIONS } from '../core/data/regions'
+import { cheapestUnlockedPactCost } from './pactPolicy'
+import { computeObjectives, type Objective } from './homeObjectives'
 import { GOSSIP } from '../core/data/gossip'
 import { FAMILIAR_KINDS } from '../core/data/familiars'
 import { todaysOdai } from '../core/data/dailyOdai'
@@ -73,7 +72,7 @@ export function HomeScreen() {
 
   const alive = data.family.filter((c) => c.alive)
   const adults = alive.filter((c) => isAdult(c, data.seasonIndex))
-  const cheapestPact = Math.min(...GODS.map((g) => g.cost))
+  const cheapestPact = cheapestUnlockedPactCost(data)
   const canPact = adults.length > 0 && data.hoto >= cheapestPact
   // M18 P2: 血脈診断・状況別推奨・月送り確認・郷の帳
   const cen = useMemo(() => census(data), [data])
@@ -136,7 +135,10 @@ export function HomeScreen() {
     setDeferredReminder(consumeDeferredReminder())
   }, [consumeDeferredReminder])
 
-  const deferredStories = data.narrative?.deferred ?? []
+  const deferredStories = (data.narrative?.deferred ?? []).filter((scene) =>
+    (scene.kind !== 'ceremony' && scene.kind !== 'jobrite')
+    || data.family.some((c) => c.id === scene.charId && c.alive),
+  )
   const archivedStories = data.narrative?.archive ?? []
   const currentQuestion = data.narrative?.generationQuestion ?? generationQuestion(data)
   const latestReturnTraces = returnTraces(data)
@@ -721,47 +723,6 @@ function HelpModal({ onClose }: { onClose: () => void }) {
 
 // ---- 務め(目標階層) — 研究の density of goals / 短期・中期・長期の重ね合わせ ----
 // 全て現在の state から純粋導出(store非改変)。新規〜中盤の「次に何を目指すか」を常に明示する。
-type Obj = { text: string; go?: 'pact' | 'depart' | 'chronicle' | 'codex'; goLabel?: string; progress?: [number, number]; done?: boolean }
-function computeObjectives(data: ReturnType<typeof useGame.getState>['data'] & object, adultCount: number): { short: Obj[]; mid: Obj[]; long: Obj[] } {
-  const alive = data.family.filter((c) => c.alive)
-  const head = alive.find((c) => c.isHead)
-  const gens = data.family.length > 0 ? Math.max(...data.family.map((c) => c.gen)) : 0
-  const baseEnemies = ENEMIES.filter((e) => !/_[wo]$/.test(e.id))
-  const enemySeen = new Set((data.codex?.enemies ?? []).map((id) => id.replace(/_[wo]$/, ''))).size
-  const bossRegions = REGIONS.filter((r) => r.bossId && r.id !== 'tokoyo_tou')
-  const clearedSet = new Set(data.regionsCleared)
-
-  // 短期(今すぐ〜この代)
-  const short: Obj[] = []
-  if (head && seasonsLeft(head, data.seasonIndex) <= 3 && data.pendingBirths.length === 0) {
-    short.push({ text: `当主 ${head.name} の灯が細い。次代を残す`, go: 'pact', goLabel: '星契りへ' })
-  }
-  if (alive.length <= 2 && data.pendingBirths.length === 0 && adultCount > 0) {
-    short.push({ text: '血が細い。星と契り、子を授かる', go: 'pact', goLabel: '星契りへ' })
-  }
-  if (adultCount > 0) short.push({ text: '夜藪へ出立し、奉燈と血珠を持ち帰る', go: 'depart', goLabel: '出立へ' })
-  if (short.length === 0) short.push({ text: '子が育つのを待ち、次の一手を練る' })
-
-  // 中期(この周回)
-  const mid: Obj[] = []
-  const nextLocked = REGIONS.filter((r) => r.unlockFame > data.fame && r.id !== 'tokoyo_tou').sort((a, b) => a.unlockFame - b.unlockFame)[0]
-  if (nextLocked) mid.push({ text: `「${nextLocked.name}」への道を開く`, progress: [data.fame, nextLocked.unlockFame], go: 'depart', goLabel: '出立へ' })
-  const nextBoss = bossRegions.filter((r) => r.unlockFame <= data.fame && !clearedSet.has(r.id)).sort((a, b) => a.tier - b.tier)[0]
-  if (nextBoss) mid.push({ text: `「${nextBoss.name}」の主を鎮める`, go: 'depart', goLabel: '出立へ' })
-  mid.push({ text: '血を継ぎ、代を重ねる', progress: [gens, 10] })
-  mid.push({ text: '魔性を見聞し、図鑑を埋める', progress: [enemySeen, baseEnemies.length], go: 'codex', goLabel: '図鑑へ' })
-
-  // 長期(千年紀)
-  const long: Obj[] = []
-  long.push({ text: '玄冬を討ち、常夜に朝を還す', done: !!data.flags.cleared })
-  long.push({ text: '全ての地の主を鎮める', progress: [data.regionsCleared.filter((id) => bossRegions.some((r) => r.id === id)).length, bossRegions.length] })
-  if (data.flags.cleared) {
-    const tower = typeof data.flags.towerBest === 'number' ? data.flags.towerBest : 0
-    long.push({ text: '常夜百層を、深く制す', progress: [tower, 100] })
-  }
-  return { short, mid, long }
-}
-
 function ObjectivesModal({ onClose }: { onClose: () => void }) {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
@@ -777,12 +738,12 @@ function ObjectivesModal({ onClose }: { onClose: () => void }) {
   const odaiMet = odai.check(data)
   const odaiClaimed = data.flags.odaiClaimedDay === odaiKey || odaiDone
   const odaiReward = [odai.reward.hoto ? `奉燈${odai.reward.hoto}` : '', odai.reward.ketsu ? `血珠${odai.reward.ketsu}` : ''].filter(Boolean).join('・')
-  const tiers: [string, string, Obj[]][] = [
+  const tiers: [string, string, Objective[]][] = [
     ['今', '今すぐの務め', short],
     ['代', 'この代の務め', mid],
     ['紀', '千年紀の務め', long],
   ]
-  const go = (id: Obj['go']) => { if (id) { onClose(); setScreen({ id }) } }
+  const go = (id: Objective['go']) => { if (id) { onClose(); setScreen({ id }) } }
   return (
     <Sheet title="務め — 一族の目標" onClose={onClose}>
         <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 10 }}>

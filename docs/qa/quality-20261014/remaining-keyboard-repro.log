@@ -1,0 +1,97 @@
+{
+  "scenario": "fame520 / no cleared region / all stars / highest rank",
+  "rows": [
+    {
+      "text": "月\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "火\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "星\n???\n武功1400で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "火\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "星\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "土\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "風\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "土\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "水\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "月\n月夜見の大神\n心\n技\n880",
+      "tabIndex": -1,
+      "disabled": "false"
+    },
+    {
+      "text": "月\n???\n第5代の血で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "水\n???\n第8代の血で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "土\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "火\n???\nとある地の主の討伐で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "火\n???\nとある地の主の討伐と第6代の血で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "星\n???\n武功520と第12代の血で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "月\n???\n武功1800と第10代の血で道が開く\n—",
+      "tabIndex": -1,
+      "disabled": "true"
+    },
+    {
+      "text": "星\n北辰老\n力\n体\n1200",
+      "tabIndex": -1,
+      "disabled": "false"
+    }
+  ],
+  "inspectableRows": 2,
+  "tabReachableRows": 0
+}

@@ -1,0 +1,49 @@
+{
+  "recordedAt": "2026-10-14T12:47:42.5425984+09:00",
+  "wrapper": "C:/Users/junna/Documents/Claude/portfolio-control/scripts/codex-task.ps1",
+  "route": "deep",
+  "independentReadOnly": true,
+  "reviews": [
+    {
+      "version": "v1",
+      "sessionId": "01a1387e-c4f1-7a10-97a0-d9da11e1bc3a",
+      "requestedModel": "gpt-6-astra",
+      "requestedReasoningEffort": "high",
+      "observedServerModel": null,
+      "observedServerReasoningEffort": null,
+      "cliVersion": "codex-cli 0.162.0-alpha.17.2",
+      "cliSha256": "D13914CED6C7AF174D8D638DB938284231227312104B06A25E9608C632A7DAEC",
+      "exitCode": 0,
+      "inputManifest": "input-manifest-v1.json",
+      "inputManifestSha256": "69147ce0e74f0ff2df4847abea300a95d19099f9bb688bf67a3ad3db4ade93c2",
+      "output": "independent-review-v1.md",
+      "outputSha256": "35bdd1aa788da63af144f5869888bdadd340e6e12a3603224f30e69786db7de1",
+      "eventLog": "independent-review-events.jsonl",
+      "eventLogSha256": "29eec8dd4f8845f50ef1be067b67b12856ff25de636c520cf2054bab4ce609ed"
+    },
+    {
+      "version": "v2",
+      "sessionId": "01a13882-a9d1-7271-8f0c-6a96e8fa77b0",
+      "requestedModel": "gpt-6-astra",
+      "requestedReasoningEffort": "high",
+      "observedServerModel": null,
+      "observedServerReasoningEffort": null,
+      "cliVersion": "codex-cli 0.162.0-alpha.17.2",
+      "cliSha256": "D13914CED6C7AF174D8D638DB938284231227312104B06A25E9608C632A7DAEC",
+      "exitCode": 0,
+      "inputManifest": "input-manifest-v2.json",
+      "inputManifestSha256": "bb77e04b69ab430a49fe90d9af72cda77dda7b5264b4138d2da2b3826f95a4b4",
+      "output": "independent-review-v2.md",
+      "outputSha256": "3141321ad48b70487552518c341ef3c89ebe5ea23b7d678c554322a85ec18762",
+      "eventLog": "independent-review-v2-events.jsonl",
+      "eventLogSha256": "743748fea1fa5b673fb8e9fa4572599e4783a29a59af366de579cd8d9880f959"
+    }
+  ],
+  "finalSourceAgreement": {
+    "manifest": "input-manifest-v2.json",
+    "checkedFiles": 190,
+    "changedFiles": [],
+    "allEqual": true
+  },
+  "note": "v2 includes the final pure-function extraction and additional direct browser logs; it does not contain v1 review text. Test execution and static review are separate evidence."
+}

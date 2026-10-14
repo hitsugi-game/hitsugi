@@ -1,0 +1,19 @@
+
+Running 10 tests using 1 worker
+
+(node:54628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [pc-1280] › tests\visual\quality_pact_focus_20261014.spec.ts:29:1 › 封印行に先頭を塞がれても、閲覧可能な極ツ星へTabで入れる (4.1s)
+  ok  2 [pc-1280] › tests\visual\quality_pact_focus_20261014.spec.ts:40:1 › 矢印・Home・Endは封印行を飛ばし、閲覧選択を勝手に変更しない (4.2s)
+  ok  3 [pc-1280] › tests\visual\quality_pact_focus_20261014.spec.ts:59:1 › フィルタと薦め切替でTab入口を補正し、0件からも安全に戻れる (5.7s)
+  ok  4 [pc-1280] › tests\visual\quality_pact_focus_20261014.spec.ts:76:1 › 全封印・親なしでは無効行へ入らず、費用不足だけなら閲覧できる (6.6s)
+  ok  5 [pc-1280] › tests\visual\quality_pact_focus_20261014.spec.ts:95:1 › 属性・未契約フィルタでも閲覧行だけにTab入口を保ち、0件から復帰する (4.6s)
+(node:13700) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  6 [mobile-390] › tests\visual\quality_pact_focus_20261014.spec.ts:29:1 › 封印行に先頭を塞がれても、閲覧可能な極ツ星へTabで入れる (4.1s)
+  ok  7 [mobile-390] › tests\visual\quality_pact_focus_20261014.spec.ts:40:1 › 矢印・Home・Endは封印行を飛ばし、閲覧選択を勝手に変更しない (3.9s)
+  ok  8 [mobile-390] › tests\visual\quality_pact_focus_20261014.spec.ts:59:1 › フィルタと薦め切替でTab入口を補正し、0件からも安全に戻れる (4.3s)
+  ok  9 [mobile-390] › tests\visual\quality_pact_focus_20261014.spec.ts:76:1 › 全封印・親なしでは無効行へ入らず、費用不足だけなら閲覧できる (5.7s)
+  ok 10 [mobile-390] › tests\visual\quality_pact_focus_20261014.spec.ts:95:1 › 属性・未契約フィルタでも閲覧行だけにTab入口を保ち、0件から復帰する (3.0s)
+
+  10 passed (48.5s)

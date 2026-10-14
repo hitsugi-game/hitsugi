@@ -1,0 +1,19 @@
+
+Running 10 tests using 1 worker
+
+(node:54692) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [pc-1280] › tests\visual\quality_ending_followup_20261014.spec.ts:13:3 › 共通目標は結末未選択の記録に合わせて表示する (9.0s)
+  ok  2 [pc-1280] › tests\visual\quality_ending_followup_20261014.spec.ts:13:3 › 共通目標は結末0の記録に合わせて表示する (6.6s)
+  ok  3 [pc-1280] › tests\visual\quality_ending_followup_20261014.spec.ts:13:3 › 共通目標は結末1の記録に合わせて表示する (6.4s)
+  ok  4 [pc-1280] › tests\visual\quality_ending_followup_20261014.spec.ts:13:3 › 共通目標は結末2の記録に合わせて表示する (7.8s)
+  ok  5 [pc-1280] › tests\visual\quality_ending_followup_20261014.spec.ts:41:1 › 継ぐの本文と後日談は代替わりの交代を一貫して伝える (5.5s)
+(node:24388) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  6 [mobile-390] › tests\visual\quality_ending_followup_20261014.spec.ts:13:3 › 共通目標は結末未選択の記録に合わせて表示する (2.6s)
+  ok  7 [mobile-390] › tests\visual\quality_ending_followup_20261014.spec.ts:13:3 › 共通目標は結末0の記録に合わせて表示する (3.0s)
+  ok  8 [mobile-390] › tests\visual\quality_ending_followup_20261014.spec.ts:13:3 › 共通目標は結末1の記録に合わせて表示する (3.0s)
+  ok  9 [mobile-390] › tests\visual\quality_ending_followup_20261014.spec.ts:13:3 › 共通目標は結末2の記録に合わせて表示する (2.5s)
+  ok 10 [mobile-390] › tests\visual\quality_ending_followup_20261014.spec.ts:41:1 › 継ぐの本文と後日談は代替わりの交代を一貫して伝える (4.8s)
+
+  10 passed (54.9s)

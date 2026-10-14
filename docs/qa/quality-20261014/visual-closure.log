@@ -1,0 +1,16 @@
+
+> hitsugi@0.2.0 check:visual-closure
+> node scripts/validate_visual_closure.mjs
+
+entries[2].provenance.sourceSha256: does not match src/ui/Home.tsx
+entries[4].provenance.sourceSha256: does not match src/ui/Pact.tsx
+entries[5].provenance.sourceSha256: does not match src/ui/Scenes.tsx
+entries[6].provenance.sourceSha256: does not match src/ui/Scenes.tsx
+entries[7].provenance.sourceSha256: does not match src/ui/Scenes.tsx
+entries[8].provenance.sourceSha256: does not match src/ui/Scenes.tsx
+entries[9].provenance.sourceSha256: does not match src/ui/Scenes.tsx
+entries[10].provenance.sourceSha256: does not match src/ui/Scenes.tsx
+entries[11].provenance.sourceSha256: does not match src/ui/Scenes.tsx
+entries[17].provenance.sourceSha256: does not match src/ui/Chronicle.tsx
+entries[20].provenance.sourceSha256: does not match src/ui/Scenes.tsx
+entries[21].provenance.sourceSha256: does not match src/ui/Scenes.tsx

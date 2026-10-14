@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { pactAvailability } from '../src/ui/pactPolicy'
+import { cheapestUnlockedPactCost, pactAvailability } from '../src/ui/pactPolicy'
 
 describe('星契りの閲覧・契約可否', () => {
+  it.each([[0, 80], [0.5, 80], [1, 77], [5, 64], [9, 64]])('縁%sの最安費用を%s奉燈として入口と助言へ渡す', (affinity, expected) => {
+    expect(cheapestUnlockedPactCost({
+      fame: 0, regionsCleared: [], family: [], godAffinity: { ishiusu: affinity },
+    })).toBe(expected)
+  })
+
   it('封印解除済みなら奉燈不足でも詳細を閲覧できる', () => {
     expect(pactAvailability(true, 40, 100)).toEqual({
       inspectable: true,

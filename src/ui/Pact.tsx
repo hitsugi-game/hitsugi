@@ -11,7 +11,7 @@ import { CharCard, MaybeImg, NightBackdrop, Panel, TsuzuriLine } from './compone
 import { GodArtFallback } from './GodArtFallback'
 import { gameImg, godPresentationImg, HOME_BG } from './img'
 import { ActionDock, CompareRow, Sheet, StatusCallout } from './layout/shell'
-import { pactAvailability } from './pactPolicy'
+import { inspectablePactGodIds, pactAvailability, pactFocusTarget, pactRovingFocusId } from './pactPolicy'
 import './pact_m18.css'
 import './pact_m26.css' // M26 §9.5: 星契り最終確認Sheet(pact_m18.cssより後 — 後勝ち)
 import './pact_m35.css' // M35: 御影を切らず、全身像と奉納札を同時に読む星契り専用の祭壇レイアウト
@@ -61,7 +61,7 @@ function predictionSummary(prediction: Record<StatKey, [number, number]>): strin
     .sort((a, b) => b[1] - a[1])
   const rising = mids.slice(0, 2).map(([k]) => STAT_LABELS[k]).join('・')
   const weak = STAT_LABELS[mids[mids.length - 1][0]]
-  return `伸びるは${rising}、弱いは${weak}となりそうだ。`
+  return `${rising}が伸びやすく、${weak}が弱点となりそうだ。`
 }
 
 export function PactScreen() {
@@ -72,7 +72,7 @@ export function PactScreen() {
   const [parentId, setParentId] = useState<string | null>(() => adults.length === 1 ? adults[0].id : null)
   const [godId, setGodId] = useState<string | null>(null)
   const [showAllGods, setShowAllGods] = useState(false)
-  const [activeGodIndex, setActiveGodIndex] = useState(0)
+  const [activeGodId, setActiveGodId] = useState<string | null>(null)
   const [rankTab, setRankTab] = useState<GodRank | 0>(0) // 0=全て
   const [elemChip, setElemChip] = useState<Element | null>(null)
   const [onlyAffordable, setOnlyAffordable] = useState(false) // 絞り込み: 費用内(M18)
@@ -109,6 +109,8 @@ export function PactScreen() {
     })
     .slice(0, 3)
   const shownGods = showAllGods ? filteredGods : recommendedGods
+  const inspectableGodIds = inspectablePactGodIds(shownGods, data, parent !== null)
+  const tabStopGodId = pactRovingFocusId(inspectableGodIds, activeGodId)
 
   const prediction = useMemo(
     () => (parent && god ? predictChild(parent, god) : null),
@@ -157,7 +159,7 @@ export function PactScreen() {
     <div className="screen pact-screen pact-has-dock">
       <NightBackdrop bg={gameImg(HOME_BG)} />
       <h1 className="season-label" style={{ marginBottom: 14 }}>交神の儀</h1>
-      <TsuzuriLine text="星神と契れば、翌季に子が生まれる。血潮は親と神から流れ込む — 誰の血を、どの星に継がせる?" />
+      <TsuzuriLine text="星神と契れば、翌月に子が生まれる。血潮は親と神から流れ込む — 誰の血を、どの星に継がせる?" />
 
       <PactSteps step={pactStep} />
 
@@ -186,7 +188,7 @@ export function PactScreen() {
             type="button"
             className="btn btn-ghost"
             aria-expanded={showAllGods}
-            onClick={() => { setShowAllGods((shown) => !shown); setActiveGodIndex(0) }}
+            onClick={() => setShowAllGods((shown) => !shown)}
           >
             {showAllGods ? '薦め三柱へ戻る' : '全ての星を見る'}
           </button>
@@ -254,20 +256,21 @@ export function PactScreen() {
                 <button
                   key={g.id}
                   data-god-index={index}
+                  data-god-id={g.id}
                   className={`god-row ${godId === g.id ? 'selected' : ''} ${sealed ? 'locked' : ''} ${!availability.contractable && availability.inspectable ? 'unaffordable' : ''} ${recommended ? 'recommended' : ''}`}
                   aria-pressed={godId === g.id}
                   aria-disabled={!canInspect}
-                  tabIndex={canInspect && index === Math.min(activeGodIndex, shownGods.length - 1) ? 0 : -1}
+                  tabIndex={canInspect && g.id === tabStopGodId ? 0 : -1}
                   title={!parent ? '先に契る親を選ぶ' : availability.reason ?? ''}
-                  onClick={() => { if (canInspect) { setGodId(g.id); setActiveGodIndex(index) } }}
+                  onFocus={() => { if (canInspect) setActiveGodId(g.id) }}
+                  onClick={() => { if (canInspect) { setGodId(g.id); setActiveGodId(g.id) } }}
                   onKeyDown={(event) => {
                     if (!canInspect || !['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
                     event.preventDefault()
-                    const next = event.key === 'Home' ? 0
-                      : event.key === 'End' ? shownGods.length - 1
-                        : (index + (event.key === 'ArrowDown' ? 1 : -1) + shownGods.length) % shownGods.length
-                    setActiveGodIndex(next)
-                    event.currentTarget.parentElement?.querySelector<HTMLButtonElement>(`[data-god-index="${next}"]`)?.focus()
+                    const next = pactFocusTarget(inspectableGodIds, g.id, event.key)
+                    if (next === null) return
+                    setActiveGodId(next)
+                    event.currentTarget.parentElement?.querySelector<HTMLButtonElement>(`[data-god-id="${next}"]`)?.focus()
                   }}
                 >
                   <span className={`element-badge el-${g.element} god-row-el`}>{ELEMENT_LABELS[g.element]}</span>
@@ -306,7 +309,7 @@ export function PactScreen() {
             ) : (
               <div className="god-stage-empty">
                 <span className="god-stage-star">✦</span>
-                <p>左の星名を選ぶと、その姿が顕れる</p>
+                <p>星名を選ぶと、その姿が顕れる</p>
               </div>
             )}
           </div>

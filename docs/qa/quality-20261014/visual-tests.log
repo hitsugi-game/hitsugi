@@ -1,0 +1,22 @@
+[WebServer] (node:52704) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 45 tests using 1 worker
+
+(node:30824) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   1 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:22:1 › 新規Homeは報酬より最優先を一件だけ示し、PCの第一画面に今月の決断が入る (30.3s)
+(node:48984) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  2 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:34:1 › 画面進入は先頭へ戻りh1を読み始めにする。星契り初期は推薦三柱 (24.1s)
+  ok  3 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:48:1 › 出立は唯一成人を仮編成し、mobileは周辺五地点の横絵巻にする (3.2s)
+  ok  4 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:60:1 › 宝具録は小太刀で絞り、解除すれば54棚へ戻る (5.1s)
+  ok  5 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:71:1 › 郷のD-padと見渡すはkeyboard holdとreleaseをariaで伝える (7.6s)
+  ok  6 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:89:1 › 次代の約束は後継と今代の約束を月消費なしで保存する (5.2s)
+  ok  7 [pc-1280] › tests\visual\m43_first_run_ux.spec.ts:112:1 › 星籤は実確率を示し、保存済み三星からkeyboardでも一柱だけ確定する (7.3s)
+  x   8 [pc-1280] › tests\visual\m60_mobile_core_readability.spec.ts:47:1 › 戦闘: 兆しと対処は12px・二行で、全文をclick/keyboardの一操作で読める (2.8s)
+(node:48928) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   9 [pc-1280] › tests\visual\m60_mobile_core_readability.spec.ts:93:1 › 戦闘: 200%表示でも兆し・敵札・味方札・ログが交差しない (30.2s)
+(node:12352) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

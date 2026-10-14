@@ -1,0 +1,121 @@
+
+ RUN  v4.1.10 C:/Users/junna/Documents/Claude/_fable5/hitsugi
+
+ ❯ tests/quality_final_objective_20261014.test.ts (11 tests | 10 failed) 28ms
+   × 結末0の達成は共通の選択を示し、夜明けを一律に断言しない 13ms
+   × 結末1の達成は共通の選択を示し、夜明けを一律に断言しない 2ms
+   × 結末2の達成は共通の選択を示し、夜明けを一律に断言しない 1ms
+   × 選択が確認できない状態では達成を付けない: {} 1ms
+   × 選択が確認できない状態では達成を付けない: {"cleared":true} 1ms
+   × 選択が確認できない状態では達成を付けない: {"cleared":true,"finalePending":true} 1ms
+   × 選択が確認できない状態では達成を付けない: {"cleared":true,"endingType":-1} 1ms
+   × 選択が確認できない状態では達成を付けない: {"cleared":true,"endingType":3} 1ms
+   × 選択が確認できない状態では達成を付けない: {"cleared":false,"endingType":1} 1ms
+   × 継ぐ後日談は既存本文と同じ代替わりを使い、就任後の八季を約束しない 3ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/quality_final_objective_20261014.test.ts > 結末0の達成は共通の選択を示し、夜明けを一律に断言しない
+ FAIL  tests/quality_final_objective_20261014.test.ts > 結末1の達成は共通の選択を示し、夜明けを一律に断言しない
+ FAIL  tests/quality_final_objective_20261014.test.ts > 結末2の達成は共通の選択を示し、夜明けを一律に断言しない
+AssertionError: expected { text: '玄冬を討ち、常夜に朝を還す', done: true } to deeply equal { text: '千年の答えを選ぶ', done: true }
+
+- Expected
++ Received
+
+  {
+    "done": true,
+-   "text": "千年の答えを選ぶ",
++   "text": "玄冬を討ち、常夜に朝を還す",
+  }
+
+ ❯ tests/quality_final_objective_20261014.test.ts:14:21
+     12|   const before = JSON.stringify(data)
+     13|   const objective = computeObjectives(data, 1).long[0]
+     14|   expect(objective).toEqual({ text: '千年の答えを選ぶ', done: true })
+       |                     ^
+     15|   expect(objective.text).not.toContain('朝を還す')
+     16|   expect(JSON.stringify(data)).toBe(before)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/quality_final_objective_20261014.test.ts > 選択が確認できない状態では達成を付けない: {}
+ FAIL  tests/quality_final_objective_20261014.test.ts > 選択が確認できない状態では達成を付けない: {"cleared":false,"endingType":1}
+AssertionError: expected { text: '玄冬を討ち、常夜に朝を還す', done: false } to deeply equal { text: '千年の答えを選ぶ', done: false }
+
+- Expected
++ Received
+
+  {
+    "done": false,
+-   "text": "千年の答えを選ぶ",
++   "text": "玄冬を討ち、常夜に朝を還す",
+  }
+
+ ❯ tests/quality_final_objective_20261014.test.ts:23:46
+     21|   { cleared: false, endingType: 1 }])('選択が確認できない状態では達成を付けない: %j', (fla…
+     22|   const data = { ...useGame.getState().data!, flags }
+     23|   expect(computeObjectives(data, 1).long[0]).toEqual({ text: '千年の答えを選ぶ…
+       |                                              ^
+     24| })
+     25|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/quality_final_objective_20261014.test.ts > 選択が確認できない状態では達成を付けない: {"cleared":true}
+ FAIL  tests/quality_final_objective_20261014.test.ts > 選択が確認できない状態では達成を付けない: {"cleared":true,"finalePending":true}
+ FAIL  tests/quality_final_objective_20261014.test.ts > 選択が確認できない状態では達成を付けない: {"cleared":true,"endingType":-1}
+ FAIL  tests/quality_final_objective_20261014.test.ts > 選択が確認できない状態では達成を付けない: {"cleared":true,"endingType":3}
+AssertionError: expected { text: '玄冬を討ち、常夜に朝を還す', done: true } to deeply equal { text: '千年の答えを選ぶ', done: false }
+
+- Expected
++ Received
+
+  {
+-   "done": false,
+-   "text": "千年の答えを選ぶ",
++   "done": true,
++   "text": "玄冬を討ち、常夜に朝を還す",
+  }
+
+ ❯ tests/quality_final_objective_20261014.test.ts:23:46
+     21|   { cleared: false, endingType: 1 }])('選択が確認できない状態では達成を付けない: %j', (fla…
+     22|   const data = { ...useGame.getState().data!, flags }
+     23|   expect(computeObjectives(data, 1).long[0]).toEqual({ text: '千年の答えを選ぶ…
+       |                                              ^
+     24| })
+     25|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/quality_final_objective_20261014.test.ts > 継ぐ後日談は既存本文と同じ代替わりを使い、就任後の八季を約束しない
+AssertionError: expected '\n  \'山を降りた汐里は、綴の隣で、家譜の続きを綴る側になった。今度は…' to contain '代替わりのたびに'
+
+- Expected
++ Received
+
+- 代替わりのたびに
++
++   '山を降りた汐里は、綴の隣で、家譜の続きを綴る側になった。今度は、頂に座る者を、憶えておくために。',
++   '綴は筆を渡しながら言った。「錠前は代わる。だが家譜は続く。名を書き継ぐ者がいる限り、頂の誰も、独りにはならん」',
++   '汐里はときおり、頂へ文を送る。産声を、祭を、恋を、昼寝を——山の下の、短くて眩しい日々を。',
++   '夜は、明けない。だが頂の座は、もう永遠の牢ではない。八季ごとに、次の灯が、交代しに登ってゆく。',
++   '汝の屍を越え、灯は継がれた。頂へ、頂へと。今度は、誰も独りにはさせずに。',
++   '— 完 —',
+
+ ❯ tests/quality_final_objective_20261014.test.ts:36:20
+     34|   expect(epilogue).toBeTruthy()
+     35|   expect(ENDINGS.inherit.beats.join('\n')).toContain('代替わりのたびに')
+     36|   expect(epilogue).toContain('代替わりのたびに')
+       |                    ^
+     37|   expect(epilogue).not.toContain('八季ごと')
+     38|   expect(epilogue).toContain('夜は、明けない')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 1 passed (11)
+   Start at  12:30:04
+   Duration  1.45s (transform 950ms, setup 0ms, import 1.20s, tests 28ms, environment 0ms)
+

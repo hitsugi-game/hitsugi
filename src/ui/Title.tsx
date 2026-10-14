@@ -36,7 +36,11 @@ export function TitleScreen({ onRuntimeReady }: { onRuntimeReady?: () => void } 
   useEffect(refreshSaveStatus, [])
 
   // 「はじめから」— 既存セーブがあれば上書き確認を挟む
-  const onNewGame = () => { if (saveExists) setConfirmNew(true); else setMode('normal') }
+  const onNewGame = () => {
+    if (saveStatus === 'checking') return
+    if (saveExists) setConfirmNew(true)
+    else setMode('normal')
+  }
   const onImportFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = () => {
@@ -145,7 +149,7 @@ export function TitleScreen({ onRuntimeReady }: { onRuntimeReady?: () => void } 
             {saveStatus === 'none' && <>端末の記 <strong>まだない</strong></>}
             {saveStatus === 'checking' && <>端末の記 <strong>確認中</strong></>}
           </p>
-          <button className="btn btn-main" onClick={onNewGame}>
+          <button className="btn btn-main" disabled={saveStatus === 'checking'} onClick={onNewGame}>
             はじめから
           </button>
           {canContinue && (

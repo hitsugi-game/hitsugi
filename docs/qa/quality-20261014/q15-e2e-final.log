@@ -1,0 +1,25 @@
+Q15 captured console excerpts, 2026-10-14 (not a new test run)
+The final source was exercised in two bounded runs: 8 + 2 = 10 passed.
+
+Command: npx playwright test tests/visual/quality_pact_focus_20261014.spec.ts --project=pc-1280 --project=mobile-390
+
+Running 8 tests using 1 worker
+  ok 1 [pc-1280] 封印行に先頭を塞がれても、閲覧可能な極ツ星へTabで入れる (3.4s)
+  ok 2 [pc-1280] 矢印・Home・Endは封印行を飛ばし、閲覧選択を勝手に変更しない (3.0s)
+  ok 3 [pc-1280] フィルタと薦め切替でTab入口を補正し、0件からも安全に戻れる (3.4s)
+  ok 4 [pc-1280] 全封印・親なしでは無効行へ入らず、費用不足だけなら閲覧できる (4.8s)
+  ok 5 [mobile-390] 封印行に先頭を塞がれても、閲覧可能な極ツ星へTabで入れる (2.7s)
+  ok 6 [mobile-390] 矢印・Home・Endは封印行を飛ばし、閲覧選択を勝手に変更しない (3.0s)
+  ok 7 [mobile-390] フィルタと薦め切替でTab入口を補正し、0件からも安全に戻れる (3.4s)
+  ok 8 [mobile-390] 全封印・親なしでは無効行へ入らず、費用不足だけなら閲覧できる (6.1s)
+  8 passed (32.2s)
+
+After adding the final attribute/uncontracted-filter test (no product-source change):
+Command: npx playwright test tests/visual/quality_pact_focus_20261014.spec.ts --project=pc-1280 --project=mobile-390 -g 属性・未契約
+
+Running 2 tests using 1 worker
+  ok 1 [pc-1280] 属性・未契約フィルタでも閲覧行だけにTab入口を保ち、0件から復帰する (3.7s)
+  ok 2 [mobile-390] 属性・未契約フィルタでも閲覧行だけにTab入口を保ち、0件から復帰する (3.8s)
+  2 passed (9.6s)
+
+Server: http://127.0.0.1:5173/; Vite PID 28816; exec session 16051.

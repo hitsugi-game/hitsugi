@@ -3,7 +3,7 @@
 import type { GameData, Character } from '../core/types'
 import { LIFESPAN_MONTHS, MOTTOS, isFestivalMonth } from '../core/types'
 import { ageOf, isAdult } from '../core/inheritance'
-import { GODS } from '../core/data/gods'
+import { cheapestUnlockedPactCost } from './pactPolicy'
 import { ENEMIES } from '../core/data/enemies'
 import { FACILITIES, FACILITY_MAX_LV, facilityCost, facilityLevel } from '../core/data/facilities'
 import { GOSSIP } from '../core/data/gossip'
@@ -50,7 +50,7 @@ export interface Recommendation {
 
 export function recommendAction(d: GameData): Recommendation {
   const c = census(d)
-  const cheapestPact = Math.min(...GODS.map((g) => g.cost))
+  const cheapestPact = cheapestUnlockedPactCost(d)
   const canPact = c.adults.length > 0 && d.hoto >= cheapestPact
 
   // 1. 存命1・後継なし・契り可能 → 星契り

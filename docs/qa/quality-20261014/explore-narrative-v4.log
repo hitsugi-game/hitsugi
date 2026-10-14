@@ -1,0 +1,45 @@
+
+Running 32 tests using 1 worker
+
+
+(node:57164) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/32] [pc-1280] › tests\visual\ar1_dungeon_battle.spec.ts:76:1 › AR1 Dungeon and Battle preserve one Hotarubi stage identity and pooled budget
+[2/32] [pc-1280] › tests\visual\ar1_dungeon_battle.spec.ts:134:1 › M54 wide-short viewport keeps exploration map-native and battle image-backed
+[3/32] [pc-1280] › tests\visual\ar1_dungeon_battle.spec.ts:160:1 › V2 gate keeps OFF on V1 and gives non-AR1 floors/regions a code-native regional layer
+[4/32] [pc-1280] › tests\visual\ar1_dungeon_battle.spec.ts:198:1 › AR1R-B gives only rare/boss combatants a hero treatment and keeps rare drop through return
+[5/32] [pc-1280] › tests\visual\ar1_dungeon_battle.spec.ts:262:1 › AR1R-B 1600px completion frame has no overflow and retains keyboard targeting with reduced motion
+[6/32] [pc-1280] › tests\visual\ar1_dungeon_battle.spec.ts:286:1 › AR1 return keeps the expedition consequence visible in Home and Village
+[7/32] [pc-1280] › tests\visual\m60_mobile_core_readability.spec.ts:47:1 › 戦闘: 兆しと対処は12px・二行で、全文をclick/keyboardの一操作で読める
+[8/32] [pc-1280] › tests\visual\m60_mobile_core_readability.spec.ts:93:1 › 戦闘: 200%表示でも兆し・敵札・味方札・ログが交差しない
+[9/32] [pc-1280] › tests\visual\m60_mobile_core_readability.spec.ts:113:3 › 郷: 一族1人で重複要約と横overflowを作らず重要文字を12px以上にする
+[10/32] [pc-1280] › tests\visual\m60_mobile_core_readability.spec.ts:113:3 › 郷: 一族2人で重複要約と横overflowを作らず重要文字を12px以上にする
+[11/32] [pc-1280] › tests\visual\m60_mobile_core_readability.spec.ts:113:3 › 郷: 一族4人で重複要約と横overflowを作らず重要文字を12px以上にする
+[12/32] [pc-1280] › tests\visual\m60_mobile_core_readability.spec.ts:113:3 › 郷: 一族8人で重複要約と横overflowを作らず重要文字を12px以上にする
+[13/32] [pc-1280] › tests\visual\narrative_m34.spec.ts:55:1 › 三択は履歴傾向に左右されず同順・同装飾・全て選択可能
+[14/32] [pc-1280] › tests\visual\narrative_m34.spec.ts:68:1 › 一族の固有名を返し、狭幅でも三択へスクロール到達できる
+[15/32] [pc-1280] › tests\visual\narrative_m34.spec.ts:92:1 › 灯の余白は7日通知を一度出し、完読済みの章を進行不変で再読できる
+[16/32] [pc-1280] › tests\visual\narrative_m34.spec.ts:143:1 › 灯の余白は低い画面でもSheet内に収まり、本文だけがスクロールする
+
+(node:50168) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[17/32] [mobile-390] › tests\visual\ar1_dungeon_battle.spec.ts:76:1 › AR1 Dungeon and Battle preserve one Hotarubi stage identity and pooled budget
+[18/32] [mobile-390] › tests\visual\ar1_dungeon_battle.spec.ts:134:1 › M54 wide-short viewport keeps exploration map-native and battle image-backed
+[19/32] [mobile-390] › tests\visual\ar1_dungeon_battle.spec.ts:160:1 › V2 gate keeps OFF on V1 and gives non-AR1 floors/regions a code-native regional layer
+[20/32] [mobile-390] › tests\visual\ar1_dungeon_battle.spec.ts:198:1 › AR1R-B gives only rare/boss combatants a hero treatment and keeps rare drop through return
+[21/32] [mobile-390] › tests\visual\ar1_dungeon_battle.spec.ts:262:1 › AR1R-B 1600px completion frame has no overflow and retains keyboard targeting with reduced motion
+[22/32] [mobile-390] › tests\visual\ar1_dungeon_battle.spec.ts:286:1 › AR1 return keeps the expedition consequence visible in Home and Village
+[23/32] [mobile-390] › tests\visual\m60_mobile_core_readability.spec.ts:47:1 › 戦闘: 兆しと対処は12px・二行で、全文をclick/keyboardの一操作で読める
+[24/32] [mobile-390] › tests\visual\m60_mobile_core_readability.spec.ts:93:1 › 戦闘: 200%表示でも兆し・敵札・味方札・ログが交差しない
+[25/32] [mobile-390] › tests\visual\m60_mobile_core_readability.spec.ts:113:3 › 郷: 一族1人で重複要約と横overflowを作らず重要文字を12px以上にする
+[26/32] [mobile-390] › tests\visual\m60_mobile_core_readability.spec.ts:113:3 › 郷: 一族2人で重複要約と横overflowを作らず重要文字を12px以上にする
+[27/32] [mobile-390] › tests\visual\m60_mobile_core_readability.spec.ts:113:3 › 郷: 一族4人で重複要約と横overflowを作らず重要文字を12px以上にする
+[28/32] [mobile-390] › tests\visual\m60_mobile_core_readability.spec.ts:113:3 › 郷: 一族8人で重複要約と横overflowを作らず重要文字を12px以上にする
+[29/32] [mobile-390] › tests\visual\narrative_m34.spec.ts:55:1 › 三択は履歴傾向に左右されず同順・同装飾・全て選択可能
+[30/32] [mobile-390] › tests\visual\narrative_m34.spec.ts:68:1 › 一族の固有名を返し、狭幅でも三択へスクロール到達できる
+[31/32] [mobile-390] › tests\visual\narrative_m34.spec.ts:92:1 › 灯の余白は7日通知を一度出し、完読済みの章を進行不変で再読できる
+[32/32] [mobile-390] › tests\visual\narrative_m34.spec.ts:143:1 › 灯の余白は低い画面でもSheet内に収まり、本文だけがスクロールする
+  3 skipped
+  29 passed (2.8m)

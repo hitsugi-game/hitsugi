@@ -1,0 +1,81 @@
+
+> hitsugi@0.2.0 build
+> tsc -b && vite build
+
+vite v8.1.2 building client environment for production...
+[2K
+transforming...✓ 894 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                     1.74 kB │ gzip:   0.87 kB
+dist/assets/shell-CezpnWAU.css                      1.89 kB │ gzip:   0.82 kB
+dist/assets/GameRuntime-UjX3xvds.css                3.02 kB │ gzip:   0.97 kB
+dist/assets/FamilyTree-BGX1tToJ.css                 4.04 kB │ gzip:   1.33 kB
+dist/assets/Pact-6QyzEUEP.css                       4.99 kB │ gzip:   1.60 kB
+dist/assets/Home-ULpRF8BF.css                       5.23 kB │ gzip:   1.69 kB
+dist/assets/Chronicle-BY0OnanO.css                  5.40 kB │ gzip:   1.72 kB
+dist/assets/Codex-BcdnRQEZ.css                      6.16 kB │ gzip:   1.92 kB
+dist/assets/StarLottery-C2WXDC7K.css                6.72 kB │ gzip:   1.68 kB
+dist/assets/Scenes-C4rYnr60.css                     8.43 kB │ gzip:   2.37 kB
+dist/assets/Dungeon-CFb8mFi6.css                    8.60 kB │ gzip:   2.37 kB
+dist/assets/Facilities-BXAivYAx.css                 8.76 kB │ gzip:   2.41 kB
+dist/assets/Village-C-pJ3fN7.css                    9.10 kB │ gzip:   2.62 kB
+dist/assets/m17_home-DfcAMjb_.css                  13.65 kB │ gzip:   3.34 kB
+dist/assets/Forge-Dmjpm5K1.css                     14.92 kB │ gzip:   3.63 kB
+dist/assets/Expedition-UZu5U448.css                15.83 kB │ gzip:   3.69 kB
+dist/assets/Battle-C1J-zjMl.css                    56.09 kB │ gzip:  12.14 kB
+dist/assets/index-D5JlTZB9.css                     97.37 kB │ gzip:  21.28 kB
+dist/assets/webworkerAll-Bry_zWhK.js                0.05 kB │ gzip:   0.06 kB
+dist/assets/init-BN4kTD5y.js                        0.11 kB │ gzip:   0.11 kB
+dist/assets/browserAll-BG98uQ_f.js                  0.23 kB │ gzip:   0.17 kB
+dist/assets/getTextureBatchBindGroup-CBTZ-juL.js    0.34 kB │ gzip:   0.26 kB
+dist/assets/rolldown-runtime-QTnfLwEv.js            0.69 kB │ gzip:   0.42 kB
+dist/assets/CanvasPool-IMTNFc5L.js                  0.75 kB │ gzip:   0.42 kB
+dist/assets/pactPolicy-Bo_yegkb.js                  0.79 kB │ gzip:   0.48 kB
+dist/assets/GodArtFallback-7JA6bKSu.js              1.09 kB │ gzip:   0.59 kB
+dist/assets/Cache-D1QM-wNu.js                       1.09 kB │ gzip:   0.55 kB
+dist/assets/img-B9BtSma2.js                         1.66 kB │ gzip:   0.75 kB
+dist/assets/shareCard-CSRVdD9E.js                   4.82 kB │ gzip:   2.23 kB
+dist/assets/villagers-5i7fwA2U.js                   5.53 kB │ gzip:   2.54 kB
+dist/assets/FamilyTree-COWaXums.js                  5.99 kB │ gzip:   2.60 kB
+dist/assets/shell-DCxrcoyv.js                       6.01 kB │ gzip:   2.39 kB
+dist/assets/canvasUtils-DP9fnD9n.js                 6.02 kB │ gzip:   2.03 kB
+dist/assets/Facilities-84iGgVXC.js                  6.92 kB │ gzip:   2.44 kB
+dist/assets/components-DTRf2FSK.js                  7.14 kB │ gzip:   2.79 kB
+dist/assets/StarLottery-BA3PatIZ.js                 9.74 kB │ gzip:   3.44 kB
+dist/assets/BufferResource-Cm52vgg2.js             10.56 kB │ gzip:   2.80 kB
+dist/assets/Codex-iUQB06_g.js                      11.31 kB │ gzip:   3.86 kB
+dist/assets/Pact-CbClalCy.js                       12.92 kB │ gzip:   4.83 kB
+dist/assets/Chronicle-D5TBXtOI.js                  13.63 kB │ gzip:   4.54 kB
+dist/assets/GameRuntime-40ajwrfn.js                18.96 kB │ gzip:   6.37 kB
+dist/assets/Expedition-CHq0frPC.js                 23.53 kB │ gzip:   7.85 kB
+dist/assets/GCManagedHash-b-QiKDKp.js              26.70 kB │ gzip:   9.33 kB
+dist/assets/Scenes-BgKZxmIJ.js                     29.15 kB │ gzip:   9.84 kB
+dist/assets/Home-De8mPJep.js                       36.69 kB │ gzip:  12.97 kB
+dist/assets/Filter-OuKfGrLY.js                     38.75 kB │ gzip:  11.06 kB
+dist/assets/Forge-Erp9aW3i.js                      39.69 kB │ gzip:  12.85 kB
+dist/assets/Village-CpzMb0ww.js                    47.38 kB │ gzip:  16.91 kB
+dist/assets/RenderTargetSystem-DCi4LZjZ.js         51.76 kB │ gzip:  14.46 kB
+dist/assets/Battle-WUGvuf_K.js                     52.75 kB │ gzip:  16.43 kB
+dist/assets/GraphicsContext-CEDaUnm3.js            53.76 kB │ gzip:  17.36 kB
+dist/assets/Geometry-DUvGI1VU.js                   62.51 kB │ gzip:  20.52 kB
+dist/assets/Dungeon-BmH3Jb-r.js                   114.59 kB │ gzip:  39.17 kB
+dist/assets/index-CbPd90bv.js                     233.37 kB │ gzip:  74.62 kB
+dist/assets/lib-N96o_2-u.js                       291.94 kB │ gzip:  83.28 kB
+dist/assets/save-ngzonW37.js                      438.59 kB │ gzip: 115.54 kB
+dist/assets/store-2-hCq9sX.js                     589.42 kB │ gzip: 193.28 kB
+
+[PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+  - vite:prepare-out-dir (40%)
+  - vite:css-post (21%)
+  - vite:css (12%)
+  - vite:build-import-analysis (7%)
+  - vite:asset (5%)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 9.99s

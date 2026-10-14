@@ -1,0 +1,40 @@
+
+Running 15 tests using 1 worker
+
+
+
+(node:36004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/15] [pc-1440] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ
+[2/15] [pc-1440] › tests\visual\m61_battle_theater.spec.ts:141:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+[3/15] [pc-1440] › tests\visual\m61_battle_theater.spec.ts:177:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める
+
+(node:33152) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[4/15] [pc-1280] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ
+[5/15] [pc-1280] › tests\visual\m61_battle_theater.spec.ts:141:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+[6/15] [pc-1280] › tests\visual\m61_battle_theater.spec.ts:177:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める
+
+(node:46596) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[7/15] [tablet-768] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ
+[8/15] [tablet-768] › tests\visual\m61_battle_theater.spec.ts:141:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+[9/15] [tablet-768] › tests\visual\m61_battle_theater.spec.ts:177:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める
+
+(node:54248) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[10/15] [mobile-390] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ
+[11/15] [mobile-390] › tests\visual\m61_battle_theater.spec.ts:141:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+[12/15] [mobile-390] › tests\visual\m61_battle_theater.spec.ts:177:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める
+
+(node:19400) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[13/15] [mobile-360] › tests\visual\m61_battle_theater.spec.ts:46:1 › M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ
+[14/15] [mobile-360] › tests\visual\m61_battle_theater.spec.ts:141:1 › M61 1024px境界でも軍議盤の戦況欄を切らず、主要操作を保つ
+[15/15] [mobile-360] › tests\visual\m61_battle_theater.spec.ts:177:1 › M61 標的は札選択で止まり、下段の明示実行だけが戦闘を進める
+  4 skipped
+  11 passed (35.7s)

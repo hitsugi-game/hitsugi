@@ -1,0 +1,13 @@
+
+> hitsugi@0.2.0 test
+> vitest run
+
+
+ RUN  v4.1.10 C:/Users/junna/Documents/Claude/_fable5/hitsugi
+
+
+ Test Files  65 passed (65)
+      Tests  930 passed (930)
+   Start at  12:37:19
+   Duration  255.24s (transform 9.10s, setup 0ms, import 18.31s, tests 307.39s, environment 16ms)
+

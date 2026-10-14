@@ -1,0 +1,10 @@
+== validate_data ==
+gods: 180柱
+enemies: 219種
+items: 15種
+regions: 40地域
+events(expedition): 8件(≒事件+その他id)
+skills(全供給源): 185本
+god rank分布: 下68/中51/上43/極18 (現行確定 68/51/43/18)
+
+OK: 0 errors, 0 warn(s)

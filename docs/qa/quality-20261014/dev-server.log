@@ -1,0 +1,26 @@
+
+> hitsugi@0.2.0 dev
+> vite
+
+
+  VITE v8.1.2  ready in 594 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+11:48:08 [vite] (client) hmr update /src/ui/battle_m61.css
+11:52:35 [vite] (client) hmr update /src/ui/Pact.tsx
+11:52:35 [vite] (client) hmr update /src/ui/Home.tsx
+11:52:35 [vite] (client) hmr update /src/ui/Home.tsx
+11:52:35 [vite] (client) hmr update /src/ui/Title.tsx
+11:53:22 [vite] (client) page reload src/core/store.ts
+11:58:49 [vite] changed tsconfig file detected: C:/Users/junna/Documents/Claude/_fable5/hitsugi/.artifacts/quality-20261014-review-v4/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+11:59:37 [vite] changed tsconfig file detected: C:/Users/junna/Documents/Claude/_fable5/hitsugi/.artifacts/quality-20261014-review-v4b/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+12:02:27 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-0/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html
+12:02:32 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-0/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html
+12:02:51 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-0/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html
+12:02:54 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-1/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html
+12:02:59 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-1/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html
+12:03:39 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-1/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html
+12:03:45 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-2/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html
+12:04:05 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-2/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html
+12:05:06 [vite] (client) page reload tests/release/.artifacts/.playwright-artifacts-2/traces/resources/ab8c638ca03ba9e966528412c588ea51667c31e7.html

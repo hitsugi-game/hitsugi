@@ -597,7 +597,7 @@ function SceneComfortControls({ onDefer, onSkip }: { onDefer: () => void; onSkip
   return (
     <div className="scene-comfort-controls" data-zone="scene-comfort-controls">
       <button className="btn btn-ghost" onClick={(e) => { e.stopPropagation(); onDefer() }}>後で読む</button>
-      <button className="btn btn-ghost" onClick={(e) => { e.stopPropagation(); onSkip() }}>要約してskip</button>
+      <button className="btn btn-ghost" onClick={(e) => { e.stopPropagation(); onSkip() }}>要約して飛ばす</button>
     </div>
   )
 }
@@ -764,7 +764,7 @@ const ENDING_INHERIT = [
   '山を降りた汐里は、綴の隣で、家譜の続きを綴る側になった。今度は、頂に座る者を、憶えておくために。',
   '綴は筆を渡しながら言った。「錠前は代わる。だが家譜は続く。名を書き継ぐ者がいる限り、頂の誰も、独りにはならん」',
   '汐里はときおり、頂へ文を送る。産声を、祭を、恋を、昼寝を——山の下の、短くて眩しい日々を。',
-  '夜は、明けない。だが頂の座は、もう永遠の牢ではない。八季ごとに、次の灯が、交代しに登ってゆく。',
+  '夜は、明けない。だが頂の座は、もう永遠の牢ではない。代替わりのたびに、次の灯が、交代しに登ってゆく。',
   '汝の屍を越え、灯は継がれた。頂へ、頂へと。今度は、誰も独りにはさせずに。',
   '— 完 —',
 ]
@@ -827,8 +827,9 @@ export function EndingScene() {
   const data = useGame((s) => s.data)!
   const setScreen = useGame((s) => s.setScreen)
   const newLegacyGame = useGame((s) => s.newLegacyGame)
+  const completeEnding = useGame((s) => s.completeEnding)
   const [beat, setBeat] = useState(0)
-  const cleared = !!data.flags.cleared
+  const cleared = !!data.flags.cleared && !data.flags.extinct
   // v3.1 M15-4: 最終選択に応じた結末分岐(選択がなければ従来の夜明け)
   const endType = (typeof data.flags.endingType === 'number'
     ? (['cut', 'save', 'inherit'] as const)[data.flags.endingType]
@@ -839,6 +840,8 @@ export function EndingScene() {
   // M34: 山場の直後に、このsaveの固有名・形見・土地から導いた一文だけを差し込む。
   const beats = cleared ? [...climaxBeats, personalizedEndingBeat(data, endType), ...epilogue] : ENDING_EXTINCT
   const done = beat >= beats.length - 1
+  // 未読の結末は再開時に冒頭から戻る。最終頁を見た時だけ読了を即保存する。
+  useEffect(() => { if (done && cleared) completeEnding() }, [done, cleared, completeEnding])
   // 山場(cut/save/inherit別)→_a、その後の共通エピローグ(ENDING_CLEARED)→_b。断絶(未clear)は画無し。
   const endingBg = cleared ? (beat < climaxBeats.length ? `cg_end_${endType}_a.png` : `cg_end_${endType}_b.png`) : null
 
@@ -865,7 +868,7 @@ export function EndingScene() {
           <button className="btn" onClick={() => downloadChronicleCard(data)}>
             この千年紀を一枚絵に残す(画像保存)
           </button>
-          {cleared && (
+          {data.flags.cleared && (
             <button className="btn btn-main vc3b-primary-action" data-scene-primary="true" onClick={() => newLegacyGame()}>
               新たな千年紀へ — 継承新周回(形見と血の濃さを持ち越す)
             </button>
@@ -874,7 +877,7 @@ export function EndingScene() {
             className={`btn ${cleared ? 'btn-ghost' : 'btn-main vc3b-primary-action'}`}
             data-scene-primary={cleared ? undefined : 'true'}
             onClick={() => {
-              if (!cleared) clearSave()
+              if (!data.flags.cleared) clearSave()
               setScreen({ id: 'title' })
             }}
           >

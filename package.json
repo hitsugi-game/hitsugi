@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "lint": "oxlint src tests scripts vite.config.ts playwright.config.ts playwright.release.config.ts",
     "check:visual-closure": "node scripts/validate_visual_closure.mjs",
     "check:visual-manifest": "node scripts/validate_visual_recovery_manifest.mjs",
     "check:asset-bom": "node scripts/public_asset_bom.mjs",

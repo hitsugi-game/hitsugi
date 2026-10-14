@@ -1,0 +1,45 @@
+
+> hitsugi@0.2.0 test:release-smoke
+> playwright test --config=playwright.release.config.ts
+
+[WebServer] (node:32368) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] [PLUGIN_TIMINGS] Your build spent significant time in plugins. Here is a breakdown:
+[WebServer]   - vite:css-post (52%)
+[WebServer]   - vite:prepare-out-dir (27%)
+[WebServer]   - vite:build-import-analysis (6%)
+[WebServer] See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+[WebServer] 
+[WebServer] [plugin builtin:vite-reporter] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:9412) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 15 tests using 1 worker
+
+(node:56408) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [release-chromium-1280] › tests\release\core-routes.spec.ts:13:1 › production Title → Home → Pact flow renders without browser errors or QA hooks (12.6s)
+  ok  2 [release-chromium-1280] › tests\release\core-routes.spec.ts:34:1 › damaged save remains recoverable and never produces a blank screen (3.0s)
+  ok  3 [release-chromium-1280] › tests\release\core-routes.spec.ts:48:1 › corrupt main save resumes from a verified BAK in the production bundle (9.6s)
+  ok  4 [release-chromium-1280] › tests\release\core-routes.spec.ts:68:1 › a failed production lazy chunk reaches the root recovery page instead of a blank screen (4.1s)
+  ok  5 [release-chromium-1280] › tests\release\core-routes.spec.ts:80:1 › denied browser storage is disclosed and non-saving play reaches Home (7.6s)
+(node:21804) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  6 [release-firefox-1280] › tests\release\core-routes.spec.ts:13:1 › production Title → Home → Pact flow renders without browser errors or QA hooks (17.0s)
+  ok  7 [release-firefox-1280] › tests\release\core-routes.spec.ts:34:1 › damaged save remains recoverable and never produces a blank screen (4.5s)
+  ok  8 [release-firefox-1280] › tests\release\core-routes.spec.ts:48:1 › corrupt main save resumes from a verified BAK in the production bundle (12.5s)
+  ok  9 [release-firefox-1280] › tests\release\core-routes.spec.ts:68:1 › a failed production lazy chunk reaches the root recovery page instead of a blank screen (6.5s)
+  ok 10 [release-firefox-1280] › tests\release\core-routes.spec.ts:80:1 › denied browser storage is disclosed and non-saving play reaches Home (9.1s)
+(node:12404) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 11 [release-webkit-390] › tests\release\core-routes.spec.ts:13:1 › production Title → Home → Pact flow renders without browser errors or QA hooks (39.5s)
+  ok 12 [release-webkit-390] › tests\release\core-routes.spec.ts:34:1 › damaged save remains recoverable and never produces a blank screen (5.3s)
+  ok 13 [release-webkit-390] › tests\release\core-routes.spec.ts:48:1 › corrupt main save resumes from a verified BAK in the production bundle (28.9s)
+  ok 14 [release-webkit-390] › tests\release\core-routes.spec.ts:68:1 › a failed production lazy chunk reaches the root recovery page instead of a blank screen (16.8s)
+  ok 15 [release-webkit-390] › tests\release\core-routes.spec.ts:80:1 › denied browser storage is disclosed and non-saving play reaches Home (19.8s)
+
+  15 passed (4.5m)

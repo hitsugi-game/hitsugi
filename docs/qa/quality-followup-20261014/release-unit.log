@@ -1,0 +1,13 @@
+
+> hitsugi@0.2.0 test
+> vitest run
+
+
+ RUN  v4.1.11 C:/Users/junna/.codex/worktrees/hitsugi-quality-release-20261014/hitsugi
+
+
+ Test Files  65 passed (65)
+      Tests  930 passed (930)
+   Start at  13:08:03
+   Duration  419.96s (transform 12.16s, setup 0ms, import 54.28s, tests 484.63s, environment 37ms)
+

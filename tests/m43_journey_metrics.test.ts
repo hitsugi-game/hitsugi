@@ -170,8 +170,13 @@ function simulateCampaign(seed: number, lanternPilot = false) {
   const countedRest = () => { restUses += 1 }
   const founder = useGame.getState().data!.family[0]
   useGame.getState().doPact(founder.id, 'ishiusu')
-  while (useGame.getState().data!.seasonIndex < 7) {
+  for (let months = 0; useGame.getState().data!.seasonIndex < 7; months += 1) {
+    if (months >= 7) throw new Error(`opening month guard exceeded: seed=${seed}`)
+    const beforeMonth = useGame.getState().data!.seasonIndex
     useGame.getState().doRest()
+    if (useGame.getState().data!.seasonIndex <= beforeMonth) {
+      throw new Error(`opening rest did not advance: seed=${seed}, month=${beforeMonth}, screen=${useGame.getState().screen.id}`)
+    }
     countedRest()
     settleNarrative()
   }
@@ -246,9 +251,14 @@ function simulateCampaign(seed: number, lanternPilot = false) {
   }
 
   // 少なくとも初代の寿命を越え、実storeの死・継承を観測する。
-  while (useGame.getState().data!.seasonIndex < 26 && !useGame.getState().data!.flags.extinct) {
+  for (let months = 0; useGame.getState().data!.seasonIndex < 26 && !useGame.getState().data!.flags.extinct; months += 1) {
+    if (months >= 26) throw new Error(`inheritance month guard exceeded: seed=${seed}`)
+    const beforeMonth = useGame.getState().data!.seasonIndex
     tryKeepLineage()
     useGame.getState().doRest()
+    if (useGame.getState().data!.seasonIndex <= beforeMonth) {
+      throw new Error(`inheritance rest did not advance: seed=${seed}, month=${beforeMonth}, screen=${useGame.getState().screen.id}`)
+    }
     countedRest()
     assignAvailableRites()
   }
@@ -286,6 +296,14 @@ function simulateCampaign(seed: number, lanternPilot = false) {
 
 describe('M43 save-local journey metrics', () => {
   beforeEach(() => mem.clear())
+
+  it('単一seedの実store campaignで月進行・終盤到達・初継承を検査できる', () => {
+    const run = simulateCampaign(37)
+    expect(run.seasons).toBeGreaterThanOrEqual(26)
+    expect(run.reachedFirstBoss).toBe(true)
+    expect(run.reachedEndgame).toBe(true)
+    expect(run.inherited).toBe(true)
+  }, 30_000)
 
   it('one-shotで二重計上せず、QA exportに氏名や自由文を含めない', () => {
     useGame.getState().newGame(true)
@@ -385,7 +403,8 @@ describe('M43 save-local journey metrics', () => {
       && tendingGate.hoto.p10 >= 0,
       JSON.stringify(tendingGate),
     ).toBe(true)
-  // Windows CI/desktopでは39地域×100 seedの実store戦闘が90秒前後まで伸びる。
-  // M57の同seed比較で200 campaignになるため、内容を縮めず余裕を持たせる。
-  }, 300_000)
+  // 2026-10-14のWindows実測: 単一seedの実campaign本体3.27秒。
+  // baseline100 + pilot100 + 同seed再現1 = 201 campaignを単純外挿すると約657秒。
+  // seed件数・合格閾値を縮めず、同期処理の完了を待てるよう900秒を確保する。
+  }, 900_000)
 })

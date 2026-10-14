@@ -1,0 +1,68 @@
+
+Running 2 tests using 1 worker
+
+(node:58260) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [pc-1280] › tests\visual\quality_20261014.spec.ts:86:1 › 割引後の奉燈77で星契りの入口と助言が一致する (8.1s)
+(node:53256) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [pc-1280] › tests\visual\quality_20261014.spec.ts:105:1 › 保存確認中は新規開始を止め、既存の記を確認なしに上書きしない (7.8s)
+
+
+  1) [pc-1280] › tests\visual\quality_20261014.spec.ts:86:1 › 割引後の奉燈77で星契りの入口と助言が一致する ──────────────
+
+    Error: expect(locator).toBeEnabled() failed
+
+    Locator:  getByRole('button', { name: /星契り — 次代を授かる/ })
+    Expected: enabled
+    Received: disabled
+    Timeout:  7000ms
+
+    Call log:
+      - Expect "toBeEnabled" with timeout 7000ms
+      - waiting for getByRole('button', { name: /星契り — 次代を授かる/ })
+        13 × locator resolved to <button disabled title="奉燈があと3要る" class="action-card  ">…</button>
+           - unexpected value "disabled"
+
+
+       97 |   })
+       98 |   const pact = page.getByRole('button', { name: /星契り — 次代を授かる/ })
+    >  99 |   await expect(pact).toBeEnabled()
+          |                      ^
+      100 |   await expect(page.locator('.home-screen')).not.toContainText('契りにあと3')
+      101 |   await pact.click()
+      102 |   await expect(page.locator('.pact-screen')).toBeVisible()
+        at C:\Users\junna\Documents\Claude\_fable5\hitsugi\tests\visual\quality_20261014.spec.ts:99:22
+
+    Error Context: tests\visual\.artifacts\quality_20261014-割引後の奉燈77で星契りの入口と助言が一致する-pc-1280\error-context.md
+
+  2) [pc-1280] › tests\visual\quality_20261014.spec.ts:105:1 › 保存確認中は新規開始を止め、既存の記を確認なしに上書きしない ──────
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByRole('button', { name: 'はじめから', exact: true })
+    Expected: disabled
+    Received: enabled
+    Timeout:  7000ms
+
+    Call log:
+      - Expect "toBeDisabled" with timeout 7000ms
+      - waiting for getByRole('button', { name: 'はじめから', exact: true })
+        17 × locator resolved to <button class="btn btn-main">はじめから</button>
+           - unexpected value "enabled"
+
+
+      114 |     await page.goto('/', { waitUntil: 'domcontentloaded' })
+      115 |     await expect(page.locator('.title-save-state')).toHaveAttribute('data-state', 'checking')
+    > 116 |     await expect(page.getByRole('button', { name: 'はじめから', exact: true })).toBeDisabled()
+          |                                                                            ^
+      117 |     expect(await page.evaluate(() => localStorage.getItem('hitsugi_save_v4'))).toBe('{existing-record-to-recover')
+      118 |   } finally {
+      119 |     releaseSave()
+        at C:\Users\junna\Documents\Claude\_fable5\hitsugi\tests\visual\quality_20261014.spec.ts:116:76
+
+    Error Context: tests\visual\.artifacts\quality_20261014-保存確認中は新規開始を止め、既存の記を確認なしに上書きしない-pc-1280\error-context.md
+
+  2 failed
+    [pc-1280] › tests\visual\quality_20261014.spec.ts:86:1 › 割引後の奉燈77で星契りの入口と助言が一致する ───────────────
+    [pc-1280] › tests\visual\quality_20261014.spec.ts:105:1 › 保存確認中は新規開始を止め、既存の記を確認なしに上書きしない ───────

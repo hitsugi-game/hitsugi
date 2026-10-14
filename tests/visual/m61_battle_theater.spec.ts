@@ -69,6 +69,13 @@ test('M61 灯脈劇場は5画面幅で上段・左右対峙・軍議盤を保つ
   expect(maxPairOverlap(enemies)).toBeLessThanOrEqual(12)
   expect(maxPairOverlap(allies)).toBeLessThanOrEqual(12)
 
+  // HPの数値はゲージ内へ収める。小さいバーで行の下部を切り落とさない。
+  const hpTextFits = await page.locator('.combatant-plate .bar').evaluateAll((bars) => bars.map((bar) => {
+    const label = bar.querySelector('.bar-text')!
+    return Number.parseFloat(getComputedStyle(label).lineHeight) <= bar.clientHeight
+  }))
+  expect(hpTextFits.every(Boolean)).toBe(true)
+
   const viewport = page.viewportSize()!
   if (viewport.width > 768) {
     const enemyCenter = enemies.reduce((sum, box) => sum + box.x + box.width / 2, 0) / enemies.length

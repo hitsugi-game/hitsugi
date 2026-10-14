@@ -1,0 +1,112 @@
+
+Running 30 tests using 1 worker
+
+
+
+(node:52944) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/30] [pc-1440] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅
+[2/30] [pc-1440] › tests\visual\quality_20261014.spec.ts:30:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する
+[3/30] [pc-1440] › tests\visual\quality_20261014.spec.ts:63:1 › 縁だけでは契約数や契約称号を付与しない
+[4/30] [pc-1440] › tests\visual\quality_20261014.spec.ts:86:1 › 割引後の奉燈77で星契りの入口と助言が一致する
+[5/30] [pc-1440] › tests\visual\quality_20261014.spec.ts:105:1 › 保存確認中は新規開始を止め、既存の記を確認なしに上書きしない
+[6/30] [pc-1440] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する
+
+(node:4484) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[7/30] [pc-1280] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅
+[8/30] [pc-1280] › tests\visual\quality_20261014.spec.ts:30:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する
+[9/30] [pc-1280] › tests\visual\quality_20261014.spec.ts:63:1 › 縁だけでは契約数や契約称号を付与しない
+[10/30] [pc-1280] › tests\visual\quality_20261014.spec.ts:86:1 › 割引後の奉燈77で星契りの入口と助言が一致する
+[11/30] [pc-1280] › tests\visual\quality_20261014.spec.ts:105:1 › 保存確認中は新規開始を止め、既存の記を確認なしに上書きしない
+[12/30] [pc-1280] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する
+  1) [pc-1280] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する ──────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-scene-route="ending"]')
+    Expected: visible
+    Timeout: 7000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 7000ms
+      - waiting for locator('[data-scene-route="ending"]')
+
+
+      139 |       game.store.getState().resolveFinale(index)
+      140 |     }, choice)
+    > 141 |     await expect(page.locator('[data-scene-route="ending"]')).toBeVisible()
+          |                                                               ^
+      142 |     await page.getByRole('button', { name: '次へ ▸', exact: true }).click()
+      143 |     await page.reload()
+      144 |     await page.waitForFunction(() => '__game' in window)
+        at C:\Users\junna\Documents\Claude\_fable5\hitsugi\tests\visual\quality_20261014.spec.ts:141:63
+
+    Error Context: tests\visual\.artifacts\quality_20261014-選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する-pc-1280\error-context.md
+
+
+
+(node:8096) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[13/30] [tablet-768] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅
+[14/30] [tablet-768] › tests\visual\quality_20261014.spec.ts:30:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する
+[15/30] [tablet-768] › tests\visual\quality_20261014.spec.ts:63:1 › 縁だけでは契約数や契約称号を付与しない
+[16/30] [tablet-768] › tests\visual\quality_20261014.spec.ts:86:1 › 割引後の奉燈77で星契りの入口と助言が一致する
+[17/30] [tablet-768] › tests\visual\quality_20261014.spec.ts:105:1 › 保存確認中は新規開始を止め、既存の記を確認なしに上書きしない
+[18/30] [tablet-768] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する
+
+(node:16116) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[19/30] [mobile-390] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅
+[20/30] [mobile-390] › tests\visual\quality_20261014.spec.ts:30:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する
+[21/30] [mobile-390] › tests\visual\quality_20261014.spec.ts:63:1 › 縁だけでは契約数や契約称号を付与しない
+[22/30] [mobile-390] › tests\visual\quality_20261014.spec.ts:86:1 › 割引後の奉燈77で星契りの入口と助言が一致する
+[23/30] [mobile-390] › tests\visual\quality_20261014.spec.ts:105:1 › 保存確認中は新規開始を止め、既存の記を確認なしに上書きしない
+[24/30] [mobile-390] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する
+  2) [mobile-390] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する ───
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-scene-route="ending"]')
+    Expected: visible
+    Timeout: 7000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 7000ms
+      - waiting for locator('[data-scene-route="ending"]')
+        - waiting for" http://localhost:5173/" navigation to finish...
+        - navigated to "http://localhost:5173/"
+
+
+      144 |     await page.waitForFunction(() => '__game' in window)
+      145 |     await page.getByRole('button', { name: 'つづきから', exact: true }).click()
+    > 146 |     await expect(page.locator('[data-scene-route="ending"]')).toBeVisible()
+          |                                                               ^
+      147 |     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('hitsugi_save_v4')!).flags.endingType)).toBe(choice)
+      148 |     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('hitsugi_save_v4')!).flags.endingPending)).toBe(true)
+      149 |     // 結末の頁数は有限。上限を超えてクリックし続けない。
+        at C:\Users\junna\Documents\Claude\_fable5\hitsugi\tests\visual\quality_20261014.spec.ts:146:63
+
+    Error Context: tests\visual\.artifacts\quality_20261014-選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する-mobile-390\error-context.md
+
+
+
+
+(node:40568) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[25/30] [mobile-360] › tests\visual\quality_20261014.spec.ts:7:1 › 初見導線の星契り説明とPC・スマホの横幅
+[26/30] [mobile-360] › tests\visual\quality_20261014.spec.ts:30:1 › 一項目残る収集を100%と表示せず、全収集時だけ達成する
+[27/30] [mobile-360] › tests\visual\quality_20261014.spec.ts:63:1 › 縁だけでは契約数や契約称号を付与しない
+[28/30] [mobile-360] › tests\visual\quality_20261014.spec.ts:86:1 › 割引後の奉燈77で星契りの入口と助言が一致する
+[29/30] [mobile-360] › tests\visual\quality_20261014.spec.ts:105:1 › 保存確認中は新規開始を止め、既存の記を確認なしに上書きしない
+[30/30] [mobile-360] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する
+  2 failed
+    [pc-1280] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する ───────
+    [mobile-390] › tests\visual\quality_20261014.spec.ts:128:1 › 選んだ結末は再読込で復帰し、最終頁を読んだ後だけ郷へ再開する ────
+  3 skipped
+  25 passed (2.0m)

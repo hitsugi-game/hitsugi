@@ -1,0 +1,7 @@
+
+> hitsugi@0.2.0 check:asset-bom:dist
+> node scripts/public_asset_bom.mjs --dist
+
+public asset BOM OK: 2825 registered, hash/size exact, restricted 0
+dist asset copy OK: 2825/2825 exact
+rights hold (non-clearance): pending 2816, cleared 9
